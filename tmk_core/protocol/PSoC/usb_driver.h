@@ -23,5 +23,3 @@ static void send_mouse(report_mouse_t *report);
 static void send_system(uint16_t data);
 static void send_consumer(uint16_t data);
 static void send_debug(const char* str, uint8_t len);
-
-#endif
