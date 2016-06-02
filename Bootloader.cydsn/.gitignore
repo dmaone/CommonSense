@@ -1,0 +1,9 @@
+*.cyprj.*
+*.cycdx
+*.cyfit
+*.rpt
+*.svd
+*_timing.html
+codegentemp
+Export
+CortexM3
