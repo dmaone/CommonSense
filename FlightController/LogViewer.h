@@ -1,5 +1,12 @@
-#ifndef LOGVIEWER_H
-#define LOGVIEWER_H
+/*
+ *
+ * Copyright (C) 2016 DMA <dma@ya.ru>
+ *
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation. 
+*/
+#pragma once
 
 #include <QPlainTextEdit>
 #include "Events.h"
@@ -19,5 +26,3 @@ class LogViewer: public QPlainTextEdit
         void logMessage(QString msg);
 
 };
-
-#endif // LOGVIEWER_H

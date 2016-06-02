@@ -1,13 +1,10 @@
-/* ========================================
+/*
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * Copyright (C) 2016 DMA <dma@ya.ru>
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation. 
 */
 #ifndef CYAPICALLBACKS_H
 #define CYAPICALLBACKS_H

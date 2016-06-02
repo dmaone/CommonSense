@@ -1,19 +1,15 @@
-/* ========================================
+/*
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * Copyright (C) 2016 DMA <dma@ya.ru>
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation. 
 */
 #include <project.h>
 #include "config.h"
 #include "keyboard.h"
 #include "usb_driver.h"
-
 
 void BootIRQ_Interrupt_InterruptCallback(void)
 {

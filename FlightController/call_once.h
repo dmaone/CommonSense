@@ -1,5 +1,5 @@
-#ifndef CALL_ONCE_H
-#define CALL_ONCE_H
+/* pasted from teh internetz as is */
+#pragma once
 
 #include <QtGlobal>
 #include <QAtomicInt>
@@ -53,5 +53,3 @@ inline static void qCallOncePerThread(Function func)
         qCallOnce(func, *once_flag()->localData());
     }
 }
-
-#endif // CALL_ONCE_H

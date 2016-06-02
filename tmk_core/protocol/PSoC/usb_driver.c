@@ -1,13 +1,10 @@
-/* ========================================
+/*
  *
- * Copyright YOUR COMPANY, THE YEAR
- * All Rights Reserved
- * UNPUBLISHED, LICENSED SOFTWARE.
+ * Copyright (C) 2016 DMA <dma@ya.ru>
  *
- * CONFIDENTIAL AND PROPRIETARY INFORMATION
- * WHICH IS THE PROPERTY OF your company.
- *
- * ========================================
+ * This program is free software; you can redistribute it and/or modify
+ * it under the terms of the GNU General Public License version 2 as
+ * published by the Free Software Foundation. 
 */
 #include <stdio.h>
 #include <project.h>
@@ -112,6 +109,3 @@ static void send_consumer(uint16_t data)
 {
     send_extrakeys(3, data);
  }
-
-
-/* [] END OF FILE */

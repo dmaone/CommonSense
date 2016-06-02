@@ -1,6 +1,5 @@
-#ifndef SINGLETON_H
-#define SINGLETON_H
-
+/* pasted from teh internetz as is */
+#pragma once
 #include <QtGlobal>
 #include <QScopedPointer>
 #include "call_once.h"
@@ -36,4 +35,3 @@ value, so a next call of QScopedPointer::operator * generates an run-time error.
 template<class T> QScopedPointer<T> Singleton<T>::tptr(0);
 template<class T> QBasicAtomicInt Singleton<T>::flag = Q_BASIC_ATOMIC_INITIALIZER(CallOnce::CO_Request);
 
-#endif // SINGLETON_H
