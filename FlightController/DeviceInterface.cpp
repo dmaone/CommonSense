@@ -5,7 +5,7 @@
 
 
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
-    device(NULL), logger(NULL), listener(NULL)
+    logger(NULL), device(NULL), pollTimerId(0)
 {
 }
 
@@ -28,9 +28,24 @@ void DeviceInterface::whine(QString msg)
     this->logger->logMessage(msg);
 }
 
+bool DeviceInterface::event(QEvent* e)
+{
+    if (e->type() == DeviceMessage::ET) {
+        logger->logMessage(static_cast<DeviceMessage *>(e)->getPayload()->constData());
+        return true;
+    }
+    QObject::event(e);
+}
+
 void DeviceInterface::deviceMessageReceiver(void)
 {
     whine("Message received");
+}
+
+void DeviceInterface::notifyDevice(QByteArray msg)
+{
+    //FIXME add extra byte at the front! (transaction number)
+    hid_write(device, (const unsigned char *)msg.data(), msg.length());
 }
 
 void DeviceInterface::resetTimer(int interval)
@@ -39,6 +54,7 @@ void DeviceInterface::resetTimer(int interval)
         killTimer(pollTimerId);
     pollTimerId = startTimer(interval);
 }
+
 void DeviceInterface::timerEvent(QTimerEvent *)
 {
     if (!device) {
@@ -49,17 +65,8 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
     if (bytesRead > 0)
     {
-        whine(QString((char*)bytesFromDevice));
-//        whine(QString("bytes read: %1").arg(bytesRead));
-        QCoreApplication::postEvent(logger, new DeviceMessage(bytesFromDevice));
-    }
-}
-
-void DeviceInterface::installListener(void)
-{
-    if (this->listener) {
-        // Connection crashed?
-        delete this->listener;
+//        whine(QString((char*)bytesFromDevice));
+        QCoreApplication::postEvent(this, new DeviceMessage(bytesFromDevice));
     }
 }
 

@@ -6,8 +6,8 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation. 
 */
-#ifndef CYAPICALLBACKS_H
-#define CYAPICALLBACKS_H
+#pragma once
+#include "globals.h"
 
 #define BootIRQ_INTERRUPT_INTERRUPT_CALLBACK
 void BootIRQ_Interrupt_InterruptCallback(void);
@@ -15,5 +15,3 @@ void BootIRQ_Interrupt_InterruptCallback(void);
     /*For more information, refer to the Macro Callbacks topic in the PSoC Creator Help.*/
 #define USB_EP_8_ISR_EXIT_CALLBACK
 void USB_EP_8_ISR_ExitCallback(void);    
-#endif /* CYAPICALLBACKS_H */   
-/* [] */

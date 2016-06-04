@@ -17,19 +17,10 @@ LogViewer::LogViewer(QWidget *parent):
     this->setReadOnly(true);
 }
 
-bool LogViewer::event(DeviceMessage* e)
-{
-    if (e->type() == DeviceMessage::ET) {
- //       this->appendPlainText(e->getPayload()->constData());
-        return true;
-    }
-    return false;
-}
 
 void LogViewer::logMessage(QString msg)
 {
     this->appendPlainText(msg);
-//    this->appendPlainText("\n");
 }
 
 void LogViewer::clearButtonClick(void)
@@ -45,6 +36,12 @@ void LogViewer::clearButtonClick(void)
 
     }
 }
+
+
+void LogViewer::redButtonClick(void)
+{
+}
+
 void LogViewer::copyAllButtonClick(void)
 {
     this->selectAll();

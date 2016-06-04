@@ -8,12 +8,14 @@
 */
 #include <stdio.h>
 #include <project.h>
+#include <stdbool.h>
+#include "globals.h"
 #include "host.h"
 #include "led.h"
 #include "usb_driver.h"
 #include "wait.h"
-#include "config.h"
-
+//#include "config.h"
+#include "c2/c2_protocol.h"
 
 host_driver_t kbd_driver = {
     keyboard_leds,
@@ -27,6 +29,17 @@ host_driver_t *psoc_driver(void){
     return &kbd_driver;
 }
 
+void process_msg(void)
+{
+    switch (inbox.command) {
+    case C2CMD_GET_MATRIX_STATUS:
+        ephemeral_debug.matrix_output = inbox.payload[0];
+        break;
+    default:
+        break;
+    }
+    acknowledge_command();
+}
 void usb_init(void)
 {
     /* Start USB operation with 5-V operation. */
@@ -39,7 +52,7 @@ void usb_init(void)
     }
     host_set_driver(psoc_driver());
     // Start listening!
-    USB_EnableOutEP(8);
+    USB_EnableOutEP(INBOX_EP);
 
 
 }
@@ -47,27 +60,33 @@ void usb_init(void)
  * Host driver 
  ******************************************************************************/
 static uint8_t keyboard_led_status;
-static uint8_t keyboard_leds(void)
+uint8_t keyboard_leds(void)
 {
     return ~keyboard_led_status;
 }
 
 void USB_EP_8_ISR_ExitCallback(void)
 {
-    USB_ReadOutEP(2, &keyboard_led_status, 1);
-    USB_EnableOutEP(2);
+    USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
+    message_for_you_in_the_lobby = true;
 }
 
-static void send_debug(const char* str, uint8_t len)
+void acknowledge_command(void)
 {
-    USB_LoadInEP(DEBUG_EP, (unsigned char*)str, len);
-    /* Wait for ACK after loading data. */
-    while (0u == USB_GetEPAckState(DEBUG_EP))
+    message_for_you_in_the_lobby = false;
+    USB_EnableOutEP(INBOX_EP);
+}
+
+void usb_send(void)
+{
+    USB_LoadInEP(OUTBOX_EP, outbox.raw, sizeof(outbox.raw));
+//    /* Wait for ACK after loading data. */
+    while (0u == USB_GetEPAckState(OUTBOX_EP))
     {
     }
 }
 
-static void send_keyboard(report_keyboard_t *report)
+void send_keyboard(report_keyboard_t *report)
 {
     USB_LoadInEP(1, (uint8_t *)report, sizeof(report_keyboard_t));
     /* Wait for ACK after loading data. */
@@ -76,7 +95,7 @@ static void send_keyboard(report_keyboard_t *report)
     }
  }
 
-static void send_mouse(report_mouse_t *report)
+void send_mouse(report_mouse_t *report)
 {
 }
 
@@ -86,7 +105,7 @@ typedef struct {
   uint16_t usage;
 } __attribute__ ((packed)) report_extra_t; 
 
-static void send_extrakeys(uint8_t report_id, uint16_t data)
+void send_extrakeys(uint8_t report_id, uint16_t data)
 {
   report_extra_t report = {
     .report_id = report_id,
@@ -100,12 +119,12 @@ static void send_extrakeys(uint8_t report_id, uint16_t data)
     }
 }
 
-static void send_system(uint16_t data)
+void send_system(uint16_t data)
 {
     send_extrakeys(2, data);
 }
 
-static void send_consumer(uint16_t data)
+void send_consumer(uint16_t data)
 {
     send_extrakeys(3, data);
  }

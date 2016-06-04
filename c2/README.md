@@ -1,0 +1,1 @@
+Command and control interface between controller and host utility.

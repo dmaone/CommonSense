@@ -9,6 +9,7 @@
 #pragma once
 
 #include <QMainWindow>
+#include <MatrixMonitor.h>
 
 namespace Ui {
 class FlightController;
@@ -22,7 +23,11 @@ public:
     explicit FlightController(QWidget *parent = 0);
     ~FlightController();
 
+public slots:
+    void matrixMonitorButtonClick(void);
+
 private:
     Ui::FlightController *ui;
+    MatrixMonitor *mm;
 
 };

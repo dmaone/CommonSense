@@ -23,7 +23,8 @@ SOURCES += main.cpp \
     FlightController.cpp \
     LogViewer.cpp \
     DeviceInterface.cpp \
-    Events.cpp
+    Events.cpp \
+    MatrixMonitor.cpp
 
 HEADERS  += \
     FlightController.h \
@@ -31,7 +32,12 @@ HEADERS  += \
     DeviceInterface.h \
     Events.h \
     call_once.h \
-    singleton.h
+    singleton.h \
+    ../c2/c2_protocol.h \
+    MatrixMonitor.h
 
 FORMS    += \
-    FlightController.ui
+    FlightController.ui \
+    MatrixMonitor.ui
+
+DISTFILES +=

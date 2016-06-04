@@ -23,17 +23,18 @@ class DeviceInterface : public QObject
         void setLogger(LogViewer *l);
         void connect(void);
         void listen(void);
+        LogViewer* logger;
+        bool event(QEvent* e);
+    public slots:
+        void notifyDevice(QByteArray);
 
     protected:
         virtual void timerEvent(QTimerEvent *);
 
     private:
         hid_device* device;
-        LogViewer* logger;
-        QSocketNotifier* listener;
         int pollTimerId;
         unsigned char bytesFromDevice[128];
-        void installListener(void);
         void whine(QString msg);
         void resetTimer(int interval);
 

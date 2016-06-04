@@ -18,9 +18,12 @@ class LogViewer: public QPlainTextEdit
 
     public:
         LogViewer(QWidget *parent = NULL);
-        bool event(DeviceMessage* e);
+
+    signals:
+        void notifyDevice(QByteArray msg);
 
     public slots:
+        void redButtonClick(void);
         void clearButtonClick(void);
         void copyAllButtonClick(void);
         void logMessage(QString msg);

@@ -7,14 +7,17 @@
  * published by the Free Software Foundation. 
 */
 #include <project.h>
-#include "config.h"
+#include "globals.h"
 #include "keyboard.h"
 #include "usb_driver.h"
+#include "c2/c2_protocol.h"
+#include "print.h"
 
 void BootIRQ_Interrupt_InterruptCallback(void)
 {
     Boot_Load();
 }
+
 
 uint8 current_column;
 
@@ -55,32 +58,27 @@ void ScanColumn(uint8 col)
     ResetColumns();
 }
 
-static bool matrix[16*8];
-static bool prev_matrix[16*8];
-
 void PrintColumn(uint8 col)
 {
     uint16 res[8];
-    bool worth_printing = false;
     for(uint8 i=0; i<8; ++i)
     {
         res[i] = ADC_GetResult16(i);
-        if (res[i] > 5)
-        {
-            worth_printing = true;
-        }
     }
-    if (worth_printing)
+
+    LED_Write(1u);
+    if (ephemeral_debug.matrix_output > 0)
     {
-        LED_Write(1u);
-        xprintf("Col: %d ADC %d %d %d %d %d %d %d %d", col, res[0], res[1], res[2], res[3], res[4], res[5], res[6], res[7]);
-        CyDelay(10u);
-        LED_Write(0u);
-        CyDelay(50u);
+        outbox.response_type = C2RESPONSE_MATRIX_STATUS;
+        outbox.payload[0] = col;
+        outbox.payload[1] = ephemeral_debug.matrix_output;
+        memcpy(&outbox.payload[2], res, sizeof(res));
+        usb_send();
+    } else {
+        CyDelay(5u);
     }
-    if (res[0] > 100) {
-        Boot_Load();
-    }
+    LED_Write(0u);
+    CyDelay(5u);
 }
 
 void scan(void)
@@ -98,14 +96,15 @@ int main()
     CyGlobalIntEnable; /* Enable global interrupts. */
     for(uint8 i=0; i<5;i++){
         LED_Write(1u);
-        CyDelay(50u);
+        CyDelay(10u);
         LED_Write(0u);
         CyDelay(100u);
     }
     usb_init();
     LED_Write(0u);
     ADC_Start();
-    xprintf("Start");
+    ephemeral_debug.matrix_output = 0;
+    //xprintf("Start");
     /* Place your initialization/startup code here (e.g. MyInst_Start()) */
     for(;;)
     {
@@ -122,8 +121,11 @@ int main()
      //       }
      //   }
      //  xprintf("Start");
-       /* Place your application code here. */
-        //LED_Write(1u);
+        if (message_for_you_in_the_lobby)
+        {
+            // This one is working @160602
+            process_msg();
+        }
         scan();
         //CyDelay(200);
         //LED_Write(0u);

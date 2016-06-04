@@ -17,9 +17,12 @@ host_driver_t *psoc_driver(void);
 
 void usb_init(void);
 
-static uint8_t keyboard_leds(void);
-static void send_keyboard(report_keyboard_t *report);
-static void send_mouse(report_mouse_t *report);
-static void send_system(uint16_t data);
-static void send_consumer(uint16_t data);
-static void send_debug(const char* str, uint8_t len);
+void usb_send(void);
+void acknowledge_command();
+void process_msg(void);
+
+void send_keyboard(report_keyboard_t *report);
+void send_mouse(report_mouse_t *report);
+void send_system(uint16_t data);
+void send_consumer(uint16_t data);
+void send_debug(const char* str, uint8_t len);

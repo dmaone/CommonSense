@@ -6,8 +6,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation. 
 */
-#ifndef CONFIG_H
-#define CONFIG_H
+#pragma once
     
 #define VENDOR_ID       0xFEED
 #define PRODUCT_ID      0xBEEF
@@ -15,11 +14,11 @@
 #define MANUFACTURER    DMA Labs
 #define PRODUCT         CommonSense
 #define DESCRIPTION     Universal capsense controller
+// those above are not used because of the way USB component is configured in PSoC creator.
+// Sorry, GUI only :(
 
 #define MATRIX_ROWS 23
 #define MATRIX_COLS 8
 
 #define EXTRAKEY_ENABLE
 #define DEBUG_EP 2
-    
-#endif
