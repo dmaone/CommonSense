@@ -66,7 +66,6 @@ void PrintColumn(uint8 col)
         res[i] = ADC_GetResult16(i);
     }
 
-    LED_Write(1u);
     if (ephemeral_debug.matrix_output > 0)
     {
         outbox.response_type = C2RESPONSE_MATRIX_STATUS;
@@ -74,11 +73,7 @@ void PrintColumn(uint8 col)
         outbox.payload[1] = ephemeral_debug.matrix_output;
         memcpy(&outbox.payload[2], res, sizeof(res));
         usb_send();
-    } else {
-        CyDelay(5u);
     }
-    LED_Write(0u);
-    CyDelay(5u);
 }
 
 void scan(void)
