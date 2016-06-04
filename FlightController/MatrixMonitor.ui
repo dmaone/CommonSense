@@ -20,14 +20,14 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="1">
-    <widget class="QPushButton" name="VoltagesButton">
+   <item row="1" column="5">
+    <widget class="QPushButton" name="CloseButton">
      <property name="text">
-      <string>Voltages</string>
+      <string>Close</string>
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
+   <item row="1" column="3">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -40,29 +40,15 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="6">
-    <widget class="QPushButton" name="CloseButton">
+   <item row="1" column="1">
+    <widget class="QPushButton" name="VoltagesButton">
      <property name="text">
-      <string>Close</string>
+      <string>Voltages</string>
      </property>
     </widget>
    </item>
    <item row="1" column="2">
-    <widget class="QPushButton" name="StatesButton">
-     <property name="text">
-      <string>States</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="5">
-    <widget class="QPushButton" name="FreezeButton">
-     <property name="text">
-      <string>Freeze!</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <widget class="QComboBox" name="comboBox">
+    <widget class="QComboBox" name="ModeSelector">
      <property name="editable">
       <bool>false</bool>
      </property>
@@ -92,7 +78,14 @@
      </item>
     </widget>
    </item>
-   <item row="0" column="1" colspan="6">
+   <item row="1" column="4">
+    <widget class="QPushButton" name="FreezeButton">
+     <property name="text">
+      <string>Freeze!</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="5">
     <widget class="QFrame" name="Dashboard">
      <property name="frameShape">
       <enum>QFrame::StyledPanel</enum>

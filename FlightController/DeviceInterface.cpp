@@ -2,6 +2,7 @@
 #include "LogViewer.h"
 #include <QCoreApplication>
 #include <string>
+#include <algorithm>
 
 
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
@@ -34,7 +35,7 @@ bool DeviceInterface::event(QEvent* e)
         logger->logMessage(static_cast<DeviceMessage *>(e)->getPayload()->constData());
         return true;
     }
-    QObject::event(e);
+    return QObject::event(e);
 }
 
 void DeviceInterface::deviceMessageReceiver(void)
@@ -44,8 +45,9 @@ void DeviceInterface::deviceMessageReceiver(void)
 
 void DeviceInterface::notifyDevice(QByteArray msg)
 {
-    //FIXME add extra byte at the front! (transaction number)
-    hid_write(device, (const unsigned char *)msg.data(), msg.length());
+    memset(outbox, 0, sizeof(outbox));
+    memcpy(outbox+1, msg.data(), std::min(msg.length(), 64));
+    hid_write(device, outbox, sizeof(outbox));
 }
 
 void DeviceInterface::resetTimer(int interval)

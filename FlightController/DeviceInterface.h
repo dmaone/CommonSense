@@ -34,7 +34,8 @@ class DeviceInterface : public QObject
     private:
         hid_device* device;
         int pollTimerId;
-        unsigned char bytesFromDevice[128];
+        unsigned char outbox[65];
+        unsigned char bytesFromDevice[65];
         void whine(QString msg);
         void resetTimer(int interval);
 
