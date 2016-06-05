@@ -10,13 +10,12 @@
 
 int main()
 {
-    CyGlobalIntEnable; /* Enable global interrupts. */
-    if (0u == CyPins_ReadPin(Pins_Button)) 
-    {
-        Bootloader_Start();
-    } else {
-        Bootloader_Exit(Bootloader_EXIT_TO_BTLDB);
-    }
+    CyGlobalIntEnable;
+    // button pulls low. Not pressed - no bootloader.
+    //if (1u == CyPins_ReadPin(Pins_Button)) 
+    //{
+    //    Bootloader_Exit(Bootloader_EXIT_TO_BTLDB);
+    //}
     Bootloader_Start();
     // Never reached.
     for(;;)
