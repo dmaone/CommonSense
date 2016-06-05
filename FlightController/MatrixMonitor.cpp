@@ -8,6 +8,7 @@
 #include "DeviceInterface.h"
 #include "singleton.h"
 #include "Events.h"
+#include "../c2/c2_protocol.h"
 
 MatrixMonitor::MatrixMonitor(uint8_t cols, uint8_t rows, QWidget *parent) :
     QFrame(parent),
@@ -15,7 +16,7 @@ MatrixMonitor::MatrixMonitor(uint8_t cols, uint8_t rows, QWidget *parent) :
     rows(rows), cols(cols),
     debug(0), displayMode(0), grid(new QGridLayout())
 {
-    this->setDebug(0); // tell the keyboard so it knows
+    this->enableOutput(0); // tell the keyboard so it does not spam us before we install handler.
     ui->setupUi(this);
     connect(ui->VoltagesButton, SIGNAL(clicked()), this, SLOT(voltagesButtonClick()));
     connect(ui->CloseButton, SIGNAL(clicked()), this, SLOT(closeButtonClick()));
@@ -23,7 +24,7 @@ MatrixMonitor::MatrixMonitor(uint8_t cols, uint8_t rows, QWidget *parent) :
     connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
     initDisplay();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    connect(this, SIGNAL(notifyDevice(QByteArray)), &di, SLOT(notifyDevice(QByteArray)));
+    connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     di.installEventFilter(this);
 }
 
@@ -53,7 +54,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
     if (event->type() == DeviceMessage::ET )
     {
         QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-        if (pl->at(0) != (unsigned char)1)
+        if (pl->at(0) != C2RESPONSE_MATRIX_STATUS)
             return false;
         uint8_t col = pl->at(1);
         if (col < 8)
@@ -76,21 +77,19 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
     return false;
 }
 
-void MatrixMonitor::setDebug(uint8_t m)
+void MatrixMonitor::enableOutput(uint8_t m)
 {
-    QByteArray pkt= QByteArray::fromHex("04");
-    pkt.append((unsigned char)m);
-    emit notifyDevice(pkt);
+    emit sendCommand(C2CMD_GET_MATRIX_STATE, m);
 }
 
 void MatrixMonitor::voltagesButtonClick(void)
 {
-    this->setDebug(1);
+    this->enableOutput(1);
 }
 
 void MatrixMonitor::freezeButtonClick(void)
 {
-    this->setDebug(0);
+    this->enableOutput(0);
 }
 
 void MatrixMonitor::closeButtonClick(void)
@@ -100,7 +99,7 @@ void MatrixMonitor::closeButtonClick(void)
 
 void MatrixMonitor::closeEvent (QCloseEvent *event)
 {
-    this->setDebug(0);
+    this->enableOutput(0);
     event->accept();
 }
 

@@ -66,11 +66,11 @@ void PrintColumn(uint8 col)
         res[i] = ADC_GetResult16(i);
     }
 
-    if (ephemeral_debug.matrix_output > 0)
+    if (status_register.matrix_output > 0)
     {
         outbox.response_type = C2RESPONSE_MATRIX_STATUS;
         outbox.payload[0] = col;
-        outbox.payload[1] = ephemeral_debug.matrix_output;
+        outbox.payload[1] = status_register.matrix_output;
         memcpy(&outbox.payload[2], res, sizeof(res));
         usb_send();
     }
@@ -96,11 +96,11 @@ int main()
         CyDelay(100u);
     }
     usb_init();
-    LED_Write(0u);
+    xprintf("Start");
     ADC_Start();
-    ephemeral_debug.matrix_output = 0;
-    //xprintf("Start");
-    /* Place your initialization/startup code here (e.g. MyInst_Start()) */
+    EEPROM_Start();
+    status_register.matrix_output = 0;
+    status_register.emergency_stop = 0;
     for(;;)
     {
         /* Host can send double SET_INTERFACE request. */
@@ -115,16 +115,11 @@ int main()
      //           xprintf("Reconfigured");
      //       }
      //   }
-     //  xprintf("Start");
         if (message_for_you_in_the_lobby)
         {
-            // This one is working @160602
             process_msg();
         }
         scan();
-        //CyDelay(200);
-        //LED_Write(0u);
-        //CyDelay(200);
     }
 }
 

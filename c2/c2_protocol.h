@@ -29,16 +29,34 @@
 
 enum c2command {
     C2CMD_EWO = 0x00,
+    C2CMD_GET_STATUS,
     C2CMD_GET_CONFIG,
     C2CMD_SEND_CONFIG,
     C2CMD_SAVE_CONFIG,
-    C2CMD_GET_MATRIX_STATUS
+    C2CMD_GET_MATRIX_STATE,
+    C2CMD_ENTER_BOOTLOADER
 };
 
 enum c2response {
+    C2RESPONSE_STATUS = 0x00,
     C2RESPONSE_CONFIG,
     C2RESPONSE_MATRIX_STATUS
 };
+
+enum deviceStatus {
+    C2DEVSTASTUS_EMERGENCY = 0,
+    C2DEVSTASTUS_MATRIXOUTPUT = 1,
+};
+
+typedef union {
+    struct {
+        uint8_t status;
+        uint8_t versionMajor;
+        uint8_t versionMinor;
+        uint8_t dieTemp;
+    };
+    uint8_t raw[4];
+} __attribute__ ((packed)) device_status_t;
 
 typedef union {
     struct {

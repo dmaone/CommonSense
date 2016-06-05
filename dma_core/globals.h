@@ -24,8 +24,10 @@ IN_c2packet_t outbox;
 psoc_eeprom_t config;
 
 //debugging
-typedef struct {
-     bool matrix_output;
-} __attribute__ ((packed)) ephemeral_debug_t;
 
-ephemeral_debug_t ephemeral_debug;
+typedef struct {
+    bool emergency_stop;
+    bool matrix_output;
+} __attribute__ ((packed)) status_register_t;
+
+status_register_t status_register;

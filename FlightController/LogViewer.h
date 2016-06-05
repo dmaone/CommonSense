@@ -9,8 +9,6 @@
 #pragma once
 
 #include <QPlainTextEdit>
-#include "Events.h"
-//#include <QWidget>
 
 class LogViewer: public QPlainTextEdit
 {
@@ -19,11 +17,7 @@ class LogViewer: public QPlainTextEdit
     public:
         LogViewer(QWidget *parent = NULL);
 
-    signals:
-        void notifyDevice(QByteArray msg);
-
     public slots:
-        void redButtonClick(void);
         void clearButtonClick(void);
         void copyAllButtonClick(void);
         void logMessage(QString msg);

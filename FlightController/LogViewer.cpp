@@ -6,17 +6,13 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation. 
 */
+#include <QMessageBox>
 #include "LogViewer.h"
 
-#include <QMessageBox>
-#include "Events.h"
-
-LogViewer::LogViewer(QWidget *parent):
-    QPlainTextEdit(parent)
+LogViewer::LogViewer(QWidget *parent): QPlainTextEdit(parent)
 {
     this->setReadOnly(true);
 }
-
 
 void LogViewer::logMessage(QString msg)
 {
@@ -29,17 +25,8 @@ void LogViewer::clearButtonClick(void)
             "Erase current logs",
             "Irreversibly! Ain't it a great thing to do?",
             QMessageBox::Yes | QMessageBox::No);
-
     if (result == QMessageBox::Yes)
-    {
         this->clear();
-
-    }
-}
-
-
-void LogViewer::redButtonClick(void)
-{
 }
 
 void LogViewer::copyAllButtonClick(void)
@@ -50,5 +37,3 @@ void LogViewer::copyAllButtonClick(void)
     cur.movePosition(cur.End);
     this->setTextCursor(cur);
 }
-
-//void LogViewer::

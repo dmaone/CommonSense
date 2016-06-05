@@ -10,7 +10,8 @@
     
 #define VENDOR_ID       0xFEED
 #define PRODUCT_ID      0xBEEF
-#define DEVICE_VER      0x0001
+#define DEVICE_VER_MAJOR      0x00
+#define DEVICE_VER_MINOR      0x01
 #define MANUFACTURER    DMA Labs
 #define PRODUCT         CommonSense
 #define DESCRIPTION     Universal capsense controller

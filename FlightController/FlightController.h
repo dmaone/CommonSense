@@ -23,8 +23,14 @@ public:
     explicit FlightController(QWidget *parent = 0);
     ~FlightController();
 
+signals:
+    void sendCommand(uint8_t cmd, uint8_t msg);
+
 public slots:
+    void redButtonToggle(bool);
+    void bootloaderButtonClick(void);
     void matrixMonitorButtonClick(void);
+    void statusRequestButtonClick(void);
 
 private:
     Ui::FlightController *ui;

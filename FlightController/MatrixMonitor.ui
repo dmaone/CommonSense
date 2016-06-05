@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Frame</string>
+   <string>Matrix monitor</string>
   </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>
@@ -43,7 +43,10 @@
    <item row="1" column="1">
     <widget class="QPushButton" name="VoltagesButton">
      <property name="text">
-      <string>Voltages</string>
+      <string>Start</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </item>

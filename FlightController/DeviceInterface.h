@@ -12,6 +12,7 @@
 #include "Events.h"
 #include <QObject>
 #include "LogViewer.h"
+#include "../c2/c2_protocol.h"
 
 class DeviceInterface : public QObject
 {
@@ -21,12 +22,14 @@ class DeviceInterface : public QObject
         DeviceInterface(QObject *parent = 0);
         ~DeviceInterface();
         void setLogger(LogViewer *l);
-        void connect(void);
-        void listen(void);
+        void start(void);
+        device_status_t* getStatus(void);
         LogViewer* logger;
         bool event(QEvent* e);
+
     public slots:
-        void notifyDevice(QByteArray);
+        void sendCommand(uint8_t, QByteArray);
+        void sendCommand(uint8_t, uint8_t);
 
     protected:
         virtual void timerEvent(QTimerEvent *);
@@ -36,6 +39,8 @@ class DeviceInterface : public QObject
         int pollTimerId;
         unsigned char outbox[65];
         unsigned char bytesFromDevice[65];
+        device_status_t status;
+        hid_device* acquireDevice(void);
         void whine(QString msg);
         void resetTimer(int interval);
 

@@ -19,7 +19,7 @@ public:
     ~MatrixMonitor();
 
 signals:
-    void notifyDevice(QByteArray msg);
+    void sendCommand(uint8_t cmd, uint8_t msg);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -34,7 +34,7 @@ private:
     QGridLayout *grid;
     QLCDNumber *display[32][16];
     void initDisplay(void);
-    void setDebug(uint8_t);
+    void enableOutput(uint8_t);
 
 private slots:
     void voltagesButtonClick(void);

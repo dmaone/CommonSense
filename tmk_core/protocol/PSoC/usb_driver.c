@@ -14,8 +14,9 @@
 #include "led.h"
 #include "usb_driver.h"
 #include "wait.h"
-//#include "config.h"
+#include "print.h"
 #include "c2/c2_protocol.h"
+#include "CyFlash.h"
 
 host_driver_t kbd_driver = {
     keyboard_leds,
@@ -29,12 +30,36 @@ host_driver_t *psoc_driver(void){
     return &kbd_driver;
 }
 
+void report_status(void)
+{
+    outbox.response_type = C2RESPONSE_STATUS;
+    outbox.payload[0] = 0;
+    outbox.payload[0] |= (status_register.emergency_stop << C2DEVSTASTUS_EMERGENCY);
+    outbox.payload[0] |= (status_register.matrix_output << C2DEVSTASTUS_MATRIXOUTPUT);
+    outbox.payload[1] = DEVICE_VER_MAJOR;
+    outbox.payload[2] = DEVICE_VER_MINOR;
+    EEPROM_UpdateTemperature();
+    outbox.payload[3] = dieTemperature[0];
+    outbox.payload[4] = dieTemperature[1];
+    usb_send();
+}
+
 void process_msg(void)
 {
     switch (inbox.command) {
-    case C2CMD_GET_MATRIX_STATUS:
-        ephemeral_debug.matrix_output = inbox.payload[0];
+    case C2CMD_EWO:
+        status_register.emergency_stop = inbox.payload[0];
+        xprintf("EWO signal received: %d", inbox.payload[0]);
         break;
+    case C2CMD_GET_STATUS:
+        report_status();
+        break;
+    case C2CMD_GET_MATRIX_STATE:
+        status_register.matrix_output = inbox.payload[0];
+        break;
+    case C2CMD_ENTER_BOOTLOADER:
+        xprintf("Jumping to bootloader..");
+        Boot_Load(); 
     default:
         break;
     }
