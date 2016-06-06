@@ -10,6 +10,7 @@
 
 #include <QMainWindow>
 #include <MatrixMonitor.h>
+#include <QComboBox>
 
 namespace Ui {
 class FlightController;
@@ -31,9 +32,12 @@ public slots:
     void bootloaderButtonClick(void);
     void matrixMonitorButtonClick(void);
     void statusRequestButtonClick(void);
+    void mainTabChanged(int);
 
 private:
     Ui::FlightController *ui;
     MatrixMonitor *mm;
-
+    QComboBox *rows[16];
+    QComboBox *columns[32];
+    void layoutMatrixMappings(void);
 };

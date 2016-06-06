@@ -1,6 +1,6 @@
 #-------------------------------------------------
 #
-# Project created by QtCreator 2016-05-29T16:37:03
+# CommonSense project - FlightController utility.
 #
 #-------------------------------------------------
 
@@ -34,7 +34,8 @@ HEADERS  += \
     call_once.h \
     singleton.h \
     ../c2/c2_protocol.h \
-    MatrixMonitor.h
+    MatrixMonitor.h \
+    ../c2/nvram.h
 
 FORMS    += \
     FlightController.ui \

@@ -21,6 +21,7 @@ FlightController::FlightController(QWidget *parent) :
     ui(new Ui::FlightController), mm(NULL)
 {
     ui->setupUi(this);
+    ui->mainPanel->setCurrentIndex(0);
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
     connect(ui->RedButton, SIGNAL(toggled(bool)), this, SLOT(redButtonToggle(bool)));
@@ -31,6 +32,18 @@ FlightController::FlightController(QWidget *parent) :
     di.setLogger(ui->LogViewport);
     di.start();
     connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
+    ui->ColumnMapping->setLayout(new QHBoxLayout());
+    for (uint8_t i = 0; i<16; i++)
+    {
+        QComboBox *b = new QComboBox();
+        b->addItem(0, "Skip");
+        b->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
+        b->sizeHint().setWidth(0);
+        ui->ColumnMapping->layout()->addWidget(b);
+        columns[i] = b;
+    }
+
+    ui->RowMapping->setLayout(new QGridLayout());
 }
 
 FlightController::~FlightController()
@@ -66,4 +79,16 @@ void FlightController::bootloaderButtonClick(void)
 void FlightController::statusRequestButtonClick(void)
 {
     emit sendCommand(C2CMD_GET_STATUS, 0);
+}
+
+void FlightController::layoutMatrixMappings(void)
+{
+    QHBoxLayout *cl = static_cast<QHBoxLayout *>(ui->ColumnMapping->layout());
+
+}
+
+void FlightController::mainTabChanged(int idx)
+{
+    if (idx == 1)
+        layoutMatrixMappings();
 }
