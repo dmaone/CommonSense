@@ -11,6 +11,7 @@
 #include <QMainWindow>
 #include <MatrixMonitor.h>
 #include <QComboBox>
+#include "../c2/c2_protocol.h"
 
 namespace Ui {
 class FlightController;
@@ -37,7 +38,9 @@ public slots:
 private:
     Ui::FlightController *ui;
     MatrixMonitor *mm;
-    QComboBox *rows[16];
-    QComboBox *columns[32];
-    void layoutMatrixMappings(void);
+    QComboBox *rows[ABSOLUTE_MAX_ROWS];
+    QComboBox *columns[ABSOLUTE_MAX_COLS];
+    void initSetupDisplay(void);
+    void updateSetupDisplay(void);
+    void adjustCows(QComboBox**, int, int);
 };

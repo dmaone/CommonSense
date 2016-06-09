@@ -43,6 +43,7 @@ void MatrixMonitor::initDisplay(void)
             QLCDNumber *l = new QLCDNumber(4);
             l->setSegmentStyle(QLCDNumber::Filled);
             l->setMinimumHeight(25);
+            l->setMaximumWidth(40);
             grid->addWidget(l, i, j);
             display[i][j] = l;
         }

@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>600</width>
-    <height>400</height>
+    <width>770</width>
+    <height>500</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -212,7 +212,7 @@ STOP</string>
             </widget>
            </item>
            <item row="1" column="1">
-            <widget class="QSpinBox" name="Columns">
+            <widget class="QSpinBox" name="Rows">
              <property name="minimum">
               <number>1</number>
              </property>
@@ -243,7 +243,7 @@ STOP</string>
            <item row="0" column="0">
             <widget class="QLabel" name="label">
              <property name="text">
-              <string>Columns</string>
+              <string>Cols</string>
              </property>
             </widget>
            </item>
@@ -258,7 +258,7 @@ STOP</string>
             </widget>
            </item>
            <item row="0" column="1">
-            <widget class="QSpinBox" name="Rows">
+            <widget class="QSpinBox" name="Cols">
              <property name="minimum">
               <number>1</number>
              </property>

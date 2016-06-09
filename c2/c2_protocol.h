@@ -10,6 +10,8 @@
 #pragma once
 
 #include <stdint.h>
+#define ABSOLUTE_MAX_ROWS 16
+#define ABSOLUTE_MAX_COLS 32
 /*
  * The data block for the control channel is 64 bytes, both up and down.
  * Packet format is [command byte][application-specific].
