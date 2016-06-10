@@ -95,6 +95,7 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     }
     else if (bytesRead < 0)
     {
+        emit(deviceStatusNotification(DeviceDisconnected));
         whine("Device went away. Reconnecting..");
         start();
     }
@@ -133,11 +134,12 @@ void DeviceInterface::start(void)
     {
         hid_set_nonblocking(device, 1);
         sendCommand(C2CMD_GET_STATUS, 0);
+        emit(deviceStatusNotification(DeviceConnected));
         resetTimer(0);
     }
     else
     {
-        whine("Cannot open device - rescanning..");
+        this->logger->continueMessage(".");
         resetTimer(1000);
     }
 }

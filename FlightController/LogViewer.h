@@ -21,5 +21,6 @@ class LogViewer: public QPlainTextEdit
         void clearButtonClick(void);
         void copyAllButtonClick(void);
         void logMessage(QString msg);
+        void continueMessage(QString msg);
 
 };

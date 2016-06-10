@@ -5,6 +5,7 @@
 #include <QLCDNumber>
 #include <stdint.h>
 #include "Events.h"
+#include "../c2/c2_protocol.h"
 
 namespace Ui {
 class MatrixMonitor;
@@ -15,11 +16,12 @@ class MatrixMonitor : public QFrame
     Q_OBJECT
 
 public:
-    explicit MatrixMonitor(uint8_t cols, uint8_t rows, QWidget *parent = 0);
+    explicit MatrixMonitor(uint8_t rows, uint8_t cols, QWidget *parent = 0);
     ~MatrixMonitor();
+    void updateDisplaySize(uint8_t, uint8_t);
 
 signals:
-    void sendCommand(uint8_t cmd, uint8_t msg);
+    void sendCommand(uint8_t, uint8_t);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -27,12 +29,10 @@ protected:
 
 private:
     Ui::MatrixMonitor *ui;
-    uint8_t rows;
-    uint8_t cols;
     uint8_t debug;
     uint8_t displayMode;
     QGridLayout *grid;
-    QLCDNumber *display[32][16];
+    QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     void initDisplay(void);
     void enableOutput(uint8_t);
 

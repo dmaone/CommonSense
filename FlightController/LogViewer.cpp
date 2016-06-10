@@ -19,6 +19,13 @@ void LogViewer::logMessage(QString msg)
     this->appendPlainText(msg);
 }
 
+void LogViewer::continueMessage(QString msg)
+{
+    this->moveCursor(QTextCursor::End);
+    this->insertPlainText(msg);
+    this->moveCursor(QTextCursor::End);
+}
+
 void LogViewer::clearButtonClick(void)
 {
     QMessageBox::StandardButton result = QMessageBox::question(this,

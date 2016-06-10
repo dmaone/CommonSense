@@ -12,6 +12,7 @@
 #include <MatrixMonitor.h>
 #include <QComboBox>
 #include "../c2/c2_protocol.h"
+#include "DeviceInterface.h"
 
 namespace Ui {
 class FlightController;
@@ -33,7 +34,14 @@ public slots:
     void bootloaderButtonClick(void);
     void matrixMonitorButtonClick(void);
     void statusRequestButtonClick(void);
+    void validateConfig(void);
     void mainTabChanged(int);
+    void configNeedsValidation(int);
+    void cowsChanged(int);
+    void deviceStatusNotification(DeviceInterface::DeviceStatus);
+
+protected:
+    void closeEvent(QCloseEvent *);
 
 private:
     Ui::FlightController *ui;
@@ -43,4 +51,5 @@ private:
     void initSetupDisplay(void);
     void updateSetupDisplay(void);
     void adjustCows(QComboBox**, int, int);
+    QComboBox* newMappingCombo(void);
 };

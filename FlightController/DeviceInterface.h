@@ -17,19 +17,24 @@
 class DeviceInterface : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(DeviceStatus)
 
     public:
         DeviceInterface(QObject *parent = 0);
         ~DeviceInterface();
         void setLogger(LogViewer *l);
         void start(void);
+        bool event(QEvent* e);
         device_status_t* getStatus(void);
         LogViewer* logger;
-        bool event(QEvent* e);
+        enum DeviceStatus {DeviceConnected, DeviceDisconnected};
 
     public slots:
         void sendCommand(uint8_t, QByteArray);
         void sendCommand(uint8_t, uint8_t);
+
+    signals:
+        void deviceStatusNotification(DeviceInterface::DeviceStatus);
 
     protected:
         virtual void timerEvent(QTimerEvent *);
