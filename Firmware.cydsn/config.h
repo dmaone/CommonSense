@@ -18,8 +18,8 @@
 // those above are not used because of the way USB component is configured in PSoC creator.
 // Sorry, GUI only :(
 
-#define MATRIX_ROWS 23
-#define MATRIX_COLS 8
+#define MATRIX_ROWS 16
+#define MATRIX_COLS 32
 
 #define EXTRAKEY_ENABLE
 #define DEBUG_EP 2

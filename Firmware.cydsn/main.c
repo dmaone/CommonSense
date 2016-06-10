@@ -57,21 +57,22 @@ void ScanColumn(uint8 col)
     InputControl_Write(1u);
     ResetColumns();
 }
-
+#define ROWS 8
 void PrintColumn(uint8 col)
 {
-    uint16 res[8];
-    for(uint8 i=0; i<8; ++i)
-    {
-        res[i] = ADC_GetResult16(i);
-    }
+    uint16 res[ROWS];
 
     if (status_register.matrix_output > 0)
     {
         outbox.response_type = C2RESPONSE_MATRIX_STATUS;
         outbox.payload[0] = col;
         outbox.payload[1] = status_register.matrix_output;
-        memcpy(&outbox.payload[2], res, sizeof(res));
+        outbox.payload[2] = (uint8_t)8u;
+        for(uint8 i=0; i<ROWS; i++)
+        {
+            res[i] = ADC_GetResult16(i);
+            outbox.payload[i+3] = res[i] & 0xff; 
+        }
         usb_send();
     }
 }
@@ -98,6 +99,7 @@ int main()
     usb_init();
     xprintf("Start");
     ADC_Start();
+    ADC_SetResolution(10u);
     EEPROM_Start();
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
