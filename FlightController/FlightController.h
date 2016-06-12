@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
+ * published by the Free Software Foundation.
 */
 #pragma once
 
@@ -21,13 +21,16 @@ class FlightController;
 class FlightController : public QMainWindow
 {
     Q_OBJECT
+    Q_ENUMS(CowValidationStatus)
 
 public:
     explicit FlightController(QWidget *parent = 0);
     ~FlightController();
+    enum CowValidationStatus {cvsOK, cvsMissing, cvsDuplicate};
 
 signals:
     void sendCommand(uint8_t cmd, uint8_t msg);
+
 
 public slots:
     void redButtonToggle(bool);
@@ -35,10 +38,13 @@ public slots:
     void matrixMonitorButtonClick(void);
     void statusRequestButtonClick(void);
     void validateConfig(void);
+    void applyConfig(void);
     void mainTabChanged(int);
-    void configNeedsValidation(int);
+    void setConfigDirty(int);
     void cowsChanged(int);
     void deviceStatusNotification(DeviceInterface::DeviceStatus);
+    void importConfig(void);
+    void exportConfig(void);
 
 protected:
     void closeEvent(QCloseEvent *);
@@ -51,5 +57,10 @@ private:
     void initSetupDisplay(void);
     void updateSetupDisplay(void);
     void adjustCows(QComboBox**, int, int);
+    bool matrixMappingValid();
+    bool reportValidationFailure(QString);
+    void lockTabs(bool);
+    CowValidationStatus validateCow(QComboBox**, int, int);
+    QString validateCows(QComboBox**, int);
     QComboBox* newMappingCombo(void);
 };

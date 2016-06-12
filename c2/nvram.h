@@ -5,13 +5,14 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
+ * published by the Free Software Foundation.
 */
 
 #pragma once
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "c2_protocol.h"
 
 typedef union {
     struct {
@@ -43,7 +44,7 @@ typedef union {
 } col_settings_t;
 
 #define COMMONSENSE_CONFIG_SIZE 64
-#define CHIP_EEPROM_SIZE 2048
+#define EEPROM_SIZE 2048
 #define READOUT_DELAY_OFFSET 2
 
 typedef union {
@@ -63,10 +64,12 @@ typedef union {
         uint8_t readoutDelay; // nanoseconds, phase lag of analog clock. max. is 10.
         capsense_settings_t capsense_flags;
         uint8_t commonsense_reserved[1];
-        row_settings_t row_params[8];
+        // Only .raw is used because bit fields suck.
+        // TODO: change to uint8_t and forget about bit fields for storable stuff.
+        row_settings_t row_params[ABSOLUTE_MAX_ROWS];
         // 32 bytes boundary
-        col_settings_t col_params[32];
-        uint8_t storage[(CHIP_EEPROM_SIZE - COMMONSENSE_CONFIG_SIZE)];
+        col_settings_t col_params[ABSOLUTE_MAX_COLS];
+        uint8_t storage[(EEPROM_SIZE - COMMONSENSE_CONFIG_SIZE)];
     };
-    unsigned char raw[CHIP_EEPROM_SIZE];
+    uint8_t raw[EEPROM_SIZE];
 } psoc_eeprom_t;

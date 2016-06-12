@@ -161,6 +161,84 @@ STOP</string>
            <string>Basic setup</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
+           <item row="1" column="9">
+            <widget class="QPushButton" name="applyButton">
+             <property name="text">
+              <string>Apply</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="2">
+            <spacer name="horizontalSpacer_2">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeType">
+              <enum>QSizePolicy::Fixed</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>20</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item row="0" column="7">
+            <widget class="QCheckBox" name="normallyOpen">
+             <property name="text">
+              <string>Normally open</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="4">
+            <widget class="QLabel" name="label_3">
+             <property name="text">
+              <string>Layers</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
+             <property name="text">
+              <string>Cols</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="5">
+            <widget class="QSpinBox" name="Layers">
+             <property name="minimum">
+              <number>1</number>
+             </property>
+             <property name="maximum">
+              <number>32</number>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="9">
+            <widget class="QPushButton" name="validateButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Validate</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="7">
+            <widget class="QCheckBox" name="InterlacedScan">
+             <property name="text">
+              <string>Interlaced scan</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Rows</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="1">
             <widget class="QSpinBox" name="Rows">
              <property name="minimum">
@@ -200,13 +278,6 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Rows</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="6">
             <spacer name="horizontalSpacer_3">
              <property name="orientation">
@@ -223,67 +294,17 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_3">
+           <item row="0" column="10">
+            <widget class="QPushButton" name="importButton">
              <property name="text">
-              <string>Layers</string>
+              <string>Import</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="7">
-            <widget class="QCheckBox" name="normallyOpen">
+           <item row="1" column="10">
+            <widget class="QPushButton" name="exportButton">
              <property name="text">
-              <string>Normally open</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Cols</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QSpinBox" name="Layers">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>32</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="2">
-            <spacer name="horizontalSpacer_2">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="1" column="7">
-            <widget class="QCheckBox" name="InterlacedScan">
-             <property name="text">
-              <string>Interlaced scan</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="9">
-            <widget class="QPushButton" name="validateButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Validate</string>
+              <string>Export</string>
              </property>
             </widget>
            </item>

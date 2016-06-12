@@ -7,6 +7,7 @@
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
     logger(NULL), device(NULL), pollTimerId(0)
 {
+    memset(config.raw, 0x00, sizeof(config));
 }
 
 DeviceInterface::~DeviceInterface(void)
@@ -73,6 +74,7 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
     hid_write(device, outbox, sizeof(outbox));
 }
 
+
 void DeviceInterface::resetTimer(int interval)
 {
     if (pollTimerId)
@@ -127,7 +129,7 @@ hid_device* DeviceInterface::acquireDevice(void)
     return retval;
 }
 
-void DeviceInterface::start(void)
+bool DeviceInterface::start(void)
 {
     device = acquireDevice();
     if (device)
@@ -136,10 +138,42 @@ void DeviceInterface::start(void)
         sendCommand(C2CMD_GET_STATUS, 0);
         emit(deviceStatusNotification(DeviceConnected));
         resetTimer(0);
+        return true;
     }
     else
     {
         this->logger->continueMessage(".");
         resetTimer(1000);
+        return false;
+    }
+}
+
+void DeviceInterface::getMatrixSizeParameters(std::vector<uint8_t>& rows, std::vector<uint8_t>& cols)
+{
+    for (uint8_t i=0; i<ABSOLUTE_MAX_ROWS; i++)
+    {
+        rows.push_back(config.row_params[i].raw & 0x80 ? config.row_params[i].raw & 0x1F : 0);
+    }
+    for (uint8_t i=0; i<ABSOLUTE_MAX_COLS; i++)
+    {
+        cols.push_back(config.col_params[i].raw & 0x80 ? config.col_params[i].raw & 0x1F : 0);
+    }
+}
+
+void DeviceInterface::setMatrixSizeParameters(std::vector<uint8_t> rows, std::vector<uint8_t> cols)
+{
+    config.matrixRows = rows.back();
+    rows.pop_back();
+    config.matrixCols = cols.back();
+    cols.pop_back();
+    for (uint8_t i=0; i<rows.size(); i++)
+    {
+        config.row_params[i].raw = rows[i] && i < config.matrixRows ? (rows[i] & 0x1F) | 0x80 : 0;
+
+    }
+    for (uint8_t i=0; i<cols.size(); i++)
+    {
+        config.col_params[i].raw = cols[i] && i < config.matrixCols ? (cols[i] & 0x1F) | 0x80 : 0;
+
     }
 }
