@@ -4,6 +4,7 @@
 #include <QPalette>
 #include <QCloseEvent>
 #include <QLabel>
+#include <QMessageBox>
 #include "MatrixMonitor.h"
 #include "ui_MatrixMonitor.h"
 #include "DeviceInterface.h"
@@ -11,7 +12,7 @@
 #include "Events.h"
 #include "../c2/c2_protocol.h"
 
-MatrixMonitor::MatrixMonitor(uint8_t rows, uint8_t cols, QWidget *parent) :
+MatrixMonitor::MatrixMonitor(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::MatrixMonitor),
     debug(0), displayMode(0), grid(new QGridLayout())
@@ -23,10 +24,20 @@ MatrixMonitor::MatrixMonitor(uint8_t rows, uint8_t cols, QWidget *parent) :
     connect(ui->FreezeButton, SIGNAL(clicked()), this, SLOT(freezeButtonClick()));
     connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
     initDisplay();
-    updateDisplaySize(rows, cols);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     di.installEventFilter(this);
+    deviceConfig = di.getConfigPtr();
+}
+
+void MatrixMonitor::show(void)
+{
+    if (deviceConfig->matrixCols && deviceConfig->matrixCols)
+    {
+        updateDisplaySize(deviceConfig->matrixRows, deviceConfig->matrixCols);
+        QWidget::show();
+    } else
+        QMessageBox::critical(this, "Error", "Matrix not configured - cannot monitor");
 }
 
 MatrixMonitor::~MatrixMonitor()
@@ -90,7 +101,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         // In fact, it is stupid to include it - obviously if we see the matrix output, it's enabled.
         uint8_t max_rows = pl->at(3);
         for (uint8_t i = 0; i<max_rows; i++) {
-            QLCDNumber *cell = display[i][col];
+            QLCDNumber *cell = display[deviceConfig->row_params[i].rowNumber - 1][deviceConfig->col_params[col].colNumber - 1];
             uint8_t level = pl->at(4+i);
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())

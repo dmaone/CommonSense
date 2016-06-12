@@ -84,10 +84,19 @@ void DeviceInterface::resetTimer(int interval)
 
 void DeviceInterface::timerEvent(QTimerEvent *)
 {
-    if (!device) {
-        start();
-        if (!device)
+    if (!device)
+    {
+        device = acquireDevice();
+        if (!device) {
+            emit(deviceStatusNotification(DeviceDisconnected));
+            this->logger->continueMessage(".");
+            resetTimer(1000);
             return;
+        }
+        hid_set_nonblocking(device, 1);
+        sendCommand(C2CMD_GET_STATUS, 0);
+        emit(deviceStatusNotification(DeviceConnected));
+        resetTimer(0);
     }
     memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
     int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
@@ -97,9 +106,8 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     }
     else if (bytesRead < 0)
     {
-        emit(deviceStatusNotification(DeviceDisconnected));
         whine("Device went away. Reconnecting..");
-        start();
+        hid_close(device);
     }
 }
 
@@ -129,51 +137,8 @@ hid_device* DeviceInterface::acquireDevice(void)
     return retval;
 }
 
-bool DeviceInterface::start(void)
+void DeviceInterface::start(void)
 {
-    device = acquireDevice();
-    if (device)
-    {
-        hid_set_nonblocking(device, 1);
-        sendCommand(C2CMD_GET_STATUS, 0);
-        emit(deviceStatusNotification(DeviceConnected));
-        resetTimer(0);
-        return true;
-    }
-    else
-    {
-        this->logger->continueMessage(".");
-        resetTimer(1000);
-        return false;
-    }
-}
-
-void DeviceInterface::getMatrixSizeParameters(std::vector<uint8_t>& rows, std::vector<uint8_t>& cols)
-{
-    for (uint8_t i=0; i<ABSOLUTE_MAX_ROWS; i++)
-    {
-        rows.push_back(config.row_params[i].raw & 0x80 ? config.row_params[i].raw & 0x1F : 0);
-    }
-    for (uint8_t i=0; i<ABSOLUTE_MAX_COLS; i++)
-    {
-        cols.push_back(config.col_params[i].raw & 0x80 ? config.col_params[i].raw & 0x1F : 0);
-    }
-}
-
-void DeviceInterface::setMatrixSizeParameters(std::vector<uint8_t> rows, std::vector<uint8_t> cols)
-{
-    config.matrixRows = rows.back();
-    rows.pop_back();
-    config.matrixCols = cols.back();
-    cols.pop_back();
-    for (uint8_t i=0; i<rows.size(); i++)
-    {
-        config.row_params[i].raw = rows[i] && i < config.matrixRows ? (rows[i] & 0x1F) | 0x80 : 0;
-
-    }
-    for (uint8_t i=0; i<cols.size(); i++)
-    {
-        config.col_params[i].raw = cols[i] && i < config.matrixCols ? (cols[i] & 0x1F) | 0x80 : 0;
-
-    }
+    whine("Acquiring device..");
+    resetTimer(0);
 }

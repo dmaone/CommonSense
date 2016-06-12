@@ -24,7 +24,7 @@ class DeviceInterface : public QObject
         DeviceInterface(QObject *parent = 0);
         ~DeviceInterface();
         void setLogger(LogViewer *l);
-        bool start(void);
+        void start(void);
         bool event(QEvent* e);
         psoc_eeprom_t *getConfigPtr(void) { return &config; }
         device_status_t* getStatus(void);

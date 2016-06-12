@@ -6,6 +6,7 @@
 #include <stdint.h>
 #include "Events.h"
 #include "../c2/c2_protocol.h"
+#include "../c2/nvram.h"
 
 namespace Ui {
 class MatrixMonitor;
@@ -16,9 +17,10 @@ class MatrixMonitor : public QFrame
     Q_OBJECT
 
 public:
-    explicit MatrixMonitor(uint8_t rows, uint8_t cols, QWidget *parent = 0);
+    explicit MatrixMonitor(QWidget *parent = 0);
     ~MatrixMonitor();
     void updateDisplaySize(uint8_t, uint8_t);
+    void show(void);
 
 signals:
     void sendCommand(uint8_t, uint8_t);
@@ -33,6 +35,7 @@ private:
     uint8_t displayMode;
     QGridLayout *grid;
     QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    psoc_eeprom_t* deviceConfig;
     void initDisplay(void);
     void enableOutput(uint8_t);
 

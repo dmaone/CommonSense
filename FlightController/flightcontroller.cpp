@@ -23,12 +23,10 @@ FlightController::FlightController(QWidget *parent) :
     QMainWindow(parent),
     ui(new Ui::FlightController), mm(NULL)
 {
-    for (uint8_t i=0; i<ABSOLUTE_MAX_COLS; i++)
-        columns[i] = NULL;
-    for (uint8_t i=0; i<ABSOLUTE_MAX_ROWS; i++)
-        rows[i] = NULL;
     ui->setupUi(this);
-    ui->mainPanel->setCurrentIndex(0);
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    di.setLogger(ui->LogViewport);
+
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
     connect(ui->RedButton, SIGNAL(toggled(bool)), this, SLOT(redButtonToggle(bool)));
@@ -43,15 +41,16 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importConfig()));
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
 
+}
+
+void FlightController::show(void)
+{
+    ui->mainPanel->setCurrentIndex(0);
+    QMainWindow::show();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    di.setLogger(ui->LogViewport);
     connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
-    ui->LogViewport->logMessage("Acquiring device..");
-    if (!di.start())
-    {
-        emit(deviceStatusNotification(DeviceInterface::DeviceDisconnected));
-    }
+    di.start();
 }
 
 void FlightController::closeEvent (QCloseEvent *event)
@@ -67,9 +66,40 @@ FlightController::~FlightController()
         delete mm;
     delete ui;
 }
+
 void FlightController::importConfig()
 {
+    QFileDialog fd(this, "Choose one file to import from");
+    fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
+    fd.setDefaultSuffix(QString("cfg"));
+    fd.setFileMode(QFileDialog::ExistingFile);
+    if (fd.exec())
+    {
+        QStringList fns = fd.selectedFiles();
+        QFile f(fns.at(0));
+        f.open(QIODevice::ReadOnly);
+        QDataStream ds(&f);
+        DeviceInterface &di = Singleton<DeviceInterface>::instance();
+        ds.readRawData((char *)di.getConfigPtr()->raw, EEPROM_SIZE);
+        ui->LogViewport->logMessage(QString("Imported config from %1").arg(fns.at(0)));
+        revertConfig();
+    }
+}
 
+void FlightController::revertConfig()
+{
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    psoc_eeprom_t* config = di.getConfigPtr();
+    ui->Rows->setValue(config->matrixRows);
+    ui->Cols->setValue(config->matrixCols);
+    ui->normallyOpen->setChecked(config->capsense_flags.normallyOpen);
+    ui->InterlacedScan->setChecked(config->capsense_flags.interlacedScan);
+    updateSetupDisplay();
+    for(uint8_t i=0; i<config->matrixRows; i++)
+        rows[i]->setCurrentIndex(config->row_params[i].isActive ? config->row_params[i].rowNumber : 0);
+    for(uint8_t i=0; i<config->matrixCols; i++)
+       columns[i]->setCurrentIndex(config->col_params[i].isActive ? config->col_params[i].colNumber : 0);
+    ui->LogViewport->logMessage("GUI synced with config");
 }
 
 void FlightController::exportConfig()
@@ -77,6 +107,7 @@ void FlightController::exportConfig()
     QFileDialog fd(this, "Choose one file to export to");
     fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
     fd.setDefaultSuffix(QString("cfg"));
+    fd.setAcceptMode(QFileDialog::AcceptSave);
     if (fd.exec())
     {
         QStringList fns = fd.selectedFiles();
@@ -85,6 +116,7 @@ void FlightController::exportConfig()
         QDataStream ds(&f);
         DeviceInterface &di = Singleton<DeviceInterface>::instance();
         ds.writeRawData((const char *)di.getConfigPtr()->raw, EEPROM_SIZE);
+        ui->LogViewport->logMessage(QString("Exported config to %1").arg(fns.at(0)));
     }
 }
 
@@ -99,7 +131,7 @@ QComboBox* FlightController::newMappingCombo(void)
 
 void FlightController::initSetupDisplay(void)
 {
-    if (rows[0])
+    if (ui->ColumnMapping->isEnabled())
         // Initialized already
         return;
     QGridLayout *lrows = new QGridLayout();
@@ -119,7 +151,9 @@ void FlightController::initSetupDisplay(void)
         lcols->addWidget(columns[i], 1, i - ABSOLUTE_MAX_ROWS);
     }
     ui->ColumnMapping->setLayout(lcols);
+    ui->ColumnMapping->setEnabled(true);
     ui->RowMapping->setLayout(lrows);
+    ui->RowMapping->setEnabled(true);
 }
 
 void FlightController::adjustCows(QComboBox *target[], int max, int cnt)
@@ -153,7 +187,7 @@ void FlightController::updateSetupDisplay(void)
 void FlightController::matrixMonitorButtonClick(void)
 {
     if (mm == NULL) {
-        mm = new MatrixMonitor(ui->Rows->value(), ui->Cols->value());
+        mm = new MatrixMonitor();
     }
     mm->show();
 }
@@ -180,13 +214,16 @@ void FlightController::statusRequestButtonClick(void)
 
 void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
 {
-    if (s == DeviceInterface::DeviceConnected)
+    switch (s)
     {
-        ui->mainPanel->setTabEnabled(1, true);
-    }
-    else if (s == DeviceInterface::DeviceDisconnected)
-    {
-        ui->mainPanel->setTabEnabled(1, false);
+        case DeviceInterface::DeviceConnected:
+            unlockTabs();
+            ui->mainPanel->setTabEnabled(1, true);
+            break;
+        case DeviceInterface::DeviceDisconnected:
+            ui->mainPanel->setCurrentIndex(0);
+            lockTabs();
+            break;
     }
 }
 
@@ -194,7 +231,8 @@ void FlightController::cowsChanged(int idx __attribute__ ((unused)) )
 {
     updateSetupDisplay();
     if (mm)
-        mm->updateDisplaySize(ui->Rows->value(), ui->Cols->value());
+        delete mm;
+        //mm->updateDisplaySize(ui->Rows->value(), ui->Cols->value());
 }
 
 void FlightController::setConfigDirty(int)
@@ -241,18 +279,18 @@ QString FlightController::validateCows(QComboBox** cows, int totalCows)
     return QString();
 }
 
-void FlightController::lockTabs(bool dothis)
+void FlightController::manipulateTabs(bool dothis)
 {
     for (int i=0; i < ui->mainPanel->count(); i++) {
         if (i == ui->mainPanel->currentIndex())
-            break;
-        ui->mainPanel->setTabEnabled(i, !dothis);
+            continue;
+        ui->mainPanel->setTabEnabled(i, dothis);
     }
 }
 
 bool FlightController::reportValidationFailure(QString msg)
 {
-    lockTabs(true);
+    lockTabs();
     QMessageBox::critical(this, "Matrix validation failure", msg);
     return false;
 }
@@ -274,23 +312,35 @@ void FlightController::validateConfig(void)
 {
     if (!matrixMappingValid())
         return;
+/*  FIXME This gets too boring. Better validations after the keyboard works.
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    psoc_eeprom_t* config = di.getConfigPtr();
+    if (ui->Rows->value() < config->matrixRows())
+    Also do not forget to really reset all row/column-dependent stuff.
+*/
     ui->validateButton->setDisabled(true);
 }
 
 void FlightController::applyConfig(void)
 {
-    std::vector<uint8_t> r;
-    std::vector<uint8_t> c;
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    psoc_eeprom_t* config = di.getConfigPtr();
+    config->capsense_flags.outputEnabled = true;
+    config->capsense_flags.interlacedScan = ui->InterlacedScan->isChecked();
+    config->capsense_flags.normallyOpen = ui->normallyOpen->isChecked();
+    config->matrixRows = ui->Rows->value();
+    config->matrixCols = ui->Cols->value();
     for(uint8_t i=0; i< ABSOLUTE_MAX_ROWS; i++)
-        r.push_back((uint8_t)rows[i]->currentIndex());
-    r.push_back(ui->Rows->value());
+    {
+        config->row_params[i].rowNumber = rows[i]->currentIndex();
+        config->row_params[i].isActive  = rows[i]->currentIndex() > 0;
+    }
     for(uint8_t i=0; i< ABSOLUTE_MAX_COLS; i++)
-        c.push_back(columns[i]->currentIndex());
-    c.push_back(ui->Cols->value());
-    di.setMatrixSizeParameters(r, c);
+    {
+        config->col_params[i].colNumber = columns[i]->currentIndex();
+        config->col_params[i].isActive  = columns[i]->currentIndex() > 0;
+    }
 }
-
 
 void FlightController::mainTabChanged(int idx)
 {

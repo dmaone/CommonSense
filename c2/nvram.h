@@ -20,25 +20,24 @@ typedef union {
         bool normallyOpen:1;
         bool interlacedScan:1;
         uint8_t reserved:4;
-        uint8_t thresholdVoltage;
     };
-    uint16_t raw;
+    uint8_t raw;
 } capsense_settings_t;
 
 typedef union {
     struct {
-        bool isActive:1;
-        uint8_t reserved:3;
         uint8_t rowNumber:4;
+        uint8_t reserved:3;
+        bool isActive:1;
     };
     uint8_t raw;
 } row_settings_t;
 
 typedef union {
     struct {
-        bool isActive:1;
-        uint8_t reserved:2;
         uint8_t colNumber:5;
+        uint8_t reserved:2;
+        bool isActive:1;
     };
     uint8_t raw;
 } col_settings_t;
@@ -63,9 +62,11 @@ typedef union {
         uint8_t layerCount;
         uint8_t readoutDelay; // nanoseconds, phase lag of analog clock. max. is 10.
         capsense_settings_t capsense_flags;
+        uint8_t thresholdVoltage;
         uint8_t commonsense_reserved[1];
         // Only .raw is used because bit fields suck.
         // TODO: change to uint8_t and forget about bit fields for storable stuff.
+        // NOTE: Looks like got it working - first bit is high bit.
         row_settings_t row_params[ABSOLUTE_MAX_ROWS];
         // 32 bytes boundary
         col_settings_t col_params[ABSOLUTE_MAX_COLS];

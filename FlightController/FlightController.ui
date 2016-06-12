@@ -33,7 +33,7 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <layout class="QGridLayout" name="gridLayout">
-          <item row="12" column="0">
+          <item row="13" column="0">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -62,43 +62,6 @@
             </property>
            </spacer>
           </item>
-          <item row="10" column="0">
-           <widget class="QPushButton" name="BootloaderButton">
-            <property name="text">
-             <string>FW Update</string>
-            </property>
-           </widget>
-          </item>
-          <item row="5" column="0">
-           <spacer name="verticalSpacer_2">
-            <property name="orientation">
-             <enum>Qt::Vertical</enum>
-            </property>
-            <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
-            </property>
-            <property name="sizeHint" stdset="0">
-             <size>
-              <width>20</width>
-              <height>10</height>
-             </size>
-            </property>
-           </spacer>
-          </item>
-          <item row="13" column="0">
-           <widget class="QPushButton" name="CopyAllButton">
-            <property name="text">
-             <string>CopyAll</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="0">
-           <widget class="QPushButton" name="ClearButton">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
           <item row="3" column="0">
            <widget class="QPushButton" name="RedButton">
             <property name="minimumSize">
@@ -122,6 +85,50 @@ STOP</string>
             </property>
            </widget>
           </item>
+          <item row="15" column="0">
+           <widget class="QPushButton" name="ClearButton">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item row="14" column="0">
+           <widget class="QPushButton" name="CopyAllButton">
+            <property name="text">
+             <string>CopyAll</string>
+            </property>
+           </widget>
+          </item>
+          <item row="10" column="0">
+           <widget class="QPushButton" name="BootloaderButton">
+            <property name="text">
+             <string>FW Update</string>
+            </property>
+           </widget>
+          </item>
+          <item row="5" column="0">
+           <spacer name="verticalSpacer_2">
+            <property name="orientation">
+             <enum>Qt::Vertical</enum>
+            </property>
+            <property name="sizeType">
+             <enum>QSizePolicy::Fixed</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>10</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="6" column="0">
+           <widget class="QPushButton" name="statusRequestButton">
+            <property name="text">
+             <string>Status</string>
+            </property>
+           </widget>
+          </item>
           <item row="7" column="0">
            <widget class="QPushButton" name="MatrixMonitorButton">
             <property name="text">
@@ -129,10 +136,17 @@ STOP</string>
             </property>
            </widget>
           </item>
-          <item row="6" column="0">
-           <widget class="QPushButton" name="statusRequestButton">
+          <item row="11" column="0">
+           <widget class="QPushButton" name="commitButton">
             <property name="text">
-             <string>Status</string>
+             <string>Flash config</string>
+            </property>
+           </widget>
+          </item>
+          <item row="12" column="0">
+           <widget class="QPushButton" name="rollbackButton">
+            <property name="text">
+             <string>Revert config</string>
             </property>
            </widget>
           </item>
@@ -161,7 +175,14 @@ STOP</string>
            <string>Basic setup</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="1" column="9">
+           <item row="0" column="4">
+            <widget class="QCheckBox" name="normallyOpen">
+             <property name="text">
+              <string>Normally open</string>
+             </property>
+            </widget>
+           </item>
+           <item row="1" column="6">
             <widget class="QPushButton" name="applyButton">
              <property name="text">
               <string>Apply</string>
@@ -184,38 +205,14 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="7">
-            <widget class="QCheckBox" name="normallyOpen">
+           <item row="1" column="4">
+            <widget class="QCheckBox" name="InterlacedScan">
              <property name="text">
-              <string>Normally open</string>
+              <string>Interlaced scan</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <widget class="QLabel" name="label_3">
-             <property name="text">
-              <string>Layers</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="0">
-            <widget class="QLabel" name="label">
-             <property name="text">
-              <string>Cols</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
-            <widget class="QSpinBox" name="Layers">
-             <property name="minimum">
-              <number>1</number>
-             </property>
-             <property name="maximum">
-              <number>32</number>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="9">
+           <item row="0" column="6">
             <widget class="QPushButton" name="validateButton">
              <property name="enabled">
               <bool>false</bool>
@@ -225,10 +222,10 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="7">
-            <widget class="QCheckBox" name="InterlacedScan">
+           <item row="1" column="0">
+            <widget class="QLabel" name="label">
              <property name="text">
-              <string>Interlaced scan</string>
+              <string>Cols</string>
              </property>
             </widget>
            </item>
@@ -248,7 +245,7 @@ STOP</string>
               <number>16</number>
              </property>
              <property name="value">
-              <number>8</number>
+              <number>1</number>
              </property>
             </widget>
            </item>
@@ -261,11 +258,11 @@ STOP</string>
               <number>32</number>
              </property>
              <property name="value">
-              <number>16</number>
+              <number>1</number>
              </property>
             </widget>
            </item>
-           <item row="0" column="8">
+           <item row="0" column="5">
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -278,30 +275,14 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="6">
-            <spacer name="horizontalSpacer_3">
-             <property name="orientation">
-              <enum>Qt::Horizontal</enum>
-             </property>
-             <property name="sizeType">
-              <enum>QSizePolicy::Fixed</enum>
-             </property>
-             <property name="sizeHint" stdset="0">
-              <size>
-               <width>20</width>
-               <height>20</height>
-              </size>
-             </property>
-            </spacer>
-           </item>
-           <item row="0" column="10">
+           <item row="0" column="7">
             <widget class="QPushButton" name="importButton">
              <property name="text">
               <string>Import</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="10">
+           <item row="1" column="7">
             <widget class="QPushButton" name="exportButton">
              <property name="text">
               <string>Export</string>
@@ -313,6 +294,9 @@ STOP</string>
         </item>
         <item>
          <widget class="QGroupBox" name="RowMapping">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Row mapping</string>
           </property>
@@ -320,6 +304,9 @@ STOP</string>
         </item>
         <item>
          <widget class="QGroupBox" name="ColumnMapping">
+          <property name="enabled">
+           <bool>false</bool>
+          </property>
           <property name="title">
            <string>Column mapping</string>
           </property>
