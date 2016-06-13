@@ -19,7 +19,6 @@ class MatrixMonitor : public QFrame
 public:
     explicit MatrixMonitor(QWidget *parent = 0);
     ~MatrixMonitor();
-    void updateDisplaySize(uint8_t, uint8_t);
     void show(void);
 
 signals:
@@ -37,6 +36,7 @@ private:
     QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     psoc_eeprom_t* deviceConfig;
     void initDisplay(void);
+    void updateDisplaySize(uint8_t, uint8_t);
     void enableOutput(uint8_t);
 
 private slots:

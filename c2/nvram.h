@@ -42,10 +42,11 @@ typedef union {
     uint8_t raw;
 } col_settings_t;
 
-#define COMMONSENSE_CONFIG_SIZE 64
+#define COMMONSENSE_CONFIG_SIZE 72
 #define EEPROM_SIZE 2048
+#define STORAGE_SIZE (EEPROM_SIZE - COMMONSENSE_CONFIG_SIZE)
 #define READOUT_DELAY_OFFSET 2
-
+#define STORAGE_ADDRESS(X) (STORAGE_SIZE - (X) - 1)
 typedef union {
     struct {
         uint8_t configVersion;
@@ -68,9 +69,9 @@ typedef union {
         // TODO: change to uint8_t and forget about bit fields for storable stuff.
         // NOTE: Looks like got it working - first bit is high bit.
         row_settings_t row_params[ABSOLUTE_MAX_ROWS];
-        // 32 bytes boundary
         col_settings_t col_params[ABSOLUTE_MAX_COLS];
-        uint8_t storage[(EEPROM_SIZE - COMMONSENSE_CONFIG_SIZE)];
+        // -- CONFIG SIZE. Storage is for user-defined stuff like layouts.
+        uint8_t storage[STORAGE_SIZE];
     };
     uint8_t raw[EEPROM_SIZE];
 } psoc_eeprom_t;

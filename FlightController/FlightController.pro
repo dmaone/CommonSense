@@ -24,7 +24,9 @@ SOURCES += main.cpp \
     LogViewer.cpp \
     DeviceInterface.cpp \
     Events.cpp \
-    MatrixMonitor.cpp
+    MatrixMonitor.cpp \
+    LayoutEditor.cpp \
+    ScancodeList.cpp
 
 HEADERS  += \
     FlightController.h \
@@ -35,10 +37,13 @@ HEADERS  += \
     singleton.h \
     ../c2/c2_protocol.h \
     MatrixMonitor.h \
-    ../c2/nvram.h
+    ../c2/nvram.h \
+    LayoutEditor.h \
+    ScancodeList.h
 
 FORMS    += \
     FlightController.ui \
-    MatrixMonitor.ui
+    MatrixMonitor.ui \
+    LayoutEditor.ui
 
 DISTFILES +=

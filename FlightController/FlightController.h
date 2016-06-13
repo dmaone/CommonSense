@@ -10,9 +10,10 @@
 
 #include <QMainWindow>
 #include <MatrixMonitor.h>
+#include <DeviceInterface.h>
+#include <LayoutEditor.h>
 #include <QComboBox>
 #include "../c2/c2_protocol.h"
-#include "DeviceInterface.h"
 
 namespace Ui {
 class FlightController;
@@ -41,6 +42,7 @@ public slots:
     void importConfig(void);
     void exportConfig(void);
     void validateConfig(void);
+    void editLayoutClick(void);
     void applyConfig(void);
     void revertConfig(void);
     void mainTabChanged(int);
@@ -54,6 +56,7 @@ protected:
 private:
     Ui::FlightController *ui;
     MatrixMonitor *mm;
+    LayoutEditor *layoutEditor;
     QComboBox *rows[ABSOLUTE_MAX_ROWS];
     QComboBox *columns[ABSOLUTE_MAX_COLS];
     std::vector<uint8_t> row_config;

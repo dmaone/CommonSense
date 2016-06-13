@@ -21,7 +21,7 @@
 
 FlightController::FlightController(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::FlightController), mm(NULL)
+    ui(new Ui::FlightController), mm(NULL), layoutEditor(NULL)
 {
     ui->setupUi(this);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
@@ -34,6 +34,7 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(matrixMonitorButtonClick()));
     connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
     connect(ui->validateButton, SIGNAL(clicked()), this, SLOT(validateConfig()));
+    connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyConfig()));
     connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
     connect(ui->Rows, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
@@ -57,13 +58,13 @@ void FlightController::closeEvent (QCloseEvent *event)
 {
     if (mm)
         mm->close();
+    if (layoutEditor)
+        layoutEditor->close();
     event->accept();
 }
 
 FlightController::~FlightController()
 {
-    if (mm)
-        delete mm;
     delete ui;
 }
 
@@ -232,7 +233,6 @@ void FlightController::cowsChanged(int idx __attribute__ ((unused)) )
     updateSetupDisplay();
     if (mm)
         delete mm;
-        //mm->updateDisplaySize(ui->Rows->value(), ui->Cols->value());
 }
 
 void FlightController::setConfigDirty(int)
@@ -306,6 +306,16 @@ bool FlightController::matrixMappingValid(void)
         return reportValidationFailure(errmsg);
 
     return true;
+}
+
+void FlightController::editLayoutClick(void)
+{
+    if (layoutEditor == NULL) {
+        layoutEditor = new LayoutEditor();
+        connect(layoutEditor, SIGNAL(logMessage(QString)), ui->LogViewport, SLOT(logMessage(QString)));
+    }
+    layoutEditor->show();
+
 }
 
 void FlightController::validateConfig(void)
