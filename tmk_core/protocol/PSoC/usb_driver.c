@@ -44,8 +44,16 @@ void report_status(void)
     usb_send();
 }
 
+void receive_config_block(void){
+    memcpy(config.raw+inbox.payload[1], inbox.payload+31, 32);
+    outbox.response_type = C2RESPONSE_CONFIG;
+    outbox.payload[0] = inbox.payload[0];
+    usb_send();
+}
+
 void process_msg(void)
 {
+    memset(outbox.raw, 0x00, sizeof(outbox));
     switch (inbox.command) {
     case C2CMD_EWO:
         status_register.emergency_stop = inbox.payload[0];
@@ -53,6 +61,9 @@ void process_msg(void)
         break;
     case C2CMD_GET_STATUS:
         report_status();
+        break;
+    case C2CMD_UPLOAD_CONFIG:
+        receive_config_block();
         break;
     case C2CMD_GET_MATRIX_STATE:
         status_register.matrix_output = inbox.payload[0];

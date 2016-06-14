@@ -5,7 +5,7 @@
 #include "LogViewer.h"
 
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
-    logger(NULL), device(NULL), pollTimerId(0)
+    logger(NULL), device(NULL), pollTimerId(0), transferDirection(TransferIdle)
 {
     memset(config.raw, 0x00, sizeof(config));
 }
@@ -29,12 +29,18 @@ void DeviceInterface::whine(QString msg)
     this->logger->logMessage(msg);
 }
 
+/**
+ * This is the handler of last resort for messages from device.
+ * Other modules are supposed to install the event filter and process messages of interest.
+ * Default behavior is to output them to the log window as strings.
+ */
 bool DeviceInterface::event(QEvent* e)
 {
     if (e->type() == DeviceMessage::ET) {
         QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
-        if (payload->at(0) == C2RESPONSE_STATUS)
+        switch (payload->at(0))
         {
+        case C2RESPONSE_STATUS:
             whine(QString("CommonSense v%1.%2, die temp %3%4 C")
                   .arg((uint8_t)payload->at(2))
                   .arg((uint8_t)payload->at(3))
@@ -46,9 +52,24 @@ bool DeviceInterface::event(QEvent* e)
                   .arg((payload->at(1) & (1 << C2DEVSTASTUS_MATRIXOUTPUT)) ? "Yes":"No")
             );
             return true;
+        case C2RESPONSE_CONFIG:
+            currentBlock++;
+            switch (transferDirection)
+            {
+            case TransferDownload:
+                downloadConfig();
+                return true;
+            case TransferUpload:
+                uploadConfig();
+                return true;
+            default:
+                whine(QString("Received config block %1 while supposed to be idle!").arg(payload->at(1)));
+                return true;
+            }
+        default:
+            logger->logMessage(payload->constData());
+            return true;
         }
-        logger->logMessage(payload->constData());
-        return true;
     }
     return QObject::event(e);
 }
@@ -58,7 +79,15 @@ void DeviceInterface::deviceMessageReceiver(void)
     whine("Message received");
 }
 
-void DeviceInterface::sendCommand(uint8_t cmd, QByteArray msg)
+void DeviceInterface::sendCommand(uint8_t cmd, uint8_t *msg)
+{
+    memset(outbox, 0, sizeof(outbox));
+    outbox[1] = cmd;
+    memcpy(outbox+2, msg, 63);
+    hid_write(device, outbox, sizeof(outbox));
+}
+
+void DeviceInterface::sendCommand(uint8_t cmd, QByteArray &msg)
 {
     memset(outbox, 0, sizeof(outbox));
     outbox[1] = cmd;
@@ -74,6 +103,37 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
     hid_write(device, outbox, sizeof(outbox));
 }
 
+void DeviceInterface::uploadConfig(void)
+{
+    switch(transferDirection)
+    {
+        case TransferIdle:
+            transferDirection = TransferUpload;
+            currentBlock = 0;
+            whine("Uploading config..");
+        case TransferUpload:
+            if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
+            {
+                whine ("done!");
+                transferDirection = TransferIdle;
+                return;
+            }
+            this->logger->continueMessage(".");
+            uint8_t payload[63];
+            payload[0] = currentBlock;
+            memcpy(payload+31, config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
+            sendCommand(C2CMD_UPLOAD_CONFIG, payload);
+            break;
+    default:
+        whine("Not a good day to upload config!");
+    }
+
+}
+
+void DeviceInterface::downloadConfig(void)
+{
+    whine("Downloading config..");
+}
 
 void DeviceInterface::resetTimer(int interval)
 {
@@ -94,7 +154,7 @@ void DeviceInterface::timerEvent(QTimerEvent *)
             return;
         }
         hid_set_nonblocking(device, 1);
-        sendCommand(C2CMD_GET_STATUS, 0);
+        sendCommand(C2CMD_GET_STATUS, (uint8_t)0);
         emit(deviceStatusNotification(DeviceConnected));
         resetTimer(0);
     }
@@ -108,6 +168,7 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     {
         whine("Device went away. Reconnecting..");
         hid_close(device);
+        device = NULL;
     }
 }
 

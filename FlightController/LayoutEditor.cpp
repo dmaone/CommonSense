@@ -94,7 +94,34 @@ void LayoutEditor::importLayout()
 
 void LayoutEditor::exportLayout()
 {
-    QMessageBox::critical(this, QString("Not implemented!"), QString("Nope!"));
+    QFileDialog fd(this, "Choose one file to export to");
+    fd.setNameFilter(tr("layout files(*.l)"));
+    fd.setDefaultSuffix(QString("l"));
+    fd.setAcceptMode(QFileDialog::AcceptSave);
+    if (fd.exec())
+    {
+        QStringList fns = fd.selectedFiles();
+        QFile f(fns.at(0));
+        f.open(QIODevice::WriteOnly);
+        QTextStream ts (&f);
+        ts.setIntegerBase(16);
+        ts.setFieldAlignment(QTextStream::AlignRight);
+        ts.setPadChar('0');
+        for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+        {
+            QByteArray buf;
+            for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+            {
+                ts << qSetFieldWidth(1) << (j ? ' ' : '\n');
+                ts << "0x";
+                ts.setFieldWidth(2);
+                ts << (uint8_t)display[i][j]->currentIndex();
+
+            }
+        }
+        ts << qSetFieldWidth(1) << '\n';
+        emit logMessage(QString("Exported layout to %1").arg(fns.at(0)));
+    }
 }
 
 void LayoutEditor::applyLayout()

@@ -19,6 +19,7 @@ class DeviceInterface : public QObject
 {
     Q_OBJECT
     Q_ENUMS(DeviceStatus)
+    Q_ENUMS(TransferDirection)
 
     public:
         DeviceInterface(QObject *parent = 0);
@@ -32,10 +33,15 @@ class DeviceInterface : public QObject
         void setMatrixSizeParameters(std::vector<uint8_t>, std::vector<uint8_t>);
         LogViewer* logger;
         enum DeviceStatus {DeviceConnected, DeviceDisconnected};
+        enum TransferDirection {TransferIdle, TransferUpload, TransferDownload};
 
     public slots:
-        void sendCommand(uint8_t, QByteArray);
+        void sendCommand(uint8_t, QByteArray&);
+        void sendCommand(uint8_t, uint8_t*);
         void sendCommand(uint8_t, uint8_t);
+        void uploadConfig(void);
+        void downloadConfig(void);
+
     signals:
         void deviceStatusNotification(DeviceInterface::DeviceStatus);
 
@@ -49,6 +55,8 @@ class DeviceInterface : public QObject
         unsigned char outbox[65];
         unsigned char bytesFromDevice[65];
         device_status_t status;
+        enum TransferDirection transferDirection;
+        uint8_t currentBlock;
         hid_device* acquireDevice(void);
         void whine(QString msg);
         void resetTimer(int interval);

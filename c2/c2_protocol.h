@@ -4,7 +4,7 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
+ * published by the Free Software Foundation.
 */
 
 #pragma once
@@ -17,7 +17,7 @@
  * Packet format is [command byte][application-specific].
  * MESSAGES MUST BE EXACTLY 64 BYTES IN LENGTH, otherwise host will drop them.
  * If your message is longer - it is _your_ problem, you should handle it at both sides.
- * Use the IN_type_t and OUT_type_t for communication. 
+ * Use the IN_type_t and OUT_type_t for communication.
  * Directions are defined in USB spec sense - so IN is TO HOST, OUT is TO DEVICE.
  * Preferred method of handling messages at the host is to install event handler to TODO
  * On firmware side we should conserver resources,
@@ -31,12 +31,13 @@
 
 enum c2command {
     C2CMD_EWO = 0x00,
-    C2CMD_GET_STATUS,
-    C2CMD_GET_CONFIG,
-    C2CMD_SEND_CONFIG,
-    C2CMD_SAVE_CONFIG,
-    C2CMD_GET_MATRIX_STATE,
-    C2CMD_ENTER_BOOTLOADER
+    C2CMD_GET_STATUS = 0x01,
+    C2CMD_ENTER_BOOTLOADER = 0x02,
+    // DO NOT TOUCH THOSE THREE ABOVE!
+    // Bootloader command must keep it's place or you lose firmware update capability.
+    C2CMD_UPLOAD_CONFIG, // FROM host
+    C2CMD_DOWNLOAD_CONFIG, // TO host
+    C2CMD_GET_MATRIX_STATE
 };
 
 enum c2response {

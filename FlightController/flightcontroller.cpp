@@ -41,6 +41,8 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->Cols, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
     connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importConfig()));
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
+    connect(ui->commitButton, SIGNAL(clicked()), &di, SLOT(uploadConfig()));
+    connect(ui->rollbackButton, SIGNAL(clicked()), &di, SLOT(downloadConfig()));
 
 }
 
@@ -81,7 +83,7 @@ void FlightController::importConfig()
         f.open(QIODevice::ReadOnly);
         QDataStream ds(&f);
         DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        ds.readRawData((char *)di.getConfigPtr()->raw, EEPROM_SIZE);
+        ds.readRawData((char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
         ui->LogViewport->logMessage(QString("Imported config from %1").arg(fns.at(0)));
         revertConfig();
     }
@@ -116,10 +118,11 @@ void FlightController::exportConfig()
         f.open(QIODevice::WriteOnly);
         QDataStream ds(&f);
         DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        ds.writeRawData((const char *)di.getConfigPtr()->raw, EEPROM_SIZE);
+        ds.writeRawData((const char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
         ui->LogViewport->logMessage(QString("Exported config to %1").arg(fns.at(0)));
     }
 }
+
 
 QComboBox* FlightController::newMappingCombo(void)
 {
@@ -233,6 +236,7 @@ void FlightController::cowsChanged(int idx __attribute__ ((unused)) )
     updateSetupDisplay();
     if (mm)
         delete mm;
+    mm = NULL;
 }
 
 void FlightController::setConfigDirty(int)

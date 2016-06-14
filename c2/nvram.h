@@ -43,8 +43,9 @@ typedef union {
 } col_settings_t;
 
 #define COMMONSENSE_CONFIG_SIZE 72
-#define EEPROM_SIZE 2048
-#define STORAGE_SIZE (EEPROM_SIZE - COMMONSENSE_CONFIG_SIZE)
+#define EEPROM_BYTESIZE 2048
+#define CONFIG_TRANSFER_BLOCK_SIZE 32
+#define STORAGE_SIZE (EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE)
 #define READOUT_DELAY_OFFSET 2
 #define STORAGE_ADDRESS(X) (STORAGE_SIZE - (X) - 1)
 typedef union {
@@ -73,5 +74,5 @@ typedef union {
         // -- CONFIG SIZE. Storage is for user-defined stuff like layouts.
         uint8_t storage[STORAGE_SIZE];
     };
-    uint8_t raw[EEPROM_SIZE];
+    uint8_t raw[EEPROM_BYTESIZE];
 } psoc_eeprom_t;
