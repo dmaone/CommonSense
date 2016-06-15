@@ -57,13 +57,13 @@ bool DeviceInterface::event(QEvent* e)
             switch (transferDirection)
             {
             case TransferDownload:
-                downloadConfig();
+                downloadConfigBlock(payload);
                 return true;
             case TransferUpload:
-                uploadConfig();
+                uploadConfigBlock();
                 return true;
             default:
-                whine(QString("Received config block %1 while supposed to be idle!").arg(payload->at(1)));
+                whine(QString("Received config block %1 while supposed to be idle!").arg((uint8_t)payload->at(1)));
                 return true;
             }
         default:
@@ -103,6 +103,10 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
     hid_write(device, outbox, sizeof(outbox));
 }
 
+/**
+ * @brief DeviceInterface::uploadConfig
+ * Fire up the uploader.
+ */
 void DeviceInterface::uploadConfig(void)
 {
     switch(transferDirection)
@@ -111,8 +115,24 @@ void DeviceInterface::uploadConfig(void)
             transferDirection = TransferUpload;
             currentBlock = 0;
             whine("Uploading config..");
+            uploadConfigBlock();
+            break;
+    default:
+        whine("Not a good day to upload config!");
+    }
+}
+
+/**
+ * @brief DeviceInterface::uploadConfigBlock
+ * Upload one block to device.
+ * We don't really care about the input packet here, hence (void)
+ */
+void DeviceInterface::uploadConfigBlock(void)
+{
+    switch(transferDirection)
+    {
         case TransferUpload:
-            if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
+            if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
             {
                 whine ("done!");
                 transferDirection = TransferIdle;
@@ -125,14 +145,54 @@ void DeviceInterface::uploadConfig(void)
             sendCommand(C2CMD_UPLOAD_CONFIG, payload);
             break;
     default:
-        whine("Not a good day to upload config!");
+        whine("Not a good day to upload config block!");
     }
 
 }
 
-void DeviceInterface::downloadConfig(void)
+void DeviceInterface::downloadConfig()
 {
-    whine("Downloading config..");
+    switch(transferDirection)
+    {
+    case TransferIdle:
+        transferDirection = TransferDownload;
+        currentBlock = 0;
+        whine("Downloading config..");
+        break;
+    case TransferDownload:
+        whine("Already downloading! Re-requesting current block");
+        break;
+    default:
+        whine("Not a good day to download config!");
+        return;
+    }
+    sendCommand(C2CMD_DOWNLOAD_CONFIG, currentBlock);
+}
+
+/**
+ * @brief DeviceInterface::downloadConfigBlock
+ * Receives one block from device, writes it to local config.
+ * @param payload - packet payload
+ */
+void DeviceInterface::downloadConfigBlock(QByteArray *payload)
+{
+    switch(transferDirection)
+    {
+        case TransferDownload:
+            if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
+            {
+                whine ("done!");
+                transferDirection = TransferIdle;
+                emit(deviceStatusNotification(DeviceConfigLoaded));
+                return;
+            }
+            this->logger->continueMessage(".");
+            memcpy(config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
+            sendCommand(C2CMD_DOWNLOAD_CONFIG, currentBlock);
+            break;
+    default:
+        whine("Not a good day to download config block!");
+    }
 }
 
 void DeviceInterface::resetTimer(int interval)
@@ -154,7 +214,9 @@ void DeviceInterface::timerEvent(QTimerEvent *)
             return;
         }
         hid_set_nonblocking(device, 1);
-        sendCommand(C2CMD_GET_STATUS, (uint8_t)0);
+        //sendCommand(C2CMD_GET_STATUS, (uint8_t)0);
+        //need to be careful not to send too fast!
+        downloadConfig();
         emit(deviceStatusNotification(DeviceConnected));
         resetTimer(0);
     }

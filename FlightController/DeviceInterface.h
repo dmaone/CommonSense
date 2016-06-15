@@ -32,7 +32,7 @@ class DeviceInterface : public QObject
         void getMatrixSizeParameters(std::vector<uint8_t>&, std::vector<uint8_t>&);
         void setMatrixSizeParameters(std::vector<uint8_t>, std::vector<uint8_t>);
         LogViewer* logger;
-        enum DeviceStatus {DeviceConnected, DeviceDisconnected};
+        enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigLoaded};
         enum TransferDirection {TransferIdle, TransferUpload, TransferDownload};
 
     public slots:
@@ -60,6 +60,8 @@ class DeviceInterface : public QObject
         hid_device* acquireDevice(void);
         void whine(QString msg);
         void resetTimer(int interval);
+        void uploadConfigBlock(void);
+        void downloadConfigBlock(QByteArray *);
 
     private slots:
         void deviceMessageReceiver(void);

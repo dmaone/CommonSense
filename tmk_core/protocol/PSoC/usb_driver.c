@@ -45,11 +45,20 @@ void report_status(void)
 }
 
 void receive_config_block(void){
-    memcpy(config.raw+inbox.payload[1], inbox.payload+31, 32);
+    // TODO define offset via transfer block size and packet size
+    memcpy(config.raw + (inbox.payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), inbox.payload+31, CONFIG_TRANSFER_BLOCK_SIZE);
     outbox.response_type = C2RESPONSE_CONFIG;
     outbox.payload[0] = inbox.payload[0];
     usb_send();
 }
+
+void send_config_block(void){
+    outbox.response_type = C2RESPONSE_CONFIG;
+    outbox.payload[0] = inbox.payload[0];
+    memcpy(outbox.payload + 31, config.raw + (inbox.payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), CONFIG_TRANSFER_BLOCK_SIZE);
+    usb_send();
+}
+
 
 void process_msg(void)
 {
@@ -64,6 +73,9 @@ void process_msg(void)
         break;
     case C2CMD_UPLOAD_CONFIG:
         receive_config_block();
+        break;
+    case C2CMD_DOWNLOAD_CONFIG:
+        send_config_block();
         break;
     case C2CMD_GET_MATRIX_STATE:
         status_register.matrix_output = inbox.payload[0];

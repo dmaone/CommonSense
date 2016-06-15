@@ -32,7 +32,7 @@ public:
 
 signals:
     void sendCommand(uint8_t cmd, uint8_t msg);
-
+    void downloadConfig(void);
 
 public slots:
     void redButtonToggle(bool);

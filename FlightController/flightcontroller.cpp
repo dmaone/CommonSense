@@ -26,6 +26,7 @@ FlightController::FlightController(QWidget *parent) :
     ui->setupUi(this);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     di.setLogger(ui->LogViewport);
+    initSetupDisplay();
 
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
@@ -43,6 +44,9 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
     connect(ui->commitButton, SIGNAL(clicked()), &di, SLOT(uploadConfig()));
     connect(ui->rollbackButton, SIGNAL(clicked()), &di, SLOT(downloadConfig()));
+    connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
+    connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
+    di.start();
 
 }
 
@@ -50,10 +54,7 @@ void FlightController::show(void)
 {
     ui->mainPanel->setCurrentIndex(0);
     QMainWindow::show();
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
-    connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
-    di.start();
+    //DeviceInterface &di = Singleton<DeviceInterface>::instance();
 }
 
 void FlightController::closeEvent (QCloseEvent *event)
@@ -168,11 +169,12 @@ void FlightController::adjustCows(QComboBox *target[], int max, int cnt)
         items.append(QString("%1").arg(i+1));
     for (uint8_t i = 0; i<max; i++)
     {
+        uint8_t idx = target[i]->currentIndex();
         target[i]->setVisible(false);
         target[i]->clear();
         if (i < cnt) {
             target[i]->addItems(items);
-            target[i]->setCurrentIndex(i+1);
+            target[i]->setCurrentIndex(idx);
             target[i]->setSizeAdjustPolicy(QComboBox::AdjustToContents);
             target[i]->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
             target[i]->sizeHint().setWidth(0);
@@ -221,12 +223,16 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
     switch (s)
     {
         case DeviceInterface::DeviceConnected:
-            unlockTabs();
-            ui->mainPanel->setTabEnabled(1, true);
             break;
         case DeviceInterface::DeviceDisconnected:
             ui->mainPanel->setCurrentIndex(0);
             lockTabs();
+            break;
+        case DeviceInterface::DeviceConfigLoaded:
+            revertConfig();
+            unlockTabs();
+            ui->mainPanel->setTabEnabled(1, true);
+            emit sendCommand(C2CMD_GET_STATUS, 0);
             break;
     }
 }
@@ -308,7 +314,6 @@ bool FlightController::matrixMappingValid(void)
     errmsg = this->validateCows(columns, ui->Cols->value());
     if (!errmsg.isEmpty())
         return reportValidationFailure(errmsg);
-
     return true;
 }
 
@@ -324,15 +329,19 @@ void FlightController::editLayoutClick(void)
 
 void FlightController::validateConfig(void)
 {
-    if (!matrixMappingValid())
-        return;
+    if (ui->mainPanel->currentIndex() == 1)
+    {
+        if (!matrixMappingValid())
+            return;
 /*  FIXME This gets too boring. Better validations after the keyboard works.
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     psoc_eeprom_t* config = di.getConfigPtr();
     if (ui->Rows->value() < config->matrixRows())
     Also do not forget to really reset all row/column-dependent stuff.
 */
+    }
     ui->validateButton->setDisabled(true);
+    unlockTabs();
 }
 
 void FlightController::applyConfig(void)
