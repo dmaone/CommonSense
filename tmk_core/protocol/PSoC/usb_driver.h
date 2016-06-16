@@ -20,6 +20,7 @@ void usb_init(void);
 void usb_send(void);
 void acknowledge_command();
 void process_msg(void);
+void load_config(void);
 
 void send_keyboard(report_keyboard_t *report);
 void send_mouse(report_mouse_t *report);

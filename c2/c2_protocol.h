@@ -37,6 +37,8 @@ enum c2command {
     // Bootloader command must keep it's place or you lose firmware update capability.
     C2CMD_UPLOAD_CONFIG, // FROM host
     C2CMD_DOWNLOAD_CONFIG, // TO host
+    C2CMD_COMMIT,
+    C2CMD_ROLLBACK,
     C2CMD_GET_MATRIX_STATE
 };
 

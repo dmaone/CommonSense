@@ -15,7 +15,7 @@
   </property>
   <widget class="QWidget" name="centralWidget">
    <layout class="QGridLayout" name="gridLayout_3">
-    <item row="0" column="0">
+    <item row="1" column="0">
      <widget class="QTabWidget" name="mainPanel">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -24,7 +24,7 @@
        </sizepolicy>
       </property>
       <property name="currentIndex">
-       <number>0</number>
+       <number>1</number>
       </property>
       <widget class="QWidget" name="StatusPanel">
        <attribute name="title">
@@ -33,7 +33,21 @@
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
          <layout class="QGridLayout" name="gridLayout">
+          <item row="12" column="0">
+           <widget class="QPushButton" name="CopyAllButton">
+            <property name="text">
+             <string>CopyAll</string>
+            </property>
+           </widget>
+          </item>
           <item row="13" column="0">
+           <widget class="QPushButton" name="ClearButton">
+            <property name="text">
+             <string>Clear</string>
+            </property>
+           </widget>
+          </item>
+          <item row="11" column="0">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -52,7 +66,7 @@
              <enum>Qt::Vertical</enum>
             </property>
             <property name="sizeType">
-             <enum>QSizePolicy::Fixed</enum>
+             <enum>QSizePolicy::MinimumExpanding</enum>
             </property>
             <property name="sizeHint" stdset="0">
              <size>
@@ -85,27 +99,6 @@ STOP</string>
             </property>
            </widget>
           </item>
-          <item row="15" column="0">
-           <widget class="QPushButton" name="ClearButton">
-            <property name="text">
-             <string>Clear</string>
-            </property>
-           </widget>
-          </item>
-          <item row="14" column="0">
-           <widget class="QPushButton" name="CopyAllButton">
-            <property name="text">
-             <string>CopyAll</string>
-            </property>
-           </widget>
-          </item>
-          <item row="10" column="0">
-           <widget class="QPushButton" name="BootloaderButton">
-            <property name="text">
-             <string>FW Update</string>
-            </property>
-           </widget>
-          </item>
           <item row="5" column="0">
            <spacer name="verticalSpacer_2">
             <property name="orientation">
@@ -122,10 +115,10 @@ STOP</string>
             </property>
            </spacer>
           </item>
-          <item row="6" column="0">
-           <widget class="QPushButton" name="statusRequestButton">
+          <item row="10" column="0">
+           <widget class="QPushButton" name="BootloaderButton">
             <property name="text">
-             <string>Status</string>
+             <string>FW Update</string>
             </property>
            </widget>
           </item>
@@ -136,17 +129,10 @@ STOP</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="0">
-           <widget class="QPushButton" name="commitButton">
+          <item row="6" column="0">
+           <widget class="QPushButton" name="statusRequestButton">
             <property name="text">
-             <string>Commit config</string>
-            </property>
-           </widget>
-          </item>
-          <item row="12" column="0">
-           <widget class="QPushButton" name="rollbackButton">
-            <property name="text">
-             <string>Revert config</string>
+             <string>Status</string>
             </property>
            </widget>
           </item>
@@ -191,17 +177,20 @@ STOP</string>
              </property>
             </spacer>
            </item>
+           <item row="0" column="7">
+            <widget class="QPushButton" name="validateButton">
+             <property name="enabled">
+              <bool>false</bool>
+             </property>
+             <property name="text">
+              <string>Validate</string>
+             </property>
+            </widget>
+           </item>
            <item row="0" column="4">
             <widget class="QCheckBox" name="normallyOpen">
              <property name="text">
               <string>Normally open</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
-             <property name="text">
-              <string>Rows</string>
              </property>
             </widget>
            </item>
@@ -212,13 +201,10 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="7">
-            <widget class="QPushButton" name="validateButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
              <property name="text">
-              <string>Validate</string>
+              <string>Rows</string>
              </property>
             </widget>
            </item>
@@ -242,20 +228,6 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="4">
-            <widget class="QCheckBox" name="InterlacedScan">
-             <property name="text">
-              <string>Interlaced scan</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="8">
-            <widget class="QPushButton" name="importButton">
-             <property name="text">
-              <string>Import</string>
-             </property>
-            </widget>
-           </item>
            <item row="1" column="1">
             <widget class="QSpinBox" name="Cols">
              <property name="minimum">
@@ -269,17 +241,10 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="8">
-            <widget class="QPushButton" name="exportButton">
+           <item row="1" column="4">
+            <widget class="QCheckBox" name="InterlacedScan">
              <property name="text">
-              <string>Export</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="6">
-            <widget class="QPushButton" name="layoutButton">
-             <property name="text">
-              <string>Layout</string>
+              <string>Interlaced scan</string>
              </property>
             </widget>
            </item>
@@ -295,6 +260,13 @@ STOP</string>
               </size>
              </property>
             </spacer>
+           </item>
+           <item row="0" column="6">
+            <widget class="QPushButton" name="layoutButton">
+             <property name="text">
+              <string>Layout</string>
+             </property>
+            </widget>
            </item>
           </layout>
          </widget>
@@ -339,6 +311,83 @@ STOP</string>
           <property name="title">
            <string>Column mapping</string>
           </property>
+         </widget>
+        </item>
+        <item>
+         <widget class="QGroupBox" name="groupBox_2">
+          <property name="title">
+           <string>Config operations</string>
+          </property>
+          <layout class="QHBoxLayout" name="horizontalLayout_2">
+           <item>
+            <widget class="QPushButton" name="importButton">
+             <property name="text">
+              <string>Import</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="uploadButton">
+             <property name="text">
+              <string>Upload</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="downloadButton">
+             <property name="text">
+              <string>Download</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <widget class="QPushButton" name="exportButton">
+             <property name="text">
+              <string>Export</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_4">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="commitButton">
+             <property name="text">
+              <string>Commit</string>
+             </property>
+            </widget>
+           </item>
+           <item>
+            <spacer name="horizontalSpacer_3">
+             <property name="orientation">
+              <enum>Qt::Horizontal</enum>
+             </property>
+             <property name="sizeHint" stdset="0">
+              <size>
+               <width>40</width>
+               <height>20</height>
+              </size>
+             </property>
+            </spacer>
+           </item>
+           <item>
+            <widget class="QPushButton" name="rollbackButton">
+             <property name="text">
+              <string>Rollback</string>
+             </property>
+            </widget>
+           </item>
+          </layout>
          </widget>
         </item>
         <item>

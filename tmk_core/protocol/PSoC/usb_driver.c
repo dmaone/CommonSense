@@ -59,6 +59,36 @@ void send_config_block(void){
     usb_send();
 }
 
+void save_config(void){
+    EEPROM_Start();
+    CyDelayUs(5);
+    EEPROM_UpdateTemperature();
+    xprintf("Updating EEPROM GO!");
+    uint16 bytes_modified = 0;
+    for(uint16 i = 0; i < EEPROM_BYTESIZE; i++)
+        if(config.raw[i] != EEPROM_ReadByte(i)) {
+            EEPROM_WriteByte(config.raw[i], i);
+            bytes_modified++;
+        }
+    EEPROM_Stop();
+    xprintf("Written %d bytes!", bytes_modified);
+}
+
+void load_config(void){
+    EEPROM_Start();
+    CyDelayUs(5);
+    // Copypaste from EEPROM.c/EEPROM_ReadByte! Use with causion!
+    uint8 interruptState;
+    interruptState = CyEnterCriticalSection();
+    /* Request access to EEPROM for reading.
+    This is needed to reserve PHUB for read operation from EEPROM */
+    CyEEPROM_ReadReserve();
+    memcpy(config.raw, (void *)CYDEV_EE_BASE, CYDEV_EE_SIZE);
+    /* Release EEPROM array */
+    CyEEPROM_ReadRelease();
+    CyExitCriticalSection(interruptState);
+    EEPROM_Stop();
+}
 
 void process_msg(void)
 {
@@ -71,18 +101,22 @@ void process_msg(void)
     case C2CMD_GET_STATUS:
         report_status();
         break;
+    case C2CMD_ENTER_BOOTLOADER:
+        xprintf("Jumping to bootloader..");
+        Boot_Load(); 
     case C2CMD_UPLOAD_CONFIG:
         receive_config_block();
         break;
     case C2CMD_DOWNLOAD_CONFIG:
         send_config_block();
         break;
+    case C2CMD_COMMIT:
+        save_config();
+    case C2CMD_ROLLBACK:
+        CySoftwareReset();
     case C2CMD_GET_MATRIX_STATE:
         status_register.matrix_output = inbox.payload[0];
         break;
-    case C2CMD_ENTER_BOOTLOADER:
-        xprintf("Jumping to bootloader..");
-        Boot_Load(); 
     default:
         break;
     }

@@ -42,8 +42,10 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->Cols, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
     connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importConfig()));
     connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
-    connect(ui->commitButton, SIGNAL(clicked()), &di, SLOT(uploadConfig()));
-    connect(ui->rollbackButton, SIGNAL(clicked()), &di, SLOT(downloadConfig()));
+    connect(ui->uploadButton, SIGNAL(clicked()), &di, SLOT(uploadConfig()));
+    connect(ui->downloadButton, SIGNAL(clicked()), &di, SLOT(downloadConfig()));
+    connect(ui->commitButton, SIGNAL(clicked()), this, SLOT(commitConfig()));
+    connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
     connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
     di.start();
@@ -64,6 +66,15 @@ void FlightController::closeEvent (QCloseEvent *event)
     if (layoutEditor)
         layoutEditor->close();
     event->accept();
+}
+
+void FlightController::mainTabChanged(int idx)
+{
+    if (idx == 1) {
+        initSetupDisplay();
+        updateSetupDisplay();
+        validateConfig();
+    }
 }
 
 FlightController::~FlightController()
@@ -365,11 +376,23 @@ void FlightController::applyConfig(void)
     }
 }
 
-void FlightController::mainTabChanged(int idx)
+void FlightController::commitConfig(void)
 {
-    if (idx == 1) {
-        initSetupDisplay();
-        updateSetupDisplay();
-        validateConfig();
-    }
+    QMessageBox::StandardButton result = QMessageBox::question(this,
+            "Saving EEPROM!",
+            "Do you want to write the config that is now in the device, to EEPROM?",
+            QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        sendCommand(C2CMD_COMMIT, 1u);
 }
+
+void FlightController::rollbackConfig(void)
+{
+    QMessageBox::StandardButton result = QMessageBox::question(this,
+            "Resetting device!",
+            "Device will be reset, config will be restored from EEPROM and downloaded to host. OK?",
+            QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        sendCommand(C2CMD_ROLLBACK, 1u);
+}
+

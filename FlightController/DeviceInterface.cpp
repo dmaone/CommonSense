@@ -1,4 +1,5 @@
 #include <QCoreApplication>
+#include <QMessageBox>
 #include <string>
 #include <algorithm>
 #include "DeviceInterface.h"

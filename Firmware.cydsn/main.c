@@ -96,11 +96,11 @@ int main()
         LED_Write(0u);
         CyDelay(100u);
     }
+    load_config();
     usb_init();
     xprintf("Start");
     ADC_Start();
     ADC_SetResolution(10u);
-    EEPROM_Start();
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
     for(;;)
