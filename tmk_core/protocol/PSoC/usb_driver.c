@@ -103,7 +103,7 @@ void process_msg(void)
         break;
     case C2CMD_ENTER_BOOTLOADER:
         xprintf("Jumping to bootloader..");
-        Boot_Load(); 
+        Boot_Load(); //Does not return, no need for break
     case C2CMD_UPLOAD_CONFIG:
         receive_config_block();
         break;
@@ -112,8 +112,10 @@ void process_msg(void)
         break;
     case C2CMD_COMMIT:
         save_config();
+        break;
     case C2CMD_ROLLBACK:
-        CySoftwareReset();
+        xprintf("Resetting..");
+        CySoftwareReset(); //Does not return, no need for break.
     case C2CMD_GET_MATRIX_STATE:
         status_register.matrix_output = inbox.payload[0];
         break;
