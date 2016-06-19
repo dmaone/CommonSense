@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: Columns_1.c  
+* File Name: Columns1.c  
 * Version 2.20
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "Columns_1.h"
+#include "Columns1.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 Columns_1__PORT == 15 && ((Columns_1__MASK & 0xC0) != 0))
+	 Columns1__PORT == 15 && ((Columns1__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: Columns_1_Write
+* Function Name: Columns1_Write
 ****************************************************************************//**
 *
 * \brief Writes the value to the physical port (data output register), masking
@@ -52,17 +52,17 @@
 *  this function.
 *
 * \funcusage
-*  \snippet Columns_1_SUT.c usage_Columns_1_Write
+*  \snippet Columns1_SUT.c usage_Columns1_Write
 *******************************************************************************/
-void Columns_1_Write(uint8 value)
+void Columns1_Write(uint8 value)
 {
-    uint8 staticBits = (Columns_1_DR & (uint8)(~Columns_1_MASK));
-    Columns_1_DR = staticBits | ((uint8)(value << Columns_1_SHIFT) & Columns_1_MASK);
+    uint8 staticBits = (Columns1_DR & (uint8)(~Columns1_MASK));
+    Columns1_DR = staticBits | ((uint8)(value << Columns1_SHIFT) & Columns1_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: Columns_1_SetDriveMode
+* Function Name: Columns1_SetDriveMode
 ****************************************************************************//**
 *
 * \brief Sets the drive mode for each of the Pins component's pins.
@@ -85,23 +85,23 @@ void Columns_1_Write(uint8 value)
 *  APIs (primary method) or disable interrupts around this function.
 *
 * \funcusage
-*  \snippet Columns_1_SUT.c usage_Columns_1_SetDriveMode
+*  \snippet Columns1_SUT.c usage_Columns1_SetDriveMode
 *******************************************************************************/
-void Columns_1_SetDriveMode(uint8 mode)
+void Columns1_SetDriveMode(uint8 mode)
 {
-	CyPins_SetPinDriveMode(Columns_1_0, mode);
-	CyPins_SetPinDriveMode(Columns_1_1, mode);
-	CyPins_SetPinDriveMode(Columns_1_2, mode);
-	CyPins_SetPinDriveMode(Columns_1_3, mode);
-	CyPins_SetPinDriveMode(Columns_1_4, mode);
-	CyPins_SetPinDriveMode(Columns_1_5, mode);
-	CyPins_SetPinDriveMode(Columns_1_6, mode);
-	CyPins_SetPinDriveMode(Columns_1_7, mode);
+	CyPins_SetPinDriveMode(Columns1_0, mode);
+	CyPins_SetPinDriveMode(Columns1_1, mode);
+	CyPins_SetPinDriveMode(Columns1_2, mode);
+	CyPins_SetPinDriveMode(Columns1_3, mode);
+	CyPins_SetPinDriveMode(Columns1_4, mode);
+	CyPins_SetPinDriveMode(Columns1_5, mode);
+	CyPins_SetPinDriveMode(Columns1_6, mode);
+	CyPins_SetPinDriveMode(Columns1_7, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: Columns_1_Read
+* Function Name: Columns1_Read
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port (pin status register) and masks 
@@ -115,16 +115,16 @@ void Columns_1_SetDriveMode(uint8 mode)
 *  The current value for the pins in the component as a right justified number.
 *
 * \funcusage
-*  \snippet Columns_1_SUT.c usage_Columns_1_Read  
+*  \snippet Columns1_SUT.c usage_Columns1_Read  
 *******************************************************************************/
-uint8 Columns_1_Read(void)
+uint8 Columns1_Read(void)
 {
-    return (Columns_1_PS & Columns_1_MASK) >> Columns_1_SHIFT;
+    return (Columns1_PS & Columns1_MASK) >> Columns1_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: Columns_1_ReadDataReg
+* Function Name: Columns1_ReadDataReg
 ****************************************************************************//**
 *
 * \brief Reads the associated physical port's data output register and masks 
@@ -133,8 +133,8 @@ uint8 Columns_1_Read(void)
 *
 * The data output register controls the signal applied to the physical pin in 
 * conjunction with the drive mode parameter. This is not the same as the 
-* preferred Columns_1_Read() API because the 
-* Columns_1_ReadDataReg() reads the data register instead of the status 
+* preferred Columns1_Read() API because the 
+* Columns1_ReadDataReg() reads the data register instead of the status 
 * register. For output pins this is a useful function to determine the value 
 * just written to the pin.
 *
@@ -143,19 +143,19 @@ uint8 Columns_1_Read(void)
 *  justified number for the component instance.
 *
 * \funcusage
-*  \snippet Columns_1_SUT.c usage_Columns_1_ReadDataReg 
+*  \snippet Columns1_SUT.c usage_Columns1_ReadDataReg 
 *******************************************************************************/
-uint8 Columns_1_ReadDataReg(void)
+uint8 Columns1_ReadDataReg(void)
 {
-    return (Columns_1_DR & Columns_1_MASK) >> Columns_1_SHIFT;
+    return (Columns1_DR & Columns1_MASK) >> Columns1_SHIFT;
 }
 
 
 /* If interrupt is connected for this Pins component */ 
-#if defined(Columns_1_INTSTAT) 
+#if defined(Columns1_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: Columns_1_SetInterruptMode
+    * Function Name: Columns1_SetInterruptMode
     ****************************************************************************//**
     *
     * \brief Configures the interrupt mode for each of the Pins component's
@@ -168,12 +168,12 @@ uint8 Columns_1_ReadDataReg(void)
     * \param position
     *  The pin position as listed in the Pins component. You may OR these to be 
     *  able to configure the interrupt mode of multiple pins within a Pins 
-    *  component. Or you may use Columns_1_INTR_ALL to configure the
+    *  component. Or you may use Columns1_INTR_ALL to configure the
     *  interrupt mode of all the pins in the Pins component.       
-    *  - Columns_1_0_INTR       (First pin in the list)
-    *  - Columns_1_1_INTR       (Second pin in the list)
+    *  - Columns1_0_INTR       (First pin in the list)
+    *  - Columns1_1_INTR       (Second pin in the list)
     *  - ...
-    *  - Columns_1_INTR_ALL     (All pins in Pins component)
+    *  - Columns1_INTR_ALL     (All pins in Pins component)
     *
     * \param mode
     *  Interrupt mode for the selected pins. Valid options are documented in
@@ -189,47 +189,47 @@ uint8 Columns_1_ReadDataReg(void)
     *  port.
     *
     * \funcusage
-    *  \snippet Columns_1_SUT.c usage_Columns_1_SetInterruptMode
+    *  \snippet Columns1_SUT.c usage_Columns1_SetInterruptMode
     *******************************************************************************/
-    void Columns_1_SetInterruptMode(uint16 position, uint16 mode)
+    void Columns1_SetInterruptMode(uint16 position, uint16 mode)
     {
-		if((position & Columns_1_0_INTR) != 0u) 
+		if((position & Columns1_0_INTR) != 0u) 
 		{ 
-			 Columns_1_0_INTTYPE_REG = (uint8)mode; 
+			 Columns1_0_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_1_INTR) != 0u) 
+		if((position & Columns1_1_INTR) != 0u) 
 		{ 
-			 Columns_1_1_INTTYPE_REG = (uint8)mode; 
+			 Columns1_1_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_2_INTR) != 0u) 
+		if((position & Columns1_2_INTR) != 0u) 
 		{ 
-			 Columns_1_2_INTTYPE_REG = (uint8)mode; 
+			 Columns1_2_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_3_INTR) != 0u) 
+		if((position & Columns1_3_INTR) != 0u) 
 		{ 
-			 Columns_1_3_INTTYPE_REG = (uint8)mode; 
+			 Columns1_3_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_4_INTR) != 0u) 
+		if((position & Columns1_4_INTR) != 0u) 
 		{ 
-			 Columns_1_4_INTTYPE_REG = (uint8)mode; 
+			 Columns1_4_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_5_INTR) != 0u) 
+		if((position & Columns1_5_INTR) != 0u) 
 		{ 
-			 Columns_1_5_INTTYPE_REG = (uint8)mode; 
+			 Columns1_5_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_6_INTR) != 0u) 
+		if((position & Columns1_6_INTR) != 0u) 
 		{ 
-			 Columns_1_6_INTTYPE_REG = (uint8)mode; 
+			 Columns1_6_INTTYPE_REG = (uint8)mode; 
 		} 
-		if((position & Columns_1_7_INTR) != 0u) 
+		if((position & Columns1_7_INTR) != 0u) 
 		{ 
-			 Columns_1_7_INTTYPE_REG = (uint8)mode; 
+			 Columns1_7_INTTYPE_REG = (uint8)mode; 
 		}
     }
     
     
     /*******************************************************************************
-    * Function Name: Columns_1_ClearInterrupt
+    * Function Name: Columns1_ClearInterrupt
     ****************************************************************************//**
     *
     * \brief Clears any active interrupts attached with the component and returns 
@@ -246,11 +246,11 @@ uint8 Columns_1_ReadDataReg(void)
     *  those associated with the Pins component.
     *
     * \funcusage
-    *  \snippet Columns_1_SUT.c usage_Columns_1_ClearInterrupt
+    *  \snippet Columns1_SUT.c usage_Columns1_ClearInterrupt
     *******************************************************************************/
-    uint8 Columns_1_ClearInterrupt(void)
+    uint8 Columns1_ClearInterrupt(void)
     {
-        return (Columns_1_INTSTAT & Columns_1_MASK) >> Columns_1_SHIFT;
+        return (Columns1_INTSTAT & Columns1_MASK) >> Columns1_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

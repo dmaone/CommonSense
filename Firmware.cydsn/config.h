@@ -8,8 +8,6 @@
 */
 #pragma once
     
-#define VENDOR_ID       0xFEED
-#define PRODUCT_ID      0xBEEF
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01
 #define MANUFACTURER    DMA Labs
@@ -22,4 +20,4 @@
 #define MATRIX_COLS 32
 
 #define EXTRAKEY_ENABLE
-#define DEBUG_EP 2
+#define DEBUG_EP OUTBOX_EP

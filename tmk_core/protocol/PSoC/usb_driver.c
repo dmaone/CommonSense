@@ -149,7 +149,8 @@ uint8_t keyboard_leds(void)
     return ~keyboard_led_status;
 }
 
-void USB_EP_8_ISR_ExitCallback(void)
+//void USB_EP_.OUTBOX_EP._ISR_ExitCallback(void)
+void INBOX_CALLBACK(void)
 {
     USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
     message_for_you_in_the_lobby = true;

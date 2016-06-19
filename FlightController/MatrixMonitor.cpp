@@ -108,7 +108,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (level > 20)
+            if (level > 15)
                 cell->setStyleSheet("background-color: #00ff00;");
             else
                 cell->setStyleSheet("background-color: #ffffff;");

@@ -250,7 +250,7 @@ hid_device* DeviceInterface::acquireDevice(void)
     }
     hid_device_info *d = root;
     while (d){
-          if (d->usage_page == 0xff31 && d->usage == 0x74){
+          if (d->usage_page == 0x6213 && d->usage == 0x88){
             whine("Found a node!");
             retval = hid_open_path(d->path);
             break;

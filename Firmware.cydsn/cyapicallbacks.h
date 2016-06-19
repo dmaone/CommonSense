@@ -13,5 +13,4 @@
 void BootIRQ_Interrupt_InterruptCallback(void);
 /*Define your macro callbacks here */
     /*For more information, refer to the Macro Callbacks topic in the PSoC Creator Help.*/
-#define USB_EP_8_ISR_EXIT_CALLBACK
-void USB_EP_8_ISR_ExitCallback(void);    
+// See globals.h for more macro callback definitions

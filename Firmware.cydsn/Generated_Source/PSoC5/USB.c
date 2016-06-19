@@ -80,13 +80,13 @@ uint8 USB_initVar = 0u;
     const uint8 USB_DmaReqOut[USB_MAX_EP] =
     {
         0u,
-        USB_ep1_dma__TR_OUTPUT,
-        USB_ep2_dma__TR_OUTPUT,
-        USB_ep3_dma__TR_OUTPUT,
         0u,
         0u,
         0u,
         0u,
+        0u,
+        0u,
+        USB_ep7_dma__TR_OUTPUT,
         USB_ep8_dma__TR_OUTPUT,
     };
 

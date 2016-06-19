@@ -11,6 +11,7 @@
 #include "keyboard.h"
 #include "usb_driver.h"
 #include "c2/c2_protocol.h"
+#include "c2/nvram.h"
 #include "print.h"
 
 void BootIRQ_Interrupt_InterruptCallback(void)
@@ -18,72 +19,100 @@ void BootIRQ_Interrupt_InterruptCallback(void)
     Boot_Load();
 }
 
+uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+
+uint32 rowpins[8] = {
+    Rows_0, Rows_1, Rows_2, Rows_3, 
+    Rows_4, Rows_5, Rows_6, Rows_7 
+};
 
 uint8 current_column;
 
 void SetColumns(uint8 col)
 {
-    current_column = col;
-    if (current_column < 8u)
+    //TODO use per-pin API
+    if (col < 8u)
     {
-        Columns_0_Write(1 << col);
+        Columns0_Write(1 << col);
     }
     else
     {
-        Columns_1_Write(1 << (col - 8));
+        Columns1_Write(1 << (col - 8));
     }
 }
 
-void ResetColumns()
+void ResetColumns(uint8 col)
 {
-    if (current_column < 8u)
-    {
-        Columns_0_Write(0);
-    }
-    else
-    {
-        Columns_1_Write(0);
-    }
+    Columns0_Write(0);
+    Columns1_Write(0);
 }
 
-void ScanColumn(uint8 col)
+// performs actual column read.
+void senseColumn(uint8_t col)
 {
     InputControl_Write(0u);
-//    CyDelayUs(10);
     SetColumns(col);
-    //CyDelayUs(10);
+//    CyDelayUs(250);
     ADC_StartConvert();
     ADC_IsEndConversion(ADC_WAIT_FOR_RESULT);
     InputControl_Write(1u);
-    ResetColumns();
+    ResetColumns(col);
+//    CyDelayUs(250);
 }
-#define ROWS 8
+
+void setupSensor(uint8 half)
+{
+    // Grounding columns we WILL NOT use.
+    for(uint8 i=0; i<config.matrixRows; i++)
+        if (i % 2 == half)
+            CyPins_ClearPin(rowpins[i]);            
+        else
+            CyPins_SetPin(rowpins[i]);
+}
+
+void ScanColumn(uint8 col, uint8_t half)
+{
+    senseColumn(col);
+    for(uint8 i=0; i<config.matrixRows; i++) {
+        if (config.capsense_flags.interlacedScan && (i % 2 == half))
+            continue;
+        matrix[i][col] = ADC_GetResult16(i) & 0xff;
+    }
+}
+
 void PrintColumn(uint8 col)
 {
-    uint16 res[ROWS];
-
     if (status_register.matrix_output > 0)
     {
         outbox.response_type = C2RESPONSE_MATRIX_STATUS;
         outbox.payload[0] = col;
         outbox.payload[1] = status_register.matrix_output;
-        outbox.payload[2] = (uint8_t)8u;
-        for(uint8 i=0; i<ROWS; i++)
+        outbox.payload[2] = config.matrixRows;
+        for(uint8 i=0; i<config.matrixRows; i++)
         {
-            res[i] = ADC_GetResult16(i);
-            outbox.payload[i+3] = res[i] & 0xff; 
+            outbox.payload[i+3] = matrix[i][col]; 
         }
         usb_send();
     }
 }
 
+void scanPass(uint8 half)
+{
+    setupSensor(half);
+    for(uint8 i = 0; i<config.matrixCols; ++i)
+    {
+        ScanColumn(i, half);
+        if (half) // Last pass
+            PrintColumn(i);
+        
+    }
+}
+
 void scan(void)
 {
-    for(uint8 i = 0; i<16; ++i)
-    {
-        ScanColumn(i);
-        PrintColumn(i);
-    }
+    if (config.capsense_flags.interlacedScan)
+        scanPass(0);
+    scanPass(1);
 }
 
 int main()

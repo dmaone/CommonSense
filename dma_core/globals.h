@@ -14,8 +14,17 @@
 uint8_t keyboard_leds(void);
 
 // USB stuff
-#define INBOX_EP 8
-#define OUTBOX_EP 2
+#define OUTBOX_EP 8
+
+#define INBOX_EP 7
+#define USB_EP_7_ISR_EXIT_CALLBACK
+// ^ those need to be updated in sync!
+// Automagic derivation of function names. Macro names don't work that way :(
+#define TOKENPASTE(x, y, z) x ## y ## z
+#define TOKENPASTE2(x, y, z) TOKENPASTE(x, y, z)
+#define INBOX_CALLBACK TOKENPASTE2(USB_EP_, INBOX_EP, _ISR_ExitCallback)
+void INBOX_CALLBACK(void);
+
 bool message_for_you_in_the_lobby;
 OUT_c2packet_t inbox;
 IN_c2packet_t outbox;
