@@ -2,11 +2,11 @@
 
 ScancodeList::ScancodeList(): list()
 {
-    list << "-0-";
+    list << "-0-"; //0x00
     list << "eKRO";
     list << "eFAIL";
-    list << "eUNK";
-    list << "A";
+    list << "eUNK"; //0x03
+    list << "A"; // 0x04
     list << "B";
     list << "C";
     list << "D";
@@ -226,7 +226,7 @@ ScancodeList::ScancodeList(): list()
     list << "KPHex";
     list << "-r-E";
     list << "-r-F";
-    list << "LCtrl";
+    list << "LCtrl"; // 0xE0
     list << "LShft";
     list << "LAlt";
     list << "LGUI";

@@ -10,20 +10,10 @@
 #pragma once
     
 #include <project.h>
-#include "host_driver.h"
-
-/* Host driver */
-host_driver_t *psoc_driver(void);
 
 void usb_init(void);
 
-void usb_send(void);
+void usb_send(uint8_t);
 void acknowledge_command();
 void process_msg(void);
 void load_config(void);
-
-void send_keyboard(report_keyboard_t *report);
-void send_mouse(report_mouse_t *report);
-void send_system(uint16_t data);
-void send_consumer(uint16_t data);
-void send_debug(const char* str, uint8_t len);

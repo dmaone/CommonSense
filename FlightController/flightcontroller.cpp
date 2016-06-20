@@ -107,6 +107,7 @@ void FlightController::revertConfig()
     psoc_eeprom_t* config = di.getConfigPtr();
     ui->Rows->setValue(config->matrixRows);
     ui->Cols->setValue(config->matrixCols);
+    ui->thresholdVoltage->setValue(config->thresholdVoltage);
     ui->normallyOpen->setChecked(config->capsense_flags.normallyOpen);
     ui->InterlacedScan->setChecked(config->capsense_flags.interlacedScan);
     updateSetupDisplay();
@@ -364,6 +365,7 @@ void FlightController::applyConfig(void)
     config->capsense_flags.normallyOpen = ui->normallyOpen->isChecked();
     config->matrixRows = ui->Rows->value();
     config->matrixCols = ui->Cols->value();
+    config->thresholdVoltage = ui->thresholdVoltage->value();
     for(uint8_t i=0; i< ABSOLUTE_MAX_ROWS; i++)
     {
         config->row_params[i].rowNumber = rows[i]->currentIndex();

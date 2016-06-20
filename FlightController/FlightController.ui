@@ -177,7 +177,14 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="7">
+           <item row="0" column="4">
+            <widget class="QCheckBox" name="normallyOpen">
+             <property name="text">
+              <string>Normally open</string>
+             </property>
+            </widget>
+           </item>
+           <item row="0" column="8">
             <widget class="QPushButton" name="validateButton">
              <property name="enabled">
               <bool>false</bool>
@@ -187,24 +194,17 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="4">
-            <widget class="QCheckBox" name="normallyOpen">
-             <property name="text">
-              <string>Normally open</string>
-             </property>
-            </widget>
-           </item>
-           <item row="1" column="7">
+           <item row="1" column="8">
             <widget class="QPushButton" name="applyButton">
              <property name="text">
               <string>Apply</string>
              </property>
             </widget>
            </item>
-           <item row="0" column="0">
-            <widget class="QLabel" name="label_2">
+           <item row="1" column="4">
+            <widget class="QCheckBox" name="InterlacedScan">
              <property name="text">
-              <string>Rows</string>
+              <string>Interlaced scan</string>
              </property>
             </widget>
            </item>
@@ -228,6 +228,13 @@ STOP</string>
              </property>
             </widget>
            </item>
+           <item row="0" column="0">
+            <widget class="QLabel" name="label_2">
+             <property name="text">
+              <string>Rows</string>
+             </property>
+            </widget>
+           </item>
            <item row="1" column="1">
             <widget class="QSpinBox" name="Cols">
              <property name="minimum">
@@ -241,14 +248,7 @@ STOP</string>
              </property>
             </widget>
            </item>
-           <item row="1" column="4">
-            <widget class="QCheckBox" name="InterlacedScan">
-             <property name="text">
-              <string>Interlaced scan</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="5">
+           <item row="0" column="6">
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -261,10 +261,20 @@ STOP</string>
              </property>
             </spacer>
            </item>
-           <item row="0" column="6">
+           <item row="0" column="7">
             <widget class="QPushButton" name="layoutButton">
              <property name="text">
               <string>Layout</string>
+             </property>
+            </widget>
+           </item>
+           <item row="2" column="1">
+            <widget class="QSpinBox" name="thresholdVoltage"/>
+           </item>
+           <item row="2" column="0">
+            <widget class="QLabel" name="label_4">
+             <property name="text">
+              <string>Threshold</string>
              </property>
             </widget>
            </item>

@@ -21,5 +21,5 @@ void xprintf(const char *format_p, ...)
     va_start(va, format_p);
     vsnprintf((char *)outbox.raw, 64, format_p, va);
     va_end(va);
-    usb_send();
+    usb_send(OUTBOX_EP);
 } 
