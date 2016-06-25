@@ -19,11 +19,13 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 
 uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
+uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
 uint32 rowpins[8] = {
     Rows_0, Rows_1, Rows_2, Rows_3, 
     Rows_4, Rows_5, Rows_6, Rows_7 
 };
+
 uint32 colpins[16] = {
     Columns0_0, Columns0_1, Columns0_2, Columns0_3, 
     Columns0_4, Columns0_5, Columns0_6, Columns0_7,
@@ -44,8 +46,9 @@ void enableSensor(uint8 half)
         InputControl_Write(0u);
     } else {
         // Selectively untie rows from the ground.
-        for(uint8 i=half; i<config.matrixRows; i+=2)
-            CyPins_SetPin(rowpins[i]);
+//        for(uint8 i=half; i< config.matrixRows >> 1; i+=2)
+//            CyPins_SetPin(rowpins[i]);
+        InputControl_Write(~(1 << half));
     }
 }
 
@@ -53,7 +56,7 @@ void dischargeSensor(uint8 half)
 {
     if (!config.capsense_flags.interlacedScan)
     {
-        InputControl_Write(1u);
+        InputControl_Write(255u);
     } else {
         for(uint8 i=half; i<config.matrixRows; i+=2)
             // Pull rows back down
@@ -61,19 +64,26 @@ void dischargeSensor(uint8 half)
     }
 }
 
+uint8_t maxlevel = 0;
+uint32_t pings = 0;
+
 void scanColumn(uint8 col, uint8_t half)
 {
     enableSensor(half);
     CyPins_SetPin(colpins[col]);
+    //CyDelayUs(1);
     ADC_StartConvert();
     ADC_IsEndConversion(ADC_WAIT_FOR_RESULT);
     dischargeSensor(half);
-    //CyDelay(5);
-    ResetColumns(col);
+    //CyDelayUs(2);
+//    ResetColumns(col);
+    CyPins_ClearPin(colpins[col]);
     for(uint8 i=0; i<config.matrixRows; i++) {
         if (config.capsense_flags.interlacedScan && (i % 2 != half))
             continue;
         matrix[i][col] += ADC_GetResult16(i) & 0xff;
+        if (maxlevel < matrix[i][col])
+            maxlevel = matrix[i][col];
     }
 }
 
@@ -92,25 +102,31 @@ void printColumn(uint8 col)
 
 void read_matrix(void)
 {
+    uint8_t cur_col = 0;
+    //uint8_t max_col = config.matrixCols + 1;
     for(uint8 i = 0; i<config.matrixCols; ++i) {
         if (config.capsense_flags.interlacedScan)
-            scanColumn(i, 0);
-        scanColumn(i, 1);
-    }
+            // shift 1 port on the column pins to reduce pin load.
+            //scanColumn(( i + 8) % config.matrixCols, 0);
+            scanColumn((cur_col+8) % config.matrixCols, 0);
+            //CyDelayUs(50);
+        scanColumn(cur_col, 1);
+        cur_col = (cur_col + 3) % config.matrixCols;
+        //CyDelayUs(50);
+        //CyDelayUs(5);
+  }
 }
 
 void scan(void)
 {
     memset(matrix, 0x00, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
     read_matrix();
-//    CyDelay(10);
-    read_matrix();
-    read_matrix();
-    read_matrix();
-    for(uint8 i = 0; i<config.matrixCols; ++i) {
-        if (status_register.matrix_output > 0)
+    //read_matrix();
+    //read_matrix();
+    //read_matrix();
+    if (status_register.matrix_output > 0)
+        for(uint8 i = 0; i<config.matrixCols; ++i)
             printColumn(i);
-    }
     //CyDelay(50);
 }
 
@@ -125,7 +141,10 @@ bool is_matrix_changed(void)
         {
             if (config.storage[STORAGE_ADDRESS((i*config.matrixCols)+j)] > 3u) {
                 if (matrix[i][j] > config.thresholdVoltage)
+                {
                     current_row |= (1 << j);
+                    pings++;
+                }
                 else
                     current_row &= ~(1 << j);
             }
@@ -171,13 +190,16 @@ void send_report(void)
                     } else if (keycode > 0x03) {
                         this_report[count++] = keycode;
                     }
-                    xprintf("KP: %d %d %x", i, j, keycode);
+                    if ((matrix_prev[i] & (1 << j)) == 0) {
+                        //xprintf("KP: %d %d %d", i, j, matrix[i][j]);
+                    }
                 }
             }
         }
     }
+    memcpy(matrix_prev, matrix_status, sizeof(matrix_prev));
     if (memcmp(this_report, prev_report, 64) != 0) {
-        xprintf("P/T %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], count);
+        //xprintf("P/T %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], count);
         memcpy(prev_report, this_report, 64);
         // Send actual report - per-key calibration still needed.
         memcpy(outbox.raw, this_report, 64);
@@ -206,7 +228,11 @@ int main()
         status_register.emergency_stop = true;
     xprintf("Start");
     memset(prev_report, 0x00, sizeof(outbox));
+    KeyboardTimer_Start();
     scan(); // fill matrix state
+    uint32_t count = 0;
+    uint32_t prev_timer = KeyboardTimer_ReadCounter();
+    uint32_t now_timer = prev_timer;
     for(;;)
     {
         /* Host can send double SET_INTERFACE request. */
@@ -219,8 +245,18 @@ int main()
             process_msg();
         }
         scan();
-        if (is_matrix_changed()) {
+        if (is_matrix_changed())
+        {
+            pings++;
             send_report();
+        }
+        if (count++ % 1000 == 0)
+        {
+            prev_timer = now_timer;
+            now_timer = KeyboardTimer_ReadCounter();
+            xprintf("ms per 1k iterations: %d, pings: %u, max level: %u", (prev_timer - now_timer), pings, maxlevel);
+            pings = 0;
+            maxlevel = 0;
         }
     }
 }
