@@ -21,11 +21,6 @@ uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
-uint32 rowpins[8] = {
-    Rows_0, Rows_1, Rows_2, Rows_3, 
-    Rows_4, Rows_5, Rows_6, Rows_7 
-};
-
 uint32 colpins[16] = {
     Columns0_0, Columns0_1, Columns0_2, Columns0_3, 
     Columns0_4, Columns0_5, Columns0_6, Columns0_7,
@@ -45,23 +40,13 @@ void enableSensor(uint8 half)
     {
         InputControl_Write(0u);
     } else {
-        // Selectively untie rows from the ground.
-//        for(uint8 i=half; i< config.matrixRows >> 1; i+=2)
-//            CyPins_SetPin(rowpins[i]);
         InputControl_Write(~(1 << half));
     }
 }
 
 void dischargeSensor(uint8 half)
 {
-    if (!config.capsense_flags.interlacedScan)
-    {
-        InputControl_Write(255u);
-    } else {
-        for(uint8 i=half; i<config.matrixRows; i+=2)
-            // Pull rows back down
-            CyPins_ClearPin(rowpins[i]);
-    }
+    InputControl_Write(255u);
 }
 
 uint8_t maxlevel = 0;
@@ -203,7 +188,7 @@ void send_report(void)
         memcpy(prev_report, this_report, 64);
         // Send actual report - per-key calibration still needed.
         memcpy(outbox.raw, this_report, 64);
-        usb_send(KEYBOARD_EP);
+        //usb_send(KEYBOARD_EP);
     }
 }
 
@@ -226,7 +211,6 @@ int main()
     usb_init();
     if (config.thresholdVoltage < 1)
         status_register.emergency_stop = true;
-    xprintf("Start");
     memset(prev_report, 0x00, sizeof(outbox));
     KeyboardTimer_Start();
     scan(); // fill matrix state
