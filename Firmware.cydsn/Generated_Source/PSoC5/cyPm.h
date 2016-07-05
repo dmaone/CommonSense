@@ -1,16 +1,15 @@
-/*******************************************************************************
-* File Name: cyPm.h
-* Version 5.30
+/***************************************************************************//**
+* \file cyPm.h
+* \version 5.40
 *
-* Description:
-*  Provides the function definitions for the power management API.
+* \brief Provides the function definitions for the power management API.
 *
-* Note:
-*  Documentation of the API's in this file is located in the
+* \note Documentation of the API's in this file is located in the
 *  System Reference Guide provided with PSoC Creator.
 *
 ********************************************************************************
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* \copyright
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.

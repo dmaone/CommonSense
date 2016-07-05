@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: InputControl.h  
+* File Name: ColReg3.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_InputControl_H) /* CY_CONTROL_REG_InputControl_H */
-#define CY_CONTROL_REG_InputControl_H
+#if !defined(CY_CONTROL_REG_ColReg3_H) /* CY_CONTROL_REG_ColReg3_H */
+#define CY_CONTROL_REG_ColReg3_H
 
 #include "cytypes.h"
 
@@ -29,20 +29,20 @@ typedef struct
 {
     uint8 controlState;
 
-} InputControl_BACKUP_STRUCT;
+} ColReg3_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    InputControl_Write(uint8 control) ;
-uint8   InputControl_Read(void) ;
+void    ColReg3_Write(uint8 control) ;
+uint8   ColReg3_Read(void) ;
 
-void InputControl_SaveConfig(void) ;
-void InputControl_RestoreConfig(void) ;
-void InputControl_Sleep(void) ; 
-void InputControl_Wakeup(void) ;
+void ColReg3_SaveConfig(void) ;
+void ColReg3_RestoreConfig(void) ;
+void ColReg3_Sleep(void) ; 
+void ColReg3_Wakeup(void) ;
 
 
 /***************************************
@@ -50,10 +50,10 @@ void InputControl_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define InputControl_Control        (* (reg8 *) InputControl_Sync_ctrl_reg__CONTROL_REG )
-#define InputControl_Control_PTR    (  (reg8 *) InputControl_Sync_ctrl_reg__CONTROL_REG )
+#define ColReg3_Control        (* (reg8 *) ColReg3_Sync_ctrl_reg__CONTROL_REG )
+#define ColReg3_Control_PTR    (  (reg8 *) ColReg3_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_InputControl_H */
+#endif /* End CY_CONTROL_REG_ColReg3_H */
 
 
 /* [] END OF FILE */

@@ -1,17 +1,16 @@
-/*******************************************************************************
-* File Name: CyLib.h
-* Version 5.30
+/***************************************************************************//**
+* \file CyLib.h
+* \version 5.40
 *
-* Description:
-*  Provides the function definitions for the system, clocking, interrupts and
-*  watchdog timer API.
+* \brief Provides the function definitions for the system, clocking, interrupts
+* and watchdog timer API.
 *
-* Note:
-*  Documentation of the API's in this file is located in the System Reference
-*  Guide provided with PSoC Creator.
+* \note Documentation of the API's in this file is located in the System
+* Reference Guide provided with PSoC Creator.
 *
 ********************************************************************************
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* \copyright
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -169,7 +168,7 @@ void CySetScPumps(uint8 enable) ;
 #endif  /* (CY_PSOC5) */
 
 #if(CY_PSOC5)
-    /* System tick timer APIs */
+    /** System tick timer APIs */
     typedef void (*cySysTickCallback)(void);
 
     void CySysTickStart(void);
@@ -809,8 +808,7 @@ void CyGetUniqueId(uint32* uniqueId);
 
 /*******************************************************************************
 * Macro Name: CyAssert
-********************************************************************************
-* Summary:
+****************************************************************************//**
 *  The macro that evaluates the expression and if it is false (evaluates to 0)
 *  then the processor is halted.
 *
@@ -820,11 +818,7 @@ void CyGetUniqueId(uint32* uniqueId);
 *  defined by default for a Release build setting and not defined for a Debug
 *  build setting.
 *
-* Parameters:
-*  expr: Logical expression.  Asserts if false.
-*
-* Return:
-*  None
+*  \param expr: Logical expression.  Asserts if false.
 *
 *******************************************************************************/
 #if !defined(NDEBUG)
@@ -971,32 +965,22 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntEnable
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *  Enables the specified interrupt number.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number
     *
     *******************************************************************************/
     #define CyIntEnable(number)     CY_SET_REG32(CY_INT_ENABLE_PTR, ((uint32)((uint32)1u << (0x1Fu & (number)))))
 
     /*******************************************************************************
     * Macro Name: CyIntDisable
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *  Disables the specified interrupt number.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntDisable(number)     CY_SET_REG32(CY_INT_CLEAR_PTR, ((uint32)((uint32)1u << (0x1Fu & (number)))))
@@ -1004,16 +988,11 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntSetPending
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *   Forces the specified interrupt number to be pending.
     *
-    * Parameters:
-    *   number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *   \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntSetPending(number)     CY_SET_REG32(CY_INT_SET_PEND_PTR, ((uint32)((uint32)1u << (0x1Fu & (number)))))
@@ -1021,16 +1000,11 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntClearPending
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *   Clears any pending interrupt for the specified interrupt number.
     *
-    * Parameters:
-    *   number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *   \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntClearPending(number)   CY_SET_REG32(CY_INT_CLR_PEND_PTR, ((uint32)((uint32)1u << (0x1Fu & (number)))))
@@ -1041,16 +1015,11 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntEnable
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *  Enables the specified interrupt number.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number
     *
     *******************************************************************************/
     #define CyIntEnable(number)   CY_SET_REG8(CY_INT_SET_EN_INDX_PTR((number)), \
@@ -1059,16 +1028,11 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntDisable
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *  Disables the specified interrupt number.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntDisable(number)   CY_SET_REG8(CY_INT_CLR_EN_INDX_PTR((number)), \
@@ -1077,16 +1041,11 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntSetPending
-    ********************************************************************************
+    ****************************************************************************//**
     *
-    * Summary:
     *  Forces the specified interrupt number to be pending.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntSetPending(number)   CY_SET_REG8(CY_INT_SET_PEND_INDX_PTR((number)), \
@@ -1095,15 +1054,10 @@ void CyGetUniqueId(uint32* uniqueId);
 
     /*******************************************************************************
     * Macro Name: CyIntClearPending
-    ********************************************************************************
-    * Summary:
+    ****************************************************************************//**
     *  Clears any pending interrupt for the specified interrupt number.
     *
-    * Parameters:
-    *  number: Valid range [0-31].  Interrupt number.
-    *
-    * Return:
-    *  None
+    *  \param number: Valid range [0-31].  Interrupt number.
     *
     *******************************************************************************/
     #define CyIntClearPending(number)   CY_SET_REG8(CY_INT_CLR_PEND_INDX_PTR((number)), \

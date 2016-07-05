@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: InputControl.c  
+* File Name: ColReg2.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "InputControl.h"
+#include "ColReg2.h"
 
 /* Check for removal by optimization */
-#if !defined(InputControl_Sync_ctrl_reg__REMOVED)
+#if !defined(ColReg2_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: InputControl_Write
+* Function Name: ColReg2_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void InputControl_Write(uint8 control) 
+void ColReg2_Write(uint8 control) 
 {
-    InputControl_Control = control;
+    ColReg2_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: InputControl_Read
+* Function Name: ColReg2_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void InputControl_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 InputControl_Read(void) 
+uint8 ColReg2_Read(void) 
 {
-    return InputControl_Control;
+    return ColReg2_Control;
 }
 
 #endif /* End check for removal by optimization */

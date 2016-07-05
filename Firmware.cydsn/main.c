@@ -11,6 +11,7 @@
 #include "usb_driver.h"
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
+#include "cyapicallbacks.h"
 
 void BootIRQ_Interrupt_InterruptCallback(void)
 {
@@ -21,54 +22,58 @@ uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
-uint32 colpins[16] = {
-    Columns0_0, Columns0_1, Columns0_2, Columns0_3, 
-    Columns0_4, Columns0_5, Columns0_6, Columns0_7,
-    Columns1_0, Columns1_1, Columns1_2, Columns1_3, 
-    Columns1_4, Columns1_5, Columns1_6, Columns1_7 
-};
 
-void ResetColumns(uint8 col)
+void SetColumns(uint8 col)
 {
-    Columns0_Write(0);
-    Columns1_Write(0);
+    // Prevent premature triggering!
+    ColReg0_Write((1 << col) & 0xff);
+//    ColReg1_Write(0u);
+//    ColReg1_Write(1 << (col - 8));
 }
 
 void enableSensor(uint8 half)
 {
     if (!config.capsense_flags.interlacedScan)
     {
-        InputControl_Write(0u);
+        SenseControl_Write(0xff);
     } else {
-        InputControl_Write(~(1 << half));
+        //SenseControl_Write(0xff);
+        SenseControl_Write(half+1);
     }
-}
-
-void dischargeSensor(uint8 half)
-{
-    InputControl_Write(255u);
 }
 
 uint8_t maxlevel = 0;
 uint32_t pings = 0;
+uint32_t lpings = 0;
 
 void scanColumn(uint8 col, uint8_t half)
 {
+    CyDelayUs(5);
     enableSensor(half);
-    CyPins_SetPin(colpins[col]);
-    //CyDelayUs(1);
-    ADC_StartConvert();
-    ADC_IsEndConversion(ADC_WAIT_FOR_RESULT);
-    dischargeSensor(half);
-    //CyDelayUs(2);
-//    ResetColumns(col);
-    CyPins_ClearPin(colpins[col]);
-    for(uint8 i=0; i<config.matrixRows; i++) {
-        if (config.capsense_flags.interlacedScan && (i % 2 != half))
-            continue;
-        matrix[i][col] += ADC_GetResult16(i) & 0xff;
-        if (maxlevel < matrix[i][col])
-            maxlevel = matrix[i][col];
+    SetColumns(col);
+    uint8_t cnt = 255;
+    while (cnt && !(HWState_Read() & 0x01))
+    {
+        CyDelayUs(1);
+        cnt--;
+    }// Wait for HW
+    if (!cnt) {
+        // Ugly hack. Timeout here means ADC didn't start properly.
+        // So far this only happened on startup - if it starts normally, it works.
+        // Probability of not starting seems about 20%. So 2-3 
+        //CySoftwareReset();
+        Boot_Load();
+
+    }
+    for(uint8 i=0; i<8; i++) {
+//    for(uint8 i=0; i<config.matrixCols; i++) {
+//        if (config.capsense_flags.interlacedScan && (i % 2 != half))
+//            continue;
+//        matrix[col][i] = ADC_Samples[i] & 0xff;
+//        matrix[col][i] += ADC_GetResult16(i) & 0xff;
+        matrix[col][(i * 2)+1 - half] += ADC_GetResult16((half * 8) + i) & 0xff;
+//        if (maxlevel < matrix[col][i])
+//            maxlevel = matrix[col][i];
     }
 }
 
@@ -87,16 +92,21 @@ void printColumn(uint8 col)
 
 void read_matrix(void)
 {
-    uint8_t cur_col = 0;
+    //uint8_t cur_col = 0;
     //uint8_t max_col = config.matrixCols + 1;
-    for(uint8 i = 0; i<config.matrixCols; ++i) {
-        if (config.capsense_flags.interlacedScan)
+    //for(uint8 i = 0; i<config.matrixCols; ++i) {
+    //FIXME rename everything - we're scanning rows and read columns actually!
+    for(uint8 i = 0; i<8; i++) {
+        //if (config.capsense_flags.interlacedScan)
             // shift 1 port on the column pins to reduce pin load.
             //scanColumn(( i + 8) % config.matrixCols, 0);
-            scanColumn((cur_col+8) % config.matrixCols, 0);
+            //scanColumn((cur_col+8) % config.matrixCols, 0);
+            scanColumn(i, 0);
             //CyDelayUs(50);
-        scanColumn(cur_col, 1);
-        cur_col = (cur_col + 3) % config.matrixCols;
+        scanColumn(i, 1);
+        //scanColumn(cur_col, 1);
+        //cur_col++;
+        //cur_col = (cur_col + 3) % config.matrixCols;
         //CyDelayUs(50);
         //CyDelayUs(5);
   }
@@ -106,13 +116,6 @@ void scan(void)
 {
     memset(matrix, 0x00, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
     read_matrix();
-    //read_matrix();
-    //read_matrix();
-    //read_matrix();
-    if (status_register.matrix_output > 0)
-        for(uint8 i = 0; i<config.matrixCols; ++i)
-            printColumn(i);
-    //CyDelay(50);
 }
 
 bool is_matrix_changed(void)
@@ -128,7 +131,7 @@ bool is_matrix_changed(void)
                 if (matrix[i][j] > config.thresholdVoltage)
                 {
                     current_row |= (1 << j);
-                    pings++;
+                    //pings++;
                 }
                 else
                     current_row &= ~(1 << j);
@@ -194,26 +197,24 @@ void send_report(void)
 
 int main()
 {
-    for(uint8 i=0; i<5;i++){
-        LED_Write(1u);
-        CyDelay(5u);
-        LED_Write(0u);
-        CyDelay(100u);
-    }
+    LED_Write(1u);
     BootIRQ_Start();
     CyGlobalIntEnable; /* Enable global interrupts. */
     load_config();
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
+    RampPWM_Start();
     ADC_Start();
-    ADC_SetResolution(10u);
+    scan(); // fill matrix state, check if ADC is operational
+    
     USB_Start(0u, USB_5V_OPERATION);
     usb_init();
+    LED_Write(0u);
     if (config.thresholdVoltage < 1)
         status_register.emergency_stop = true;
     memset(prev_report, 0x00, sizeof(outbox));
     KeyboardTimer_Start();
-    scan(); // fill matrix state
+    //ChanDecoder_WritePeriod(config.matrixRows-1);
     uint32_t count = 0;
     uint32_t prev_timer = KeyboardTimer_ReadCounter();
     uint32_t now_timer = prev_timer;
@@ -229,18 +230,26 @@ int main()
             process_msg();
         }
         scan();
+        if (status_register.matrix_output > 0)
+            for(uint8 i = 0; i<config.matrixCols; ++i)
+                printColumn(i);
         if (is_matrix_changed())
         {
-            pings++;
+            //pings++;
             send_report();
         }
         if (count++ % 1000 == 0)
         {
             prev_timer = now_timer;
             now_timer = KeyboardTimer_ReadCounter();
-            xprintf("ms per 1k iterations: %d, pings: %u, max level: %u", (prev_timer - now_timer), pings, maxlevel);
+            xprintf("ms per 1k iterations: %d, pings: %u/%u, max level: %u", (prev_timer - now_timer), pings, lpings, maxlevel);
             pings = 0;
             maxlevel = 0;
+            lpings = 0;
+            //xprintf("%d", CyDmaChGetRequest(Buf0_Chan));
+            //xprintf("%d", (uint16) ADC1_SAR_WRK0_REG);
+            //xprintf("%d", ADC_Samples[0]);//, ADC_Samples[8]);
+//            xprintf("%d", ADC_Samples[15]);
         }
     }
 }

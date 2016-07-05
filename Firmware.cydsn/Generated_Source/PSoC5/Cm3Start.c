@@ -1,11 +1,12 @@
-/*******************************************************************************
-* File Name: Cm3Start.c
-* Version 5.30
+/***************************************************************************//**
+* \file Cm3Start.c
+* \version 5.40
 *
-*  Description:
+*  \brief
 *  Startup code for the ARM CM3.
 *
 ********************************************************************************
+* \copyright
 * Copyright 2008-2015, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
@@ -78,17 +79,10 @@ cyisraddress CyRamVectors[CY_NUM_VECTORS];
 
 /*******************************************************************************
 * Function Name: IntDefaultHandler
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function is called for all interrupts, other than a reset that gets
 *  called before the system is setup.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 * Theory:
 *  Any value other than zero is acceptable.
@@ -127,17 +121,10 @@ extern int __main(void);
 
 /*******************************************************************************
 * Function Name: Reset
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function handles the reset interrupt for the RVDS/MDK toolchains.
 *  This is the first bit of code that is executed at startup.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 void Reset(void)
@@ -166,16 +153,9 @@ void Reset(void)
 
 /*******************************************************************************
 * Function Name: $Sub$$main
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function is called immediately before the users main
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 void $Sub$$main(void)
@@ -226,18 +206,13 @@ extern const char __cy_region_num __attribute__((weak));
 
 /*******************************************************************************
 * Function Name: _exit
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  Exit a program without cleaning up files. If your system doesn't provide
 *  this, it is best to avoid linking with subroutines that require it (exit,
 *  system).
 *
-* Parameters:
-*  status: Status caused program exit.
-*
-* Return:
-*  None
+*  \param status: Status caused program exit.
 *
 *******************************************************************************/
 __attribute__((weak))
@@ -253,21 +228,16 @@ void _exit(int status)
 
 /*******************************************************************************
 * Function Name: _sbrk
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  Increase program data space. As malloc and related functions depend on this,
 *  it is useful to have a working implementation. The following suffices for a
 *  standalone system; it exploits the symbol end automatically defined by the
 *  GNU linker.
 *
-* Parameters:
-*  nbytes: The number of bytes requested (if the parameter value is positive)
+*  \param nbytes: The number of bytes requested (if the parameter value is positive)
 *  from the heap or returned back to the heap (if the parameter value is
 *  negative).
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 __attribute__((weak))
@@ -296,17 +266,10 @@ void * _sbrk (int nbytes)
 
 /*******************************************************************************
 * Function Name: Reset
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function handles the reset interrupt for the GCC toolchain. This is the
 *  first bit of code that is executed at startup.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 void Reset(void)
@@ -335,18 +298,11 @@ void Reset(void)
 
 /*******************************************************************************
 * Function Name: Start_c
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function handles initializing the .data and .bss sections in
 *  preparation for running the standard C code.  Once initialization is complete
 *  it will call main(). This function will never return.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 void Start_c(void)  __attribute__ ((noreturn));
@@ -394,17 +350,13 @@ void Start_c(void)
 
 /*******************************************************************************
 * Function Name: __low_level_init
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function performs early initializations for the IAR Embedded
 *  Workbench IDE. It is executed in the context of a reset interrupt handler
 *  before the data sections are initialized.
 *
-* Parameters:
-*  None
-*
-* Return:
+* \return
 *  The value that determines whether or not data sections should be initialized
 *  by the system startup code:
 *    0 - skip data sections initialization;
@@ -477,16 +429,9 @@ int __low_level_init(void)
 
 /*******************************************************************************
 * Function Name: initialize_psoc
-********************************************************************************
+****************************************************************************//**
 *
-* Summary:
 *  This function used to initialize the PSoC chip before calling main.
-*
-* Parameters:
-*  None
-*
-* Return:
-*  None
 *
 *******************************************************************************/
 #if (defined(__GNUC__) && !defined(__ARMCC_VERSION))

@@ -3,29 +3,22 @@
 ; to pass a scatter file through a C preprocessor.
 
 ;********************************************************************************
-;* File Name: Cm3RealView.scat
-;* Version 5.30
+;* \file Cm3RealView.scat
+;* \version 5.40
 ;*
-;*  Description:
-;*  This Linker Descriptor file describes the memory layout of the PSoC5
-;*  device. The memory layout of the final binary and hex images as well as
-;*  the placement in PSoC5 memory is described.
-;*
-;*
-;*  Note:
+;* \brief
+;* This Linker Descriptor file describes the memory layout of the PSoC5
+;* device. The memory layout of the final binary and hex images as well as
+;* the placement in PSoC5 memory is described.
 ;*
 ;*  romvectors: Cypress default Interrupt service routine vector table.
-;*
 ;*      This is the ISR vector table at bootup. Used only for the reset vector.
 ;*
-;*
 ;*  ramvectors: Cypress ram interrupt service routine vector table.
-;*
 ;*      This is the ISR vector table used by the application.
 ;*
-;*
 ;********************************************************************************
-;* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+;* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 ;* You may use this file only in accordance with the license, terms, conditions,
 ;* disclaimers, and limitations in the end user license agreement accompanying
 ;* the software package with which this file was provided.

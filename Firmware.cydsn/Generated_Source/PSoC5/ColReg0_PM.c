@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: InputControl_PM.c
+* File Name: ColReg0_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "InputControl.h"
+#include "ColReg0.h"
 
 /* Check for removal by optimization */
-#if !defined(InputControl_Sync_ctrl_reg__REMOVED)
+#if !defined(ColReg0_Sync_ctrl_reg__REMOVED)
 
-static InputControl_BACKUP_STRUCT  InputControl_backup = {0u};
+static ColReg0_BACKUP_STRUCT  ColReg0_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: InputControl_SaveConfig
+* Function Name: ColReg0_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static InputControl_BACKUP_STRUCT  InputControl_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void InputControl_SaveConfig(void) 
+void ColReg0_SaveConfig(void) 
 {
-    InputControl_backup.controlState = InputControl_Control;
+    ColReg0_backup.controlState = ColReg0_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: InputControl_RestoreConfig
+* Function Name: ColReg0_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void InputControl_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void InputControl_RestoreConfig(void) 
+void ColReg0_RestoreConfig(void) 
 {
-     InputControl_Control = InputControl_backup.controlState;
+     ColReg0_Control = ColReg0_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: InputControl_Sleep
+* Function Name: ColReg0_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void InputControl_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void InputControl_Sleep(void) 
+void ColReg0_Sleep(void) 
 {
-    InputControl_SaveConfig();
+    ColReg0_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: InputControl_Wakeup
+* Function Name: ColReg0_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void InputControl_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void InputControl_Wakeup(void)  
+void ColReg0_Wakeup(void)  
 {
-    InputControl_RestoreConfig();
+    ColReg0_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

@@ -109,7 +109,7 @@ keep {  section .cybootloader,
         section .cyflashprotect,
         section .cymeta };
 
-".cyloadermeta"   : place at address mem : (CY_APPL_LOADER ? (CY_FLASH_SIZE - CY_METADATA_SIZE) : 0xF0000000) { readonly section .cyloadermeta };
+".cyloadermeta"   : place at address mem : ((CY_APPL_LOADER && !CY_APPL_LOADABLE) ? (CY_FLASH_SIZE - CY_METADATA_SIZE) : 0xF0000000) { readonly section .cyloadermeta };
 if (CY_APPL_LOADABLE)
 {
 ".cyloadablemeta"      : place at address mem : (CY_FLASH_SIZE - CY_FLASH_ROW_SIZE * (CY_APPL_NUM - 1) - CY_METADATA_SIZE) { readonly section .cyloadablemeta };
