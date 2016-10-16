@@ -21,14 +21,25 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
-
+const uint32_t Drives[] = {Drive0_0, Drive0_1, Drive0_2, Drive0_3, Drive0_4, Drive0_5, Drive0_6, Drive0_7};
+const uint32_t Senses[] = {
+    OddSense_0, EvenSense_0, OddSense_1, EvenSense_1, OddSense_2, EvenSense_2, OddSense_3, EvenSense_3,
+    OddSense_4, EvenSense_4, OddSense_5, EvenSense_5, OddSense_6, EvenSense_6, OddSense_7, EvenSense_7
+};
 
 void SetColumns(uint8 col)
 {
-    // Prevent premature triggering!
+    // Prevent premature triggering    
+    CyPins_SetPinDriveMode(Drives[col], PIN_DM_RES_UPDWN);
+    //CyPins_SetPin(Drives[col]);
     ColReg0_Write((1 << col) & 0xff);
 //    ColReg1_Write(0u);
 //    ColReg1_Write(1 << (col - 8));
+}
+
+void PinColumn(uint8 col)
+{
+    CyPins_SetPinDriveMode(Drives[col], PIN_DM_OD_LO);
 }
 
 void enableSensor(uint8 half)
@@ -37,6 +48,13 @@ void enableSensor(uint8 half)
     {
         SenseControl_Write(0xff);
     } else {
+        for(uint8 i=0; i<16; i++) {
+            if (i % 2 == half) {
+                CyPins_SetPinDriveMode(Senses[i], PIN_DM_RES_UPDWN);
+            } else {
+                CyPins_SetPinDriveMode(Senses[i], PIN_DM_OD_LO);
+            }
+        }
         //SenseControl_Write(0xff);
         SenseControl_Write(half+1);
     }
@@ -65,6 +83,7 @@ void scanColumn(uint8 col, uint8_t half)
         Boot_Load();
 
     }
+    PinColumn(col);
     for(uint8 i=0; i<8; i++) {
 //    for(uint8 i=0; i<config.matrixCols; i++) {
 //        if (config.capsense_flags.interlacedScan && (i % 2 != half))
@@ -238,6 +257,7 @@ int main()
             //pings++;
             send_report();
         }
+/*
         if (count++ % 1000 == 0)
         {
             prev_timer = now_timer;
@@ -251,6 +271,7 @@ int main()
             //xprintf("%d", ADC_Samples[0]);//, ADC_Samples[8]);
 //            xprintf("%d", ADC_Samples[15]);
         }
+*/
     }
 }
 

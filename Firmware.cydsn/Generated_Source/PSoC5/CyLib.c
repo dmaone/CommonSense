@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyLib.c
-* \version 5.40
+* \version 5.50
 *
 * \brief Provides a system API for the clocking, interrupts and watchdog timer.
 *
@@ -2748,7 +2748,25 @@ void CyEnableInts(uint32 mask)
         }
     }
 
+    
+    /*******************************************************************************
+    * Function Name: CySysTickGetClockSource
+    ****************************************************************************//**
+    *
+    *  Returns the current clock source of the SysTick counter.
+    *
+    *  \return 
+    *   CY_SYS_SYST_CSR_CLK_SRC_SYSCLK     SysTick is clocked by CPU clock.
+    *   CY_SYS_SYST_CSR_CLK_SRC_LFCLK      SysTick is clocked by the low frequency
+    *                                      clock. (ILO 100 KHz for PSoC 5LP, and
+    *                                      LFCLK for PSoC 4).
+    *******************************************************************************/
+    uint32 CySysTickGetClockSource(void)
+    {
+        return ((CY_SYS_SYST_CSR_REG >> CY_SYS_SYST_CSR_CLK_SOURCE_SHIFT) & CY_SYS_SYST_CSR_CLK_SRC_SYSCLK );
+    }
 
+    
     /*******************************************************************************
     * Function Name: CySysTickGetCountFlag
     ****************************************************************************//**

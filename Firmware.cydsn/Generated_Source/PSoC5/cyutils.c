@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cyutils.c
-* \version 5.40
+* \version 5.50
 *
 * \brief Provides a function to handle 24-bit value writes.
 *

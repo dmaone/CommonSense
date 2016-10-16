@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cytypes.h
-* \version 5.40
+* \version 5.50
 *
 * \brief CyTypes provides register access macros and approved types for use in
 * firmware.

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB.c
-* \version 3.0
+* \version 3.10
 *
 * \brief
 *  This file contains the global USBFS API functions.
@@ -12,7 +12,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -21,6 +21,7 @@
 #include "USB_pvt.h"
 #include "USB_cydmac.h"
 #include "USB_hid.h"
+#include "USB_Dp.h"
 
 
 /***************************************
@@ -749,6 +750,12 @@ void USB_Stop(void)
     /* Clear power active and standby mode templates. */
     USB_PM_ACT_CFG_REG  &= (uint8) ~USB_PM_ACT_EN_FSUSB;
     USB_PM_STBY_CFG_REG &= (uint8) ~USB_PM_STBY_EN_FSUSB;
+
+    /* Ensure single-ended disable bits are high (PRT15.INP_DIS[7:6])
+     * (input receiver disabled). */
+    USB_DM_INP_DIS_REG |= (uint8) USB_DM_MASK;
+    USB_DP_INP_DIS_REG |= (uint8) USB_DP_MASK;
+
 #endif /* (CY_PSOC4) */
 
     CyExitCriticalSection(enableInterrupts);
@@ -798,6 +805,13 @@ void USB_Stop(void)
     #if (USB_EP8_ISR_ACTIVE)
         CyIntDisable(USB_EP_8_VECT_NUM);
     #endif /* (USB_EP8_ISR_ACTIVE) */
+
+    #if (USB_DP_ISR_ACTIVE)
+        /* Clear active mode Dp interrupt source history. */
+        (void) USB_Dp_ClearInterrupt();
+        CyIntClearPending(USB_DP_INTC_VECT_NUM);
+    #endif /* (USB_DP_ISR_ACTIVE). */
+
 #endif /* (CY_PSOC4) */
 
     /* Reset component internal variables. */
@@ -1441,13 +1455,11 @@ void USB_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
 
                 /* Configure DMA descriptor. */
                 USB_CyDmaSetConfiguration(channelNum, USB_DMA_DESCR1, USB_DMA_COMMON_CFG  |
-                                                        CYDMA_BYTE | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_CHAIN);
+                                                        CYDMA_BYTE | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
                 /* Enable interrupt from DMA channel. */
                 USB_CyDmaSetInterruptMask(channelNum);
 
-                /* Validate descriptor 1. It will not be invalided during operation. */
-                USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
 
                 /* Enable DMA channel: configuration complete. */
                 USB_CyDmaChEnable(channelNum);
@@ -1526,9 +1538,6 @@ void USB_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
                     USB_DmaEpLastBurstEl[epNumber] |= (0u != (USB_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                             USB_DMA_DESCR0_MASK : USB_DMA_DESCR1_MASK;
 
-                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-                    USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
-
                     /* Restore DMA settings for current transfer. */
                     USB_CyDmaChDisable(channelNum);
 
@@ -1544,6 +1553,15 @@ void USB_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
                     /* Validate descriptor 0 and command to start with it. */
                     USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR0);
                     USB_CyDmaSetDescriptor0Next(channelNum);
+
+                    /* Validate descriptor 1. */
+                    if (USB_DmaEpBurstCnt[epNumber] > 1u)
+                    {
+                        USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1); 
+                    }                   
+
+                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+                    USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
 
                     /* Enable DMA channel: configuration complete. */
                     USB_CyDmaChEnable(channelNum);
@@ -1738,12 +1756,12 @@ uint16 USB_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
             USB_DmaEpLastBurstEl[epNumber] |= (0u != (USB_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                     USB_DMA_DESCR0_MASK : USB_DMA_DESCR1_MASK;
 
-            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-            USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
-
             /* Store address of buffer and burst counter for endpoint. */
             USB_DmaEpBufferAddrBackup[epNumber] = (uint32) pData;
             USB_DmaEpBurstCntBackup[epNumber]   = USB_DmaEpBurstCnt[epNumber];
+
+            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+            USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
 
             /* Disable DMA channel: start configuration. */
             USB_CyDmaChDisable(channelNum);
@@ -1761,14 +1779,18 @@ uint16 USB_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
 
             /* Configure DMA descriptor. */
             USB_CyDmaSetConfiguration(channelNum, USB_DMA_DESCR1, USB_DMA_COMMON_CFG  | lengthDescr1 |
-                                                    CYDMA_BYTE | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_CHAIN);
+                                                    CYDMA_BYTE | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
             /* Enable interrupt from DMA channel. */
             USB_CyDmaSetInterruptMask(channelNum);
 
             /* Validate DMA descriptor 0 and 1. */
             USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR0);
-            USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+
+            if (USB_DmaEpBurstCntBackup[epNumber] > 1u)
+            {
+                USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+            }
 
             /* Enable DMA channel: configuration complete. */
             USB_CyDmaChEnable(channelNum);
@@ -1944,13 +1966,10 @@ void USB_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
 
                 /* Configure DMA descriptor. */
                 USB_CyDmaSetConfiguration(channelNum, USB_DMA_DESCR1, USB_DMA_COMMON_CFG  |
-                                                        CYDMA_HALFWORD | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_CHAIN);
+                                                        CYDMA_HALFWORD | CYDMA_ELEMENT_WORD | CYDMA_INC_SRC_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
                 /* Enable interrupt from DMA channel. */
                 USB_CyDmaSetInterruptMask(channelNum);
-
-                /* Validate descriptor 1. It will not be invalided during operation. */
-                USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
 
                 /* Enable DMA channel: configuration complete. */
                 USB_CyDmaChEnable(channelNum);
@@ -1987,9 +2006,6 @@ void USB_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
                     USB_DmaEpLastBurstEl[epNumber] |= (0u != (USB_DmaEpBurstCnt[epNumber] & 0x1u)) ?
                                                                             USB_DMA_DESCR0_MASK : USB_DMA_DESCR1_MASK;
 
-                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-                    USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
-
                     /* Restore DMA settings for current transfer. */
                     USB_CyDmaChDisable(channelNum);
 
@@ -2005,6 +2021,15 @@ void USB_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
                     /* Validate descriptor 0 and command to start with it. */
                     USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR0);
                     USB_CyDmaSetDescriptor0Next(channelNum);
+
+                    /* Validate descriptor 1. */
+                    if (USB_DmaEpBurstCnt[epNumber] > 1u)
+                    {
+                        USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+                    }
+
+                    /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+                    USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
 
                     /* Enable DMA channel: configuration complete. */
                     USB_CyDmaChEnable(channelNum);
@@ -2174,12 +2199,12 @@ uint16 USB_ReadOutEP16(uint8 epNumber, uint8 pData[], uint16 length)
             /* Mark that 16-bits access to data register is performed. */
             USB_DmaEpLastBurstEl[epNumber] |= USB_DMA_DESCR_16BITS;
 
-            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
-            USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
-
             /* Store address of buffer and burst counter for endpoint. */
             USB_DmaEpBufferAddrBackup[epNumber] = (uint32) pData;
             USB_DmaEpBurstCntBackup[epNumber]   = USB_DmaEpBurstCnt[epNumber];
+
+            /* Adjust burst counter taking to account: 2 valid descriptors and interrupt trigger after valid descriptor were executed. */
+            USB_DmaEpBurstCnt[epNumber] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCnt[epNumber]);
 
             /* Disable DMA channel: start configuration. */
             USB_CyDmaChDisable(channelNum);
@@ -2197,14 +2222,18 @@ uint16 USB_ReadOutEP16(uint8 epNumber, uint8 pData[], uint16 length)
 
             /* Configure DMA descriptor 1. */
             USB_CyDmaSetConfiguration(channelNum, USB_DMA_DESCR1, USB_DMA_COMMON_CFG  | lengthDescr1 |
-                                                    CYDMA_HALFWORD | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_CHAIN);
+                                                    CYDMA_HALFWORD | CYDMA_WORD_ELEMENT | CYDMA_INC_DST_ADDR | CYDMA_INVALIDATE | CYDMA_CHAIN);
 
             /* Enable interrupt from DMA channel. */
             USB_CyDmaSetInterruptMask(channelNum);
 
             /* Validate DMA descriptor 0 and 1. */
             USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR0);
-            USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+            
+            if (USB_DmaEpBurstCntBackup[epNumber] > 1u)
+            {
+                USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+            }
 
             /* Enable DMA channel: configuration complete. */
             USB_CyDmaChEnable(channelNum);

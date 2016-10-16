@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_cdc.c
-* \version 3.0
+* \version 3.10
 *
 * \brief
 *  This file contains the USB MSC Class request handler and global API for MSC 
@@ -11,7 +11,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2012-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2012-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
