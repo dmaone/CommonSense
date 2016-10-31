@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseControl.h  
+* File Name: DriveReg2.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_SenseControl_H) /* CY_CONTROL_REG_SenseControl_H */
-#define CY_CONTROL_REG_SenseControl_H
+#if !defined(CY_CONTROL_REG_DriveReg2_H) /* CY_CONTROL_REG_DriveReg2_H */
+#define CY_CONTROL_REG_DriveReg2_H
 
 #include "cytypes.h"
 
@@ -29,20 +29,20 @@ typedef struct
 {
     uint8 controlState;
 
-} SenseControl_BACKUP_STRUCT;
+} DriveReg2_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    SenseControl_Write(uint8 control) ;
-uint8   SenseControl_Read(void) ;
+void    DriveReg2_Write(uint8 control) ;
+uint8   DriveReg2_Read(void) ;
 
-void SenseControl_SaveConfig(void) ;
-void SenseControl_RestoreConfig(void) ;
-void SenseControl_Sleep(void) ; 
-void SenseControl_Wakeup(void) ;
+void DriveReg2_SaveConfig(void) ;
+void DriveReg2_RestoreConfig(void) ;
+void DriveReg2_Sleep(void) ; 
+void DriveReg2_Wakeup(void) ;
 
 
 /***************************************
@@ -50,10 +50,10 @@ void SenseControl_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define SenseControl_Control        (* (reg8 *) SenseControl_Sync_ctrl_reg__CONTROL_REG )
-#define SenseControl_Control_PTR    (  (reg8 *) SenseControl_Sync_ctrl_reg__CONTROL_REG )
+#define DriveReg2_Control        (* (reg8 *) DriveReg2_Sync_ctrl_reg__CONTROL_REG )
+#define DriveReg2_Control_PTR    (  (reg8 *) DriveReg2_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_SenseControl_H */
+#endif /* End CY_CONTROL_REG_DriveReg2_H */
 
 
 /* [] END OF FILE */

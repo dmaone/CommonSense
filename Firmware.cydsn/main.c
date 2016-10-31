@@ -21,20 +21,25 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
-const uint32_t Drives[] = {Drive0_0, Drive0_1, Drive0_2, Drive0_3, Drive0_4, Drive0_5, Drive0_6, Drive0_7};
-const uint32_t Senses[] = {
-    OddSense_0, EvenSense_0, OddSense_1, EvenSense_1, OddSense_2, EvenSense_2, OddSense_3, EvenSense_3,
-    OddSense_4, EvenSense_4, OddSense_5, EvenSense_5, OddSense_6, EvenSense_6, OddSense_7, EvenSense_7
+
+const uint32_t Drives[] = {
+    Rows0_0, Rows0_1, Rows0_2, Rows0_3, Rows0_4, Rows0_5, Rows0_6, Rows0_7
 };
+
+const uint32_t Senses[] = {
+    Cols0_0, Cols0_1, Cols0_2, Cols0_3, Cols0_4, Cols0_5, Cols0_6, Cols0_7,
+    Cols1_0, Cols1_1, Cols1_2, Cols1_3, Cols1_4, Cols1_5, Cols1_6, Cols1_7
+};
+
+#define INTERLEAVE 2
+//const uint16 SenseMap = 0b1001001001001001; //every 3rd
+const uint16 SenseMap = 0b0101010101010101; //every 2nd
 
 void SetColumns(uint8 col)
 {
-    // Prevent premature triggering    
     CyPins_SetPinDriveMode(Drives[col], PIN_DM_RES_UPDWN);
-    //CyPins_SetPin(Drives[col]);
-    ColReg0_Write((1 << col) & 0xff);
-//    ColReg1_Write(0u);
-//    ColReg1_Write(1 << (col - 8));
+    //SetPin should not be used because it doesn't trigger start circuitry
+    DriveReg0_Write((1 << col) & 0xff);
 }
 
 void PinColumn(uint8 col)
@@ -42,21 +47,22 @@ void PinColumn(uint8 col)
     CyPins_SetPinDriveMode(Drives[col], PIN_DM_OD_LO);
 }
 
-void enableSensor(uint8 half)
+void enableSensor(uint8 part)
 {
     if (!config.capsense_flags.interlacedScan)
     {
-        SenseControl_Write(0xff);
+        SenseReg0_Write(0xff);
     } else {
+        uint16_t sm = (SenseMap << part) & 0xffff;
         for(uint8 i=0; i<16; i++) {
-            if (i % 2 == half) {
+            if ( sm & (1 << i) ) {
                 CyPins_SetPinDriveMode(Senses[i], PIN_DM_RES_UPDWN);
             } else {
                 CyPins_SetPinDriveMode(Senses[i], PIN_DM_OD_LO);
             }
         }
-        //SenseControl_Write(0xff);
-        SenseControl_Write(half+1);
+        SenseReg0_Write(sm & 0xff); // !!!TODO!! pattern!
+        SenseReg1_Write((sm >> 8) & 0xff); // !!!TODO!! pattern!
     }
 }
 
@@ -64,10 +70,10 @@ uint8_t maxlevel = 0;
 uint32_t pings = 0;
 uint32_t lpings = 0;
 
-void scanColumn(uint8 col, uint8_t half)
+void scanColumn(uint8 col, uint8_t part)
 {
-    CyDelayUs(5);
-    enableSensor(half);
+    //CyDelayUs(3);
+    enableSensor(part);
     SetColumns(col);
     uint8_t cnt = 255;
     while (cnt && !(HWState_Read() & 0x01))
@@ -90,7 +96,7 @@ void scanColumn(uint8 col, uint8_t half)
 //            continue;
 //        matrix[col][i] = ADC_Samples[i] & 0xff;
 //        matrix[col][i] += ADC_GetResult16(i) & 0xff;
-        matrix[col][(i * 2)+1 - half] += ADC_GetResult16((half * 8) + i) & 0xff;
+        matrix[col][INTERLEAVE*i + part] += ADC_GetResult16(INTERLEAVE*i + part) & 0xff;
 //        if (maxlevel < matrix[col][i])
 //            maxlevel = matrix[col][i];
     }
@@ -111,23 +117,10 @@ void printColumn(uint8 col)
 
 void read_matrix(void)
 {
-    //uint8_t cur_col = 0;
-    //uint8_t max_col = config.matrixCols + 1;
-    //for(uint8 i = 0; i<config.matrixCols; ++i) {
     //FIXME rename everything - we're scanning rows and read columns actually!
     for(uint8 i = 0; i<8; i++) {
-        //if (config.capsense_flags.interlacedScan)
-            // shift 1 port on the column pins to reduce pin load.
-            //scanColumn(( i + 8) % config.matrixCols, 0);
-            //scanColumn((cur_col+8) % config.matrixCols, 0);
-            scanColumn(i, 0);
-            //CyDelayUs(50);
-        scanColumn(i, 1);
-        //scanColumn(cur_col, 1);
-        //cur_col++;
-        //cur_col = (cur_col + 3) % config.matrixCols;
-        //CyDelayUs(50);
-        //CyDelayUs(5);
+        scanColumn(i, 0);
+        scanColumn((i+4)%8, 1);
   }
 }
 

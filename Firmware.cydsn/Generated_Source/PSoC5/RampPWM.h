@@ -226,8 +226,8 @@ void RampPWM_RestoreConfig(void) ;
 /***************************************
 *         Initialization Values
 **************************************/
-#define RampPWM_INIT_PERIOD_VALUE          (50u)
-#define RampPWM_INIT_COMPARE_VALUE1        (40u)
+#define RampPWM_INIT_PERIOD_VALUE          (150u)
+#define RampPWM_INIT_COMPARE_VALUE1        (20u)
 #define RampPWM_INIT_COMPARE_VALUE2        (81u)
 #define RampPWM_INIT_INTERRUPTS_MODE       (uint8)(((uint8)(0u <<   \
                                                     RampPWM_STATUS_TC_INT_EN_MASK_SHIFT)) | \

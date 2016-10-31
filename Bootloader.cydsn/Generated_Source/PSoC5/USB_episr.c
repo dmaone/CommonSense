@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file USB_episr.c
-* \version 3.0
+* \version 3.10
 *
 * \brief
 *  This file contains the Data endpoint Interrupt Service Routines.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -862,7 +862,7 @@ CY_ISR(USB_LPM_ISR)
                     uint32 channelNum = USB_DmaChan[ep];
 
                     /* Restore burst counter for endpoint. */
-                    USB_DmaEpBurstCnt[ep] = USB_DmaEpBurstCntBackup[ep];
+                    USB_DmaEpBurstCnt[ep] = USB_DMA_GET_BURST_CNT(USB_DmaEpBurstCntBackup[ep]);
 
                     /* Disable DMA channel to restore descriptor configuration. The on-going transfer is aborted. */
                     USB_CyDmaChDisable(channelNum);
@@ -886,7 +886,10 @@ CY_ISR(USB_LPM_ISR)
 
                     /* Validate descriptor 0 and 1 (also reset current state). Command to start with descriptor 0. */
                     USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR0);
-                    USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+                    if (USB_DmaEpBurstCntBackup[ep] > 1u)
+                    {
+                        USB_CyDmaValidateDescriptor(channelNum, USB_DMA_DESCR1);
+                    }
                     USB_CyDmaSetDescriptor0Next(channelNum);
 
                     /* Enable DMA channel: configuration complete. */
@@ -946,6 +949,87 @@ CY_ISR(USB_LPM_ISR)
 
 #if (USB_EP_MANAGEMENT_DMA_AUTO)
 #if (CY_PSOC4)
+
+    /******************************************************************************
+    * Function Name: USB_EPxDmaDone
+    ***************************************************************************//**
+    *
+    * \internal
+    *  Endpoint  DMA Done Interrupt Service Routine basic function .
+    *  
+    *  \param dmaCh
+    *  number of DMA channel
+    *  
+    *  \param ep
+    *  number of USB end point
+    *  
+    *  \param dmaDone
+    *  transfer completion flag
+    *  
+    *  \return
+    *   updated transfer completion flag
+    *
+    ******************************************************************************/
+    CY_INLINE static void USB_EPxDmaDone(uint8 dmaCh, uint8 ep)
+    {
+        uint32 nextAddr;
+
+        /* Manage data elements which remain to transfer. */
+        if (0u != USB_DmaEpBurstCnt[ep])
+        {
+            if(USB_DmaEpBurstCnt[ep] <= 2u)
+            {
+                /* Adjust length of last burst. */
+                USB_CyDmaSetNumDataElements(dmaCh,
+                                                    ((uint32) USB_DmaEpLastBurstEl[ep] >> USB_DMA_DESCR_SHIFT),
+                                                    ((uint32) USB_DmaEpLastBurstEl[ep] &  USB_DMA_BURST_BYTES_MASK));
+            }
+            
+
+            /* Advance source for input endpoint or destination for output endpoint. */
+            if (0u != (USB_EP[ep].addr & USB_DIR_IN))
+            {
+                /* Change source for descriptor 0. */
+                nextAddr = (uint32) USB_CyDmaGetSrcAddress(dmaCh, USB_DMA_DESCR0);
+                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
+                USB_CyDmaSetSrcAddress(dmaCh, USB_DMA_DESCR0, (void *) nextAddr);
+
+                /* Change source for descriptor 1. */
+                nextAddr += USB_DMA_BYTES_PER_BURST;
+                USB_CyDmaSetSrcAddress(dmaCh, USB_DMA_DESCR1, (void *) nextAddr);
+            }
+            else
+            {
+                /* Change destination for descriptor 0. */
+                nextAddr  = (uint32) USB_CyDmaGetDstAddress(dmaCh, USB_DMA_DESCR0);
+                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
+                USB_CyDmaSetDstAddress(dmaCh, USB_DMA_DESCR0, (void *) nextAddr);
+
+                /* Change destination for descriptor 1. */
+                nextAddr += USB_DMA_BYTES_PER_BURST;
+                USB_CyDmaSetDstAddress(dmaCh, USB_DMA_DESCR1, (void *) nextAddr);
+            }
+
+            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
+            USB_CyDmaValidateDescriptor(dmaCh, USB_DMA_DESCR0);
+            
+            --USB_DmaEpBurstCnt[ep];
+            if (0u != USB_DmaEpBurstCnt[ep])
+            {
+                USB_CyDmaValidateDescriptor(dmaCh, USB_DMA_DESCR1);
+                --USB_DmaEpBurstCnt[ep];
+            }
+            
+            USB_CyDmaChEnable (dmaCh);
+            USB_CyDmaTriggerIn(USB_DmaReqOut[ep]);
+        }
+        else
+        {
+            /* No data to transfer. False DMA trig. Ignore.  */
+        }
+
+    }
+
     #if (USB_DMA1_ACTIVE)
         /******************************************************************************
         * Function Name: USB_EP1_DMA_DONE_ISR
@@ -957,50 +1041,10 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP1_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP1])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP1];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP1_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP1] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP1] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP1].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP1_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP1_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP1_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP1_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP1_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP1_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP1_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP1_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP1]);
+            USB_EPxDmaDone((uint8)USB_EP1_DMA_CH,
+                                                  USB_EP1);
+                
         }
     #endif /* (USB_DMA1_ACTIVE) */
 
@@ -1016,50 +1060,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP2_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP2])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP2];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP2_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP2] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP2] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP2].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP2_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP2_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP2_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP2_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP2_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP2_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP2_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP2_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP2]);
+            USB_EPxDmaDone((uint8)USB_EP2_DMA_CH,
+                                                  USB_EP2);
         }
     #endif /* (USB_DMA2_ACTIVE) */
 
@@ -1075,50 +1078,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP3_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP3])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP3];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP3_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP3] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP3] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP3].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP3_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP3_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP3_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP3_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP3_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP3_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP3_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP3_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP3]);
+            USB_EPxDmaDone((uint8)USB_EP3_DMA_CH,
+                                                  USB_EP3);
         }
     #endif /* (USB_DMA3_ACTIVE) */
 
@@ -1134,50 +1096,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP4_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP4])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP4];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP4_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP4] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP4] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP4].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP4_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP4_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP4_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP4_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP4_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP4_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP4_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP4_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP4]);
+            USB_EPxDmaDone((uint8)USB_EP4_DMA_CH,
+                                                  USB_EP4);
         }
     #endif /* (USB_DMA4_ACTIVE) */
 
@@ -1193,50 +1114,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP5_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP5])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP5];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP5_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP5] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP5] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP5].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP5_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP5_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP5_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP5_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP5_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP5_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP5_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP5_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP5]);
+            USB_EPxDmaDone((uint8)USB_EP5_DMA_CH,
+                                                  USB_EP5);
         }
     #endif /* (USB_DMA5_ACTIVE) */
 
@@ -1252,50 +1132,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP6_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP6])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP6];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP6_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP6] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP6] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP6].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP6_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP6_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP6_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP6_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP6_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP6_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable the DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP6_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP6_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP6]);
+            USB_EPxDmaDone((uint8)USB_EP6_DMA_CH,
+                                                  USB_EP6);
         }
     #endif /* (USB_DMA6_ACTIVE) */
 
@@ -1311,50 +1150,9 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP7_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP7])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP7];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP7_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP7] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP7] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP7].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP7_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP7_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP7_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP7_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP7_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP7_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP7_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP7_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP7]);
+            USB_EPxDmaDone((uint8)USB_EP7_DMA_CH,
+                                                  USB_EP7);
         }
     #endif /* (USB_DMA7_ACTIVE) */
 
@@ -1370,52 +1168,12 @@ CY_ISR(USB_LPM_ISR)
         ******************************************************************************/
         void USB_EP8_DMA_DONE_ISR(void)
         {
-            uint32 nextAddr;
 
-            /* Manage data elements which remain to transfer. */
-            if (0u != USB_DmaEpBurstCnt[USB_EP8])
-            {
-                /* Decrement burst counter. */
-                --USB_DmaEpBurstCnt[USB_EP8];
-            }
-            else
-            {
-                /* Adjust length of last burst. */
-                USB_CyDmaSetNumDataElements(USB_EP8_DMA_CH,
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP8] >> USB_DMA_DESCR_SHIFT),
-                                                        ((uint32) USB_DmaEpLastBurstEl[USB_EP8] &  USB_DMA_BURST_BYTES_MASK));
-            }
-
-            /* Advance source for input endpoint or destination for output endpoint. */
-            if (0u != (USB_EP[USB_EP8].addr & USB_DIR_IN))
-            {
-                /* Change source for descriptor 0. */
-                nextAddr = (uint32) USB_CyDmaGetSrcAddress(USB_EP8_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetSrcAddress(USB_EP8_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change source for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetSrcAddress(USB_EP8_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-            else
-            {
-                /* Change destination for descriptor 0. */
-                nextAddr  = (uint32) USB_CyDmaGetDstAddress(USB_EP8_DMA_CH, USB_DMA_DESCR0);
-                nextAddr += (2u * USB_DMA_BYTES_PER_BURST);
-                USB_CyDmaSetDstAddress(USB_EP8_DMA_CH, USB_DMA_DESCR0, (void *) nextAddr);
-
-                /* Change destination for descriptor 1. */
-                nextAddr += USB_DMA_BYTES_PER_BURST;
-                USB_CyDmaSetDstAddress(USB_EP8_DMA_CH, USB_DMA_DESCR1, (void *) nextAddr);
-            }
-
-            /* Enable DMA to execute transfer as it was disabled because there were no valid descriptor. */
-            USB_CyDmaValidateDescriptor(USB_EP8_DMA_CH, USB_DMA_DESCR0);
-            USB_CyDmaChEnable (USB_EP8_DMA_CH);
-            USB_CyDmaTriggerIn(USB_DmaReqOut[USB_EP8]);
+            USB_EPxDmaDone((uint8)USB_EP8_DMA_CH,
+                                                  USB_EP8);
         }
     #endif /* (USB_DMA8_ACTIVE) */
+
 
 #else
     #if (USB_EP_DMA_AUTO_OPT == 0u)

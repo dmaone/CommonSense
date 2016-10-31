@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyFlash.h
-* \version 5.40
+* \version 5.50
 *
 * \brief Provides the function definitions for the FLASH/EEPROM.
 *

@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file  USB.h
-* \version 3.0
+* \version 3.10
 *
 * \brief
 *  This file provides function prototypes and constants for the USBFS component. 
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -687,7 +687,7 @@ uint8  USB_RWUEnabled(void)    ;
 
         #define USB_DMA_GET_DESCR_NUM(desrc)
         #define USB_DMA_GET_BURST_CNT(dmaBurstCnt) \
-                    (((((dmaBurstCnt) - 2u) >> 1u) + ((dmaBurstCnt) & 0x1u)) - 1u)
+                    (((dmaBurstCnt) > 2u)? ((dmaBurstCnt) - 2u) : 0u)
 
         #define USB_DMA_GET_MAX_ELEM_PER_BURST(dmaLastBurstEl) \
                     ((0u != ((dmaLastBurstEl) & USB_DMA_DESCR_16BITS)) ? \
@@ -1596,24 +1596,19 @@ extern volatile uint8 USB_deviceStatus;
 ***************************************/
 
 #if (CY_PSOC4)
-    #define USB_ClearSieEpInterruptSource(intMask) \
-                do{ \
-                    USB_SIE_EP_INT_SR_REG = (uint32) (intMask); \
-                }while(0)
-
     #define USB_ClearSieInterruptSource(intMask) \
                 do{ \
                     USB_INTR_SIE_REG = (uint32) (intMask); \
                 }while(0)
 #else
-    #define USB_ClearSieEpInterruptSource(intMask) \
-                do{ \
-                    USB_SIE_EP_INT_SR_REG &= (uint8) ~(intMask); \
-                }while(0)
-
     #define USB_ClearSieInterruptSource(intMask) \
-                do{ /* Does nohitng. */ }while(0)
+                do{ /* Does nothing. */ }while(0)
 #endif /* (CY_PSOC4) */
+
+#define USB_ClearSieEpInterruptSource(intMask) \
+            do{ \
+                USB_SIE_EP_INT_SR_REG = (uint8) (intMask); \
+            }while(0)
 
 #define USB_GET_ACTIVE_IN_EP_CR0_MODE(epType)  (((epType) == USB_EP_TYPE_ISOC) ? \
                                                                 (USB_MODE_ISO_IN) : (USB_MODE_ACK_IN))

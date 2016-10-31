@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file Cm3Start.c
-* \version 5.40
+* \version 5.50
 *
 *  \brief
 *  Startup code for the ARM CM3.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2008-2016, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -90,17 +90,37 @@ cyisraddress CyRamVectors[CY_NUM_VECTORS];
 *******************************************************************************/
 CY_ISR(IntDefaultHandler)
 {
-    #ifdef CY_BOOT_INT_DEFAULT_HANDLER_EXCEPTION_ENTRY_CALLBACK
-        CyBoot_IntDefaultHandler_Exception_EntryCallback();
-    #endif /* CY_BOOT_INT_DEFAULT_HANDLER_EXCEPTION_ENTRY_CALLBACK */
+    /***************************************************************************
+    * We must not get here. If we do, a serious problem occurs, so go into
+    * an infinite loop.
+    ***************************************************************************/
 
-    while(1)
-    {
-        /***********************************************************************
-        * We must not get here. If we do, a serious problem occurs, so go
-        * into an infinite loop.
-        ***********************************************************************/
-    }
+    #if defined(__GNUC__)
+        if (errno == ENOMEM)
+        {
+            #ifdef CY_BOOT_INT_DEFAULT_HANDLER_ENOMEM_EXCEPTION_CALLBACK
+                CyBoot_IntDefaultHandler_Enomem_Exception_Callback();
+            #endif /* CY_BOOT_INT_DEFAULT_HANDLER_ENOMEM_EXCEPTION_CALLBACK */
+            
+            while(1)
+            {
+                /* Out Of Heap Space
+                 * This can be increased in the System tab of the Design Wide Resources.
+                 */
+            }
+        }
+        else
+    #endif
+        {
+            #ifdef CY_BOOT_INT_DEFAULT_HANDLER_EXCEPTION_ENTRY_CALLBACK
+                CyBoot_IntDefaultHandler_Exception_EntryCallback();
+            #endif /* CY_BOOT_INT_DEFAULT_HANDLER_EXCEPTION_ENTRY_CALLBACK */
+
+            while(1)
+            {
+
+            }
+        }
 }
 
 

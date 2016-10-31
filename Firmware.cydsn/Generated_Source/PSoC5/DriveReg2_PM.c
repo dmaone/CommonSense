@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseControl_PM.c
+* File Name: DriveReg2_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "SenseControl.h"
+#include "DriveReg2.h"
 
 /* Check for removal by optimization */
-#if !defined(SenseControl_Sync_ctrl_reg__REMOVED)
+#if !defined(DriveReg2_Sync_ctrl_reg__REMOVED)
 
-static SenseControl_BACKUP_STRUCT  SenseControl_backup = {0u};
+static DriveReg2_BACKUP_STRUCT  DriveReg2_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: SenseControl_SaveConfig
+* Function Name: DriveReg2_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static SenseControl_BACKUP_STRUCT  SenseControl_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void SenseControl_SaveConfig(void) 
+void DriveReg2_SaveConfig(void) 
 {
-    SenseControl_backup.controlState = SenseControl_Control;
+    DriveReg2_backup.controlState = DriveReg2_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseControl_RestoreConfig
+* Function Name: DriveReg2_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void SenseControl_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void SenseControl_RestoreConfig(void) 
+void DriveReg2_RestoreConfig(void) 
 {
-     SenseControl_Control = SenseControl_backup.controlState;
+     DriveReg2_Control = DriveReg2_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseControl_Sleep
+* Function Name: DriveReg2_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void SenseControl_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void SenseControl_Sleep(void) 
+void DriveReg2_Sleep(void) 
 {
-    SenseControl_SaveConfig();
+    DriveReg2_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: SenseControl_Wakeup
+* Function Name: DriveReg2_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void SenseControl_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void SenseControl_Wakeup(void)  
+void DriveReg2_Wakeup(void)  
 {
-    SenseControl_RestoreConfig();
+    DriveReg2_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

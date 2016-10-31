@@ -1,7 +1,7 @@
 ;
 ; File Name: cydeviceiar.inc
 ; OBSOLETE: Do not use this file. Use the _trm version instead.
-; PSoC Creator  3.3 SP2
+; PSoC Creator  4.0
 ;
 ; Description:
 ; This file provides all of the address values for the entire PSoC device.

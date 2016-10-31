@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg1.c  
+* File Name: SenseReg0.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg1.h"
+#include "SenseReg0.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg1_Sync_ctrl_reg__REMOVED)
+#if !defined(SenseReg0_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: ColReg1_Write
+* Function Name: SenseReg0_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void ColReg1_Write(uint8 control) 
+void SenseReg0_Write(uint8 control) 
 {
-    ColReg1_Control = control;
+    SenseReg0_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg1_Read
+* Function Name: SenseReg0_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void ColReg1_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 ColReg1_Read(void) 
+uint8 SenseReg0_Read(void) 
 {
-    return ColReg1_Control;
+    return SenseReg0_Control;
 }
 
 #endif /* End check for removal by optimization */

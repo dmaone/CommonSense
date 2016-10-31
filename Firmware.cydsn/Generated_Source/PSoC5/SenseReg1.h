@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg0.h  
+* File Name: SenseReg1.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_ColReg0_H) /* CY_CONTROL_REG_ColReg0_H */
-#define CY_CONTROL_REG_ColReg0_H
+#if !defined(CY_CONTROL_REG_SenseReg1_H) /* CY_CONTROL_REG_SenseReg1_H */
+#define CY_CONTROL_REG_SenseReg1_H
 
 #include "cytypes.h"
 
@@ -29,20 +29,20 @@ typedef struct
 {
     uint8 controlState;
 
-} ColReg0_BACKUP_STRUCT;
+} SenseReg1_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    ColReg0_Write(uint8 control) ;
-uint8   ColReg0_Read(void) ;
+void    SenseReg1_Write(uint8 control) ;
+uint8   SenseReg1_Read(void) ;
 
-void ColReg0_SaveConfig(void) ;
-void ColReg0_RestoreConfig(void) ;
-void ColReg0_Sleep(void) ; 
-void ColReg0_Wakeup(void) ;
+void SenseReg1_SaveConfig(void) ;
+void SenseReg1_RestoreConfig(void) ;
+void SenseReg1_Sleep(void) ; 
+void SenseReg1_Wakeup(void) ;
 
 
 /***************************************
@@ -50,10 +50,10 @@ void ColReg0_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define ColReg0_Control        (* (reg8 *) ColReg0_Sync_ctrl_reg__CONTROL_REG )
-#define ColReg0_Control_PTR    (  (reg8 *) ColReg0_Sync_ctrl_reg__CONTROL_REG )
+#define SenseReg1_Control        (* (reg8 *) SenseReg1_Sync_ctrl_reg__CONTROL_REG )
+#define SenseReg1_Control_PTR    (  (reg8 *) SenseReg1_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_ColReg0_H */
+#endif /* End CY_CONTROL_REG_SenseReg1_H */
 
 
 /* [] END OF FILE */

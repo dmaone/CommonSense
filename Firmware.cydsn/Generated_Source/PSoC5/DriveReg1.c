@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg2.c  
+* File Name: DriveReg1.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg2.h"
+#include "DriveReg1.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg2_Sync_ctrl_reg__REMOVED)
+#if !defined(DriveReg1_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: ColReg2_Write
+* Function Name: DriveReg1_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void ColReg2_Write(uint8 control) 
+void DriveReg1_Write(uint8 control) 
 {
-    ColReg2_Control = control;
+    DriveReg1_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg2_Read
+* Function Name: DriveReg1_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void ColReg2_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 ColReg2_Read(void) 
+uint8 DriveReg1_Read(void) 
 {
-    return ColReg2_Control;
+    return DriveReg1_Control;
 }
 
 #endif /* End check for removal by optimization */

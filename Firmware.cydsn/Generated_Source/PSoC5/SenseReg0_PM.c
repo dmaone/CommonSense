@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg0_PM.c
+* File Name: SenseReg0_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg0.h"
+#include "SenseReg0.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg0_Sync_ctrl_reg__REMOVED)
+#if !defined(SenseReg0_Sync_ctrl_reg__REMOVED)
 
-static ColReg0_BACKUP_STRUCT  ColReg0_backup = {0u};
+static SenseReg0_BACKUP_STRUCT  SenseReg0_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: ColReg0_SaveConfig
+* Function Name: SenseReg0_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static ColReg0_BACKUP_STRUCT  ColReg0_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void ColReg0_SaveConfig(void) 
+void SenseReg0_SaveConfig(void) 
 {
-    ColReg0_backup.controlState = ColReg0_Control;
+    SenseReg0_backup.controlState = SenseReg0_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg0_RestoreConfig
+* Function Name: SenseReg0_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void ColReg0_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void ColReg0_RestoreConfig(void) 
+void SenseReg0_RestoreConfig(void) 
 {
-     ColReg0_Control = ColReg0_backup.controlState;
+     SenseReg0_Control = SenseReg0_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg0_Sleep
+* Function Name: SenseReg0_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void ColReg0_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void ColReg0_Sleep(void) 
+void SenseReg0_Sleep(void) 
 {
-    ColReg0_SaveConfig();
+    SenseReg0_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg0_Wakeup
+* Function Name: SenseReg0_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void ColReg0_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void ColReg0_Wakeup(void)  
+void SenseReg0_Wakeup(void)  
 {
-    ColReg0_RestoreConfig();
+    SenseReg0_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

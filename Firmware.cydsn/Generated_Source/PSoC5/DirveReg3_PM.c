@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg3_PM.c
+* File Name: DirveReg3_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg3.h"
+#include "DirveReg3.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg3_Sync_ctrl_reg__REMOVED)
+#if !defined(DirveReg3_Sync_ctrl_reg__REMOVED)
 
-static ColReg3_BACKUP_STRUCT  ColReg3_backup = {0u};
+static DirveReg3_BACKUP_STRUCT  DirveReg3_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: ColReg3_SaveConfig
+* Function Name: DirveReg3_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static ColReg3_BACKUP_STRUCT  ColReg3_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void ColReg3_SaveConfig(void) 
+void DirveReg3_SaveConfig(void) 
 {
-    ColReg3_backup.controlState = ColReg3_Control;
+    DirveReg3_backup.controlState = DirveReg3_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg3_RestoreConfig
+* Function Name: DirveReg3_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void ColReg3_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void ColReg3_RestoreConfig(void) 
+void DirveReg3_RestoreConfig(void) 
 {
-     ColReg3_Control = ColReg3_backup.controlState;
+     DirveReg3_Control = DirveReg3_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg3_Sleep
+* Function Name: DirveReg3_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void ColReg3_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void ColReg3_Sleep(void) 
+void DirveReg3_Sleep(void) 
 {
-    ColReg3_SaveConfig();
+    DirveReg3_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg3_Wakeup
+* Function Name: DirveReg3_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void ColReg3_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void ColReg3_Wakeup(void)  
+void DirveReg3_Wakeup(void)  
 {
-    ColReg3_RestoreConfig();
+    DirveReg3_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

@@ -10,10 +10,10 @@
 /*
 Proto kit connectors.
       WO     O    WB     B   WBr    Br
-J1  P1.0  P1.1  P1.2  P1.3  P1.4  P1.5
-J2  P1.6  P1.7  P3.0  P3.1  P3.3  P3.4
-J3  P3.5  P3.6  P3.7 P15.0 P15.1 P15.5
-J4  P0.0  P0.1  P2.4  P2.5  P2.6  P2.7
+J1  P2.0  P2.2  P0.7  P0.6  P2.4  P2.5
+J2 P15.1 P15.0  P1.2  P1.3  P1.4  P1.5
+J3  P3.6  P3.5  P3.4  P3.3  P3.1  P3.0
+J4  P2.6  P2.7  P0.5  P0.1  P0.0 P15.5
 
 F122: cols: 4-3-2(O+B), rows 2(Br)-1
 */

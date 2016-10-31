@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseControl.c  
+* File Name: DriveReg2.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "SenseControl.h"
+#include "DriveReg2.h"
 
 /* Check for removal by optimization */
-#if !defined(SenseControl_Sync_ctrl_reg__REMOVED)
+#if !defined(DriveReg2_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: SenseControl_Write
+* Function Name: DriveReg2_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void SenseControl_Write(uint8 control) 
+void DriveReg2_Write(uint8 control) 
 {
-    SenseControl_Control = control;
+    DriveReg2_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseControl_Read
+* Function Name: DriveReg2_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void SenseControl_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 SenseControl_Read(void) 
+uint8 DriveReg2_Read(void) 
 {
-    return SenseControl_Control;
+    return DriveReg2_Control;
 }
 
 #endif /* End check for removal by optimization */

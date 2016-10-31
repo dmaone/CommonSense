@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg2.h  
+* File Name: DriveReg0.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_ColReg2_H) /* CY_CONTROL_REG_ColReg2_H */
-#define CY_CONTROL_REG_ColReg2_H
+#if !defined(CY_CONTROL_REG_DriveReg0_H) /* CY_CONTROL_REG_DriveReg0_H */
+#define CY_CONTROL_REG_DriveReg0_H
 
 #include "cytypes.h"
 
@@ -29,20 +29,20 @@ typedef struct
 {
     uint8 controlState;
 
-} ColReg2_BACKUP_STRUCT;
+} DriveReg0_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    ColReg2_Write(uint8 control) ;
-uint8   ColReg2_Read(void) ;
+void    DriveReg0_Write(uint8 control) ;
+uint8   DriveReg0_Read(void) ;
 
-void ColReg2_SaveConfig(void) ;
-void ColReg2_RestoreConfig(void) ;
-void ColReg2_Sleep(void) ; 
-void ColReg2_Wakeup(void) ;
+void DriveReg0_SaveConfig(void) ;
+void DriveReg0_RestoreConfig(void) ;
+void DriveReg0_Sleep(void) ; 
+void DriveReg0_Wakeup(void) ;
 
 
 /***************************************
@@ -50,10 +50,10 @@ void ColReg2_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define ColReg2_Control        (* (reg8 *) ColReg2_Sync_ctrl_reg__CONTROL_REG )
-#define ColReg2_Control_PTR    (  (reg8 *) ColReg2_Sync_ctrl_reg__CONTROL_REG )
+#define DriveReg0_Control        (* (reg8 *) DriveReg0_Sync_ctrl_reg__CONTROL_REG )
+#define DriveReg0_Control_PTR    (  (reg8 *) DriveReg0_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_ColReg2_H */
+#endif /* End CY_CONTROL_REG_DriveReg0_H */
 
 
 /* [] END OF FILE */

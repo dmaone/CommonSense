@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg3.c  
+* File Name: DirveReg3.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg3.h"
+#include "DirveReg3.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg3_Sync_ctrl_reg__REMOVED)
+#if !defined(DirveReg3_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: ColReg3_Write
+* Function Name: DirveReg3_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void ColReg3_Write(uint8 control) 
+void DirveReg3_Write(uint8 control) 
 {
-    ColReg3_Control = control;
+    DirveReg3_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg3_Read
+* Function Name: DirveReg3_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void ColReg3_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 ColReg3_Read(void) 
+uint8 DirveReg3_Read(void) 
 {
-    return ColReg3_Control;
+    return DirveReg3_Control;
 }
 
 #endif /* End check for removal by optimization */

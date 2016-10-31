@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ColReg2_PM.c
+* File Name: DriveReg0_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ColReg2.h"
+#include "DriveReg0.h"
 
 /* Check for removal by optimization */
-#if !defined(ColReg2_Sync_ctrl_reg__REMOVED)
+#if !defined(DriveReg0_Sync_ctrl_reg__REMOVED)
 
-static ColReg2_BACKUP_STRUCT  ColReg2_backup = {0u};
+static DriveReg0_BACKUP_STRUCT  DriveReg0_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: ColReg2_SaveConfig
+* Function Name: DriveReg0_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static ColReg2_BACKUP_STRUCT  ColReg2_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void ColReg2_SaveConfig(void) 
+void DriveReg0_SaveConfig(void) 
 {
-    ColReg2_backup.controlState = ColReg2_Control;
+    DriveReg0_backup.controlState = DriveReg0_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg2_RestoreConfig
+* Function Name: DriveReg0_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void ColReg2_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void ColReg2_RestoreConfig(void) 
+void DriveReg0_RestoreConfig(void) 
 {
-     ColReg2_Control = ColReg2_backup.controlState;
+     DriveReg0_Control = DriveReg0_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg2_Sleep
+* Function Name: DriveReg0_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void ColReg2_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void ColReg2_Sleep(void) 
+void DriveReg0_Sleep(void) 
 {
-    ColReg2_SaveConfig();
+    DriveReg0_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: ColReg2_Wakeup
+* Function Name: DriveReg0_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void ColReg2_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void ColReg2_Wakeup(void)  
+void DriveReg0_Wakeup(void)  
 {
-    ColReg2_RestoreConfig();
+    DriveReg0_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */
