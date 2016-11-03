@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADC_IRQ.c  
+* File Name: ADC1_IRQ.c  
 * Version 1.70
 *
 *  Description:
@@ -18,15 +18,15 @@
 
 #include <cydevice_trm.h>
 #include <CyLib.h>
-#include <ADC_IRQ.h>
+#include <ADC1_IRQ.h>
 #include "cyapicallbacks.h"
 
-#if !defined(ADC_IRQ__REMOVED) /* Check for removal by optimization */
+#if !defined(ADC1_IRQ__REMOVED) /* Check for removal by optimization */
 
 /*******************************************************************************
 *  Place your includes, defines and code here 
 ********************************************************************************/
-/* `#START ADC_IRQ_intc` */
+/* `#START ADC1_IRQ_intc` */
 
 /* `#END` */
 
@@ -42,7 +42,7 @@ CY_ISR_PROTO(IntDefaultHandler);
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_Start
+* Function Name: ADC1_IRQ_Start
 ********************************************************************************
 *
 * Summary:
@@ -58,24 +58,24 @@ CY_ISR_PROTO(IntDefaultHandler);
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_Start(void)
+void ADC1_IRQ_Start(void)
 {
     /* For all we know the interrupt is active. */
-    ADC_IRQ_Disable();
+    ADC1_IRQ_Disable();
 
-    /* Set the ISR to point to the ADC_IRQ Interrupt. */
-    ADC_IRQ_SetVector(&ADC_IRQ_Interrupt);
+    /* Set the ISR to point to the ADC1_IRQ Interrupt. */
+    ADC1_IRQ_SetVector(&ADC1_IRQ_Interrupt);
 
     /* Set the priority. */
-    ADC_IRQ_SetPriority((uint8)ADC_IRQ_INTC_PRIOR_NUMBER);
+    ADC1_IRQ_SetPriority((uint8)ADC1_IRQ_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    ADC_IRQ_Enable();
+    ADC1_IRQ_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_StartEx
+* Function Name: ADC1_IRQ_StartEx
 ********************************************************************************
 *
 * Summary:
@@ -101,24 +101,24 @@ void ADC_IRQ_Start(void)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_StartEx(cyisraddress address)
+void ADC1_IRQ_StartEx(cyisraddress address)
 {
     /* For all we know the interrupt is active. */
-    ADC_IRQ_Disable();
+    ADC1_IRQ_Disable();
 
-    /* Set the ISR to point to the ADC_IRQ Interrupt. */
-    ADC_IRQ_SetVector(address);
+    /* Set the ISR to point to the ADC1_IRQ Interrupt. */
+    ADC1_IRQ_SetVector(address);
 
     /* Set the priority. */
-    ADC_IRQ_SetPriority((uint8)ADC_IRQ_INTC_PRIOR_NUMBER);
+    ADC1_IRQ_SetPriority((uint8)ADC1_IRQ_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    ADC_IRQ_Enable();
+    ADC1_IRQ_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_Stop
+* Function Name: ADC1_IRQ_Stop
 ********************************************************************************
 *
 * Summary:
@@ -131,22 +131,22 @@ void ADC_IRQ_StartEx(cyisraddress address)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_Stop(void)
+void ADC1_IRQ_Stop(void)
 {
     /* Disable this interrupt. */
-    ADC_IRQ_Disable();
+    ADC1_IRQ_Disable();
 
     /* Set the ISR to point to the passive one. */
-    ADC_IRQ_SetVector(&IntDefaultHandler);
+    ADC1_IRQ_SetVector(&IntDefaultHandler);
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_Interrupt
+* Function Name: ADC1_IRQ_Interrupt
 ********************************************************************************
 *
 * Summary:
-*   The default Interrupt Service Routine for ADC_IRQ.
+*   The default Interrupt Service Routine for ADC1_IRQ.
 *
 *   Add custom code between the coments to keep the next version of this file
 *   from over writting your code.
@@ -157,27 +157,27 @@ void ADC_IRQ_Stop(void)
 *   None
 *
 *******************************************************************************/
-CY_ISR(ADC_IRQ_Interrupt)
+CY_ISR(ADC1_IRQ_Interrupt)
 {
-    #ifdef ADC_IRQ_INTERRUPT_INTERRUPT_CALLBACK
-        ADC_IRQ_Interrupt_InterruptCallback();
-    #endif /* ADC_IRQ_INTERRUPT_INTERRUPT_CALLBACK */ 
+    #ifdef ADC1_IRQ_INTERRUPT_INTERRUPT_CALLBACK
+        ADC1_IRQ_Interrupt_InterruptCallback();
+    #endif /* ADC1_IRQ_INTERRUPT_INTERRUPT_CALLBACK */ 
 
     /*  Place your Interrupt code here. */
-    /* `#START ADC_IRQ_Interrupt` */
+    /* `#START ADC1_IRQ_Interrupt` */
 
     /* `#END` */
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_SetVector
+* Function Name: ADC1_IRQ_SetVector
 ********************************************************************************
 *
 * Summary:
-*   Change the ISR vector for the Interrupt. Note calling ADC_IRQ_Start
+*   Change the ISR vector for the Interrupt. Note calling ADC1_IRQ_Start
 *   will override any effect this method would have had. To set the vector 
-*   before the component has been started use ADC_IRQ_StartEx instead.
+*   before the component has been started use ADC1_IRQ_StartEx instead.
 * 
 *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
 *   used to provide consistent definition across compilers:
@@ -197,18 +197,18 @@ CY_ISR(ADC_IRQ_Interrupt)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_SetVector(cyisraddress address)
+void ADC1_IRQ_SetVector(cyisraddress address)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    ramVectorTable[CYINT_IRQ_BASE + (uint32)ADC_IRQ__INTC_NUMBER] = address;
+    ramVectorTable[CYINT_IRQ_BASE + (uint32)ADC1_IRQ__INTC_NUMBER] = address;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_GetVector
+* Function Name: ADC1_IRQ_GetVector
 ********************************************************************************
 *
 * Summary:
@@ -221,26 +221,26 @@ void ADC_IRQ_SetVector(cyisraddress address)
 *   Address of the ISR in the interrupt vector table.
 *
 *******************************************************************************/
-cyisraddress ADC_IRQ_GetVector(void)
+cyisraddress ADC1_IRQ_GetVector(void)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    return ramVectorTable[CYINT_IRQ_BASE + (uint32)ADC_IRQ__INTC_NUMBER];
+    return ramVectorTable[CYINT_IRQ_BASE + (uint32)ADC1_IRQ__INTC_NUMBER];
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_SetPriority
+* Function Name: ADC1_IRQ_SetPriority
 ********************************************************************************
 *
 * Summary:
 *   Sets the Priority of the Interrupt. 
 *
-*   Note calling ADC_IRQ_Start or ADC_IRQ_StartEx will 
+*   Note calling ADC1_IRQ_Start or ADC1_IRQ_StartEx will 
 *   override any effect this API would have had. This API should only be called
-*   after ADC_IRQ_Start or ADC_IRQ_StartEx has been called. 
+*   after ADC1_IRQ_Start or ADC1_IRQ_StartEx has been called. 
 *   To set the initial priority for the component, use the Design-Wide Resources
 *   Interrupt Editor.
 *
@@ -255,14 +255,14 @@ cyisraddress ADC_IRQ_GetVector(void)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_SetPriority(uint8 priority)
+void ADC1_IRQ_SetPriority(uint8 priority)
 {
-    *ADC_IRQ_INTC_PRIOR = priority << 5;
+    *ADC1_IRQ_INTC_PRIOR = priority << 5;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_GetPriority
+* Function Name: ADC1_IRQ_GetPriority
 ********************************************************************************
 *
 * Summary:
@@ -277,19 +277,19 @@ void ADC_IRQ_SetPriority(uint8 priority)
 *    PSoC 4: Priority is from 0 to 3.
 *
 *******************************************************************************/
-uint8 ADC_IRQ_GetPriority(void)
+uint8 ADC1_IRQ_GetPriority(void)
 {
     uint8 priority;
 
 
-    priority = *ADC_IRQ_INTC_PRIOR >> 5;
+    priority = *ADC1_IRQ_INTC_PRIOR >> 5;
 
     return priority;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_Enable
+* Function Name: ADC1_IRQ_Enable
 ********************************************************************************
 *
 * Summary:
@@ -304,15 +304,15 @@ uint8 ADC_IRQ_GetPriority(void)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_Enable(void)
+void ADC1_IRQ_Enable(void)
 {
     /* Enable the general interrupt. */
-    *ADC_IRQ_INTC_SET_EN = ADC_IRQ__INTC_MASK;
+    *ADC1_IRQ_INTC_SET_EN = ADC1_IRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_GetState
+* Function Name: ADC1_IRQ_GetState
 ********************************************************************************
 *
 * Summary:
@@ -325,15 +325,15 @@ void ADC_IRQ_Enable(void)
 *   1 if enabled, 0 if disabled.
 *
 *******************************************************************************/
-uint8 ADC_IRQ_GetState(void)
+uint8 ADC1_IRQ_GetState(void)
 {
     /* Get the state of the general interrupt. */
-    return ((*ADC_IRQ_INTC_SET_EN & (uint32)ADC_IRQ__INTC_MASK) != 0u) ? 1u:0u;
+    return ((*ADC1_IRQ_INTC_SET_EN & (uint32)ADC1_IRQ__INTC_MASK) != 0u) ? 1u:0u;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_Disable
+* Function Name: ADC1_IRQ_Disable
 ********************************************************************************
 *
 * Summary:
@@ -346,15 +346,15 @@ uint8 ADC_IRQ_GetState(void)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_Disable(void)
+void ADC1_IRQ_Disable(void)
 {
     /* Disable the general interrupt. */
-    *ADC_IRQ_INTC_CLR_EN = ADC_IRQ__INTC_MASK;
+    *ADC1_IRQ_INTC_CLR_EN = ADC1_IRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_SetPending
+* Function Name: ADC1_IRQ_SetPending
 ********************************************************************************
 *
 * Summary:
@@ -373,14 +373,14 @@ void ADC_IRQ_Disable(void)
 *   interrupts).
 *
 *******************************************************************************/
-void ADC_IRQ_SetPending(void)
+void ADC1_IRQ_SetPending(void)
 {
-    *ADC_IRQ_INTC_SET_PD = ADC_IRQ__INTC_MASK;
+    *ADC1_IRQ_INTC_SET_PD = ADC1_IRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_IRQ_ClearPending
+* Function Name: ADC1_IRQ_ClearPending
 ********************************************************************************
 *
 * Summary:
@@ -398,9 +398,9 @@ void ADC_IRQ_SetPending(void)
 *   None
 *
 *******************************************************************************/
-void ADC_IRQ_ClearPending(void)
+void ADC1_IRQ_ClearPending(void)
 {
-    *ADC_IRQ_INTC_CLR_PD = ADC_IRQ__INTC_MASK;
+    *ADC1_IRQ_INTC_CLR_PD = ADC1_IRQ__INTC_MASK;
 }
 
 #endif /* End check for removal by optimization */

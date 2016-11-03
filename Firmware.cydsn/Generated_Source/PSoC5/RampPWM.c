@@ -400,10 +400,10 @@ void RampPWM_Stop(void)
     *  The PWM Period will be reloaded when a counter value will be a zero
     *
     *******************************************************************************/
-    void RampPWM_WriteCounter(uint16 counter) \
+    void RampPWM_WriteCounter(uint8 counter) \
                                        
     {
-        CY_SET_REG16(RampPWM_COUNTER_LSB_PTR, counter);
+        CY_SET_REG8(RampPWM_COUNTER_LSB_PTR, counter);
     }
 
 
@@ -422,7 +422,7 @@ void RampPWM_Stop(void)
     *  The current value of the counter.
     *
     *******************************************************************************/
-    uint16 RampPWM_ReadCounter(void) 
+    uint8 RampPWM_ReadCounter(void) 
     {
         /* Force capture by reading Accumulator */
         /* Must first do a software capture to be able to read the counter */
@@ -430,7 +430,7 @@ void RampPWM_Stop(void)
           (void)CY_GET_REG8(RampPWM_COUNTERCAP_LSB_PTR_8BIT);
 
         /* Read the data from the FIFO */
-        return (CY_GET_REG16(RampPWM_CAPTURE_LSB_PTR));
+        return (CY_GET_REG8(RampPWM_CAPTURE_LSB_PTR));
     }
 
     #if (RampPWM_UseStatus)
@@ -479,12 +479,12 @@ void RampPWM_Stop(void)
 *  None
 *
 *******************************************************************************/
-void RampPWM_WritePeriod(uint16 period) 
+void RampPWM_WritePeriod(uint8 period) 
 {
     #if(RampPWM_UsingFixedFunction)
         CY_SET_REG16(RampPWM_PERIOD_LSB_PTR, (uint16)period);
     #else
-        CY_SET_REG16(RampPWM_PERIOD_LSB_PTR, period);
+        CY_SET_REG8(RampPWM_PERIOD_LSB_PTR, period);
     #endif /* (RampPWM_UsingFixedFunction) */
 }
 
@@ -513,20 +513,20 @@ void RampPWM_WritePeriod(uint16 period)
     *  Dither Mode, Center Aligned Mode or One Output Mode
     *
     *******************************************************************************/
-    void RampPWM_WriteCompare(uint16 compare) \
+    void RampPWM_WriteCompare(uint8 compare) \
                                        
     {
         #if(RampPWM_UsingFixedFunction)
             CY_SET_REG16(RampPWM_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG16(RampPWM_COMPARE1_LSB_PTR, compare);
+            CY_SET_REG8(RampPWM_COMPARE1_LSB_PTR, compare);
         #endif /* (RampPWM_UsingFixedFunction) */
 
         #if (RampPWM_PWMMode == RampPWM__B_PWM__DITHER)
             #if(RampPWM_UsingFixedFunction)
                 CY_SET_REG16(RampPWM_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
             #else
-                CY_SET_REG16(RampPWM_COMPARE2_LSB_PTR, (compare + 1u));
+                CY_SET_REG8(RampPWM_COMPARE2_LSB_PTR, (compare + 1u));
             #endif /* (RampPWM_UsingFixedFunction) */
         #endif /* (RampPWM_PWMMode == RampPWM__B_PWM__DITHER) */
     }
@@ -552,13 +552,13 @@ void RampPWM_WritePeriod(uint16 period)
     *  None
     *
     *******************************************************************************/
-    void RampPWM_WriteCompare1(uint16 compare) \
+    void RampPWM_WriteCompare1(uint8 compare) \
                                         
     {
         #if(RampPWM_UsingFixedFunction)
             CY_SET_REG16(RampPWM_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG16(RampPWM_COMPARE1_LSB_PTR, compare);
+            CY_SET_REG8(RampPWM_COMPARE1_LSB_PTR, compare);
         #endif /* (RampPWM_UsingFixedFunction) */
     }
 
@@ -581,13 +581,13 @@ void RampPWM_WritePeriod(uint16 period)
     *  None
     *
     *******************************************************************************/
-    void RampPWM_WriteCompare2(uint16 compare) \
+    void RampPWM_WriteCompare2(uint8 compare) \
                                         
     {
         #if(RampPWM_UsingFixedFunction)
             CY_SET_REG16(RampPWM_COMPARE2_LSB_PTR, compare);
         #else
-            CY_SET_REG16(RampPWM_COMPARE2_LSB_PTR, compare);
+            CY_SET_REG8(RampPWM_COMPARE2_LSB_PTR, compare);
         #endif /* (RampPWM_UsingFixedFunction) */
     }
 #endif /* UseOneCompareMode */
@@ -787,9 +787,9 @@ void RampPWM_WritePeriod(uint16 period)
     *  uint8/uint16: The current capture value
     *
     *******************************************************************************/
-    uint16 RampPWM_ReadCapture(void) 
+    uint8 RampPWM_ReadCapture(void) 
     {
-        return (CY_GET_REG16(RampPWM_CAPTURE_LSB_PTR));
+        return (CY_GET_REG8(RampPWM_CAPTURE_LSB_PTR));
     }
 
 #endif /* (!RampPWM_UsingFixedFunction) */
@@ -813,12 +813,12 @@ void RampPWM_WritePeriod(uint16 period)
     *  uint8/uint16: Current compare value
     *
     *******************************************************************************/
-    uint16 RampPWM_ReadCompare(void) 
+    uint8 RampPWM_ReadCompare(void) 
     {
         #if(RampPWM_UsingFixedFunction)
-            return ((uint16)CY_GET_REG16(RampPWM_COMPARE1_LSB_PTR));
+            return ((uint8)CY_GET_REG16(RampPWM_COMPARE1_LSB_PTR));
         #else
-            return (CY_GET_REG16(RampPWM_COMPARE1_LSB_PTR));
+            return (CY_GET_REG8(RampPWM_COMPARE1_LSB_PTR));
         #endif /* (RampPWM_UsingFixedFunction) */
     }
 
@@ -839,9 +839,9 @@ void RampPWM_WritePeriod(uint16 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint16 RampPWM_ReadCompare1(void) 
+    uint8 RampPWM_ReadCompare1(void) 
     {
-        return (CY_GET_REG16(RampPWM_COMPARE1_LSB_PTR));
+        return (CY_GET_REG8(RampPWM_COMPARE1_LSB_PTR));
     }
 
 
@@ -859,9 +859,9 @@ void RampPWM_WritePeriod(uint16 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint16 RampPWM_ReadCompare2(void) 
+    uint8 RampPWM_ReadCompare2(void) 
     {
-        return (CY_GET_REG16(RampPWM_COMPARE2_LSB_PTR));
+        return (CY_GET_REG8(RampPWM_COMPARE2_LSB_PTR));
     }
 
 #endif /* (RampPWM_UseOneCompareMode) */
@@ -881,12 +881,12 @@ void RampPWM_WritePeriod(uint16 period)
 *  uint8/16: Period value
 *
 *******************************************************************************/
-uint16 RampPWM_ReadPeriod(void) 
+uint8 RampPWM_ReadPeriod(void) 
 {
     #if(RampPWM_UsingFixedFunction)
-        return ((uint16)CY_GET_REG16(RampPWM_PERIOD_LSB_PTR));
+        return ((uint8)CY_GET_REG16(RampPWM_PERIOD_LSB_PTR));
     #else
-        return (CY_GET_REG16(RampPWM_PERIOD_LSB_PTR));
+        return (CY_GET_REG8(RampPWM_PERIOD_LSB_PTR));
     #endif /* (RampPWM_UsingFixedFunction) */
 }
 

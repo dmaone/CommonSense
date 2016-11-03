@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADC_SAR_Bypass.h  
+* File Name: ADC0_Bypass.h  
 * Version 1.90
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_PINS_ADC_SAR_Bypass_ALIASES_H) /* Pins ADC_SAR_Bypass_ALIASES_H */
-#define CY_PINS_ADC_SAR_Bypass_ALIASES_H
+#if !defined(CY_PINS_ADC0_Bypass_ALIASES_H) /* Pins ADC0_Bypass_ALIASES_H */
+#define CY_PINS_ADC0_Bypass_ALIASES_H
 
 #include "cytypes.h"
 #include "cyfitter.h"
@@ -25,8 +25,8 @@
 /***************************************
 *              Constants        
 ***************************************/
-#define ADC_SAR_Bypass_0		ADC_SAR_Bypass__0__PC
+#define ADC0_Bypass_0		ADC0_Bypass__0__PC
 
-#endif /* End Pins ADC_SAR_Bypass_ALIASES_H */
+#endif /* End Pins ADC0_Bypass_ALIASES_H */
 
 /* [] END OF FILE */

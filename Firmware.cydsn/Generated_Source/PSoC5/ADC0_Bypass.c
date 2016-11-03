@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADC_SAR_Bypass.c  
+* File Name: ADC0_Bypass.c  
 * Version 1.90
 *
 * Description:
@@ -15,15 +15,15 @@
 *******************************************************************************/
 
 #include "cytypes.h"
-#include "ADC_SAR_Bypass.h"
+#include "ADC0_Bypass.h"
 
 /* APIs are not generated for P15[7:6] on PSoC 5 */
 #if !(CY_PSOC5A &&\
-	 ADC_SAR_Bypass__PORT == 15 && ((ADC_SAR_Bypass__MASK & 0xC0) != 0))
+	 ADC0_Bypass__PORT == 15 && ((ADC0_Bypass__MASK & 0xC0) != 0))
 
 
 /*******************************************************************************
-* Function Name: ADC_SAR_Bypass_Write
+* Function Name: ADC0_Bypass_Write
 ********************************************************************************
 *
 * Summary:
@@ -36,15 +36,15 @@
 *  None
 *  
 *******************************************************************************/
-void ADC_SAR_Bypass_Write(uint8 value) 
+void ADC0_Bypass_Write(uint8 value) 
 {
-    uint8 staticBits = (ADC_SAR_Bypass_DR & (uint8)(~ADC_SAR_Bypass_MASK));
-    ADC_SAR_Bypass_DR = staticBits | ((uint8)(value << ADC_SAR_Bypass_SHIFT) & ADC_SAR_Bypass_MASK);
+    uint8 staticBits = (ADC0_Bypass_DR & (uint8)(~ADC0_Bypass_MASK));
+    ADC0_Bypass_DR = staticBits | ((uint8)(value << ADC0_Bypass_SHIFT) & ADC0_Bypass_MASK);
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_SAR_Bypass_SetDriveMode
+* Function Name: ADC0_Bypass_SetDriveMode
 ********************************************************************************
 *
 * Summary:
@@ -57,14 +57,14 @@ void ADC_SAR_Bypass_Write(uint8 value)
 *  None
 *
 *******************************************************************************/
-void ADC_SAR_Bypass_SetDriveMode(uint8 mode) 
+void ADC0_Bypass_SetDriveMode(uint8 mode) 
 {
-	CyPins_SetPinDriveMode(ADC_SAR_Bypass_0, mode);
+	CyPins_SetPinDriveMode(ADC0_Bypass_0, mode);
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_SAR_Bypass_Read
+* Function Name: ADC0_Bypass_Read
 ********************************************************************************
 *
 * Summary:
@@ -78,17 +78,17 @@ void ADC_SAR_Bypass_SetDriveMode(uint8 mode)
 *  Returns the current value of the Digital Port as a right justified number
 *  
 * Note:
-*  Macro ADC_SAR_Bypass_ReadPS calls this function. 
+*  Macro ADC0_Bypass_ReadPS calls this function. 
 *  
 *******************************************************************************/
-uint8 ADC_SAR_Bypass_Read(void) 
+uint8 ADC0_Bypass_Read(void) 
 {
-    return (ADC_SAR_Bypass_PS & ADC_SAR_Bypass_MASK) >> ADC_SAR_Bypass_SHIFT;
+    return (ADC0_Bypass_PS & ADC0_Bypass_MASK) >> ADC0_Bypass_SHIFT;
 }
 
 
 /*******************************************************************************
-* Function Name: ADC_SAR_Bypass_ReadDataReg
+* Function Name: ADC0_Bypass_ReadDataReg
 ********************************************************************************
 *
 * Summary:
@@ -101,17 +101,17 @@ uint8 ADC_SAR_Bypass_Read(void)
 *  Returns the current value assigned to the Digital Port's data output register
 *  
 *******************************************************************************/
-uint8 ADC_SAR_Bypass_ReadDataReg(void) 
+uint8 ADC0_Bypass_ReadDataReg(void) 
 {
-    return (ADC_SAR_Bypass_DR & ADC_SAR_Bypass_MASK) >> ADC_SAR_Bypass_SHIFT;
+    return (ADC0_Bypass_DR & ADC0_Bypass_MASK) >> ADC0_Bypass_SHIFT;
 }
 
 
 /* If Interrupts Are Enabled for this Pins component */ 
-#if defined(ADC_SAR_Bypass_INTSTAT) 
+#if defined(ADC0_Bypass_INTSTAT) 
 
     /*******************************************************************************
-    * Function Name: ADC_SAR_Bypass_ClearInterrupt
+    * Function Name: ADC0_Bypass_ClearInterrupt
     ********************************************************************************
     * Summary:
     *  Clears any active interrupts attached to port and returns the value of the 
@@ -124,9 +124,9 @@ uint8 ADC_SAR_Bypass_ReadDataReg(void)
     *  Returns the value of the interrupt status register
     *  
     *******************************************************************************/
-    uint8 ADC_SAR_Bypass_ClearInterrupt(void) 
+    uint8 ADC0_Bypass_ClearInterrupt(void) 
     {
-        return (ADC_SAR_Bypass_INTSTAT & ADC_SAR_Bypass_MASK) >> ADC_SAR_Bypass_SHIFT;
+        return (ADC0_Bypass_INTSTAT & ADC0_Bypass_MASK) >> ADC0_Bypass_SHIFT;
     }
 
 #endif /* If Interrupts Are Enabled for this Pins component */ 

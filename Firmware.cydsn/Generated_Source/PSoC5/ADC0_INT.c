@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: ADC_SAR_INT.c
+* File Name: ADC0_INT.c
 * Version 3.0
 *
 *  Description:
@@ -15,7 +15,7 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "ADC_SAR.h"
+#include "ADC0.h"
 #include "cyapicallbacks.h"
 
 
@@ -28,11 +28,11 @@
 
 /* `#END`  */
 
-#if(ADC_SAR_IRQ_REMOVE == 0u)
+#if(ADC0_IRQ_REMOVE == 0u)
 
 
     /******************************************************************************
-    * Function Name: ADC_SAR_ISR
+    * Function Name: ADC0_ISR
     *******************************************************************************
     *
     * Summary:
@@ -48,11 +48,11 @@
     *  No.
     *
     ******************************************************************************/
-    CY_ISR( ADC_SAR_ISR )
+    CY_ISR( ADC0_ISR )
     {
-        #ifdef ADC_SAR_ISR_INTERRUPT_CALLBACK
-            ADC_SAR_ISR_InterruptCallback();
-        #endif /* ADC_SAR_ISR_INTERRUPT_CALLBACK */          
+        #ifdef ADC0_ISR_INTERRUPT_CALLBACK
+            ADC0_ISR_InterruptCallback();
+        #endif /* ADC0_ISR_INTERRUPT_CALLBACK */          
 
         
         /************************************************************************
@@ -64,6 +64,6 @@
           /* `#END`  */
     }
 
-#endif   /* End ADC_SAR_IRQ_REMOVE */
+#endif   /* End ADC0_IRQ_REMOVE */
 
 /* [] END OF FILE */

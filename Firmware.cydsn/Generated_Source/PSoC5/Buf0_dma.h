@@ -1,5 +1,5 @@
 /******************************************************************************
-* File Name: ADC_FinalBuf_dma.h  
+* File Name: Buf0_dma.h  
 * Version 1.70
 *
 *  Description:
@@ -12,24 +12,24 @@
 * disclaimers, and limitations in the end user license agreement accompanying 
 * the software package with which this file was provided.
 ********************************************************************************/
-#if !defined(CY_DMA_ADC_FinalBuf_DMA_H__)
-#define CY_DMA_ADC_FinalBuf_DMA_H__
+#if !defined(CY_DMA_Buf0_DMA_H__)
+#define CY_DMA_Buf0_DMA_H__
 
 
 
 #include <CYDMAC.H>
 #include <CYFITTER.H>
 
-#define ADC_FinalBuf__TD_TERMOUT_EN (((0 != ADC_FinalBuf__TERMOUT0_EN) ? TD_TERMOUT0_EN : 0) | \
-    (ADC_FinalBuf__TERMOUT1_EN ? TD_TERMOUT1_EN : 0))
+#define Buf0__TD_TERMOUT_EN (((0 != Buf0__TERMOUT0_EN) ? TD_TERMOUT0_EN : 0) | \
+    (Buf0__TERMOUT1_EN ? TD_TERMOUT1_EN : 0))
 
-/* Zero based index of ADC_FinalBuf dma channel */
-extern uint8 ADC_FinalBuf_DmaHandle;
-
-
-uint8 ADC_FinalBuf_DmaInitialize(uint8 BurstCount, uint8 ReqestPerBurst, uint16 UpperSrcAddress, uint16 UpperDestAddress) ;
-void  ADC_FinalBuf_DmaRelease(void) ;
+/* Zero based index of Buf0 dma channel */
+extern uint8 Buf0_DmaHandle;
 
 
-/* CY_DMA_ADC_FinalBuf_DMA_H__ */
+uint8 Buf0_DmaInitialize(uint8 BurstCount, uint8 ReqestPerBurst, uint16 UpperSrcAddress, uint16 UpperDestAddress) ;
+void  Buf0_DmaRelease(void) ;
+
+
+/* CY_DMA_Buf0_DMA_H__ */
 #endif

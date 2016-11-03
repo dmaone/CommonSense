@@ -12,6 +12,14 @@
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
 #include "cyapicallbacks.h"
+//#include "cyfitter.h" // for MAGIC
+
+void Boot_Load(void)
+{
+    LED_Write(1u);
+    CyDelayUs(20);
+    LED_Write(0u);
+}
 
 void BootIRQ_Interrupt_InterruptCallback(void)
 {
@@ -22,6 +30,7 @@ uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
+/*
 const uint32_t Drives[] = {
     Rows0_0, Rows0_1, Rows0_2, Rows0_3, Rows0_4, Rows0_5, Rows0_6, Rows0_7
 };
@@ -30,40 +39,26 @@ const uint32_t Senses[] = {
     Cols0_0, Cols0_1, Cols0_2, Cols0_3, Cols0_4, Cols0_5, Cols0_6, Cols0_7,
     Cols1_0, Cols1_1, Cols1_2, Cols1_3, Cols1_4, Cols1_5, Cols1_6, Cols1_7
 };
+*/
 
-#define INTERLEAVE 2
-//const uint16 SenseMap = 0b1001001001001001; //every 3rd
-const uint16 SenseMap = 0b0101010101010101; //every 2nd
+static uint8 Buf0Mem[4], Buf1Mem[4]; // Actual results are 16 bits, but we don't need that much. So we read half.
 
-void SetColumns(uint8 col)
+void Drive(uint8 drv)
 {
-    CyPins_SetPinDriveMode(Drives[col], PIN_DM_RES_UPDWN);
+/*
+ * CyPins_SetPinDriveMode is HELLISHLY expensive (about 1us/call)
+ * So changing drive mode in realtime to enhance crosstalk immunity is _not_ a good idea.
+ * reading the row in 4us is pointless if you spend 20us setting drive modes.
+*/
     //SetPin should not be used because it doesn't trigger start circuitry
-    DriveReg0_Write((1 << col) & 0xff);
+    DriveReg0_Write(1 << drv);
 }
 
-void PinColumn(uint8 col)
+void primeSensor(uint8 part)
 {
-    CyPins_SetPinDriveMode(Drives[col], PIN_DM_OD_LO);
-}
-
-void enableSensor(uint8 part)
-{
-    if (!config.capsense_flags.interlacedScan)
-    {
-        SenseReg0_Write(0xff);
-    } else {
-        uint16_t sm = (SenseMap << part) & 0xffff;
-        for(uint8 i=0; i<16; i++) {
-            if ( sm & (1 << i) ) {
-                CyPins_SetPinDriveMode(Senses[i], PIN_DM_RES_UPDWN);
-            } else {
-                CyPins_SetPinDriveMode(Senses[i], PIN_DM_OD_LO);
-            }
-        }
-        SenseReg0_Write(sm & 0xff); // !!!TODO!! pattern!
-        SenseReg1_Write((sm >> 8) & 0xff); // !!!TODO!! pattern!
-    }
+    uint16 tt = 0b0101010101010101;
+    SenseReg0_Write((tt << part) & 0xff);
+    SenseReg1_Write((tt << part) & 0xff);
 }
 
 uint8_t maxlevel = 0;
@@ -72,33 +67,24 @@ uint32_t lpings = 0;
 
 void scanColumn(uint8 col, uint8_t part)
 {
-    //CyDelayUs(3);
-    enableSensor(part);
-    SetColumns(col);
-    uint8_t cnt = 255;
+    primeSensor(part);
+    Drive(col);
+    uint8_t cnt = 50;
     while (cnt && !(HWState_Read() & 0x01))
     {
         CyDelayUs(1);
         cnt--;
     }// Wait for HW
     if (!cnt) {
-        // Ugly hack. Timeout here means ADC didn't start properly.
-        // So far this only happened on startup - if it starts normally, it works.
-        // Probability of not starting seems about 20%. So 2-3 
-        //CySoftwareReset();
+        // Something _very_ wrong happened.
         Boot_Load();
 
     }
-    PinColumn(col);
-    for(uint8 i=0; i<8; i++) {
-//    for(uint8 i=0; i<config.matrixCols; i++) {
-//        if (config.capsense_flags.interlacedScan && (i % 2 != half))
-//            continue;
-//        matrix[col][i] = ADC_Samples[i] & 0xff;
-//        matrix[col][i] += ADC_GetResult16(i) & 0xff;
-        matrix[col][INTERLEAVE*i + part] += ADC_GetResult16(INTERLEAVE*i + part) & 0xff;
-//        if (maxlevel < matrix[col][i])
-//            maxlevel = matrix[col][i];
+    for(int i=0; i<4; i++) {
+        // Since Count7 counts down, _last_ channel is first in buffer.
+        // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
+        matrix[col][2*i + part] = Buf0Mem[i];
+        matrix[col][2*i + 8 + part] = Buf1Mem[i];
     }
 }
 
@@ -118,15 +104,15 @@ void printColumn(uint8 col)
 void read_matrix(void)
 {
     //FIXME rename everything - we're scanning rows and read columns actually!
-    for(uint8 i = 0; i<8; i++) {
+    for(uint8 i = 0; i<8; i++){
         scanColumn(i, 0);
-        scanColumn((i+4)%8, 1);
-  }
+        scanColumn((i+4) % 8, 1);
+    }
 }
 
 void scan(void)
 {
-    memset(matrix, 0x00, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
+    memset(matrix, 0xbf, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
     read_matrix();
 }
 
@@ -206,6 +192,60 @@ void send_report(void)
         //usb_send(KEYBOARD_EP);
     }
 }
+static uint8 Buf0Chan, Buf1Chan;
+static uint8 Buf0TD = CY_DMA_INVALID_TD;
+static uint8 Buf1TD = CY_DMA_INVALID_TD;
+
+void InitSensor(void)
+{
+    uint8 enableInterrupts;
+    /* Init DMA, 2 bytes bursts, each burst requires a request */
+    Buf0Chan = Buf0_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf1Chan = Buf1_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    //(*(reg8 *)PTK_ChannelCounter__PERIOD_REG) = 3u;
+    enableInterrupts = CyEnterCriticalSection();
+    (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
+    CyExitCriticalSection(enableInterrupts);
+    ADC0_Start();
+    ADC1_Start();
+    CyDelayUs(10); // Give ADCs time to warm up
+}
+
+void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)
+{
+    (void)CyDmaClearPendingDrq(*chan);
+    if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
+    (void) CyDmaTdSetConfiguration(*td, (uint16)4u, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
+    (void) CyDmaChSetInitialTd(*chan, *td);
+    (void) CyDmaChEnable(*chan, 1);
+}
+
+void EnableSensor(void)
+{
+    //BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
+    (void)CyDmaClearPendingDrq(Buf0Chan);
+    if (Buf0TD == CY_DMA_INVALID_TD) Buf0TD = CyDmaTdAllocate();
+    (void) CyDmaTdSetConfiguration(Buf0TD, 4u,  Buf0TD, ((uint8)Buf0__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetAddress(Buf0TD, LO16((uint32)ADC0_ADC_SAR__WRK0), LO16((uint32)Buf0Mem));
+    (void) CyDmaChSetInitialTd(Buf0Chan, Buf0TD);
+    (void) CyDmaChEnable(Buf0Chan, 1);
+    
+    (void)CyDmaClearPendingDrq(Buf1Chan);
+    if (Buf1TD == CY_DMA_INVALID_TD) Buf1TD = CyDmaTdAllocate();
+    (void) CyDmaTdSetConfiguration(Buf1TD, 4u,  Buf1TD, ((uint8)Buf1__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetAddress(Buf1TD, LO16((uint32)ADC1_ADC_SAR__WRK0), LO16((uint32)Buf1Mem));
+    (void) CyDmaChSetInitialTd(Buf1Chan, Buf1TD);
+    (void) CyDmaChEnable(Buf1Chan, 1);
+    //BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
+    (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
+}
+
+void SetupSensor(void)
+{
+    InitSensor();
+    EnableSensor();
+}
 
 int main()
 {
@@ -216,9 +256,8 @@ int main()
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
     RampPWM_Start();
-    ADC_Start();
+    SetupSensor();
     scan(); // fill matrix state, check if ADC is operational
-    
     USB_Start(0u, USB_5V_OPERATION);
     usb_init();
     LED_Write(0u);
@@ -243,7 +282,7 @@ int main()
         }
         scan();
         if (status_register.matrix_output > 0)
-            for(uint8 i = 0; i<config.matrixCols; ++i)
+            for(uint8 i = 0; i<config.matrixCols; i++)
                 printColumn(i);
         if (is_matrix_changed())
         {

@@ -28,7 +28,7 @@ extern uint8 RampPWM_initVar;
 /***************************************
 * Conditional Compilation Parameters
 ***************************************/
-#define RampPWM_Resolution                     (16u)
+#define RampPWM_Resolution                     (8u)
 #define RampPWM_UsingFixedFunction             (0u)
 #define RampPWM_DeadBandMode                   (0u)
 #define RampPWM_KillModeMinTime                (0u)
@@ -110,9 +110,9 @@ typedef struct
     uint8 PWMEnableState;
 
     #if(!RampPWM_UsingFixedFunction)
-        uint16 PWMUdb;               /* PWM Current Counter value  */
+        uint8 PWMUdb;               /* PWM Current Counter value  */
         #if(!RampPWM_PWMModeIsCenterAligned)
-            uint16 PWMPeriod;
+            uint8 PWMPeriod;
         #endif /* (!RampPWM_PWMModeIsCenterAligned) */
         #if (RampPWM_UseStatus)
             uint8 InterruptMaskValue;   /* PWM Current Interrupt Mask */
@@ -176,32 +176,32 @@ void    RampPWM_Stop(void) ;
 #endif /* (RampPWM_UseOneCompareMode) */
 
 #if (!RampPWM_UsingFixedFunction)
-    uint16   RampPWM_ReadCounter(void) ;
-    uint16 RampPWM_ReadCapture(void) ;
+    uint8   RampPWM_ReadCounter(void) ;
+    uint8 RampPWM_ReadCapture(void) ;
 
     #if (RampPWM_UseStatus)
             void RampPWM_ClearFIFO(void) ;
     #endif /* (RampPWM_UseStatus) */
 
-    void    RampPWM_WriteCounter(uint16 counter)
+    void    RampPWM_WriteCounter(uint8 counter)
             ;
 #endif /* (!RampPWM_UsingFixedFunction) */
 
-void    RampPWM_WritePeriod(uint16 period)
+void    RampPWM_WritePeriod(uint8 period)
         ;
-uint16 RampPWM_ReadPeriod(void) ;
+uint8 RampPWM_ReadPeriod(void) ;
 
 #if (RampPWM_UseOneCompareMode)
-    void    RampPWM_WriteCompare(uint16 compare)
+    void    RampPWM_WriteCompare(uint8 compare)
             ;
-    uint16 RampPWM_ReadCompare(void) ;
+    uint8 RampPWM_ReadCompare(void) ;
 #else
-    void    RampPWM_WriteCompare1(uint16 compare)
+    void    RampPWM_WriteCompare1(uint8 compare)
             ;
-    uint16 RampPWM_ReadCompare1(void) ;
-    void    RampPWM_WriteCompare2(uint16 compare)
+    uint8 RampPWM_ReadCompare1(void) ;
+    void    RampPWM_WriteCompare2(uint8 compare)
             ;
-    uint16 RampPWM_ReadCompare2(void) ;
+    uint8 RampPWM_ReadCompare2(void) ;
 #endif /* (RampPWM_UseOneCompareMode) */
 
 
@@ -226,8 +226,8 @@ void RampPWM_RestoreConfig(void) ;
 /***************************************
 *         Initialization Values
 **************************************/
-#define RampPWM_INIT_PERIOD_VALUE          (150u)
-#define RampPWM_INIT_COMPARE_VALUE1        (20u)
+#define RampPWM_INIT_PERIOD_VALUE          (45u)
+#define RampPWM_INIT_COMPARE_VALUE1        (1u)
 #define RampPWM_INIT_COMPARE_VALUE2        (81u)
 #define RampPWM_INIT_INTERRUPTS_MODE       (uint8)(((uint8)(0u <<   \
                                                     RampPWM_STATUS_TC_INT_EN_MASK_SHIFT)) | \
@@ -264,73 +264,73 @@ void RampPWM_RestoreConfig(void) ;
    #if (RampPWM_Resolution == 8u) /* 8bit - PWM */
 
        #if(RampPWM_PWMModeIsCenterAligned)
-           #define RampPWM_PERIOD_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-           #define RampPWM_PERIOD_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
+           #define RampPWM_PERIOD_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+           #define RampPWM_PERIOD_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
        #else
-           #define RampPWM_PERIOD_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__F0_REG)
-           #define RampPWM_PERIOD_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__F0_REG)
+           #define RampPWM_PERIOD_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__F0_REG)
+           #define RampPWM_PERIOD_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__F0_REG)
        #endif /* (RampPWM_PWMModeIsCenterAligned) */
 
-       #define RampPWM_COMPARE1_LSB        (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D0_REG)
-       #define RampPWM_COMPARE1_LSB_PTR    ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__D0_REG)
-       #define RampPWM_COMPARE2_LSB        (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-       #define RampPWM_COMPARE2_LSB_PTR    ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-       #define RampPWM_COUNTERCAP_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__A1_REG)
-       #define RampPWM_COUNTERCAP_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__A1_REG)
-       #define RampPWM_COUNTER_LSB         (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__A0_REG)
-       #define RampPWM_COUNTER_LSB_PTR     ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__A0_REG)
-       #define RampPWM_CAPTURE_LSB         (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__F1_REG)
-       #define RampPWM_CAPTURE_LSB_PTR     ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__F1_REG)
+       #define RampPWM_COMPARE1_LSB        (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D0_REG)
+       #define RampPWM_COMPARE1_LSB_PTR    ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__D0_REG)
+       #define RampPWM_COMPARE2_LSB        (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+       #define RampPWM_COMPARE2_LSB_PTR    ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+       #define RampPWM_COUNTERCAP_LSB      (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__A1_REG)
+       #define RampPWM_COUNTERCAP_LSB_PTR  ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__A1_REG)
+       #define RampPWM_COUNTER_LSB         (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__A0_REG)
+       #define RampPWM_COUNTER_LSB_PTR     ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__A0_REG)
+       #define RampPWM_CAPTURE_LSB         (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__F1_REG)
+       #define RampPWM_CAPTURE_LSB_PTR     ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__F1_REG)
 
    #else
         #if(CY_PSOC3) /* 8-bit address space */
             #if(RampPWM_PWMModeIsCenterAligned)
-               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
+               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
             #else
-               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__F0_REG)
-               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__F0_REG)
+               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__F0_REG)
+               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__F0_REG)
             #endif /* (RampPWM_PWMModeIsCenterAligned) */
 
-            #define RampPWM_COMPARE1_LSB       (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__D0_REG)
-            #define RampPWM_COMPARE1_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D0_REG)
-            #define RampPWM_COMPARE2_LSB       (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-            #define RampPWM_COMPARE2_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__D1_REG)
-            #define RampPWM_COUNTERCAP_LSB     (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__A1_REG)
-            #define RampPWM_COUNTERCAP_LSB_PTR ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__A1_REG)
-            #define RampPWM_COUNTER_LSB        (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__A0_REG)
-            #define RampPWM_COUNTER_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__A0_REG)
-            #define RampPWM_CAPTURE_LSB        (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__F1_REG)
-            #define RampPWM_CAPTURE_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__F1_REG)
+            #define RampPWM_COMPARE1_LSB       (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__D0_REG)
+            #define RampPWM_COMPARE1_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D0_REG)
+            #define RampPWM_COMPARE2_LSB       (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+            #define RampPWM_COMPARE2_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__D1_REG)
+            #define RampPWM_COUNTERCAP_LSB     (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__A1_REG)
+            #define RampPWM_COUNTERCAP_LSB_PTR ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__A1_REG)
+            #define RampPWM_COUNTER_LSB        (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__A0_REG)
+            #define RampPWM_COUNTER_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__A0_REG)
+            #define RampPWM_CAPTURE_LSB        (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__F1_REG)
+            #define RampPWM_CAPTURE_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__F1_REG)
         #else
             #if(RampPWM_PWMModeIsCenterAligned)
-               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
-               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
+               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
             #else
-               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
-               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
+               #define RampPWM_PERIOD_LSB      (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
+               #define RampPWM_PERIOD_LSB_PTR  ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
             #endif /* (RampPWM_PWMModeIsCenterAligned) */
 
-            #define RampPWM_COMPARE1_LSB       (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
-            #define RampPWM_COMPARE1_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
-            #define RampPWM_COMPARE2_LSB       (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
-            #define RampPWM_COMPARE2_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
-            #define RampPWM_COUNTERCAP_LSB     (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
-            #define RampPWM_COUNTERCAP_LSB_PTR ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
-            #define RampPWM_COUNTER_LSB        (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
-            #define RampPWM_COUNTER_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
-            #define RampPWM_CAPTURE_LSB        (*(reg16 *) RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
-            #define RampPWM_CAPTURE_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
+            #define RampPWM_COMPARE1_LSB       (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
+            #define RampPWM_COMPARE1_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
+            #define RampPWM_COMPARE2_LSB       (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
+            #define RampPWM_COMPARE2_LSB_PTR   ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
+            #define RampPWM_COUNTERCAP_LSB     (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
+            #define RampPWM_COUNTERCAP_LSB_PTR ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
+            #define RampPWM_COUNTER_LSB        (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
+            #define RampPWM_COUNTER_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
+            #define RampPWM_CAPTURE_LSB        (*(reg16 *) RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
+            #define RampPWM_CAPTURE_LSB_PTR    ((reg16 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
         #endif /* (CY_PSOC3) */
 
-       #define RampPWM_AUX_CONTROLDP1          (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
-       #define RampPWM_AUX_CONTROLDP1_PTR      ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
+       #define RampPWM_AUX_CONTROLDP1          (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
+       #define RampPWM_AUX_CONTROLDP1_PTR      ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
 
    #endif /* (RampPWM_Resolution == 8) */
 
-   #define RampPWM_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__A1_REG)
-   #define RampPWM_AUX_CONTROLDP0          (*(reg8 *)  RampPWM_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
-   #define RampPWM_AUX_CONTROLDP0_PTR      ((reg8 *)   RampPWM_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
+   #define RampPWM_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__A1_REG)
+   #define RampPWM_AUX_CONTROLDP0          (*(reg8 *)  RampPWM_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
+   #define RampPWM_AUX_CONTROLDP0_PTR      ((reg8 *)   RampPWM_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
 
 #endif /* (RampPWM_UsingFixedFunction) */
 
