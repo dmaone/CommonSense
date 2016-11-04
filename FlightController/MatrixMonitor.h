@@ -42,7 +42,7 @@ private:
 private slots:
     void voltagesButtonClick(void);
     void closeButtonClick(void);
-    void freezeButtonClick(void);
+    void thresholdsButtonClick(void);
     void displayModeChanged(QString);
 
 };

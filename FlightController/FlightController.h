@@ -12,6 +12,7 @@
 #include <MatrixMonitor.h>
 #include <DeviceInterface.h>
 #include <LayoutEditor.h>
+#include <ThresholdEditor.h>
 #include <QComboBox>
 #include "../c2/c2_protocol.h"
 
@@ -43,6 +44,7 @@ public slots:
     void exportConfig(void);
     void validateConfig(void);
     void editLayoutClick(void);
+    void editThresholdsClick(void);
     void applyConfig(void);
     void revertConfig(void);
     void mainTabChanged(int);
@@ -59,6 +61,7 @@ private:
     Ui::FlightController *ui;
     MatrixMonitor *mm;
     LayoutEditor *layoutEditor;
+    ThresholdEditor *thresholdEditor;
     QComboBox *rows[ABSOLUTE_MAX_ROWS];
     QComboBox *columns[ABSOLUTE_MAX_COLS];
     std::vector<uint8_t> row_config;

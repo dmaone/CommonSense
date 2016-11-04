@@ -30,41 +30,7 @@ uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
-/*
-const uint32_t Drives[] = {
-    Rows0_0, Rows0_1, Rows0_2, Rows0_3, Rows0_4, Rows0_5, Rows0_6, Rows0_7
-};
-
-const uint32_t Senses[] = {
-    Cols0_0, Cols0_1, Cols0_2, Cols0_3, Cols0_4, Cols0_5, Cols0_6, Cols0_7,
-    Cols1_0, Cols1_1, Cols1_2, Cols1_3, Cols1_4, Cols1_5, Cols1_6, Cols1_7
-};
-*/
-
 static uint8 Buf0Mem[10], Buf1Mem[10]; // Actual results are 16 bits, but we don't need that much. So we read half.
-
-    // Last column - discharge everything we can, then add small amount (have to, trigger!) and remove.
-/*
- * Discharge sensor before scanning. It picks up lots of noise between runs.
- */
-void Discharge()
-{
-    SenseReg0_Write(0xff);
-    SenseReg1_Write(0xff);
-    DriveReg0_Write(0x80); 
-    
-    uint8_t cnt = 50;
-    while (cnt && !(HWState_Read() & 0x01))
-    {
-        CyDelayUs(1);
-        cnt--;
-    }// Wait for HW
-    if (!cnt) {
-        // Something _very_ wrong happened.
-        Boot_Load();
-
-    }
-}
 
 void Drive(uint8 drv)
 {
@@ -124,21 +90,14 @@ void printColumn(uint8 col)
     usb_send(OUTBOX_EP);
 }
 
-void read_matrix(void)
-{
-    Discharge();
-    //FIXME rename everything - we're scanning rows and read columns actually!
-    for(uint8 i = 0; i<8; i++){
-        scanColumn(i, 0);
-        scanColumn(i, 1);
-//        scanColumn((i+4) % 8, 1);
-    }
-}
-
 void scan(void)
 {
-    memset(matrix, 0xbf, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
-    read_matrix();
+    //memset(matrix, 0xbf, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
+    for(uint8 i = 0; i<8; i++){
+        //scanColumn((i+4) % 8, 0);
+        scanColumn(i, 0);
+        scanColumn(i, 1);
+    }
 }
 
 bool is_matrix_changed(void)
@@ -150,9 +109,11 @@ bool is_matrix_changed(void)
         uint32_t current_row = matrix_status[i];
         for (uint8_t j=0; j<config.matrixCols; j++)
         {
-            if (config.storage[STORAGE_ADDRESS((i*config.matrixCols)+j)] > 3u) {
-                if (matrix[i][j] > config.thresholdVoltage)
+            if (config.storage[STORAGE_ADDRESS((i*config.matrixCols) + j)] > 3u) {
+                // Not a dead key in layout
+                if (matrix[i][j] > config.storage[i*config.matrixCols + j])
                 {
+                    // Above noise floor
                     current_row |= (1 << j);
                     //pings++;
                 }
@@ -201,9 +162,9 @@ void send_report(void)
                     } else if (keycode > 0x03) {
                         this_report[count++] = keycode;
                     }
-                    if ((matrix_prev[i] & (1 << j)) == 0) {
-                        //xprintf("KP: %d %d %d", i, j, matrix[i][j]);
-                    }
+//                    if ((matrix_prev[i] & (1 << j)) == 0) {
+//                        xprintf("KP: %d %d %d", i, j, matrix[i][j]);
+//                    }
                 }
             }
         }
@@ -214,7 +175,7 @@ void send_report(void)
         memcpy(prev_report, this_report, 64);
         // Send actual report - per-key calibration still needed.
         memcpy(outbox.raw, this_report, 64);
-        //usb_send(KEYBOARD_EP);
+        usb_send(KEYBOARD_EP);
     }
 }
 static uint8 Buf0Chan, Buf1Chan;
@@ -227,7 +188,6 @@ void InitSensor(void)
     /* Init DMA, 2 bytes bursts, each burst requires a request */
     Buf0Chan = Buf0_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     Buf1Chan = Buf1_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    //(*(reg8 *)PTK_ChannelCounter__PERIOD_REG) = 3u;
     enableInterrupts = CyEnterCriticalSection();
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
@@ -249,29 +209,8 @@ void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, 
 void EnableSensor(void)
 {
     BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
-/*
-    (void)CyDmaClearPendingDrq(Buf0Chan);
-    if (Buf0TD == CY_DMA_INVALID_TD) Buf0TD = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(Buf0TD, 10u,  Buf0TD, ((uint8)Buf0__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
-    (void) CyDmaTdSetAddress(Buf0TD, LO16((uint32)ADC0_ADC_SAR__WRK0), LO16((uint32)Buf0Mem));
-    (void) CyDmaChSetInitialTd(Buf0Chan, Buf0TD);
-    (void) CyDmaChEnable(Buf0Chan, 1);
-    
-    (void)CyDmaClearPendingDrq(Buf1Chan);
-    if (Buf1TD == CY_DMA_INVALID_TD) Buf1TD = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(Buf1TD, 10u,  Buf1TD, ((uint8)Buf1__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
-    (void) CyDmaTdSetAddress(Buf1TD, LO16((uint32)ADC1_ADC_SAR__WRK0), LO16((uint32)Buf1Mem));
-    (void) CyDmaChSetInitialTd(Buf1Chan, Buf1TD);
-    (void) CyDmaChEnable(Buf1Chan, 1);
-*/
     BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
     (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
-}
-
-void SetupSensor(void)
-{
-    InitSensor();
-    EnableSensor();
 }
 
 int main()
@@ -283,7 +222,8 @@ int main()
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
     RampPWM_Start();
-    SetupSensor();
+    InitSensor();
+    EnableSensor();
     scan(); // fill matrix state, check if ADC is operational
     USB_Start(0u, USB_5V_OPERATION);
     usb_init();
@@ -292,7 +232,6 @@ int main()
         status_register.emergency_stop = true;
     memset(prev_report, 0x00, sizeof(outbox));
     KeyboardTimer_Start();
-    //ChanDecoder_WritePeriod(config.matrixRows-1);
     uint32_t count = 0;
     uint32_t prev_timer = KeyboardTimer_ReadCounter();
     uint32_t now_timer = prev_timer;

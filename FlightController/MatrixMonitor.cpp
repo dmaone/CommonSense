@@ -21,7 +21,7 @@ MatrixMonitor::MatrixMonitor(QWidget *parent) :
     ui->setupUi(this);
     connect(ui->VoltagesButton, SIGNAL(clicked()), this, SLOT(voltagesButtonClick()));
     connect(ui->CloseButton, SIGNAL(clicked()), this, SLOT(closeButtonClick()));
-    connect(ui->FreezeButton, SIGNAL(clicked()), this, SLOT(freezeButtonClick()));
+    connect(ui->ThresholdsButton, SIGNAL(clicked()), this, SLOT(thresholdsButtonClick()));
     connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
     initDisplay();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
@@ -101,14 +101,14 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         // In fact, it is stupid to include it - obviously if we see the matrix output, it's enabled.
         uint8_t max_rows = pl->at(3);
         for (uint8_t i = 0; i<max_rows; i++) {
-            QLCDNumber *cell = display[deviceConfig->row_params[i].rowNumber - 1][deviceConfig->col_params[col].colNumber - 1];
+            QLCDNumber *cell = display[i][col];
             uint8_t level = pl->at(4+i);
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (level > deviceConfig->thresholdVoltage)
+            if (level > deviceConfig->storage[i*deviceConfig->matrixCols + col])
                 cell->setStyleSheet("background-color: #00ff00;");
             else
                 cell->setStyleSheet("background-color: #ffffff;");
@@ -125,12 +125,24 @@ void MatrixMonitor::enableOutput(uint8_t m)
 
 void MatrixMonitor::voltagesButtonClick(void)
 {
-    this->enableOutput(1);
+    if (ui->VoltagesButton->text() == "Stop!") {
+        ui->VoltagesButton->setText("Again!");
+        enableOutput(0);
+    } else {
+        ui->VoltagesButton->setText("Stop!");
+        enableOutput(1);
+    }
 }
 
-void MatrixMonitor::freezeButtonClick(void)
+void MatrixMonitor::thresholdsButtonClick(void)
 {
-    this->enableOutput(0);
+    for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+    {
+        for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+        {
+            deviceConfig->storage[i*deviceConfig->matrixCols + j] = display[i][j]->value() + ui->threshold->value();
+        }
+    }
 }
 
 void MatrixMonitor::closeButtonClick(void)

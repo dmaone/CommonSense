@@ -21,7 +21,7 @@
 
 FlightController::FlightController(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::FlightController), mm(NULL), layoutEditor(NULL)
+    ui(new Ui::FlightController), mm(NULL), layoutEditor(NULL), thresholdEditor(NULL)
 {
     ui->setupUi(this);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
@@ -36,6 +36,7 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
     connect(ui->validateButton, SIGNAL(clicked()), this, SLOT(validateConfig()));
     connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
+    connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyConfig()));
     connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
     connect(ui->Rows, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
@@ -107,7 +108,6 @@ void FlightController::revertConfig()
     psoc_eeprom_t* config = di.getConfigPtr();
     ui->Rows->setValue(config->matrixRows);
     ui->Cols->setValue(config->matrixCols);
-    ui->thresholdVoltage->setValue(config->thresholdVoltage);
     ui->normallyOpen->setChecked(config->capsense_flags.normallyOpen);
     ui->InterlacedScan->setChecked(config->capsense_flags.interlacedScan);
     updateSetupDisplay();
@@ -339,6 +339,17 @@ void FlightController::editLayoutClick(void)
 
 }
 
+void FlightController::editThresholdsClick(void)
+{
+    if (thresholdEditor == NULL) {
+        thresholdEditor = new ThresholdEditor();
+        connect(thresholdEditor, SIGNAL(logMessage(QString)), ui->LogViewport, SLOT(logMessage(QString)));
+    }
+    thresholdEditor->show();
+
+}
+
+
 void FlightController::validateConfig(void)
 {
     if (ui->mainPanel->currentIndex() == 1)
@@ -365,7 +376,6 @@ void FlightController::applyConfig(void)
     config->capsense_flags.normallyOpen = ui->normallyOpen->isChecked();
     config->matrixRows = ui->Rows->value();
     config->matrixCols = ui->Cols->value();
-    config->thresholdVoltage = ui->thresholdVoltage->value();
     for(uint8_t i=0; i< ABSOLUTE_MAX_ROWS; i++)
     {
         config->row_params[i].rowNumber = rows[i]->currentIndex();
