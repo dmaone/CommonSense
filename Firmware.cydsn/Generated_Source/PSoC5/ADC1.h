@@ -170,7 +170,7 @@ extern volatile int16 ADC1_shift;
 #define ADC1_DEFAULT_REFERENCE      (1u)         /* Default reference */
 #define ADC1_DEFAULT_RANGE          (0u)       /* ADC Input Range selection */
 #define ADC1_CLOCK_FREQUENCY        (1600000u)   /* Clock frequency */
-#define ADC1_NOMINAL_CLOCK_FREQ     (18000000)  /* Nominal Clock Frequency */
+#define ADC1_NOMINAL_CLOCK_FREQ     (12000000)  /* Nominal Clock Frequency */
 #define ADC1_HIGH_POWER_PULSE       (0u)        /* Not zero when clock pulse > 50 ns */
 #define ADC1_IRQ_REMOVE             (0u)                /* Removes internal interrupt */
 

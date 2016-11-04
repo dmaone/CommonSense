@@ -41,7 +41,30 @@ const uint32_t Senses[] = {
 };
 */
 
-static uint8 Buf0Mem[4], Buf1Mem[4]; // Actual results are 16 bits, but we don't need that much. So we read half.
+static uint8 Buf0Mem[10], Buf1Mem[10]; // Actual results are 16 bits, but we don't need that much. So we read half.
+
+    // Last column - discharge everything we can, then add small amount (have to, trigger!) and remove.
+/*
+ * Discharge sensor before scanning. It picks up lots of noise between runs.
+ */
+void Discharge()
+{
+    SenseReg0_Write(0xff);
+    SenseReg1_Write(0xff);
+    DriveReg0_Write(0x80); 
+    
+    uint8_t cnt = 50;
+    while (cnt && !(HWState_Read() & 0x01))
+    {
+        CyDelayUs(1);
+        cnt--;
+    }// Wait for HW
+    if (!cnt) {
+        // Something _very_ wrong happened.
+        Boot_Load();
+
+    }
+}
 
 void Drive(uint8 drv)
 {
@@ -80,11 +103,11 @@ void scanColumn(uint8 col, uint8_t part)
         Boot_Load();
 
     }
-    for(int i=0; i<4; i++) {
+    for(int i=part; i<8; i+=2) {
         // Since Count7 counts down, _last_ channel is first in buffer.
         // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
-        matrix[col][2*i + part] = Buf0Mem[i];
-        matrix[col][2*i + 8 + part] = Buf1Mem[i];
+        matrix[col][i] = Buf0Mem[i+2];
+        matrix[col][i + 8] = Buf1Mem[i+2];
     }
 }
 
@@ -103,10 +126,12 @@ void printColumn(uint8 col)
 
 void read_matrix(void)
 {
+    Discharge();
     //FIXME rename everything - we're scanning rows and read columns actually!
     for(uint8 i = 0; i<8; i++){
         scanColumn(i, 0);
-        scanColumn((i+4) % 8, 1);
+        scanColumn(i, 1);
+//        scanColumn((i+4) % 8, 1);
     }
 }
 
@@ -215,7 +240,7 @@ void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, 
 {
     (void)CyDmaClearPendingDrq(*chan);
     if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(*td, (uint16)4u, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetConfiguration(*td, (uint16)10u, *td, (channel_config | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
     (void) CyDmaChSetInitialTd(*chan, *td);
     (void) CyDmaChEnable(*chan, 1);
@@ -223,21 +248,23 @@ void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, 
 
 void EnableSensor(void)
 {
-    //BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
+    BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
+/*
     (void)CyDmaClearPendingDrq(Buf0Chan);
     if (Buf0TD == CY_DMA_INVALID_TD) Buf0TD = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(Buf0TD, 4u,  Buf0TD, ((uint8)Buf0__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetConfiguration(Buf0TD, 10u,  Buf0TD, ((uint8)Buf0__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(Buf0TD, LO16((uint32)ADC0_ADC_SAR__WRK0), LO16((uint32)Buf0Mem));
     (void) CyDmaChSetInitialTd(Buf0Chan, Buf0TD);
     (void) CyDmaChEnable(Buf0Chan, 1);
     
     (void)CyDmaClearPendingDrq(Buf1Chan);
     if (Buf1TD == CY_DMA_INVALID_TD) Buf1TD = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(Buf1TD, 4u,  Buf1TD, ((uint8)Buf1__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetConfiguration(Buf1TD, 10u,  Buf1TD, ((uint8)Buf1__TD_TERMOUT_EN | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(Buf1TD, LO16((uint32)ADC1_ADC_SAR__WRK0), LO16((uint32)Buf1Mem));
     (void) CyDmaChSetInitialTd(Buf1Chan, Buf1TD);
     (void) CyDmaChEnable(Buf1Chan, 1);
-    //BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
+*/
+    BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
     (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
 }
 

@@ -169,8 +169,8 @@ extern volatile int16 ADC0_shift;
 #define ADC0_DEFAULT_INTERNAL_CLK   (0u)             /* Default clock selection */
 #define ADC0_DEFAULT_REFERENCE      (1u)         /* Default reference */
 #define ADC0_DEFAULT_RANGE          (0u)       /* ADC Input Range selection */
-#define ADC0_CLOCK_FREQUENCY        (10105264u)   /* Clock frequency */
-#define ADC0_NOMINAL_CLOCK_FREQ     (18000000)  /* Nominal Clock Frequency */
+#define ADC0_CLOCK_FREQUENCY        (16000000u)   /* Clock frequency */
+#define ADC0_NOMINAL_CLOCK_FREQ     (12000000)  /* Nominal Clock Frequency */
 #define ADC0_HIGH_POWER_PULSE       (0u)        /* Not zero when clock pulse > 50 ns */
 #define ADC0_IRQ_REMOVE             (0u)                /* Removes internal interrupt */
 
