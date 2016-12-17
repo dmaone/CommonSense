@@ -614,13 +614,14 @@
       <Data key="e261f250-bb91-406c-842a-8aab322eb24b" value="Analog" />
     </Group>
     <Group key="Pin">
-      <Data key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844" value="Ground" />
+      <Data key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844" value="D1" />
       <Data key="3acca61d-a42a-470f-98af-f737d6abec51" value="Drive2" />
       <Data key="4b479e6e-09c1-491c-af18-a32ab89c5896" value="Drive1" />
       <Data key="6f3a82b4-753e-4d3e-b1c4-b20df034b655/dea208d9-07b0-438b-a5e0-ac5d207f2658/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC1_SAR_Bypass" />
       <Data key="8afe3869-e12a-4395-a856-0f9ebd72c36c/dea208d9-07b0-438b-a5e0-ac5d207f2658/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC0_SAR_Bypass" />
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="BootPin" />
       <Data key="8e9dc1aa-8ac4-4374-9de8-8e630c513d15/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC0_Bypass" />
+      <Data key="14f470b7-5aaf-40a1-b4bd-9b2bdc04b8ea" value="D0" />
       <Data key="56db9090-b56d-4683-91a6-aebcccbd47c4" value="Drive3" />
       <Data key="82abd659-c6e6-4159-ac54-73b6be653ba6/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC0_Bypass" />
       <Data key="85aadf9f-e154-441a-ac4d-116ad5cc121b/16a808f6-2e13-45b9-bce0-b001c8655113" value="ADC1_Bypass" />
@@ -3725,7 +3726,7 @@
   <Group key="Pin2">
     <Group key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844">
       <Group key="0">
-        <Data key="Port Format" value="3,2" />
+        <Data key="Port Format" value="15,3" />
       </Group>
       <Group key="1">
         <Data key="Port Format" value="15,2" />
@@ -3781,6 +3782,11 @@
     <Group key="8e9dc1aa-8ac4-4374-9de8-8e630c513d15/16a808f6-2e13-45b9-bce0-b001c8655113">
       <Group key="0">
         <Data key="Port Format" value="0,2" />
+      </Group>
+    </Group>
+    <Group key="14f470b7-5aaf-40a1-b4bd-9b2bdc04b8ea">
+      <Group key="0">
+        <Data key="Port Format" value="15,2" />
       </Group>
     </Group>
     <Group key="82abd659-c6e6-4159-ac54-73b6be653ba6/16a808f6-2e13-45b9-bce0-b001c8655113">

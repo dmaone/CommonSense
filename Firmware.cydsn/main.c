@@ -25,12 +25,15 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 {
     Boot_Load();
 }
-
+#define NOT_A_KEYBOARD 1
+// DO NOT FORGET TO UPDATE PTK COMPONENT!
+#define PTK_CHANNELS 18
+#define CH0_OFFSET 0
 uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
-static uint8 Buf0Mem[10], Buf1Mem[10]; // Actual results are 16 bits, but we don't need that much. So we read half.
+static uint8 Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS]; // Actual results are 16 bits, but we don't need that much. So we read half.
 
 void Drive(uint8 drv)
 {
@@ -43,20 +46,13 @@ void Drive(uint8 drv)
     DriveReg0_Write(1 << drv);
 }
 
-void primeSensor(uint8 part)
-{
-    uint16 tt = 0b0101010101010101;
-    SenseReg0_Write((tt << part) & 0xff);
-    SenseReg1_Write((tt << part) & 0xff);
-}
-
 uint8_t maxlevel = 0;
 uint32_t pings = 0;
 uint32_t lpings = 0;
 
 void scanColumn(uint8 col, uint8_t part)
 {
-    primeSensor(part);
+    SenseReg_Control |= 0x01; // Untie sense from the ground
     Drive(col);
     uint8_t cnt = 50;
     while (cnt && !(HWState_Read() & 0x01))
@@ -69,11 +65,11 @@ void scanColumn(uint8 col, uint8_t part)
         Boot_Load();
 
     }
-    for(int i=part; i<8; i+=2) {
+    for(int i=0; i<8; i++) {
         // Since Count7 counts down, _last_ channel is first in buffer.
         // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
-        matrix[col][i] = Buf0Mem[i+2];
-        matrix[col][i + 8] = Buf1Mem[i+2];
+        matrix[col][i] = (7 * (uint16)matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET]) >> 3;
+        matrix[col][i + 8] = (7 * (uint16)matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET]) >> 3;
     }
 }
 
@@ -95,8 +91,8 @@ void scan(void)
     //memset(matrix, 0xbf, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
     for(uint8 i = 0; i<8; i++){
         //scanColumn((i+4) % 8, 0);
-        scanColumn(i, 0);
-        scanColumn(i, 1);
+        scanColumn(i, 0); // rotate 4 bits
+        //scanColumn(i, 1);
     }
 }
 
@@ -171,11 +167,11 @@ void send_report(void)
     }
     memcpy(matrix_prev, matrix_status, sizeof(matrix_prev));
     if (memcmp(this_report, prev_report, 64) != 0) {
-        //xprintf("P/T %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], count);
-        memcpy(prev_report, this_report, 64);
+        xprintf("P/T %x %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], this_report[2], count);
+        //memcpy(prev_report, this_report, 64);
         // Send actual report - per-key calibration still needed.
-        memcpy(outbox.raw, this_report, 64);
-        usb_send(KEYBOARD_EP);
+        //memcpy(outbox.raw, this_report, 64);
+        //usb_send(KEYBOARD_EP);
     }
 }
 static uint8 Buf0Chan, Buf1Chan;
@@ -200,7 +196,7 @@ void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, 
 {
     (void)CyDmaClearPendingDrq(*chan);
     if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(*td, (uint16)10u, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetConfiguration(*td, (uint16)PTK_CHANNELS, *td, (channel_config | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
     (void) CyDmaChSetInitialTd(*chan, *td);
     (void) CyDmaChEnable(*chan, 1);
@@ -220,8 +216,7 @@ int main()
     CyGlobalIntEnable; /* Enable global interrupts. */
     load_config();
     status_register.matrix_output = 0;
-    status_register.emergency_stop = 0;
-    RampPWM_Start();
+    status_register.emergency_stop = NOT_A_KEYBOARD;
     InitSensor();
     EnableSensor();
     scan(); // fill matrix state, check if ADC is operational

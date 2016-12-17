@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseReg0.h  
+* File Name: SenseReg.h  
 * Version 1.80
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_CONTROL_REG_SenseReg0_H) /* CY_CONTROL_REG_SenseReg0_H */
-#define CY_CONTROL_REG_SenseReg0_H
+#if !defined(CY_CONTROL_REG_SenseReg_H) /* CY_CONTROL_REG_SenseReg_H */
+#define CY_CONTROL_REG_SenseReg_H
 
 #include "cytypes.h"
 
@@ -29,20 +29,20 @@ typedef struct
 {
     uint8 controlState;
 
-} SenseReg0_BACKUP_STRUCT;
+} SenseReg_BACKUP_STRUCT;
 
 
 /***************************************
 *         Function Prototypes 
 ***************************************/
 
-void    SenseReg0_Write(uint8 control) ;
-uint8   SenseReg0_Read(void) ;
+void    SenseReg_Write(uint8 control) ;
+uint8   SenseReg_Read(void) ;
 
-void SenseReg0_SaveConfig(void) ;
-void SenseReg0_RestoreConfig(void) ;
-void SenseReg0_Sleep(void) ; 
-void SenseReg0_Wakeup(void) ;
+void SenseReg_SaveConfig(void) ;
+void SenseReg_RestoreConfig(void) ;
+void SenseReg_Sleep(void) ; 
+void SenseReg_Wakeup(void) ;
 
 
 /***************************************
@@ -50,10 +50,10 @@ void SenseReg0_Wakeup(void) ;
 ***************************************/
 
 /* Control Register */
-#define SenseReg0_Control        (* (reg8 *) SenseReg0_Sync_ctrl_reg__CONTROL_REG )
-#define SenseReg0_Control_PTR    (  (reg8 *) SenseReg0_Sync_ctrl_reg__CONTROL_REG )
+#define SenseReg_Control        (* (reg8 *) SenseReg_Sync_ctrl_reg__CONTROL_REG )
+#define SenseReg_Control_PTR    (  (reg8 *) SenseReg_Sync_ctrl_reg__CONTROL_REG )
 
-#endif /* End CY_CONTROL_REG_SenseReg0_H */
+#endif /* End CY_CONTROL_REG_SenseReg_H */
 
 
 /* [] END OF FILE */

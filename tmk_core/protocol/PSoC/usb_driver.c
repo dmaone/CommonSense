@@ -124,6 +124,7 @@ void usb_init(void)
 
 void INBOX_CALLBACK(void)
 {
+    // !!!FIXME!!! Right now we really hope there won't be another packet before this packet is processed.
     USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
     message_for_you_in_the_lobby = true;
 }
@@ -134,11 +135,12 @@ void acknowledge_command(void)
     USB_EnableOutEP(INBOX_EP);
 }
 
+
 void usb_send(uint8_t ep)
 {
+    
+    while (USB_GetEPState(ep) & USB_NO_EVENT_ALLOWED) {}; // wait for the green light
     USB_LoadInEP(ep, outbox.raw, sizeof(outbox.raw));
-//    /* Wait for ACK after loading data. */
-    while (0u == USB_GetEPAckState(ep))
-    {
-    }
+    // !!!TODO!!! one can just return here if there's more than one buffer.
+    while (!(USB_GetEPState(ep) & USB_IN_BUFFER_EMPTY)) {}; // wait for buffer release
 }

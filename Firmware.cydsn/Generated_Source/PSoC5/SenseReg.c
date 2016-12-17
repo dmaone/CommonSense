@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseReg0.c  
+* File Name: SenseReg.c  
 * Version 1.80
 *
 * Description:
@@ -14,14 +14,14 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "SenseReg0.h"
+#include "SenseReg.h"
 
 /* Check for removal by optimization */
-#if !defined(SenseReg0_Sync_ctrl_reg__REMOVED)
+#if !defined(SenseReg_Sync_ctrl_reg__REMOVED)
 
     
 /*******************************************************************************
-* Function Name: SenseReg0_Write
+* Function Name: SenseReg_Write
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  None.
 *
 *******************************************************************************/
-void SenseReg0_Write(uint8 control) 
+void SenseReg_Write(uint8 control) 
 {
-    SenseReg0_Control = control;
+    SenseReg_Control = control;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseReg0_Read
+* Function Name: SenseReg_Read
 ********************************************************************************
 *
 * Summary:
@@ -54,9 +54,9 @@ void SenseReg0_Write(uint8 control)
 *  Returns the current value in the Control Register.
 *
 *******************************************************************************/
-uint8 SenseReg0_Read(void) 
+uint8 SenseReg_Read(void) 
 {
-    return SenseReg0_Control;
+    return SenseReg_Control;
 }
 
 #endif /* End check for removal by optimization */

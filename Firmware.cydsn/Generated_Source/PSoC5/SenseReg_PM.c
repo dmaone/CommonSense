@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: SenseReg0_PM.c
+* File Name: SenseReg_PM.c
 * Version 1.80
 *
 * Description:
@@ -15,16 +15,16 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "SenseReg0.h"
+#include "SenseReg.h"
 
 /* Check for removal by optimization */
-#if !defined(SenseReg0_Sync_ctrl_reg__REMOVED)
+#if !defined(SenseReg_Sync_ctrl_reg__REMOVED)
 
-static SenseReg0_BACKUP_STRUCT  SenseReg0_backup = {0u};
+static SenseReg_BACKUP_STRUCT  SenseReg_backup = {0u};
 
     
 /*******************************************************************************
-* Function Name: SenseReg0_SaveConfig
+* Function Name: SenseReg_SaveConfig
 ********************************************************************************
 *
 * Summary:
@@ -37,14 +37,14 @@ static SenseReg0_BACKUP_STRUCT  SenseReg0_backup = {0u};
 *  None
 *
 *******************************************************************************/
-void SenseReg0_SaveConfig(void) 
+void SenseReg_SaveConfig(void) 
 {
-    SenseReg0_backup.controlState = SenseReg0_Control;
+    SenseReg_backup.controlState = SenseReg_Control;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseReg0_RestoreConfig
+* Function Name: SenseReg_RestoreConfig
 ********************************************************************************
 *
 * Summary:
@@ -58,14 +58,14 @@ void SenseReg0_SaveConfig(void)
 *
 *
 *******************************************************************************/
-void SenseReg0_RestoreConfig(void) 
+void SenseReg_RestoreConfig(void) 
 {
-     SenseReg0_Control = SenseReg0_backup.controlState;
+     SenseReg_Control = SenseReg_backup.controlState;
 }
 
 
 /*******************************************************************************
-* Function Name: SenseReg0_Sleep
+* Function Name: SenseReg_Sleep
 ********************************************************************************
 *
 * Summary:
@@ -78,14 +78,14 @@ void SenseReg0_RestoreConfig(void)
 *  None
 *
 *******************************************************************************/
-void SenseReg0_Sleep(void) 
+void SenseReg_Sleep(void) 
 {
-    SenseReg0_SaveConfig();
+    SenseReg_SaveConfig();
 }
 
 
 /*******************************************************************************
-* Function Name: SenseReg0_Wakeup
+* Function Name: SenseReg_Wakeup
 ********************************************************************************
 *
 * Summary:
@@ -98,9 +98,9 @@ void SenseReg0_Sleep(void)
 *  None
 *
 *******************************************************************************/
-void SenseReg0_Wakeup(void)  
+void SenseReg_Wakeup(void)  
 {
-    SenseReg0_RestoreConfig();
+    SenseReg_RestoreConfig();
 }
 
 #endif /* End check for removal by optimization */

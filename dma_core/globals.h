@@ -28,14 +28,16 @@ F122: cols: 4-3-2(O+B), rows 2(Br)-1
 #define OUTBOX_EP 8
 #define KEYBOARD_EP 1
 
+//for using ## in macro definition. Unfortunately doesn't work in macro names :(
+#define FUZE_3_TOKENS(x, y, z) x ## y ## z
+#define JOIN3(x, y, z) FUZE_3_TOKENS(x, y, z)
+
 #define INBOX_EP 7
 #define USB_EP_7_ISR_EXIT_CALLBACK
 // ^ ^^ those must be kept in sync!
 
-// Automagic derivation of function names. Macro names don't work that way :(
-#define TOKENPASTE(x, y, z) x ## y ## z
-#define TOKENPASTE2(x, y, z) TOKENPASTE(x, y, z)
-#define INBOX_CALLBACK TOKENPASTE2(USB_EP_, INBOX_EP, _ISR_ExitCallback)
+#define INBOX_CALLBACK JOIN3(USB_EP_, INBOX_EP, _ISR_ExitCallback)
+
 void INBOX_CALLBACK(void);
 
 bool message_for_you_in_the_lobby;

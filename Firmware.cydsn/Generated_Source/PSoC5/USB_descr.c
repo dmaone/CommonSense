@@ -133,7 +133,7 @@ const uint8 CYCODE USB_DEVICE0_CONFIGURATION0_DESCR[66u] = {
 /*  bEndpointAddress                       */ 0x81u,
 /*  bmAttributes                           */ 0x03u,
 /*  wMaxPacketSize                         */ 0x40u, 0x00u,
-/*  bInterval                              */ 0x0Au
+/*  bInterval                              */ 0x01u
 };
 
 /*********************************************************************
