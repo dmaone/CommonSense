@@ -1,7 +1,7 @@
 /*******************************************************************************
 * File Name: cydevicegnu.inc
 * OBSOLETE: Do not use this file. Use the _trm version instead.
-* PSoC Creator  4.0
+* PSoC Creator  4.0 Update 1
 *
 * Description:
 * This file provides all of the address values for the entire PSoC device.
@@ -15,21 +15,21 @@
 ********************************************************************************/
 
 .set CYDEV_FLASH_BASE, 0x00000000
-.set CYDEV_FLASH_SIZE, 0x00040000
+.set CYDEV_FLASH_SIZE, 0x00020000
 .set CYDEV_FLASH_DATA_MBASE, 0x00000000
-.set CYDEV_FLASH_DATA_MSIZE, 0x00040000
-.set CYDEV_SRAM_BASE, 0x1fff8000
-.set CYDEV_SRAM_SIZE, 0x00010000
+.set CYDEV_FLASH_DATA_MSIZE, 0x00020000
+.set CYDEV_SRAM_BASE, 0x1fffc000
+.set CYDEV_SRAM_SIZE, 0x00008000
 .set CYDEV_SRAM_CODE64K_MBASE, 0x1fff8000
 .set CYDEV_SRAM_CODE64K_MSIZE, 0x00004000
 .set CYDEV_SRAM_CODE32K_MBASE, 0x1fffc000
 .set CYDEV_SRAM_CODE32K_MSIZE, 0x00002000
 .set CYDEV_SRAM_CODE16K_MBASE, 0x1fffe000
 .set CYDEV_SRAM_CODE16K_MSIZE, 0x00001000
-.set CYDEV_SRAM_CODE_MBASE, 0x1fff8000
-.set CYDEV_SRAM_CODE_MSIZE, 0x00008000
+.set CYDEV_SRAM_CODE_MBASE, 0x1fffc000
+.set CYDEV_SRAM_CODE_MSIZE, 0x00004000
 .set CYDEV_SRAM_DATA_MBASE, 0x20000000
-.set CYDEV_SRAM_DATA_MSIZE, 0x00008000
+.set CYDEV_SRAM_DATA_MSIZE, 0x00004000
 .set CYDEV_SRAM_DATA16K_MBASE, 0x20001000
 .set CYDEV_SRAM_DATA16K_MSIZE, 0x00001000
 .set CYDEV_SRAM_DATA32K_MBASE, 0x20002000

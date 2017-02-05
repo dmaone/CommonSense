@@ -96,19 +96,18 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
         if (pl->at(0) != C2RESPONSE_MATRIX_STATUS)
             return false;
-        uint8_t col = pl->at(1);
-        // byte 2 is matrix output flag - not used.
-        // In fact, it is stupid to include it - obviously if we see the matrix output, it's enabled.
-        uint8_t max_rows = pl->at(3);
-        for (uint8_t i = 0; i<max_rows; i++) {
-            QLCDNumber *cell = display[i][col];
-            uint8_t level = pl->at(4+i);
+        uint8_t row = pl->at(1);
+        uint8_t max_cols = pl->at(2);
+        for (uint8_t i = 0; i<max_cols; i++) {
+            QLCDNumber *cell = display[row][i];
+            int16_t level = *pl->mid(3+(i<<1), 2).constData();
+            //int16_t level = pl->constData()[3+(i<<1)];
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (level > deviceConfig->storage[i*deviceConfig->matrixCols + col])
+            if (level > deviceConfig->storage[row*deviceConfig->matrixCols + i])
                 cell->setStyleSheet("background-color: #00ff00;");
             else
                 cell->setStyleSheet("background-color: #ffffff;");

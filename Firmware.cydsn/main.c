@@ -14,26 +14,55 @@
 #include "cyapicallbacks.h"
 //#include "cyfitter.h" // for MAGIC
 
-void Boot_Load(void)
-{
-    LED_Write(1u);
-    CyDelayUs(20);
-    LED_Write(0u);
-}
-
 void BootIRQ_Interrupt_InterruptCallback(void)
 {
     Boot_Load();
 }
+
 #define NOT_A_KEYBOARD 1
 // DO NOT FORGET TO UPDATE PTK COMPONENT!
 #define PTK_CHANNELS 18
 #define CH0_OFFSET 0
-uint8 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+int16 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
 
-static uint8 Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS]; // Actual results are 16 bits, but we don't need that much. So we read half.
+
+static uint8 Buf0Chan, Buf1Chan;
+static uint8 Buf0TD = CY_DMA_INVALID_TD;
+static uint8 Buf1TD = CY_DMA_INVALID_TD;
+static int16 Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
+
+void InitSensor(void)
+{
+    uint8 enableInterrupts;
+    /* Init DMA, 2 bytes bursts, each burst requires a request */
+    Buf0Chan = Buf0_DmaInitialize(sizeof(Buf0Mem[1]), 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf1Chan = Buf1_DmaInitialize(sizeof(Buf1Mem[1]), 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    enableInterrupts = CyEnterCriticalSection();
+    (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
+    CyExitCriticalSection(enableInterrupts);
+    ADC0_Start();
+    ADC1_Start();
+    CyDelayUs(10); // Give ADCs time to warm up
+}
+
+void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)
+{
+    (void)CyDmaClearPendingDrq(*chan);
+    if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
+    (void) CyDmaTdSetConfiguration(*td, (uint16)PTK_CHANNELS, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
+    (void) CyDmaChSetInitialTd(*chan, *td);
+    (void) CyDmaChEnable(*chan, 1);
+}
+
+void EnableSensor(void)
+{
+    BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
+    BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
+    (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
+}
 
 void Drive(uint8 drv)
 {
@@ -68,20 +97,23 @@ void scanColumn(uint8 col, uint8_t part)
     for(int i=0; i<8; i++) {
         // Since Count7 counts down, _last_ channel is first in buffer.
         // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
-        matrix[col][i] = (7 * (uint16)matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET]) >> 3;
-        matrix[col][i + 8] = (7 * (uint16)matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET]) >> 3;
+        matrix[col][i] = Buf0Mem[(i << 1) + CH0_OFFSET];
+        matrix[col][i + 8] = Buf1Mem[(i << 1) + CH0_OFFSET];
+        // IIR filter
+        //matrix[col][i] = (3 * matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET]) >> 2;
+        //matrix[col][i + 8] = (3 * matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET]) >> 2;
     }
 }
 
-void printColumn(uint8 col)
+void printRow(uint8 row)
 {
     outbox.response_type = C2RESPONSE_MATRIX_STATUS;
-    outbox.payload[0] = col;
-    outbox.payload[1] = status_register.matrix_output;
-    outbox.payload[2] = config.matrixRows;
-    for(uint8 i=0; i<config.matrixRows; i++)
+    outbox.payload[0] = row;
+    outbox.payload[1] = config.matrixCols;
+    //int16 buf = 0;
+    for(uint8 i=0; i<config.matrixCols; i++)
     {
-        outbox.payload[i+3] = matrix[i][col]; 
+        memcpy(outbox.payload + 2 + (i<<1), &matrix[row][i], 2);
     }
     usb_send(OUTBOX_EP);
 }
@@ -174,41 +206,6 @@ void send_report(void)
         //usb_send(KEYBOARD_EP);
     }
 }
-static uint8 Buf0Chan, Buf1Chan;
-static uint8 Buf0TD = CY_DMA_INVALID_TD;
-static uint8 Buf1TD = CY_DMA_INVALID_TD;
-
-void InitSensor(void)
-{
-    uint8 enableInterrupts;
-    /* Init DMA, 2 bytes bursts, each burst requires a request */
-    Buf0Chan = Buf0_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    Buf1Chan = Buf1_DmaInitialize(1, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    enableInterrupts = CyEnterCriticalSection();
-    (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
-    CyExitCriticalSection(enableInterrupts);
-    ADC0_Start();
-    ADC1_Start();
-    CyDelayUs(10); // Give ADCs time to warm up
-}
-
-void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)
-{
-    (void)CyDmaClearPendingDrq(*chan);
-    if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(*td, (uint16)PTK_CHANNELS, *td, (channel_config | (uint8)TD_INC_DST_ADR));
-    (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
-    (void) CyDmaChSetInitialTd(*chan, *td);
-    (void) CyDmaChEnable(*chan, 1);
-}
-
-void EnableSensor(void)
-{
-    BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
-    BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
-    (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
-}
-
 int main()
 {
     LED_Write(1u);
@@ -227,9 +224,9 @@ int main()
         status_register.emergency_stop = true;
     memset(prev_report, 0x00, sizeof(outbox));
     KeyboardTimer_Start();
-    uint32_t count = 0;
-    uint32_t prev_timer = KeyboardTimer_ReadCounter();
-    uint32_t now_timer = prev_timer;
+    //uint32_t count = 0;
+    //uint32_t prev_timer = KeyboardTimer_ReadCounter();
+    //uint32_t now_timer = prev_timer;
     for(;;)
     {
         /* Host can send double SET_INTERFACE request. */
@@ -243,8 +240,8 @@ int main()
         }
         scan();
         if (status_register.matrix_output > 0)
-            for(uint8 i = 0; i<config.matrixCols; i++)
-                printColumn(i);
+            for(uint8 i = 0; i<config.matrixRows; i++)
+                printRow(i);
         if (is_matrix_changed())
         {
             //pings++;

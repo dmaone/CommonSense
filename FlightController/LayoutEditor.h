@@ -27,7 +27,7 @@ public slots:
     void resetLayout(void);
 
 signals:
-    logMessage(QString);
+    void logMessage(QString);
 
 private:
     Ui::LayoutEditor *ui;
