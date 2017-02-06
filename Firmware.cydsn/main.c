@@ -20,8 +20,9 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 }
 
 #define NOT_A_KEYBOARD 1
-// DO NOT FORGET TO UPDATE PTK COMPONENT!
+// Should be number of columns + 2 (0 is ground, scan sequence is ch1-ch0-ch2-ch0-ch3-ch0..)
 #define PTK_CHANNELS 18
+// DO NOT FORGET TO UPDATE PTK COMPONENT!
 #define CH0_OFFSET 0
 int16 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
@@ -35,15 +36,16 @@ static int16 Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
 
 void InitSensor(void)
 {
-    uint8 enableInterrupts;
     /* Init DMA, 2 bytes bursts, each burst requires a request */
     Buf0Chan = Buf0_DmaInitialize(sizeof(Buf0Mem[1]), 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     Buf1Chan = Buf1_DmaInitialize(sizeof(Buf1Mem[1]), 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    enableInterrupts = CyEnterCriticalSection();
+    uint8 enableInterrupts = CyEnterCriticalSection();
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
     ADC0_Start();
+    ADC0_SetResolution(ADC_RESOLUTION);
     ADC1_Start();
+    ADC1_SetResolution(ADC_RESOLUTION);
     CyDelayUs(10); // Give ADCs time to warm up
 }
 
@@ -51,7 +53,8 @@ void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, 
 {
     (void)CyDmaClearPendingDrq(*chan);
     if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
-    (void) CyDmaTdSetConfiguration(*td, (uint16)PTK_CHANNELS, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    // transferCount is actually bytes, not transactions.
+    (void) CyDmaTdSetConfiguration(*td, (uint16)PTK_CHANNELS<<1, *td, (channel_config | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
     (void) CyDmaChSetInitialTd(*chan, *td);
     (void) CyDmaChEnable(*chan, 1);
@@ -97,11 +100,12 @@ void scanColumn(uint8 col, uint8_t part)
     for(int i=0; i<8; i++) {
         // Since Count7 counts down, _last_ channel is first in buffer.
         // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
-        matrix[col][i] = Buf0Mem[(i << 1) + CH0_OFFSET];
-        matrix[col][i + 8] = Buf1Mem[(i << 1) + CH0_OFFSET];
+        // No filter
+        //matrix[col][i] = Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
+        //matrix[col][i + 8] = Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
         // IIR filter
-        //matrix[col][i] = (3 * matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET]) >> 2;
-        //matrix[col][i + 8] = (3 * matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET]) >> 2;
+        matrix[col][i] = (3 * matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> 2;
+        matrix[col][i + 8] = (3 * matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> 2;
     }
 }
 
@@ -173,37 +177,37 @@ void send_report(void)
     // Our report is 1b modifiers 62b other keys. No LEDs.
     uint8_t count = 1; // start from second byte
     memset(this_report, 0x00, 64);
-    if (!status_register.emergency_stop)
+    for (uint8_t i=0; i<config.matrixRows; i++)
     {
-        for (uint8_t i=0; i<config.matrixRows; i++)
+        for (uint8_t j=0; j<config.matrixCols; j++)
         {
-            for (uint8_t j=0; j<config.matrixCols; j++)
+            if (config.col_params->isActive && (matrix_status[i] & (1 << j)))
             {
-                if (config.col_params->isActive && (matrix_status[i] & (1 << j)))
+                // Keypress!
+                uint8_t keycode = config.storage[STORAGE_ADDRESS((i*config.matrixCols)+j)];
+                if ((keycode & 0xF8) == 0xE0) 
                 {
-                    // Keypress!
-                    uint8_t keycode = config.storage[STORAGE_ADDRESS((i*config.matrixCols)+j)];
-                    if ((keycode & 0xF8) == 0xE0) 
-                    {
-                        // modifier. set the modifier bit.
-                        this_report[0] |= (1 << (keycode & 7));
-                    } else if (keycode > 0x03) {
-                        this_report[count++] = keycode;
-                    }
-//                    if ((matrix_prev[i] & (1 << j)) == 0) {
-//                        xprintf("KP: %d %d %d", i, j, matrix[i][j]);
-//                    }
+                    // modifier. set the modifier bit.
+                    this_report[0] |= (1 << (keycode & 7));
+                } else if (keycode > 0x03) {
+                    this_report[count++] = keycode;
                 }
+                    if ((matrix_prev[i] & (1 << j)) == 0) {
+                        xprintf("KP: %d %d %d", i, j, matrix[i][j]);
+                    }
             }
         }
     }
     memcpy(matrix_prev, matrix_status, sizeof(matrix_prev));
     if (memcmp(this_report, prev_report, 64) != 0) {
-        xprintf("P/T %x %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], this_report[2], count);
-        //memcpy(prev_report, this_report, 64);
+        //xprintf("P/T %x %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], this_report[2], count);
+        memcpy(prev_report, this_report, 64);
         // Send actual report - per-key calibration still needed.
-        //memcpy(outbox.raw, this_report, 64);
-        //usb_send(KEYBOARD_EP);
+        memcpy(outbox.raw, this_report, 64);
+        if (!status_register.emergency_stop)
+        {
+            usb_send(KEYBOARD_EP);
+        }
     }
 }
 int main()
@@ -242,6 +246,7 @@ int main()
         if (status_register.matrix_output > 0)
             for(uint8 i = 0; i<config.matrixRows; i++)
                 printRow(i);
+                
         if (is_matrix_changed())
         {
             //pings++;

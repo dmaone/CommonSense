@@ -47,6 +47,10 @@ IN_c2packet_t outbox;
 // EEPROM stuff
 psoc_eeprom_t config;
 
+// Zero must be shifted right (12-N) bit.
+#define ADC_RESOLUTION 10
+#define ADC_ZERO (ADC0_SAR_DIFF_SHIFT >> 2)
+
 typedef struct {
     bool emergency_stop;
     bool matrix_output;
