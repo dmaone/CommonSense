@@ -1,5 +1,5 @@
 This is a work in progress.
-It's licensed under GPL, errrhm, v2? GPL v2, because it uses tmk_core.
+It's licensed under GPL, errrhm, v2?
 
 If you have PSoC Creator, Qt+Qt creator, CY8CKIT-059 prototype board and an IBM keyboard with 16x8 matrix (that includes practically any model F, but not beamsprings) - you may try it.
 You can also fry the controller doing it. If you break it - you own all the parts.
@@ -7,7 +7,10 @@ You can also fry the controller doing it. If you break it - you own all the part
 If you are lucky^W^W do everything correctly - you will see the USB device with 2 interfaces and ADC readings in the utility (or wireshark) when you press the keys.
 Also, with a bit of trial and error, you can make a working keyboard out of this thing.
 
-READ THIS FILE TILL THE VERY END - it's not a linear story, it seems.
+Things below are outdated and not true. There's work in progress to make a specialized controller board.
+You will still be able to use the prototyping kit - pins must be reassigned though. Directions on what to do exactly will be posted a bit later.
+
+--READ THIS FILE TILL THE VERY END - it's not a linear story, it seems.--
 
 Soldering:
 SOLDER IT SO THAT CHIP IS FACING AWAY FROM THE BACKPLATE.
@@ -15,11 +18,7 @@ It's in CAPS because I was stupid enough to solder it chip (and LED) _to_ backpl
 Important warning done, here's to the business.
 
 Ground to any ground point you find on the controller.
-Rows to ports P2.0 P0.7 P2.2 P0.5 P2.4 P0.1 P2.6 P15.5 - looks strange, but it's really not. It's USB side of the board - and since the model F 122 keys pin step is 2x board step, I had to fit it that way. Also should reduce crosstalk a bit.
-All row pins are reassignable - just avoid P0.2 - P0.4 and P3.2 - they have HUGE(relatively to the capacitance we're about to measure) 1uF bypass capacitors connected to them (see the kit documentation for details).
-Columns to P1.[0-7] to P12.[0-7]. P1 is columns 0..7, P12 - 8..16.
-
-"To the bat cave^W^W^W bootloader" pin is 2.3. Pull it low to go to bootloader. The LED will light steady blue while in bootloader.
+All pins are reassignable - just avoid P0.2 - P0.4 and P3.2 - they have HUGE(relatively to the capacitance we're about to measure) 1uF bypass capacitors connected to them (see the kit documentation for details).
 
 Building the firmware:
 1) build and program bootloader (CY8CKIT-059 Bootloader.cywrk). Basically connect the kit, click the workspace, wait for it to load and press Ctrl-F5. It will demand to update KitProg - it explains how.

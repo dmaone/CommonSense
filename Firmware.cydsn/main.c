@@ -8,11 +8,10 @@
 */
 #include <project.h>
 #include "globals.h"
-#include "usb_driver.h"
+#include "PSoC_USB.h"
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
 #include "cyapicallbacks.h"
-//#include "cyfitter.h" // for MAGIC
 
 void BootIRQ_Interrupt_InterruptCallback(void)
 {
@@ -27,7 +26,6 @@ void BootIRQ_Interrupt_InterruptCallback(void)
 int16 matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
-
 
 static uint8 Buf0Chan, Buf1Chan;
 static uint8 Buf0TD = CY_DMA_INVALID_TD;
@@ -78,10 +76,6 @@ void Drive(uint8 drv)
     DriveReg0_Write(1 << drv);
 }
 
-uint8_t maxlevel = 0;
-uint32_t pings = 0;
-uint32_t lpings = 0;
-
 void scanColumn(uint8 col, uint8_t part)
 {
     SenseReg_Control |= 0x01; // Untie sense from the ground
@@ -101,11 +95,11 @@ void scanColumn(uint8 col, uint8_t part)
         // Since Count7 counts down, _last_ channel is first in buffer.
         // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
         // No filter
-        //matrix[col][i] = Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
-        //matrix[col][i + 8] = Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
+        matrix[col][i] = Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
+        matrix[col][i + 8] = Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO;
         // IIR filter
-        matrix[col][i] = (3 * matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> 2;
-        matrix[col][i + 8] = (3 * matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> 2;
+        //matrix[col][i] = (IIR_N * matrix[col][i] + Buf0Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> IIR_M_BIT;
+        //matrix[col][i + 8] = (IIR_N * matrix[col][i + 8] + Buf1Mem[(i << 1) + CH0_OFFSET] - ADC_ZERO) >> IIR_M_BIT;
     }
 }
 
@@ -114,7 +108,6 @@ void printRow(uint8 row)
     outbox.response_type = C2RESPONSE_MATRIX_STATUS;
     outbox.payload[0] = row;
     outbox.payload[1] = config.matrixCols;
-    //int16 buf = 0;
     for(uint8 i=0; i<config.matrixCols; i++)
     {
         memcpy(outbox.payload + 2 + (i<<1), &matrix[row][i], 2);
@@ -126,9 +119,7 @@ void scan(void)
 {
     //memset(matrix, 0xbf, ABSOLUTE_MAX_COLS*ABSOLUTE_MAX_ROWS);
     for(uint8 i = 0; i<8; i++){
-        //scanColumn((i+4) % 8, 0);
-        scanColumn(i, 0); // rotate 4 bits
-        //scanColumn(i, 1);
+        scanColumn(i, 0);
     }
 }
 
@@ -154,14 +145,6 @@ bool is_matrix_changed(void)
             }
         }
         if (current_row != matrix_status[i]) {
-#if 1 == 0
-            xprintf("Row %d keys %08x -> %08x", i, matrix_status[i], current_row);
-            for (uint8_t j=0; j<config.matrixCols; j++)
-            {
-                if (matrix[i][j] > config.thresholdVoltage)
-                    xprintf("Keypress: %d %d %d", i, j, matrix[i][j]);
-            }
-#endif
             matrix_status[i] = current_row;
             retval = true;
         }
@@ -192,9 +175,9 @@ void send_report(void)
                 } else if (keycode > 0x03) {
                     this_report[count++] = keycode;
                 }
-                    if ((matrix_prev[i] & (1 << j)) == 0) {
-                        xprintf("KP: %d %d %d", i, j, matrix[i][j]);
-                    }
+                if ((matrix_prev[i] & (1 << j)) == 0) {
+                    xprintf("KP: %d %d %d > %d", i, j, config.storage[i*config.matrixCols + j], matrix[i][j]);
+                }
             }
         }
     }
@@ -212,7 +195,6 @@ void send_report(void)
 }
 int main()
 {
-    LED_Write(1u);
     BootIRQ_Start();
     CyGlobalIntEnable; /* Enable global interrupts. */
     load_config();
@@ -223,14 +205,7 @@ int main()
     scan(); // fill matrix state, check if ADC is operational
     USB_Start(0u, USB_5V_OPERATION);
     usb_init();
-    LED_Write(0u);
-    if (config.thresholdVoltage < 1)
-        status_register.emergency_stop = true;
     memset(prev_report, 0x00, sizeof(outbox));
-    KeyboardTimer_Start();
-    //uint32_t count = 0;
-    //uint32_t prev_timer = KeyboardTimer_ReadCounter();
-    //uint32_t now_timer = prev_timer;
     for(;;)
     {
         /* Host can send double SET_INTERFACE request. */
@@ -249,24 +224,8 @@ int main()
                 
         if (is_matrix_changed())
         {
-            //pings++;
             send_report();
         }
-/*
-        if (count++ % 1000 == 0)
-        {
-            prev_timer = now_timer;
-            now_timer = KeyboardTimer_ReadCounter();
-            xprintf("ms per 1k iterations: %d, pings: %u/%u, max level: %u", (prev_timer - now_timer), pings, lpings, maxlevel);
-            pings = 0;
-            maxlevel = 0;
-            lpings = 0;
-            //xprintf("%d", CyDmaChGetRequest(Buf0_Chan));
-            //xprintf("%d", (uint16) ADC1_SAR_WRK0_REG);
-            //xprintf("%d", ADC_Samples[0]);//, ADC_Samples[8]);
-//            xprintf("%d", ADC_Samples[15]);
-        }
-*/
     }
 }
 

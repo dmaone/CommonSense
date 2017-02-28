@@ -167,10 +167,10 @@ extern volatile int16 ADC0_shift;
 #define ADC0_DEFAULT_RESOLUTION     (10u)   /* ADC resolution selected with parameters.*/
 #define ADC0_DEFAULT_CONV_MODE      (2u)        /* Default conversion method */
 #define ADC0_DEFAULT_INTERNAL_CLK   (0u)             /* Default clock selection */
-#define ADC0_DEFAULT_REFERENCE      (1u)         /* Default reference */
-#define ADC0_DEFAULT_RANGE          (3u)       /* ADC Input Range selection */
-#define ADC0_CLOCK_FREQUENCY        (12000000u)   /* Clock frequency */
-#define ADC0_NOMINAL_CLOCK_FREQ     (12000000)  /* Nominal Clock Frequency */
+#define ADC0_DEFAULT_REFERENCE      (2u)         /* Default reference */
+#define ADC0_DEFAULT_RANGE          (1u)       /* ADC Input Range selection */
+#define ADC0_CLOCK_FREQUENCY        (18000000u)   /* Clock frequency */
+#define ADC0_NOMINAL_CLOCK_FREQ     (18000000)  /* Nominal Clock Frequency */
 #define ADC0_HIGH_POWER_PULSE       (0u)        /* Not zero when clock pulse > 50 ns */
 #define ADC0_IRQ_REMOVE             (0u)                /* Removes internal interrupt */
 
@@ -182,7 +182,7 @@ extern volatile int16 ADC0_shift;
                                      (CYDEV_VDDA / 2) : \
                                    (((ADC0_DEFAULT_REFERENCE != (uint8)ADC0__EXT_REF) && \
                                      (ADC0_DEFAULT_RANGE == (uint8)ADC0__VNEG_VDDA_2_DIFF)) ? \
-                                     CYDEV_VDDA : (1.024)))      /* ADC reference voltage. */
+                                     CYDEV_VDDA : (2.5)))      /* ADC reference voltage. */
 #define ADC0_DEFAULT_REF_VOLTAGE_MV \
                                    (((ADC0_DEFAULT_REFERENCE != (uint8)ADC0__EXT_REF) && \
                                     ((ADC0_DEFAULT_RANGE == (uint8)ADC0__VSSA_TO_VDDA) || \
@@ -190,7 +190,7 @@ extern volatile int16 ADC0_shift;
                                      (CYDEV_VDDA_MV / 2) : \
                                   (((ADC0_DEFAULT_REFERENCE != (uint8)ADC0__EXT_REF) && \
                                     (ADC0_DEFAULT_RANGE == (uint8)ADC0__VNEG_VDDA_2_DIFF)) ? \
-                                     CYDEV_VDDA_MV : (1024)))   /* ADC reference voltage in mV */
+                                     CYDEV_VDDA_MV : (2500)))   /* ADC reference voltage in mV */
 /* The power is set to normal power, 1/2, 1/4 power depend on the clock setting. */
 #define ADC0_DEFAULT_POWER \
        ((ADC0_NOMINAL_CLOCK_FREQ > (ADC0_MAX_FREQUENCY / 4)) ? ADC0__HIGHPOWER : \

@@ -21,7 +21,9 @@ F122: cols: 4-3-2(O+B), rows 2(Br)-1
 #pragma once
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
-#include "config.h"
+
+#define DEVICE_VER_MAJOR      0x00
+#define DEVICE_VER_MINOR      0x01
 
 #define KRO_LIMIT 62
 // USB stuff
@@ -47,9 +49,14 @@ IN_c2packet_t outbox;
 // EEPROM stuff
 psoc_eeprom_t config;
 
-// Zero must be shifted right (12-N) bit.
+// Zero must be shifted right (12-N) bit for diff mode, left at zero for SE.
 #define ADC_RESOLUTION 10
-#define ADC_ZERO (ADC0_SAR_DIFF_SHIFT >> 2)
+#define ADC_ZERO (ADC0_SAR_DIFF_SHIFT >> (12 - ADC_RESOLUTION))
+//#define ADC_ZERO 0
+
+// IIR 3/4 = 3/2, 7/8 = 7/3, etc
+#define IIR_N 7
+#define IIR_M_BIT 3
 
 typedef struct {
     bool emergency_stop;

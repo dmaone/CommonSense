@@ -8,16 +8,11 @@
 */
 #pragma once
     
-#define DEVICE_VER_MAJOR      0x00
-#define DEVICE_VER_MINOR      0x01
+
 #define MANUFACTURER    DMA Labs
 #define PRODUCT         CommonSense
 #define DESCRIPTION     Universal capsense controller
 // those above are not used because of the way USB component is configured in PSoC creator.
 // Sorry, GUI only :(
 
-#define MATRIX_ROWS 16
-#define MATRIX_COLS 32
-
-#define EXTRAKEY_ENABLE
 #define DEBUG_EP OUTBOX_EP
