@@ -7,36 +7,29 @@
  * published by the Free Software Foundation. 
 */
 
-/*
-Proto kit connectors.
-      WO     O    WB     B   WBr    Br
-J1  P2.0  P2.2  P0.7  P0.6  P2.4  P2.5
-J2 P15.1 P15.0  P1.2  P1.3  P1.4  P1.5
-J3  P3.6  P3.5  P3.4  P3.3  P3.1  P3.0
-J4  P2.6  P2.7  P0.5  P0.1  P0.0 P15.5
-
-F122: cols: 4-3-2(O+B), rows 2(Br)-1
-*/
-
 #pragma once
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
+
+// Main safety switch
+#define NOT_A_KEYBOARD 1
 
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01
 
 #define KRO_LIMIT 62
-// USB stuff
-#define OUTBOX_EP 8
-#define KEYBOARD_EP 1
 
-//for using ## in macro definition. Unfortunately doesn't work in macro names :(
-#define FUZE_3_TOKENS(x, y, z) x ## y ## z
-#define JOIN3(x, y, z) FUZE_3_TOKENS(x, y, z)
+// USB stuff
+#define KEYBOARD_EP 1
+#define OUTBOX_EP 8
 
 #define INBOX_EP 7
 #define USB_EP_7_ISR_EXIT_CALLBACK
 // ^ ^^ those must be kept in sync!
+
+//for using ## in macro definition. Unfortunately doesn't work in macro names :(
+#define FUZE_3_TOKENS(x, y, z) x ## y ## z
+#define JOIN3(x, y, z) FUZE_3_TOKENS(x, y, z)
 
 #define INBOX_CALLBACK JOIN3(USB_EP_, INBOX_EP, _ISR_ExitCallback)
 
@@ -48,15 +41,6 @@ IN_c2packet_t outbox;
 
 // EEPROM stuff
 psoc_eeprom_t config;
-
-// Zero must be shifted right (12-N) bit for diff mode, left at zero for SE.
-#define ADC_RESOLUTION 10
-#define ADC_ZERO (ADC0_SAR_DIFF_SHIFT >> (12 - ADC_RESOLUTION))
-//#define ADC_ZERO 0
-
-// IIR 3/4 = 3/2, 7/8 = 7/3, etc
-#define IIR_N 7
-#define IIR_M_BIT 3
 
 typedef struct {
     bool emergency_stop;

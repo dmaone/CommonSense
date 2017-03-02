@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2016 DMA <dma@ya.ru>
+ * Copyright (C) 2016-2017 DMA <dma@ya.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -11,9 +11,17 @@
 #include "globals.h"
 #include "c2/c2_protocol.h"
 #include "PSoC_USB.h"
+#include "scan.h"
 
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
+
+void INBOX_CALLBACK(void)
+{
+    // !!!FIXME!!! Right now we really hope there won't be another packet before this packet is processed.
+    USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
+    message_for_you_in_the_lobby = true;
+}
 
 void report_status(void)
 {
@@ -88,7 +96,7 @@ void process_msg(void)
         break;
     case C2CMD_ENTER_BOOTLOADER:
         xprintf("Jumping to bootloader..");
-        Boot_Load(); //Does not return, no need for break
+       // Boot_Load(); //Does not return, no need for break
     case C2CMD_UPLOAD_CONFIG:
         receive_config_block();
         break;
@@ -109,6 +117,7 @@ void process_msg(void)
     }
     acknowledge_command();
 }
+
 void usb_init(void)
 {
 
@@ -121,12 +130,6 @@ void usb_init(void)
     USB_EnableOutEP(INBOX_EP);
 }
 
-void INBOX_CALLBACK(void)
-{
-    // !!!FIXME!!! Right now we really hope there won't be another packet before this packet is processed.
-    USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
-    message_for_you_in_the_lobby = true;
-}
 
 void acknowledge_command(void)
 {
@@ -136,8 +139,7 @@ void acknowledge_command(void)
 
 
 void usb_send(uint8_t ep)
-{
-    
+{   
     while (USB_GetEPState(ep) & USB_NO_EVENT_ALLOWED) {}; // wait for the green light
     USB_LoadInEP(ep, outbox.raw, sizeof(outbox.raw));
     // !!!TODO!!! one can just return here if there's more than one buffer.

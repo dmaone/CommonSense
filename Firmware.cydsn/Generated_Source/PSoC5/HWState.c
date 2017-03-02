@@ -17,7 +17,7 @@
 
 #include "HWState.h"
 
-#if !defined(HWState_sts_sts_reg__REMOVED) /* Check for removal by optimization */
+#if !defined(HWState_sts_intr_sts_reg__REMOVED) /* Check for removal by optimization */
 
 
 /*******************************************************************************

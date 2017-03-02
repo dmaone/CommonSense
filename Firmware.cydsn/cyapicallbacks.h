@@ -7,10 +7,11 @@
  * published by the Free Software Foundation. 
 */
 #pragma once
-#include "globals.h"
+#include <globals.h>
 
-#define BootIRQ_INTERRUPT_INTERRUPT_CALLBACK
-void BootIRQ_Interrupt_InterruptCallback(void);
+/*
+ * It is VERY important to include all files that define *_CALLBACK's to this file.
+ */
+
 /*Define your macro callbacks here */
     /*For more information, refer to the Macro Callbacks topic in the PSoC Creator Help.*/
-// See globals.h for more macro callback definitions

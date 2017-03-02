@@ -9,8 +9,6 @@
 
 #pragma once
     
-#include <project.h>
-
 void usb_init(void);
 
 void usb_send(uint8_t);

@@ -64,10 +64,10 @@ uint8 HWState_ReadMask(void) ;
 ***************************************/
 
 /* Status Register */
-#define HWState_Status             (* (reg8 *) HWState_sts_sts_reg__STATUS_REG )
-#define HWState_Status_PTR         (  (reg8 *) HWState_sts_sts_reg__STATUS_REG )
-#define HWState_Status_Mask        (* (reg8 *) HWState_sts_sts_reg__MASK_REG )
-#define HWState_Status_Aux_Ctrl    (* (reg8 *) HWState_sts_sts_reg__STATUS_AUX_CTL_REG )
+#define HWState_Status             (* (reg8 *) HWState_sts_intr_sts_reg__STATUS_REG )
+#define HWState_Status_PTR         (  (reg8 *) HWState_sts_intr_sts_reg__STATUS_REG )
+#define HWState_Status_Mask        (* (reg8 *) HWState_sts_intr_sts_reg__MASK_REG )
+#define HWState_Status_Aux_Ctrl    (* (reg8 *) HWState_sts_intr_sts_reg__STATUS_AUX_CTL_REG )
 
 #endif /* End CY_STATUS_REG_HWState_H */
 
