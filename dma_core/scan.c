@@ -103,6 +103,9 @@ void scan_update(void)
     else
     {
         current_col = config.matrixRows - 1;
+        // For 100kHz version, uncomment the line below and set PTK channels to 2 or 4
+        // This will drive only line 0 and read 1 or 2 columns. But it will do that VERY fast.
+        //current_col = 0;
         Drive(current_col);
     }
 }

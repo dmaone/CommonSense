@@ -10,7 +10,7 @@
 #pragma once
 #include "globals.h"
 
-// Should be number of columns + 2 (0 is ground, scan sequence is ch1-ch0-ch2-ch0-ch3-ch0..)
+// Should be [number of columns per ADC + 1] * 2 (0 is ground, scan sequence is ch1-ch0-ch2-ch0-ch3-ch0..)
 #define PTK_CHANNELS 18
 // DO NOT FORGET TO UPDATE PTK COMPONENT TO MATCH THIS!
 
