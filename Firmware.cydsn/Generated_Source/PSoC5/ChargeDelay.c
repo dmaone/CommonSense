@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: RampDelay.c
+* File Name: ChargeDelay.c
 * Version 3.30
 *
 * Description:
@@ -21,19 +21,19 @@
 * the software package with which this file was provided.
 ********************************************************************************/
 
-#include "RampDelay.h"
+#include "ChargeDelay.h"
 
 /* Error message for removed <resource> through optimization */
-#ifdef RampDelay_PWMUDB_genblk1_ctrlreg__REMOVED
+#ifdef ChargeDelay_PWMUDB_genblk1_ctrlreg__REMOVED
     #error PWM_v3_30 detected with a constant 0 for the enable or \
          constant 1 for reset. This will prevent the component from operating.
-#endif /* RampDelay_PWMUDB_genblk1_ctrlreg__REMOVED */
+#endif /* ChargeDelay_PWMUDB_genblk1_ctrlreg__REMOVED */
 
-uint8 RampDelay_initVar = 0u;
+uint8 ChargeDelay_initVar = 0u;
 
 
 /*******************************************************************************
-* Function Name: RampDelay_Start
+* Function Name: ChargeDelay_Start
 ********************************************************************************
 *
 * Summary:
@@ -48,31 +48,31 @@ uint8 RampDelay_initVar = 0u;
 *  None
 *
 * Global variables:
-*  RampDelay_initVar: Is modified when this function is called for the
+*  ChargeDelay_initVar: Is modified when this function is called for the
 *   first time. Is used to ensure that initialization happens only once.
 *
 *******************************************************************************/
-void RampDelay_Start(void) 
+void ChargeDelay_Start(void) 
 {
     /* If not Initialized then initialize all required hardware and software */
-    if(RampDelay_initVar == 0u)
+    if(ChargeDelay_initVar == 0u)
     {
-        RampDelay_Init();
-        RampDelay_initVar = 1u;
+        ChargeDelay_Init();
+        ChargeDelay_initVar = 1u;
     }
-    RampDelay_Enable();
+    ChargeDelay_Enable();
 
 }
 
 
 /*******************************************************************************
-* Function Name: RampDelay_Init
+* Function Name: ChargeDelay_Init
 ********************************************************************************
 *
 * Summary:
 *  Initialize component's parameters to the parameters set by user in the
 *  customizer of the component placed onto schematic. Usually called in
-*  RampDelay_Start().
+*  ChargeDelay_Start().
 *
 * Parameters:
 *  None
@@ -81,106 +81,106 @@ void RampDelay_Start(void)
 *  None
 *
 *******************************************************************************/
-void RampDelay_Init(void) 
+void ChargeDelay_Init(void) 
 {
-    #if (RampDelay_UsingFixedFunction || RampDelay_UseControl)
+    #if (ChargeDelay_UsingFixedFunction || ChargeDelay_UseControl)
         uint8 ctrl;
-    #endif /* (RampDelay_UsingFixedFunction || RampDelay_UseControl) */
+    #endif /* (ChargeDelay_UsingFixedFunction || ChargeDelay_UseControl) */
 
-    #if(!RampDelay_UsingFixedFunction)
-        #if(RampDelay_UseStatus)
+    #if(!ChargeDelay_UsingFixedFunction)
+        #if(ChargeDelay_UseStatus)
             /* Interrupt State Backup for Critical Region*/
-            uint8 RampDelay_interruptState;
-        #endif /* (RampDelay_UseStatus) */
-    #endif /* (!RampDelay_UsingFixedFunction) */
+            uint8 ChargeDelay_interruptState;
+        #endif /* (ChargeDelay_UseStatus) */
+    #endif /* (!ChargeDelay_UsingFixedFunction) */
 
-    #if (RampDelay_UsingFixedFunction)
+    #if (ChargeDelay_UsingFixedFunction)
         /* You are allowed to write the compare value (FF only) */
-        RampDelay_CONTROL |= RampDelay_CFG0_MODE;
-        #if (RampDelay_DeadBand2_4)
-            RampDelay_CONTROL |= RampDelay_CFG0_DB;
-        #endif /* (RampDelay_DeadBand2_4) */
+        ChargeDelay_CONTROL |= ChargeDelay_CFG0_MODE;
+        #if (ChargeDelay_DeadBand2_4)
+            ChargeDelay_CONTROL |= ChargeDelay_CFG0_DB;
+        #endif /* (ChargeDelay_DeadBand2_4) */
 
-        ctrl = RampDelay_CONTROL3 & ((uint8 )(~RampDelay_CTRL_CMPMODE1_MASK));
-        RampDelay_CONTROL3 = ctrl | RampDelay_DEFAULT_COMPARE1_MODE;
+        ctrl = ChargeDelay_CONTROL3 & ((uint8 )(~ChargeDelay_CTRL_CMPMODE1_MASK));
+        ChargeDelay_CONTROL3 = ctrl | ChargeDelay_DEFAULT_COMPARE1_MODE;
 
          /* Clear and Set SYNCTC and SYNCCMP bits of RT1 register */
-        RampDelay_RT1 &= ((uint8)(~RampDelay_RT1_MASK));
-        RampDelay_RT1 |= RampDelay_SYNC;
+        ChargeDelay_RT1 &= ((uint8)(~ChargeDelay_RT1_MASK));
+        ChargeDelay_RT1 |= ChargeDelay_SYNC;
 
         /*Enable DSI Sync all all inputs of the PWM*/
-        RampDelay_RT1 &= ((uint8)(~RampDelay_SYNCDSI_MASK));
-        RampDelay_RT1 |= RampDelay_SYNCDSI_EN;
+        ChargeDelay_RT1 &= ((uint8)(~ChargeDelay_SYNCDSI_MASK));
+        ChargeDelay_RT1 |= ChargeDelay_SYNCDSI_EN;
 
-    #elif (RampDelay_UseControl)
+    #elif (ChargeDelay_UseControl)
         /* Set the default compare mode defined in the parameter */
-        ctrl = RampDelay_CONTROL & ((uint8)(~RampDelay_CTRL_CMPMODE2_MASK)) &
-                ((uint8)(~RampDelay_CTRL_CMPMODE1_MASK));
-        RampDelay_CONTROL = ctrl | RampDelay_DEFAULT_COMPARE2_MODE |
-                                   RampDelay_DEFAULT_COMPARE1_MODE;
-    #endif /* (RampDelay_UsingFixedFunction) */
+        ctrl = ChargeDelay_CONTROL & ((uint8)(~ChargeDelay_CTRL_CMPMODE2_MASK)) &
+                ((uint8)(~ChargeDelay_CTRL_CMPMODE1_MASK));
+        ChargeDelay_CONTROL = ctrl | ChargeDelay_DEFAULT_COMPARE2_MODE |
+                                   ChargeDelay_DEFAULT_COMPARE1_MODE;
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 
-    #if (!RampDelay_UsingFixedFunction)
-        #if (RampDelay_Resolution == 8)
+    #if (!ChargeDelay_UsingFixedFunction)
+        #if (ChargeDelay_Resolution == 8)
             /* Set FIFO 0 to 1 byte register for period*/
-            RampDelay_AUX_CONTROLDP0 |= (RampDelay_AUX_CTRL_FIFO0_CLR);
-        #else /* (RampDelay_Resolution == 16)*/
+            ChargeDelay_AUX_CONTROLDP0 |= (ChargeDelay_AUX_CTRL_FIFO0_CLR);
+        #else /* (ChargeDelay_Resolution == 16)*/
             /* Set FIFO 0 to 1 byte register for period */
-            RampDelay_AUX_CONTROLDP0 |= (RampDelay_AUX_CTRL_FIFO0_CLR);
-            RampDelay_AUX_CONTROLDP1 |= (RampDelay_AUX_CTRL_FIFO0_CLR);
-        #endif /* (RampDelay_Resolution == 8) */
+            ChargeDelay_AUX_CONTROLDP0 |= (ChargeDelay_AUX_CTRL_FIFO0_CLR);
+            ChargeDelay_AUX_CONTROLDP1 |= (ChargeDelay_AUX_CTRL_FIFO0_CLR);
+        #endif /* (ChargeDelay_Resolution == 8) */
 
-        RampDelay_WriteCounter(RampDelay_INIT_PERIOD_VALUE);
-    #endif /* (!RampDelay_UsingFixedFunction) */
+        ChargeDelay_WriteCounter(ChargeDelay_INIT_PERIOD_VALUE);
+    #endif /* (!ChargeDelay_UsingFixedFunction) */
 
-    RampDelay_WritePeriod(RampDelay_INIT_PERIOD_VALUE);
+    ChargeDelay_WritePeriod(ChargeDelay_INIT_PERIOD_VALUE);
 
-        #if (RampDelay_UseOneCompareMode)
-            RampDelay_WriteCompare(RampDelay_INIT_COMPARE_VALUE1);
+        #if (ChargeDelay_UseOneCompareMode)
+            ChargeDelay_WriteCompare(ChargeDelay_INIT_COMPARE_VALUE1);
         #else
-            RampDelay_WriteCompare1(RampDelay_INIT_COMPARE_VALUE1);
-            RampDelay_WriteCompare2(RampDelay_INIT_COMPARE_VALUE2);
-        #endif /* (RampDelay_UseOneCompareMode) */
+            ChargeDelay_WriteCompare1(ChargeDelay_INIT_COMPARE_VALUE1);
+            ChargeDelay_WriteCompare2(ChargeDelay_INIT_COMPARE_VALUE2);
+        #endif /* (ChargeDelay_UseOneCompareMode) */
 
-        #if (RampDelay_KillModeMinTime)
-            RampDelay_WriteKillTime(RampDelay_MinimumKillTime);
-        #endif /* (RampDelay_KillModeMinTime) */
+        #if (ChargeDelay_KillModeMinTime)
+            ChargeDelay_WriteKillTime(ChargeDelay_MinimumKillTime);
+        #endif /* (ChargeDelay_KillModeMinTime) */
 
-        #if (RampDelay_DeadBandUsed)
-            RampDelay_WriteDeadTime(RampDelay_INIT_DEAD_TIME);
-        #endif /* (RampDelay_DeadBandUsed) */
+        #if (ChargeDelay_DeadBandUsed)
+            ChargeDelay_WriteDeadTime(ChargeDelay_INIT_DEAD_TIME);
+        #endif /* (ChargeDelay_DeadBandUsed) */
 
-    #if (RampDelay_UseStatus || RampDelay_UsingFixedFunction)
-        RampDelay_SetInterruptMode(RampDelay_INIT_INTERRUPTS_MODE);
-    #endif /* (RampDelay_UseStatus || RampDelay_UsingFixedFunction) */
+    #if (ChargeDelay_UseStatus || ChargeDelay_UsingFixedFunction)
+        ChargeDelay_SetInterruptMode(ChargeDelay_INIT_INTERRUPTS_MODE);
+    #endif /* (ChargeDelay_UseStatus || ChargeDelay_UsingFixedFunction) */
 
-    #if (RampDelay_UsingFixedFunction)
+    #if (ChargeDelay_UsingFixedFunction)
         /* Globally Enable the Fixed Function Block chosen */
-        RampDelay_GLOBAL_ENABLE |= RampDelay_BLOCK_EN_MASK;
+        ChargeDelay_GLOBAL_ENABLE |= ChargeDelay_BLOCK_EN_MASK;
         /* Set the Interrupt source to come from the status register */
-        RampDelay_CONTROL2 |= RampDelay_CTRL2_IRQ_SEL;
+        ChargeDelay_CONTROL2 |= ChargeDelay_CTRL2_IRQ_SEL;
     #else
-        #if(RampDelay_UseStatus)
+        #if(ChargeDelay_UseStatus)
 
             /* CyEnterCriticalRegion and CyExitCriticalRegion are used to mark following region critical*/
             /* Enter Critical Region*/
-            RampDelay_interruptState = CyEnterCriticalSection();
+            ChargeDelay_interruptState = CyEnterCriticalSection();
             /* Use the interrupt output of the status register for IRQ output */
-            RampDelay_STATUS_AUX_CTRL |= RampDelay_STATUS_ACTL_INT_EN_MASK;
+            ChargeDelay_STATUS_AUX_CTRL |= ChargeDelay_STATUS_ACTL_INT_EN_MASK;
 
              /* Exit Critical Region*/
-            CyExitCriticalSection(RampDelay_interruptState);
+            CyExitCriticalSection(ChargeDelay_interruptState);
 
-            /* Clear the FIFO to enable the RampDelay_STATUS_FIFOFULL
+            /* Clear the FIFO to enable the ChargeDelay_STATUS_FIFOFULL
                    bit to be set on FIFO full. */
-            RampDelay_ClearFIFO();
-        #endif /* (RampDelay_UseStatus) */
-    #endif /* (RampDelay_UsingFixedFunction) */
+            ChargeDelay_ClearFIFO();
+        #endif /* (ChargeDelay_UseStatus) */
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 }
 
 
 /*******************************************************************************
-* Function Name: RampDelay_Enable
+* Function Name: ChargeDelay_Enable
 ********************************************************************************
 *
 * Summary:
@@ -196,23 +196,23 @@ void RampDelay_Init(void)
 *  This works only if software enable mode is chosen
 *
 *******************************************************************************/
-void RampDelay_Enable(void) 
+void ChargeDelay_Enable(void) 
 {
     /* Globally Enable the Fixed Function Block chosen */
-    #if (RampDelay_UsingFixedFunction)
-        RampDelay_GLOBAL_ENABLE |= RampDelay_BLOCK_EN_MASK;
-        RampDelay_GLOBAL_STBY_ENABLE |= RampDelay_BLOCK_STBY_EN_MASK;
-    #endif /* (RampDelay_UsingFixedFunction) */
+    #if (ChargeDelay_UsingFixedFunction)
+        ChargeDelay_GLOBAL_ENABLE |= ChargeDelay_BLOCK_EN_MASK;
+        ChargeDelay_GLOBAL_STBY_ENABLE |= ChargeDelay_BLOCK_STBY_EN_MASK;
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 
     /* Enable the PWM from the control register  */
-    #if (RampDelay_UseControl || RampDelay_UsingFixedFunction)
-        RampDelay_CONTROL |= RampDelay_CTRL_ENABLE;
-    #endif /* (RampDelay_UseControl || RampDelay_UsingFixedFunction) */
+    #if (ChargeDelay_UseControl || ChargeDelay_UsingFixedFunction)
+        ChargeDelay_CONTROL |= ChargeDelay_CTRL_ENABLE;
+    #endif /* (ChargeDelay_UseControl || ChargeDelay_UsingFixedFunction) */
 }
 
 
 /*******************************************************************************
-* Function Name: RampDelay_Stop
+* Function Name: ChargeDelay_Stop
 ********************************************************************************
 *
 * Summary:
@@ -230,25 +230,25 @@ void RampDelay_Enable(void)
 *  has no effect on the operation of the PWM
 *
 *******************************************************************************/
-void RampDelay_Stop(void) 
+void ChargeDelay_Stop(void) 
 {
-    #if (RampDelay_UseControl || RampDelay_UsingFixedFunction)
-        RampDelay_CONTROL &= ((uint8)(~RampDelay_CTRL_ENABLE));
-    #endif /* (RampDelay_UseControl || RampDelay_UsingFixedFunction) */
+    #if (ChargeDelay_UseControl || ChargeDelay_UsingFixedFunction)
+        ChargeDelay_CONTROL &= ((uint8)(~ChargeDelay_CTRL_ENABLE));
+    #endif /* (ChargeDelay_UseControl || ChargeDelay_UsingFixedFunction) */
 
     /* Globally disable the Fixed Function Block chosen */
-    #if (RampDelay_UsingFixedFunction)
-        RampDelay_GLOBAL_ENABLE &= ((uint8)(~RampDelay_BLOCK_EN_MASK));
-        RampDelay_GLOBAL_STBY_ENABLE &= ((uint8)(~RampDelay_BLOCK_STBY_EN_MASK));
-    #endif /* (RampDelay_UsingFixedFunction) */
+    #if (ChargeDelay_UsingFixedFunction)
+        ChargeDelay_GLOBAL_ENABLE &= ((uint8)(~ChargeDelay_BLOCK_EN_MASK));
+        ChargeDelay_GLOBAL_STBY_ENABLE &= ((uint8)(~ChargeDelay_BLOCK_STBY_EN_MASK));
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 }
 
-#if (RampDelay_UseOneCompareMode)
-    #if (RampDelay_CompareMode1SW)
+#if (ChargeDelay_UseOneCompareMode)
+    #if (ChargeDelay_CompareMode1SW)
 
 
         /*******************************************************************************
-        * Function Name: RampDelay_SetCompareMode
+        * Function Name: ChargeDelay_SetCompareMode
         ********************************************************************************
         *
         * Summary:
@@ -263,53 +263,53 @@ void RampDelay_Stop(void)
         *  None
         *
         *******************************************************************************/
-        void RampDelay_SetCompareMode(uint8 comparemode) 
+        void ChargeDelay_SetCompareMode(uint8 comparemode) 
         {
-            #if(RampDelay_UsingFixedFunction)
+            #if(ChargeDelay_UsingFixedFunction)
 
-                #if(0 != RampDelay_CTRL_CMPMODE1_SHIFT)
-                    uint8 comparemodemasked = ((uint8)((uint8)comparemode << RampDelay_CTRL_CMPMODE1_SHIFT));
+                #if(0 != ChargeDelay_CTRL_CMPMODE1_SHIFT)
+                    uint8 comparemodemasked = ((uint8)((uint8)comparemode << ChargeDelay_CTRL_CMPMODE1_SHIFT));
                 #else
                     uint8 comparemodemasked = comparemode;
-                #endif /* (0 != RampDelay_CTRL_CMPMODE1_SHIFT) */
+                #endif /* (0 != ChargeDelay_CTRL_CMPMODE1_SHIFT) */
 
-                RampDelay_CONTROL3 &= ((uint8)(~RampDelay_CTRL_CMPMODE1_MASK)); /*Clear Existing Data */
-                RampDelay_CONTROL3 |= comparemodemasked;
+                ChargeDelay_CONTROL3 &= ((uint8)(~ChargeDelay_CTRL_CMPMODE1_MASK)); /*Clear Existing Data */
+                ChargeDelay_CONTROL3 |= comparemodemasked;
 
-            #elif (RampDelay_UseControl)
+            #elif (ChargeDelay_UseControl)
 
-                #if(0 != RampDelay_CTRL_CMPMODE1_SHIFT)
-                    uint8 comparemode1masked = ((uint8)((uint8)comparemode << RampDelay_CTRL_CMPMODE1_SHIFT)) &
-                                                RampDelay_CTRL_CMPMODE1_MASK;
+                #if(0 != ChargeDelay_CTRL_CMPMODE1_SHIFT)
+                    uint8 comparemode1masked = ((uint8)((uint8)comparemode << ChargeDelay_CTRL_CMPMODE1_SHIFT)) &
+                                                ChargeDelay_CTRL_CMPMODE1_MASK;
                 #else
-                    uint8 comparemode1masked = comparemode & RampDelay_CTRL_CMPMODE1_MASK;
-                #endif /* (0 != RampDelay_CTRL_CMPMODE1_SHIFT) */
+                    uint8 comparemode1masked = comparemode & ChargeDelay_CTRL_CMPMODE1_MASK;
+                #endif /* (0 != ChargeDelay_CTRL_CMPMODE1_SHIFT) */
 
-                #if(0 != RampDelay_CTRL_CMPMODE2_SHIFT)
-                    uint8 comparemode2masked = ((uint8)((uint8)comparemode << RampDelay_CTRL_CMPMODE2_SHIFT)) &
-                                               RampDelay_CTRL_CMPMODE2_MASK;
+                #if(0 != ChargeDelay_CTRL_CMPMODE2_SHIFT)
+                    uint8 comparemode2masked = ((uint8)((uint8)comparemode << ChargeDelay_CTRL_CMPMODE2_SHIFT)) &
+                                               ChargeDelay_CTRL_CMPMODE2_MASK;
                 #else
-                    uint8 comparemode2masked = comparemode & RampDelay_CTRL_CMPMODE2_MASK;
-                #endif /* (0 != RampDelay_CTRL_CMPMODE2_SHIFT) */
+                    uint8 comparemode2masked = comparemode & ChargeDelay_CTRL_CMPMODE2_MASK;
+                #endif /* (0 != ChargeDelay_CTRL_CMPMODE2_SHIFT) */
 
                 /*Clear existing mode */
-                RampDelay_CONTROL &= ((uint8)(~(RampDelay_CTRL_CMPMODE1_MASK |
-                                            RampDelay_CTRL_CMPMODE2_MASK)));
-                RampDelay_CONTROL |= (comparemode1masked | comparemode2masked);
+                ChargeDelay_CONTROL &= ((uint8)(~(ChargeDelay_CTRL_CMPMODE1_MASK |
+                                            ChargeDelay_CTRL_CMPMODE2_MASK)));
+                ChargeDelay_CONTROL |= (comparemode1masked | comparemode2masked);
 
             #else
                 uint8 temp = comparemode;
-            #endif /* (RampDelay_UsingFixedFunction) */
+            #endif /* (ChargeDelay_UsingFixedFunction) */
         }
-    #endif /* RampDelay_CompareMode1SW */
+    #endif /* ChargeDelay_CompareMode1SW */
 
 #else /* UseOneCompareMode */
 
-    #if (RampDelay_CompareMode1SW)
+    #if (ChargeDelay_CompareMode1SW)
 
 
         /*******************************************************************************
-        * Function Name: RampDelay_SetCompareMode1
+        * Function Name: ChargeDelay_SetCompareMode1
         ********************************************************************************
         *
         * Summary:
@@ -323,27 +323,27 @@ void RampDelay_Stop(void)
         *  None
         *
         *******************************************************************************/
-        void RampDelay_SetCompareMode1(uint8 comparemode) 
+        void ChargeDelay_SetCompareMode1(uint8 comparemode) 
         {
-            #if(0 != RampDelay_CTRL_CMPMODE1_SHIFT)
-                uint8 comparemodemasked = ((uint8)((uint8)comparemode << RampDelay_CTRL_CMPMODE1_SHIFT)) &
-                                           RampDelay_CTRL_CMPMODE1_MASK;
+            #if(0 != ChargeDelay_CTRL_CMPMODE1_SHIFT)
+                uint8 comparemodemasked = ((uint8)((uint8)comparemode << ChargeDelay_CTRL_CMPMODE1_SHIFT)) &
+                                           ChargeDelay_CTRL_CMPMODE1_MASK;
             #else
-                uint8 comparemodemasked = comparemode & RampDelay_CTRL_CMPMODE1_MASK;
-            #endif /* (0 != RampDelay_CTRL_CMPMODE1_SHIFT) */
+                uint8 comparemodemasked = comparemode & ChargeDelay_CTRL_CMPMODE1_MASK;
+            #endif /* (0 != ChargeDelay_CTRL_CMPMODE1_SHIFT) */
 
-            #if (RampDelay_UseControl)
-                RampDelay_CONTROL &= ((uint8)(~RampDelay_CTRL_CMPMODE1_MASK)); /*Clear existing mode */
-                RampDelay_CONTROL |= comparemodemasked;
-            #endif /* (RampDelay_UseControl) */
+            #if (ChargeDelay_UseControl)
+                ChargeDelay_CONTROL &= ((uint8)(~ChargeDelay_CTRL_CMPMODE1_MASK)); /*Clear existing mode */
+                ChargeDelay_CONTROL |= comparemodemasked;
+            #endif /* (ChargeDelay_UseControl) */
         }
-    #endif /* RampDelay_CompareMode1SW */
+    #endif /* ChargeDelay_CompareMode1SW */
 
-#if (RampDelay_CompareMode2SW)
+#if (ChargeDelay_CompareMode2SW)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_SetCompareMode2
+    * Function Name: ChargeDelay_SetCompareMode2
     ********************************************************************************
     *
     * Summary:
@@ -357,31 +357,31 @@ void RampDelay_Stop(void)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_SetCompareMode2(uint8 comparemode) 
+    void ChargeDelay_SetCompareMode2(uint8 comparemode) 
     {
 
-        #if(0 != RampDelay_CTRL_CMPMODE2_SHIFT)
-            uint8 comparemodemasked = ((uint8)((uint8)comparemode << RampDelay_CTRL_CMPMODE2_SHIFT)) &
-                                                 RampDelay_CTRL_CMPMODE2_MASK;
+        #if(0 != ChargeDelay_CTRL_CMPMODE2_SHIFT)
+            uint8 comparemodemasked = ((uint8)((uint8)comparemode << ChargeDelay_CTRL_CMPMODE2_SHIFT)) &
+                                                 ChargeDelay_CTRL_CMPMODE2_MASK;
         #else
-            uint8 comparemodemasked = comparemode & RampDelay_CTRL_CMPMODE2_MASK;
-        #endif /* (0 != RampDelay_CTRL_CMPMODE2_SHIFT) */
+            uint8 comparemodemasked = comparemode & ChargeDelay_CTRL_CMPMODE2_MASK;
+        #endif /* (0 != ChargeDelay_CTRL_CMPMODE2_SHIFT) */
 
-        #if (RampDelay_UseControl)
-            RampDelay_CONTROL &= ((uint8)(~RampDelay_CTRL_CMPMODE2_MASK)); /*Clear existing mode */
-            RampDelay_CONTROL |= comparemodemasked;
-        #endif /* (RampDelay_UseControl) */
+        #if (ChargeDelay_UseControl)
+            ChargeDelay_CONTROL &= ((uint8)(~ChargeDelay_CTRL_CMPMODE2_MASK)); /*Clear existing mode */
+            ChargeDelay_CONTROL |= comparemodemasked;
+        #endif /* (ChargeDelay_UseControl) */
     }
-    #endif /*RampDelay_CompareMode2SW */
+    #endif /*ChargeDelay_CompareMode2SW */
 
 #endif /* UseOneCompareMode */
 
 
-#if (!RampDelay_UsingFixedFunction)
+#if (!ChargeDelay_UsingFixedFunction)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteCounter
+    * Function Name: ChargeDelay_WriteCounter
     ********************************************************************************
     *
     * Summary:
@@ -400,15 +400,15 @@ void RampDelay_Stop(void)
     *  The PWM Period will be reloaded when a counter value will be a zero
     *
     *******************************************************************************/
-    void RampDelay_WriteCounter(uint8 counter) \
+    void ChargeDelay_WriteCounter(uint8 counter) \
                                        
     {
-        CY_SET_REG8(RampDelay_COUNTER_LSB_PTR, counter);
+        CY_SET_REG8(ChargeDelay_COUNTER_LSB_PTR, counter);
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadCounter
+    * Function Name: ChargeDelay_ReadCounter
     ********************************************************************************
     *
     * Summary:
@@ -422,22 +422,22 @@ void RampDelay_Stop(void)
     *  The current value of the counter.
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadCounter(void) 
+    uint8 ChargeDelay_ReadCounter(void) 
     {
         /* Force capture by reading Accumulator */
         /* Must first do a software capture to be able to read the counter */
         /* It is up to the user code to make sure there isn't already captured data in the FIFO */
-          (void)CY_GET_REG8(RampDelay_COUNTERCAP_LSB_PTR_8BIT);
+          (void)CY_GET_REG8(ChargeDelay_COUNTERCAP_LSB_PTR_8BIT);
 
         /* Read the data from the FIFO */
-        return (CY_GET_REG8(RampDelay_CAPTURE_LSB_PTR));
+        return (CY_GET_REG8(ChargeDelay_CAPTURE_LSB_PTR));
     }
 
-    #if (RampDelay_UseStatus)
+    #if (ChargeDelay_UseStatus)
 
 
         /*******************************************************************************
-        * Function Name: RampDelay_ClearFIFO
+        * Function Name: ChargeDelay_ClearFIFO
         ********************************************************************************
         *
         * Summary:
@@ -450,21 +450,21 @@ void RampDelay_Stop(void)
         *  None
         *
         *******************************************************************************/
-        void RampDelay_ClearFIFO(void) 
+        void ChargeDelay_ClearFIFO(void) 
         {
-            while(0u != (RampDelay_ReadStatusRegister() & RampDelay_STATUS_FIFONEMPTY))
+            while(0u != (ChargeDelay_ReadStatusRegister() & ChargeDelay_STATUS_FIFONEMPTY))
             {
-                (void)RampDelay_ReadCapture();
+                (void)ChargeDelay_ReadCapture();
             }
         }
 
-    #endif /* RampDelay_UseStatus */
+    #endif /* ChargeDelay_UseStatus */
 
-#endif /* !RampDelay_UsingFixedFunction */
+#endif /* !ChargeDelay_UsingFixedFunction */
 
 
 /*******************************************************************************
-* Function Name: RampDelay_WritePeriod
+* Function Name: ChargeDelay_WritePeriod
 ********************************************************************************
 *
 * Summary:
@@ -479,20 +479,20 @@ void RampDelay_Stop(void)
 *  None
 *
 *******************************************************************************/
-void RampDelay_WritePeriod(uint8 period) 
+void ChargeDelay_WritePeriod(uint8 period) 
 {
-    #if(RampDelay_UsingFixedFunction)
-        CY_SET_REG16(RampDelay_PERIOD_LSB_PTR, (uint16)period);
+    #if(ChargeDelay_UsingFixedFunction)
+        CY_SET_REG16(ChargeDelay_PERIOD_LSB_PTR, (uint16)period);
     #else
-        CY_SET_REG8(RampDelay_PERIOD_LSB_PTR, period);
-    #endif /* (RampDelay_UsingFixedFunction) */
+        CY_SET_REG8(ChargeDelay_PERIOD_LSB_PTR, period);
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 }
 
-#if (RampDelay_UseOneCompareMode)
+#if (ChargeDelay_UseOneCompareMode)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteCompare
+    * Function Name: ChargeDelay_WriteCompare
     ********************************************************************************
     *
     * Summary:
@@ -513,22 +513,22 @@ void RampDelay_WritePeriod(uint8 period)
     *  Dither Mode, Center Aligned Mode or One Output Mode
     *
     *******************************************************************************/
-    void RampDelay_WriteCompare(uint8 compare) \
+    void ChargeDelay_WriteCompare(uint8 compare) \
                                        
     {
-        #if(RampDelay_UsingFixedFunction)
-            CY_SET_REG16(RampDelay_COMPARE1_LSB_PTR, (uint16)compare);
+        #if(ChargeDelay_UsingFixedFunction)
+            CY_SET_REG16(ChargeDelay_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG8(RampDelay_COMPARE1_LSB_PTR, compare);
-        #endif /* (RampDelay_UsingFixedFunction) */
+            CY_SET_REG8(ChargeDelay_COMPARE1_LSB_PTR, compare);
+        #endif /* (ChargeDelay_UsingFixedFunction) */
 
-        #if (RampDelay_PWMMode == RampDelay__B_PWM__DITHER)
-            #if(RampDelay_UsingFixedFunction)
-                CY_SET_REG16(RampDelay_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
+        #if (ChargeDelay_PWMMode == ChargeDelay__B_PWM__DITHER)
+            #if(ChargeDelay_UsingFixedFunction)
+                CY_SET_REG16(ChargeDelay_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
             #else
-                CY_SET_REG8(RampDelay_COMPARE2_LSB_PTR, (compare + 1u));
-            #endif /* (RampDelay_UsingFixedFunction) */
-        #endif /* (RampDelay_PWMMode == RampDelay__B_PWM__DITHER) */
+                CY_SET_REG8(ChargeDelay_COMPARE2_LSB_PTR, (compare + 1u));
+            #endif /* (ChargeDelay_UsingFixedFunction) */
+        #endif /* (ChargeDelay_PWMMode == ChargeDelay__B_PWM__DITHER) */
     }
 
 
@@ -536,7 +536,7 @@ void RampDelay_WritePeriod(uint8 period)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteCompare1
+    * Function Name: ChargeDelay_WriteCompare1
     ********************************************************************************
     *
     * Summary:
@@ -552,19 +552,19 @@ void RampDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_WriteCompare1(uint8 compare) \
+    void ChargeDelay_WriteCompare1(uint8 compare) \
                                         
     {
-        #if(RampDelay_UsingFixedFunction)
-            CY_SET_REG16(RampDelay_COMPARE1_LSB_PTR, (uint16)compare);
+        #if(ChargeDelay_UsingFixedFunction)
+            CY_SET_REG16(ChargeDelay_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG8(RampDelay_COMPARE1_LSB_PTR, compare);
-        #endif /* (RampDelay_UsingFixedFunction) */
+            CY_SET_REG8(ChargeDelay_COMPARE1_LSB_PTR, compare);
+        #endif /* (ChargeDelay_UsingFixedFunction) */
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteCompare2
+    * Function Name: ChargeDelay_WriteCompare2
     ********************************************************************************
     *
     * Summary:
@@ -581,22 +581,22 @@ void RampDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_WriteCompare2(uint8 compare) \
+    void ChargeDelay_WriteCompare2(uint8 compare) \
                                         
     {
-        #if(RampDelay_UsingFixedFunction)
-            CY_SET_REG16(RampDelay_COMPARE2_LSB_PTR, compare);
+        #if(ChargeDelay_UsingFixedFunction)
+            CY_SET_REG16(ChargeDelay_COMPARE2_LSB_PTR, compare);
         #else
-            CY_SET_REG8(RampDelay_COMPARE2_LSB_PTR, compare);
-        #endif /* (RampDelay_UsingFixedFunction) */
+            CY_SET_REG8(ChargeDelay_COMPARE2_LSB_PTR, compare);
+        #endif /* (ChargeDelay_UsingFixedFunction) */
     }
 #endif /* UseOneCompareMode */
 
-#if (RampDelay_DeadBandUsed)
+#if (ChargeDelay_DeadBandUsed)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteDeadTime
+    * Function Name: ChargeDelay_WriteDeadTime
     ********************************************************************************
     *
     * Summary:
@@ -609,30 +609,30 @@ void RampDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_WriteDeadTime(uint8 deadtime) 
+    void ChargeDelay_WriteDeadTime(uint8 deadtime) 
     {
         /* If using the Dead Band 1-255 mode then just write the register */
-        #if(!RampDelay_DeadBand2_4)
-            CY_SET_REG8(RampDelay_DEADBAND_COUNT_PTR, deadtime);
+        #if(!ChargeDelay_DeadBand2_4)
+            CY_SET_REG8(ChargeDelay_DEADBAND_COUNT_PTR, deadtime);
         #else
             /* Otherwise the data has to be masked and offset */
             /* Clear existing data */
-            RampDelay_DEADBAND_COUNT &= ((uint8)(~RampDelay_DEADBAND_COUNT_MASK));
+            ChargeDelay_DEADBAND_COUNT &= ((uint8)(~ChargeDelay_DEADBAND_COUNT_MASK));
 
             /* Set new dead time */
-            #if(RampDelay_DEADBAND_COUNT_SHIFT)
-                RampDelay_DEADBAND_COUNT |= ((uint8)((uint8)deadtime << RampDelay_DEADBAND_COUNT_SHIFT)) &
-                                                    RampDelay_DEADBAND_COUNT_MASK;
+            #if(ChargeDelay_DEADBAND_COUNT_SHIFT)
+                ChargeDelay_DEADBAND_COUNT |= ((uint8)((uint8)deadtime << ChargeDelay_DEADBAND_COUNT_SHIFT)) &
+                                                    ChargeDelay_DEADBAND_COUNT_MASK;
             #else
-                RampDelay_DEADBAND_COUNT |= deadtime & RampDelay_DEADBAND_COUNT_MASK;
-            #endif /* (RampDelay_DEADBAND_COUNT_SHIFT) */
+                ChargeDelay_DEADBAND_COUNT |= deadtime & ChargeDelay_DEADBAND_COUNT_MASK;
+            #endif /* (ChargeDelay_DEADBAND_COUNT_SHIFT) */
 
-        #endif /* (!RampDelay_DeadBand2_4) */
+        #endif /* (!ChargeDelay_DeadBand2_4) */
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadDeadTime
+    * Function Name: ChargeDelay_ReadDeadTime
     ********************************************************************************
     *
     * Summary:
@@ -645,29 +645,29 @@ void RampDelay_WritePeriod(uint8 period)
     *  Dead Band Counts
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadDeadTime(void) 
+    uint8 ChargeDelay_ReadDeadTime(void) 
     {
         /* If using the Dead Band 1-255 mode then just read the register */
-        #if(!RampDelay_DeadBand2_4)
-            return (CY_GET_REG8(RampDelay_DEADBAND_COUNT_PTR));
+        #if(!ChargeDelay_DeadBand2_4)
+            return (CY_GET_REG8(ChargeDelay_DEADBAND_COUNT_PTR));
         #else
 
             /* Otherwise the data has to be masked and offset */
-            #if(RampDelay_DEADBAND_COUNT_SHIFT)
-                return ((uint8)(((uint8)(RampDelay_DEADBAND_COUNT & RampDelay_DEADBAND_COUNT_MASK)) >>
-                                                                           RampDelay_DEADBAND_COUNT_SHIFT));
+            #if(ChargeDelay_DEADBAND_COUNT_SHIFT)
+                return ((uint8)(((uint8)(ChargeDelay_DEADBAND_COUNT & ChargeDelay_DEADBAND_COUNT_MASK)) >>
+                                                                           ChargeDelay_DEADBAND_COUNT_SHIFT));
             #else
-                return (RampDelay_DEADBAND_COUNT & RampDelay_DEADBAND_COUNT_MASK);
-            #endif /* (RampDelay_DEADBAND_COUNT_SHIFT) */
-        #endif /* (!RampDelay_DeadBand2_4) */
+                return (ChargeDelay_DEADBAND_COUNT & ChargeDelay_DEADBAND_COUNT_MASK);
+            #endif /* (ChargeDelay_DEADBAND_COUNT_SHIFT) */
+        #endif /* (!ChargeDelay_DeadBand2_4) */
     }
 #endif /* DeadBandUsed */
 
-#if (RampDelay_UseStatus || RampDelay_UsingFixedFunction)
+#if (ChargeDelay_UseStatus || ChargeDelay_UsingFixedFunction)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_SetInterruptMode
+    * Function Name: ChargeDelay_SetInterruptMode
     ********************************************************************************
     *
     * Summary:
@@ -681,14 +681,14 @@ void RampDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_SetInterruptMode(uint8 interruptMode) 
+    void ChargeDelay_SetInterruptMode(uint8 interruptMode) 
     {
-        CY_SET_REG8(RampDelay_STATUS_MASK_PTR, interruptMode);
+        CY_SET_REG8(ChargeDelay_STATUS_MASK_PTR, interruptMode);
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadStatusRegister
+    * Function Name: ChargeDelay_ReadStatusRegister
     ********************************************************************************
     *
     * Summary:
@@ -708,19 +708,19 @@ void RampDelay_WritePeriod(uint8 period)
     *  [0]   : Compare output 1
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadStatusRegister(void) 
+    uint8 ChargeDelay_ReadStatusRegister(void) 
     {
-        return (CY_GET_REG8(RampDelay_STATUS_PTR));
+        return (CY_GET_REG8(ChargeDelay_STATUS_PTR));
     }
 
-#endif /* (RampDelay_UseStatus || RampDelay_UsingFixedFunction) */
+#endif /* (ChargeDelay_UseStatus || ChargeDelay_UsingFixedFunction) */
 
 
-#if (RampDelay_UseControl)
+#if (ChargeDelay_UseControl)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadControlRegister
+    * Function Name: ChargeDelay_ReadControlRegister
     ********************************************************************************
     *
     * Summary:
@@ -734,17 +734,17 @@ void RampDelay_WritePeriod(uint8 period)
     *  uint8 : Current control register value
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadControlRegister(void) 
+    uint8 ChargeDelay_ReadControlRegister(void) 
     {
         uint8 result;
 
-        result = CY_GET_REG8(RampDelay_CONTROL_PTR);
+        result = CY_GET_REG8(ChargeDelay_CONTROL_PTR);
         return (result);
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteControlRegister
+    * Function Name: ChargeDelay_WriteControlRegister
     ********************************************************************************
     *
     * Summary:
@@ -762,19 +762,19 @@ void RampDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_WriteControlRegister(uint8 control) 
+    void ChargeDelay_WriteControlRegister(uint8 control) 
     {
-        CY_SET_REG8(RampDelay_CONTROL_PTR, control);
+        CY_SET_REG8(ChargeDelay_CONTROL_PTR, control);
     }
 
-#endif /* (RampDelay_UseControl) */
+#endif /* (ChargeDelay_UseControl) */
 
 
-#if (!RampDelay_UsingFixedFunction)
+#if (!ChargeDelay_UsingFixedFunction)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadCapture
+    * Function Name: ChargeDelay_ReadCapture
     ********************************************************************************
     *
     * Summary:
@@ -787,19 +787,19 @@ void RampDelay_WritePeriod(uint8 period)
     *  uint8/uint16: The current capture value
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadCapture(void) 
+    uint8 ChargeDelay_ReadCapture(void) 
     {
-        return (CY_GET_REG8(RampDelay_CAPTURE_LSB_PTR));
+        return (CY_GET_REG8(ChargeDelay_CAPTURE_LSB_PTR));
     }
 
-#endif /* (!RampDelay_UsingFixedFunction) */
+#endif /* (!ChargeDelay_UsingFixedFunction) */
 
 
-#if (RampDelay_UseOneCompareMode)
+#if (ChargeDelay_UseOneCompareMode)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadCompare
+    * Function Name: ChargeDelay_ReadCompare
     ********************************************************************************
     *
     * Summary:
@@ -813,20 +813,20 @@ void RampDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadCompare(void) 
+    uint8 ChargeDelay_ReadCompare(void) 
     {
-        #if(RampDelay_UsingFixedFunction)
-            return ((uint8)CY_GET_REG16(RampDelay_COMPARE1_LSB_PTR));
+        #if(ChargeDelay_UsingFixedFunction)
+            return ((uint8)CY_GET_REG16(ChargeDelay_COMPARE1_LSB_PTR));
         #else
-            return (CY_GET_REG8(RampDelay_COMPARE1_LSB_PTR));
-        #endif /* (RampDelay_UsingFixedFunction) */
+            return (CY_GET_REG8(ChargeDelay_COMPARE1_LSB_PTR));
+        #endif /* (ChargeDelay_UsingFixedFunction) */
     }
 
 #else
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadCompare1
+    * Function Name: ChargeDelay_ReadCompare1
     ********************************************************************************
     *
     * Summary:
@@ -839,14 +839,14 @@ void RampDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadCompare1(void) 
+    uint8 ChargeDelay_ReadCompare1(void) 
     {
-        return (CY_GET_REG8(RampDelay_COMPARE1_LSB_PTR));
+        return (CY_GET_REG8(ChargeDelay_COMPARE1_LSB_PTR));
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadCompare2
+    * Function Name: ChargeDelay_ReadCompare2
     ********************************************************************************
     *
     * Summary:
@@ -859,16 +859,16 @@ void RampDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadCompare2(void) 
+    uint8 ChargeDelay_ReadCompare2(void) 
     {
-        return (CY_GET_REG8(RampDelay_COMPARE2_LSB_PTR));
+        return (CY_GET_REG8(ChargeDelay_COMPARE2_LSB_PTR));
     }
 
-#endif /* (RampDelay_UseOneCompareMode) */
+#endif /* (ChargeDelay_UseOneCompareMode) */
 
 
 /*******************************************************************************
-* Function Name: RampDelay_ReadPeriod
+* Function Name: ChargeDelay_ReadPeriod
 ********************************************************************************
 *
 * Summary:
@@ -881,20 +881,20 @@ void RampDelay_WritePeriod(uint8 period)
 *  uint8/16: Period value
 *
 *******************************************************************************/
-uint8 RampDelay_ReadPeriod(void) 
+uint8 ChargeDelay_ReadPeriod(void) 
 {
-    #if(RampDelay_UsingFixedFunction)
-        return ((uint8)CY_GET_REG16(RampDelay_PERIOD_LSB_PTR));
+    #if(ChargeDelay_UsingFixedFunction)
+        return ((uint8)CY_GET_REG16(ChargeDelay_PERIOD_LSB_PTR));
     #else
-        return (CY_GET_REG8(RampDelay_PERIOD_LSB_PTR));
-    #endif /* (RampDelay_UsingFixedFunction) */
+        return (CY_GET_REG8(ChargeDelay_PERIOD_LSB_PTR));
+    #endif /* (ChargeDelay_UsingFixedFunction) */
 }
 
-#if ( RampDelay_KillModeMinTime)
+#if ( ChargeDelay_KillModeMinTime)
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_WriteKillTime
+    * Function Name: ChargeDelay_WriteKillTime
     ********************************************************************************
     *
     * Summary:
@@ -908,14 +908,14 @@ uint8 RampDelay_ReadPeriod(void)
     *  None
     *
     *******************************************************************************/
-    void RampDelay_WriteKillTime(uint8 killtime) 
+    void ChargeDelay_WriteKillTime(uint8 killtime) 
     {
-        CY_SET_REG8(RampDelay_KILLMODEMINTIME_PTR, killtime);
+        CY_SET_REG8(ChargeDelay_KILLMODEMINTIME_PTR, killtime);
     }
 
 
     /*******************************************************************************
-    * Function Name: RampDelay_ReadKillTime
+    * Function Name: ChargeDelay_ReadKillTime
     ********************************************************************************
     *
     * Summary:
@@ -929,11 +929,11 @@ uint8 RampDelay_ReadPeriod(void)
     *  uint8: The current Minimum Time kill counts
     *
     *******************************************************************************/
-    uint8 RampDelay_ReadKillTime(void) 
+    uint8 ChargeDelay_ReadKillTime(void) 
     {
-        return (CY_GET_REG8(RampDelay_KILLMODEMINTIME_PTR));
+        return (CY_GET_REG8(ChargeDelay_KILLMODEMINTIME_PTR));
     }
 
-#endif /* ( RampDelay_KillModeMinTime) */
+#endif /* ( ChargeDelay_KillModeMinTime) */
 
 /* [] END OF FILE */

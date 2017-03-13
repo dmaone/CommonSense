@@ -37,7 +37,7 @@ static void InitSensor(void)
     ADC1_Start();
     ADC1_SetResolution(ADC_RESOLUTION);
     CyDelayUs(10); // Give ADCs time to warm up
-    RampDelay_Start();
+    ChargeDelay_Start();
 }
 
 static void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)

@@ -43,7 +43,7 @@
 #include "ADC1.h"
 #include "Buf0_dma.h"
 #include "Buf1_dma.h"
-#include "RampDelay.h"
+#include "ChargeDelay.h"
 #include "USB_Dm_aliases.h"
 #include "USB_Dm.h"
 #include "USB_Dp_aliases.h"
