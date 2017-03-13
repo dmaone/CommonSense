@@ -100,8 +100,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         uint8_t max_cols = pl->at(2);
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
-            int16_t level = *pl->mid(3+(i<<1), 2).constData();
-            //int16_t level = pl->constData()[3+(i<<1)];
+            uint8_t level = pl->constData()[3+i];
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())
                or (displayMode == 2 and level > cell->intValue())

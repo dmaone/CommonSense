@@ -15,15 +15,15 @@ define symbol __ICFEDIT_size_heap__   = 0x80;
 
 
 /******** Definitions ********/
-define symbol CY_APPL_LOADABLE  = 0;
+define symbol CY_APPL_LOADABLE  = 1;
 define symbol CY_APPL_LOADER    = 0;
 define symbol CY_APPL_NUM       = 1;
 define symbol CY_APPL_MAX       = 1;
 define symbol CY_METADATA_SIZE  = 64;
 define symbol CY_CHECKSUM_EXCLUDE_SIZE = 0;
-define symbol CY_EE_IN_BTLDR    = 0x0;
+define symbol CY_EE_IN_BTLDR    = 0x00;
 define symbol CY_EE_SIZE        = 2048;
-
+include "cybootloader.icf";
 if (!CY_APPL_LOADABLE) {
     define symbol CYDEV_BTLDR_SIZE = 0;
 }

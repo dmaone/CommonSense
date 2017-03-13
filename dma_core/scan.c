@@ -37,6 +37,7 @@ static void InitSensor(void)
     ADC1_Start();
     ADC1_SetResolution(ADC_RESOLUTION);
     CyDelayUs(10); // Give ADCs time to warm up
+    RampDelay_Start();
 }
 
 static void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)
@@ -85,29 +86,27 @@ void scan_update(void)
 {
     if (!scan_in_progress)
         return;
-    
-    for(int i=0; i<8; i++) {
-        // Since Count7 counts down, _last_ channel is first in buffer.
-        // To save on computation here, channels in schematic are swapped - 6-4-2-0 instead of 0-2-4-6
-        // No filter
-        //matrix[current_col][i] = Buf0Mem[i << 1];
-        //matrix[current_col][i + 8] = Buf1Mem[i << 1];
-        // IIR filter
-        matrix[current_col][i] = (IIR_N * matrix[current_col][i] + Buf0Mem[i << 1]) >> IIR_M_BIT;
-        matrix[current_col][i + 8] = (IIR_N * matrix[current_col][i + 8] + Buf1Mem[i << 1]) >> IIR_M_BIT;
+#ifdef COMMONSENSE_100KHZ_MODE
+    CyDelayUs(3);
+    Drive(0);
+    return;
+    // The rest of the code is dead in 100kHz mode.
+#endif
+    uint8_t next_col;
+    // Drive column. We will have enough time to read the status - RampDelay should take care of that.
+    next_col = (current_col ? current_col : config.matrixRows) - 1;
+    Drive(next_col);
+    for(uint8_t i=0; i<8; i++) {
+#if COMMONSENSE_IIR_ORDER == 0
+        // Degenerate version. But very fast! Can be used in noiseless environments.
+        matrix[current_col][i]     = Buf0Mem[_ADC_COL_OFFSET(i)];
+        matrix[current_col][i + 8] = Buf1Mem[_ADC_COL_OFFSET(i)];
+#else
+        matrix[current_col][i]     += Buf0Mem[_ADC_COL_OFFSET(i)] - (matrix[current_col][i] >> COMMONSENSE_IIR_ORDER);
+        matrix[current_col][i + 8] += Buf1Mem[_ADC_COL_OFFSET(i)] - (matrix[current_col][i + 8] >> COMMONSENSE_IIR_ORDER);
+#endif
     }
-    if (current_col)
-    {
-        Drive(--current_col);
-    }
-    else
-    {
-        current_col = config.matrixRows - 1;
-        // For 100kHz version, uncomment the line below and set PTK channels to 2 or 4
-        // This will drive only line 0 and read 1 or 2 columns. But it will do that VERY fast.
-        //current_col = 0;
-        Drive(current_col);
-    }
+    current_col = next_col;    
 }
 
 void scan_init(void)

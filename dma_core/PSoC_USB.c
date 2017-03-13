@@ -96,7 +96,7 @@ void process_msg(void)
         break;
     case C2CMD_ENTER_BOOTLOADER:
         xprintf("Jumping to bootloader..");
-       // Boot_Load(); //Does not return, no need for break
+        Boot_Load(); //Does not return, no need for break
     case C2CMD_UPLOAD_CONFIG:
         receive_config_block();
         break;

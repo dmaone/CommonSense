@@ -15,7 +15,7 @@
 
 CY_ISR(BootIRQ_ISR)
 {
-    //Boot_Load();
+    Boot_Load();
 }
 
 uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
@@ -29,7 +29,7 @@ void printRow(uint8 row)
     outbox.payload[1] = config.matrixCols;
     for(uint8_t i=0; i<config.matrixCols; i++)
     {
-        memcpy(outbox.payload + 2 + (i<<1), &matrix[row][i], 2);
+        memcpy(outbox.payload + 2 + (i), &matrix[row][i], 2);
     }
     usb_send(OUTBOX_EP);
 }
@@ -37,22 +37,23 @@ void printRow(uint8 row)
 bool is_matrix_changed(void)
 {
     bool retval = false;
-    ///FIXME use actual calibration
+    uint32_t current_row = 0;
     for (uint8_t i=0; i<config.matrixRows; i++)
     {
-        uint32_t current_row = matrix_status[i];
         for (uint8_t j=0; j<config.matrixCols; j++)
         {
             if (config.storage[STORAGE_ADDRESS((i*config.matrixCols) + j)] > 3u) {
                 // Not a dead key in layout
-                if (matrix[i][j] > config.storage[i*config.matrixCols + j])
+                if (matrix[i][j] > config.storage[(i*config.matrixCols) + j])
                 {
                     // Above noise floor
                     current_row |= (1 << j);
                     //pings++;
                 }
                 else
+                {
                     current_row &= ~(1 << j);
+                }
             }
         }
         if (current_row != matrix_status[i]) {
@@ -86,8 +87,9 @@ void send_report(void)
                 } else if (keycode > 0x03) {
                     this_report[count++] = keycode;
                 }
-                if ((matrix_prev[i] & (1 << j)) == 0) {
-                    xprintf("KP: %d %d %d > %d", i, j, config.storage[i*config.matrixCols + j], matrix[i][j]);
+                if (!(matrix_prev[i] & (1 << j))) {
+                    xprintf("KP: %d %d %d > %d", i, j, config.storage[(i*config.matrixCols) + j], matrix[i][j]);
+                    xprintf("Row: %x", matrix_status[i]);
                 }
             }
         }

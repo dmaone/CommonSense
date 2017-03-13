@@ -3333,10 +3333,10 @@
   <Group key="Pin2">
     <Group key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba">
       <Group key="0">
-        <Data key="Port Format" value="2,3" />
+        <Data key="Port Format" value="3,5" />
       </Group>
       <Group key="1">
-        <Data key="Port Format" value="2,1" />
+        <Data key="Port Format" value="12,0" />
       </Group>
     </Group>
     <Group key="18d9ada4-e478-49a4-a229-4677cdd31300/8b77a6c4-10a0-4390-971c-672353e2a49c">
@@ -3363,7 +3363,7 @@
     <Data key="CYDEV_CONFIG_UNUSED_IO" value="AllowButWarn" />
     <Data key="CYDEV_CONFIGURATION_ECC" value="True" />
     <Data key="CYDEV_CONFIGURATION_MODE" value="COMPRESSED" />
-    <Data key="CYDEV_DEBUGGING_DPS" value="SWD" />
+    <Data key="CYDEV_DEBUGGING_DPS" value="Disable" />
     <Data key="CYDEV_DEBUGGING_XRES" value="False" />
     <Data key="CYDEV_ECC_ENABLE" value="False" />
     <Data key="CYDEV_HEAP_SIZE" value="0x0400" />
