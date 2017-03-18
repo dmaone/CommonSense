@@ -127,11 +127,16 @@ int main()
         {
             usb_init();
         }
-        if (message_for_you_in_the_lobby)
+        if (CTRLR_SCB.status == USB_XFER_STATUS_ACK)
         {
-            process_msg();
+            process_msg((void*)CTRLR_INBOX);
+            CTRLR_SCB.status = USB_XFER_IDLE;
         }
-        //scan_start();
+        if (KBD_SCB.status == USB_XFER_STATUS_ACK)
+        {
+            xprintf("%d", CTRLR_INBOX[0]);
+            KBD_SCB.status = USB_XFER_IDLE;
+        }
         if (status_register.matrix_output > 0)
             for(uint8 i = 0; i<config.matrixRows; i++)
                 printRow(i);

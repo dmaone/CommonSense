@@ -17,26 +17,28 @@
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01
 
+/* Devices may append additional data to these boot reports, 
+ * but the first 8 bytes of keyboard reports 
+ * and the first 3 bytes of mouse reports 
+ * must conform to the format defined by the Boot Report descriptor
+ * in order for the data to be correctly interpreted by the BIOS.
+ * -- HID Spec, v1.11, Appendix B: "Boot Interface Descriptors"
+ *
+ * The BIOS will ignore any extensions to reports. 
+ * -- Same place.
+ */
 #define KRO_LIMIT 62
 
 // USB stuff
 #define KEYBOARD_EP 1
+//#define KBD_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_FEATURE_RPT_SCB
+//#define KBD_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_FEATURE_BUF
+
 #define OUTBOX_EP 8
+#define CTRLR_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_OUT_RPT_SCB
+#define CTRLR_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_OUT_BUF
 
-#define INBOX_EP 7
-#define USB_EP_7_ISR_EXIT_CALLBACK
-// ^ ^^ those must be kept in sync!
 
-//for using ## in macro definition. Unfortunately doesn't work in macro names :(
-#define FUZE_3_TOKENS(x, y, z) x ## y ## z
-#define JOIN3(x, y, z) FUZE_3_TOKENS(x, y, z)
-
-#define INBOX_CALLBACK JOIN3(USB_EP_, INBOX_EP, _ISR_ExitCallback)
-
-void INBOX_CALLBACK(void);
-
-bool message_for_you_in_the_lobby;
-OUT_c2packet_t inbox;
 IN_c2packet_t outbox;
 
 // EEPROM stuff

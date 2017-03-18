@@ -16,13 +16,6 @@
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
 
-void INBOX_CALLBACK(void)
-{
-    // !!!FIXME!!! Right now we really hope there won't be another packet before this packet is processed.
-    USB_ReadOutEP(INBOX_EP, inbox.raw, USB_GetEPCount(INBOX_EP));
-    message_for_you_in_the_lobby = true;
-}
-
 void report_status(void)
 {
     outbox.response_type = C2RESPONSE_STATUS;
@@ -37,18 +30,18 @@ void report_status(void)
     usb_send(OUTBOX_EP);
 }
 
-void receive_config_block(void){
+void receive_config_block(OUT_c2packet_t *inbox){
     // TODO define offset via transfer block size and packet size
-    memcpy(config.raw + (inbox.payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), inbox.payload+31, CONFIG_TRANSFER_BLOCK_SIZE);
+    memcpy(config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), inbox->payload+31, CONFIG_TRANSFER_BLOCK_SIZE);
     outbox.response_type = C2RESPONSE_CONFIG;
-    outbox.payload[0] = inbox.payload[0];
+    outbox.payload[0] = inbox->payload[0];
     usb_send(OUTBOX_EP);
 }
 
-void send_config_block(void){
+void send_config_block(OUT_c2packet_t *inbox){
     outbox.response_type = C2RESPONSE_CONFIG;
-    outbox.payload[0] = inbox.payload[0];
-    memcpy(outbox.payload + 31, config.raw + (inbox.payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), CONFIG_TRANSFER_BLOCK_SIZE);
+    outbox.payload[0] = inbox->payload[0];
+    memcpy(outbox.payload + 31, config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), CONFIG_TRANSFER_BLOCK_SIZE);
     usb_send(OUTBOX_EP);
 }
 
@@ -83,13 +76,13 @@ void load_config(void){
     EEPROM_Stop();
 }
 
-void process_msg(void)
+void process_msg(OUT_c2packet_t * inbox)
 {
     memset(outbox.raw, 0x00, sizeof(outbox));
-    switch (inbox.command) {
+    switch (inbox->command) {
     case C2CMD_EWO:
-        status_register.emergency_stop = inbox.payload[0];
-        xprintf("EWO signal received: %d", inbox.payload[0]);
+        status_register.emergency_stop = inbox->payload[0];
+        xprintf("EWO signal received: %d", inbox->payload[0]);
         break;
     case C2CMD_GET_STATUS:
         report_status();
@@ -98,10 +91,10 @@ void process_msg(void)
         xprintf("Jumping to bootloader..");
         Boot_Load(); //Does not return, no need for break
     case C2CMD_UPLOAD_CONFIG:
-        receive_config_block();
+        receive_config_block(inbox);
         break;
     case C2CMD_DOWNLOAD_CONFIG:
-        send_config_block();
+        send_config_block(inbox);
         break;
     case C2CMD_COMMIT:
         save_config();
@@ -110,12 +103,11 @@ void process_msg(void)
         xprintf("Resetting..");
         CySoftwareReset(); //Does not return, no need for break.
     case C2CMD_GET_MATRIX_STATE:
-        status_register.matrix_output = inbox.payload[0];
+        status_register.matrix_output = inbox->payload[0];
         break;
     default:
         break;
     }
-    acknowledge_command();
 }
 
 void usb_init(void)
@@ -126,17 +118,7 @@ void usb_init(void)
     {
         CyDelay(100);
     }
-    // Start listening!
-    USB_EnableOutEP(INBOX_EP);
 }
-
-
-void acknowledge_command(void)
-{
-    message_for_you_in_the_lobby = false;
-    USB_EnableOutEP(INBOX_EP);
-}
-
 
 void usb_send(uint8_t ep)
 {   
