@@ -35,11 +35,12 @@
     <HID_Item Type="USAGE_MAXIMUM" Code="40" Size="1" Value="5" />
     <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="1" />
     <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="5" />
-    <HID_Item Type="FEATURE" Code="176" Size="1" Value="2" />
+    <HID_Item Type="OUTPUT" Code="144" Size="1" Value="2" Desc="(Var)" />
 
     <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="3" />
     <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="1" />
-    <HID_Item Type="FEATURE" Code="176" Size="1" Value="1" />
+    <HID_Item Type="OUTPUT" Code="144" Size="1" Value="1" Desc="(Con)" />
+
 
     <HID_Item Type="END_COLLECTION" Code="192" Size="0" Value="0" />
   </Items>

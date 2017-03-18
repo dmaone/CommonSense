@@ -28,6 +28,7 @@ void report_status(void)
     outbox.payload[3] = dieTemperature[0];
     outbox.payload[4] = dieTemperature[1];
     usb_send(OUTBOX_EP);
+    xprintf("LED status: %d %d %d %d %d", led_status&0x01, led_status&0x02, led_status&0x04, led_status&0x08, led_status&0x10);
 }
 
 void receive_config_block(OUT_c2packet_t *inbox){
@@ -126,6 +127,11 @@ void usb_send(uint8_t ep)
     USB_LoadInEP(ep, outbox.raw, sizeof(outbox.raw));
     // !!!TODO!!! one can just return here if there's more than one buffer.
     while (!(USB_GetEPState(ep) & USB_IN_BUFFER_EMPTY)) {}; // wait for buffer release
+}
+
+void usb_keyboard_send(void* bufptr, uint8_t length)
+{
+    memcpy(KBD_OUTBOX, bufptr, length);
 }
 
 void xprintf(const char *format_p, ...)

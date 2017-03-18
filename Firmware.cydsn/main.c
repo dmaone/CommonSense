@@ -71,6 +71,7 @@ void send_report(void)
 {
     // Our report is 1b modifiers 62b other keys. No LEDs.
     uint8_t count = 1; // start from second byte
+    // Can't just update directly in USB buffer - host may read from there anytime.
     memset(this_report, 0x00, 64);
     for (uint8_t i=0; i<config.matrixRows; i++)
     {
@@ -98,11 +99,9 @@ void send_report(void)
     if (memcmp(this_report, prev_report, 64) != 0) {
         //xprintf("P/T %x %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], this_report[2], count);
         memcpy(prev_report, this_report, 64);
-        // Send actual report - per-key calibration still needed.
-        memcpy(outbox.raw, this_report, 64);
         if (!status_register.emergency_stop)
         {
-            usb_send(KEYBOARD_EP);
+            usb_keyboard_send(this_report, 64);
         }
     }
 }
@@ -134,7 +133,7 @@ int main()
         }
         if (KBD_SCB.status == USB_XFER_STATUS_ACK)
         {
-            xprintf("%d", CTRLR_INBOX[0]);
+            led_status = KBD_INBOX[0];
             KBD_SCB.status = USB_XFER_IDLE;
         }
         if (status_register.matrix_output > 0)
