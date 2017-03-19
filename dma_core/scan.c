@@ -76,9 +76,9 @@ void scan_start(void)
 {
     if (!scan_in_progress)
     {
-        current_col = config.matrixRows - 1;
+        current_col = 0;
+        Drive(0);
         scan_in_progress = true;
-        Drive(current_col);
     }
 }
 

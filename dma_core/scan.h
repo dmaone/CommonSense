@@ -23,7 +23,9 @@
 
 #define ADC_RESOLUTION 10
 
+// Don't forget to set keyboard to 3 channels for 100kHz mode!
 #undef COMMONSENSE_100KHZ_MODE
+
 // 0 - none, 1 - 1/2, 2 - 3/4, etc.
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
 #define COMMONSENSE_IIR_ORDER 2
