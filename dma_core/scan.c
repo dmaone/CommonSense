@@ -87,7 +87,6 @@ void scan_update(void)
     if (!scan_in_progress)
         return;
 #ifdef COMMONSENSE_100KHZ_MODE
-    CyDelayUs(3);
     Drive(0);
     return;
     // The rest of the code is dead in 100kHz mode.
@@ -96,14 +95,16 @@ void scan_update(void)
     // Drive column. We will have enough time to read the status - RampDelay should take care of that.
     next_col = (current_col ? current_col : config.matrixRows) - 1;
     Drive(next_col);
-    for(uint8_t i=0; i<8; i++) {
+    for(uint8_t i=0; i<ADC_CHANNELS; i++) {
 #if COMMONSENSE_IIR_ORDER == 0
         // Degenerate version. But very fast! Can be used in noiseless environments.
-        matrix[current_col][i]     = Buf0Mem[_ADC_COL_OFFSET(i)];
-        matrix[current_col][i + 8] = Buf1Mem[_ADC_COL_OFFSET(i)];
+        matrix[current_col][i]                  = Buf0Mem[_ADC_COL_OFFSET(i)];
+        matrix[current_col][i + ADC_CHANNELS]   = Buf1Mem[_ADC_COL_OFFSET(i)];
 #else
-        matrix[current_col][i]     += Buf0Mem[_ADC_COL_OFFSET(i)] - (matrix[current_col][i] >> COMMONSENSE_IIR_ORDER);
-        matrix[current_col][i + 8] += Buf1Mem[_ADC_COL_OFFSET(i)] - (matrix[current_col][i + 8] >> COMMONSENSE_IIR_ORDER);
+        matrix[current_col][i]                  += Buf0Mem[_ADC_COL_OFFSET(i)]
+                                                - (matrix[current_col][i] >> COMMONSENSE_IIR_ORDER);
+        matrix[current_col][i + ADC_CHANNELS]   += Buf1Mem[_ADC_COL_OFFSET(i)] 
+                                                - (matrix[current_col][i + ADC_CHANNELS] >> COMMONSENSE_IIR_ORDER);
 #endif
     }
     current_col = next_col;    

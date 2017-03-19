@@ -29,7 +29,7 @@ void printRow(uint8 row)
     outbox.payload[1] = config.matrixCols;
     for(uint8_t i=0; i<config.matrixCols; i++)
     {
-        memcpy(outbox.payload + 2 + (i), &matrix[row][i], 2);
+        memcpy(outbox.payload + 2 + (i), &matrix[row][i], 1);
     }
     usb_send(OUTBOX_EP);
 }
@@ -44,7 +44,12 @@ bool is_matrix_changed(void)
         {
             if (config.storage[STORAGE_ADDRESS((i*config.matrixCols) + j)] > 3u) {
                 // Not a dead key in layout
-                if (matrix[i][j] > config.storage[(i*config.matrixCols) + j])
+#if NORMALLY_LOW
+#define CMP_OP >
+#else
+#define CMP_OP <
+#endif
+                if (matrix[i][j] CMP_OP config.storage[(i*config.matrixCols) + j])
                 {
                     // Above noise floor
                     current_row |= (1 << j);

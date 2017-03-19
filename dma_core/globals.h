@@ -11,6 +11,11 @@
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
 
+#define BEAMSPRING 0
+#define BUCKLING_SPRING 1
+
+#define SWITCH_TYPE BEAMSPRING
+
 // Main safety switch
 #define NOT_A_KEYBOARD 1
 
@@ -53,3 +58,11 @@ status_register_t status_register;
 uint8_t led_status;
 
 void xprintf(const char *format_p, ...);
+
+#if SWITCH_TYPE == BEAMSPRING
+#define NORMALLY_LOW 0
+#elif SWITCH_TYPE == BUCKLING_SPRING
+#define NORMALLY_LOW 1
+#else
+#error "Unknown switch type"
+#endif

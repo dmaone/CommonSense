@@ -46,7 +46,13 @@ void send_config_block(OUT_c2packet_t *inbox){
     usb_send(OUTBOX_EP);
 }
 
+void set_hardware_parameters(void)
+{
+    config.capsense_flags.normallyOpen = NORMALLY_LOW;
+}
+
 void save_config(void){
+    set_hardware_parameters();
     EEPROM_Start();
     CyDelayUs(5);
     EEPROM_UpdateTemperature();
@@ -75,6 +81,7 @@ void load_config(void){
     CyEEPROM_ReadRelease();
     CyExitCriticalSection(interruptState);
     EEPROM_Stop();
+    set_hardware_parameters();
 }
 
 void process_msg(OUT_c2packet_t * inbox)
