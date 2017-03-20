@@ -12,8 +12,8 @@
 #include "Events.h"
 #include <QObject>
 #include "LogViewer.h"
+#include "DeviceConfig.h"
 #include "../c2/c2_protocol.h"
-#include "../c2/nvram.h"
 
 class DeviceInterface : public QObject
 {
@@ -27,41 +27,33 @@ class DeviceInterface : public QObject
         void setLogger(LogViewer *l);
         void start(void);
         bool event(QEvent* e);
-        psoc_eeprom_t *getConfigPtr(void) { return &config; }
         device_status_t* getStatus(void);
-        void getMatrixSizeParameters(std::vector<uint8_t>&, std::vector<uint8_t>&);
-        void setMatrixSizeParameters(std::vector<uint8_t>, std::vector<uint8_t>);
         LogViewer* logger;
+        DeviceConfig* config;
         enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigLoaded};
-        enum TransferDirection {TransferIdle, TransferUpload, TransferDownload};
 
     public slots:
         void sendCommand(uint8_t, QByteArray&);
         void sendCommand(uint8_t, uint8_t*);
         void sendCommand(uint8_t, uint8_t);
-        void uploadConfig(void);
-        void downloadConfig(void);
 
     signals:
         void deviceStatusNotification(DeviceInterface::DeviceStatus);
+        void Log();
 
     protected:
         virtual void timerEvent(QTimerEvent *);
 
     private:
         hid_device* device;
-        psoc_eeprom_t config;
         int pollTimerId;
         unsigned char outbox[65];
         unsigned char bytesFromDevice[65];
         device_status_t status;
-        enum TransferDirection transferDirection;
-        uint8_t currentBlock;
         hid_device* acquireDevice(void);
-        void whine(QString msg);
-        void resetTimer(int interval);
-        void uploadConfigBlock(void);
-        void downloadConfigBlock(QByteArray *);
+        void _initDevice(void);
+        void _resetTimer(int interval);
+        void _sendPacket(void);
 
     private slots:
         void deviceMessageReceiver(void);

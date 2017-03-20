@@ -27,7 +27,8 @@ SOURCES += main.cpp \
     MatrixMonitor.cpp \
     LayoutEditor.cpp \
     ScancodeList.cpp \
-    ThresholdEditor.cpp
+    ThresholdEditor.cpp \
+    DviceConfig.cpp
 
 HEADERS  += \
     FlightController.h \
@@ -41,7 +42,8 @@ HEADERS  += \
     ../c2/nvram.h \
     LayoutEditor.h \
     ScancodeList.h \
-    ThresholdEditor.h
+    ThresholdEditor.h \
+    DeviceConfig.h
 
 FORMS    += \
     FlightController.ui \

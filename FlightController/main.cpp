@@ -9,10 +9,27 @@
 #include <QApplication>
 #include "FlightController.h"
 
+static LogViewer* logger;
+static QtMessageHandler old_logger;
+
+void logToViewport(QtMsgType type, const QMessageLogContext &context, const QString &msg)
+{
+    if (logger)
+    {
+        logger->logMessage(msg);
+    } else if (old_logger) {
+        old_logger(type, context, msg);
+    }
+}
+
 int main(int argc, char *argv[])
 {
+    logger = NULL;
+    old_logger = NULL;
     QApplication a(argc, argv);
     FlightController w;
+    logger = w.getLogViewport();
+    old_logger = qInstallMessageHandler(logToViewport);
     w.show();
 
     return a.exec();

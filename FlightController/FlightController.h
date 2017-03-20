@@ -30,6 +30,8 @@ public:
     ~FlightController();
     void show(void);
     enum CowValidationStatus {cvsOK, cvsMissing, cvsDuplicate};
+    LogViewer* getLogViewport(void);
+    void logToViewport(const QString&);
 
 signals:
     void sendCommand(uint8_t cmd, uint8_t msg);
@@ -40,8 +42,6 @@ public slots:
     void bootloaderButtonClick(void);
     void matrixMonitorButtonClick(void);
     void statusRequestButtonClick(void);
-    void importConfig(void);
-    void exportConfig(void);
     void validateConfig(void);
     void editLayoutClick(void);
     void editThresholdsClick(void);

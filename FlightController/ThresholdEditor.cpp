@@ -14,7 +14,7 @@ ThresholdEditor::ThresholdEditor(QWidget *parent) :
 {
     ui->setupUi(this);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    deviceConfig = di.getConfigPtr();
+    // TODO deviceConfig = di.getConfigPtr();
 }
 
 void ThresholdEditor::show(void)

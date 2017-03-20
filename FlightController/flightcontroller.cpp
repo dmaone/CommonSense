@@ -7,14 +7,13 @@
  * published by the Free Software Foundation.
 */
 #include <QMessageBox>
-#include <QFileDialog>
-#include <Qfile>
 #include "FlightController.h"
 #include "ui_flightcontroller.h"
 #include "MatrixMonitor.h"
 
 #include "singleton.h"
 #include "DeviceInterface.h"
+#include "DeviceConfig.h"
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 
@@ -41,10 +40,10 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
     connect(ui->Rows, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
     connect(ui->Cols, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
-    connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importConfig()));
-    connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportConfig()));
-    connect(ui->uploadButton, SIGNAL(clicked()), &di, SLOT(uploadConfig()));
-    connect(ui->downloadButton, SIGNAL(clicked()), &di, SLOT(downloadConfig()));
+    connect(ui->importButton, SIGNAL(clicked()), di.config, SLOT(fromFile()));
+    connect(ui->uploadButton, SIGNAL(clicked()), di.config, SLOT(toDevice()));
+    connect(ui->downloadButton, SIGNAL(clicked()), di.config, SLOT(fromDevice()));
+    connect(ui->exportButton, SIGNAL(clicked()), di.config, SLOT(toFile()));
     connect(ui->commitButton, SIGNAL(clicked()), this, SLOT(commitConfig()));
     connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
     connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
@@ -83,52 +82,27 @@ FlightController::~FlightController()
     delete ui;
 }
 
-void FlightController::importConfig()
+LogViewer* FlightController::getLogViewport(void)
 {
-    QFileDialog fd(this, "Choose one file to import from");
-    fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
-    fd.setDefaultSuffix(QString("cfg"));
-    fd.setFileMode(QFileDialog::ExistingFile);
-    if (fd.exec())
-    {
-        QStringList fns = fd.selectedFiles();
-        QFile f(fns.at(0));
-        f.open(QIODevice::ReadOnly);
-        QDataStream ds(&f);
-        DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        ds.readRawData((char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
-        ui->LogViewport->logMessage(QString("Imported config from %1").arg(fns.at(0)));
-        revertConfig();
-    }
+    return ui->LogViewport;
+}
+
+void FlightController::logToViewport(const QString &msg)
+{
+    ui->LogViewport->logMessage(msg);
 }
 
 void FlightController::revertConfig()
 {
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    /*TODO
     psoc_eeprom_t* config = di.getConfigPtr();
     ui->Rows->setValue(config->matrixRows);
     ui->Cols->setValue(config->matrixCols);
     ui->normallyOpen->setChecked(config->capsenseFlags & (1 << CSF_NL));
+    */
     updateSetupDisplay();
     ui->LogViewport->logMessage("GUI synced with config");
-}
-
-void FlightController::exportConfig()
-{
-    QFileDialog fd(this, "Choose one file to export to");
-    fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
-    fd.setDefaultSuffix(QString("cfg"));
-    fd.setAcceptMode(QFileDialog::AcceptSave);
-    if (fd.exec())
-    {
-        QStringList fns = fd.selectedFiles();
-        QFile f(fns.at(0));
-        f.open(QIODevice::WriteOnly);
-        QDataStream ds(&f);
-        DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        ds.writeRawData((const char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
-        ui->LogViewport->logMessage(QString("Exported config to %1").arg(fns.at(0)));
-    }
 }
 
 
@@ -365,7 +339,7 @@ void FlightController::validateConfig(void)
 void FlightController::applyConfig(void)
 {
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    psoc_eeprom_t* config = di.getConfigPtr();
+    // TODO psoc_eeprom_t* config = di.getConfigPtr();
 }
 
 void FlightController::commitConfig(void)

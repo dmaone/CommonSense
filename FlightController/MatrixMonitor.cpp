@@ -27,7 +27,7 @@ MatrixMonitor::MatrixMonitor(QWidget *parent) :
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     di.installEventFilter(this);
-    deviceConfig = di.getConfigPtr();
+    // TODO deviceConfig = di.getConfigPtr();
 }
 
 void MatrixMonitor::show(void)
