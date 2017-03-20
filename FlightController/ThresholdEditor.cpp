@@ -73,8 +73,8 @@ void ThresholdEditor::applyThresholds()
     {
         for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
         {
-            uint8_t kc = display[i][j]->value();
-            deviceConfig->storage[(deviceConfig->row_params[i].rowNumber-1)*deviceConfig->matrixCols + deviceConfig->col_params[j].colNumber-1] = kc;
+            uint8_t kc = display[i][j]->value();            
+            // TODO deviceConfig->storage[(deviceConfig->row_params[i].rowNumber-1)*deviceConfig->matrixCols + deviceConfig->col_params[j].colNumber-1] = kc;
         }
     }
 }
@@ -86,9 +86,11 @@ void ThresholdEditor::resetThresholds()
     {
         for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
         {
+            /* TODO
             uint8_t kc = deviceConfig->storage[i*deviceConfig->matrixCols + j];
-            QSpinBox *cell = display[deviceConfig->row_params[i].rowNumber-1][deviceConfig->col_params[j].colNumber-1];
+            QSpinBox *cell = display[i][j];
             cell->setValue(kc);
+            */
         }
     }
     emit logMessage(QString("Loaded thresholds from device"));

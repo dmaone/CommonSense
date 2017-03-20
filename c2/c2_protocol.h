@@ -53,6 +53,11 @@ enum deviceStatus {
     C2DEVSTASTUS_MATRIXOUTPUT = 1,
 };
 
+enum capsenseFlags {
+    CSF_OE = 0,
+    CSF_NL = 1,
+};
+
 typedef union {
     struct {
         uint8_t status;

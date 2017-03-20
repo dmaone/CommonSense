@@ -108,13 +108,8 @@ void FlightController::revertConfig()
     psoc_eeprom_t* config = di.getConfigPtr();
     ui->Rows->setValue(config->matrixRows);
     ui->Cols->setValue(config->matrixCols);
-    ui->normallyOpen->setChecked(config->capsense_flags.normallyOpen);
-    ui->InterlacedScan->setChecked(config->capsense_flags.interlacedScan);
+    ui->normallyOpen->setChecked(config->capsenseFlags & (1 << CSF_NL));
     updateSetupDisplay();
-    for(uint8_t i=0; i<config->matrixRows; i++)
-        rows[i]->setCurrentIndex(config->row_params[i].isActive ? config->row_params[i].rowNumber : 0);
-    for(uint8_t i=0; i<config->matrixCols; i++)
-       columns[i]->setCurrentIndex(config->col_params[i].isActive ? config->col_params[i].colNumber : 0);
     ui->LogViewport->logMessage("GUI synced with config");
 }
 
@@ -371,21 +366,6 @@ void FlightController::applyConfig(void)
 {
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     psoc_eeprom_t* config = di.getConfigPtr();
-    config->capsense_flags.outputEnabled = true;
-    config->capsense_flags.interlacedScan = ui->InterlacedScan->isChecked();
-    config->capsense_flags.normallyOpen = ui->normallyOpen->isChecked();
-    config->matrixRows = ui->Rows->value();
-    config->matrixCols = ui->Cols->value();
-    for(uint8_t i=0; i< ABSOLUTE_MAX_ROWS; i++)
-    {
-        config->row_params[i].rowNumber = rows[i]->currentIndex();
-        config->row_params[i].isActive  = rows[i]->currentIndex() > 0;
-    }
-    for(uint8_t i=0; i< ABSOLUTE_MAX_COLS; i++)
-    {
-        config->col_params[i].colNumber = columns[i]->currentIndex();
-        config->col_params[i].isActive  = columns[i]->currentIndex() > 0;
-    }
 }
 
 void FlightController::commitConfig(void)

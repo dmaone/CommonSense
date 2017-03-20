@@ -106,11 +106,13 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (deviceConfig->capsense_flags.normallyOpen && level > deviceConfig->storage[row*deviceConfig->matrixCols + i])
+            /* TODO
+            if (deviceConfig->capsenseFlags && level > deviceConfig->storage[row*deviceConfig->matrixCols + i])
                 cell->setStyleSheet("background-color: #00ff00;");
             else if (!deviceConfig->capsense_flags.normallyOpen && level < deviceConfig->storage[row*deviceConfig->matrixCols + i])
                 cell->setStyleSheet("background-color: #00ff00;");
             else
+            */
                 cell->setStyleSheet("background-color: #ffffff;");
         }
         return true;
@@ -140,12 +142,14 @@ void MatrixMonitor::thresholdsButtonClick(void)
     {
         for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
         {
+            /* TODO
             if (deviceConfig->capsense_flags.normallyOpen)
             {
                 deviceConfig->storage[i*deviceConfig->matrixCols + j] = display[i][j]->value() + ui->threshold->value();
             } else {
                 deviceConfig->storage[i*deviceConfig->matrixCols + j] = display[i][j]->value() - ui->threshold->value();
             }
+            */
         }
     }
 }

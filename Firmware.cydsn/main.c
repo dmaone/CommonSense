@@ -18,8 +18,8 @@ CY_ISR(BootIRQ_ISR)
     Boot_Load();
 }
 
-uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
-uint32_t matrix_prev[ABSOLUTE_MAX_ROWS];
+uint32_t matrix_status[MATRIX_ROWS];
+uint32_t matrix_prev[MATRIX_ROWS];
 
 
 void printRow(uint8 row)
@@ -42,23 +42,15 @@ bool is_matrix_changed(void)
     {
         for (uint8_t j=0; j<config.matrixCols; j++)
         {
-            if (config.storage[STORAGE_ADDRESS((i*config.matrixCols) + j)] > 3u) {
-                // Not a dead key in layout
-#if NORMALLY_LOW
-#define CMP_OP >
-#else
-#define CMP_OP <
-#endif
-                if (matrix[i][j] CMP_OP config.storage[(i*config.matrixCols) + j])
-                {
-                    // Above noise floor
-                    current_row |= (1 << j);
-                    //pings++;
-                }
-                else
-                {
-                    current_row &= ~(1 << j);
-                }
+            if (matrix[i][j] > config.noiseFloor[i][j] && matrix[i][j] < config.noiseCeiling[i][j])
+            {
+                // Inside the corridor of interest
+                current_row |= (1 << j);
+                //pings++;
+            }
+            else
+            {
+                current_row &= ~(1 << j);
             }
         }
         if (current_row != matrix_status[i]) {
@@ -74,17 +66,18 @@ uint8_t this_report[64];
 
 void send_report(void)
 {
-    // Our report is 1b modifiers 62b other keys. No LEDs.
+    // Our report is 1b modifiers, 1b reserved, 62b other keys.
     uint8_t count = 1; // start from second byte
     // Can't just update directly in USB buffer - host may read from there anytime.
     memset(this_report, 0x00, 64);
+/*  TODO LAYERS
     for (uint8_t i=0; i<config.matrixRows; i++)
     {
         for (uint8_t j=0; j<config.matrixCols; j++)
         {
-            if (config.col_params->isActive && (matrix_status[i] & (1 << j)))
+            if (matrix_status[i] & (1 << j))
             {
-                // Keypress!
+                // Keypress! TODO LAYERS
                 uint8_t keycode = config.storage[STORAGE_ADDRESS((i*config.matrixCols)+j)];
                 if ((keycode & 0xF8) == 0xE0) 
                 {
@@ -100,6 +93,7 @@ void send_report(void)
             }
         }
     }
+*/
     memcpy(matrix_prev, matrix_status, sizeof(matrix_prev));
     if (memcmp(this_report, prev_report, 64) != 0) {
         //xprintf("P/T %x %x %x %x %x, %d", prev_report[0], prev_report[1], this_report[0], this_report[1], this_report[2], count);

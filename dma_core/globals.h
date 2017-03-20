@@ -8,13 +8,19 @@
 */
 
 #pragma once
-#include "c2/c2_protocol.h"
-#include "c2/nvram.h"
-
+// LIB.H!!!
+#define FORCE_BIT(VAR, BN, TO) ((VAR & (!(1<<BN))) + (TO << BN))
+// /LIB.H!!!
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
 
 #define SWITCH_TYPE BEAMSPRING
+#define MATRIX_COLS 23
+#define MATRIX_ROWS 4
+
+#include "c2/c2_protocol.h"
+#include "c2/nvram.h"
+
 
 // Main safety switch
 #define NOT_A_KEYBOARD 1

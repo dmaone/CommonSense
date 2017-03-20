@@ -48,7 +48,9 @@ void send_config_block(OUT_c2packet_t *inbox){
 
 void set_hardware_parameters(void)
 {
-    config.capsense_flags.normallyOpen = NORMALLY_LOW;
+    config.capsenseFlags = FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
+    config.matrixRows = MATRIX_ROWS;
+    config.matrixCols = MATRIX_COLS;
 }
 
 void save_config(void){
@@ -82,6 +84,12 @@ void load_config(void){
     CyExitCriticalSection(interruptState);
     EEPROM_Stop();
     set_hardware_parameters();
+    if (config.configVersion != CS_CONFIG_VERSION)
+    {
+        // Unexpected config version - not sure calibration data are there!
+        config.capsenseFlags = FORCE_BIT(config.capsenseFlags, CSF_OE, 0);
+        status_register.emergency_stop = true;
+    }
 }
 
 void process_msg(OUT_c2packet_t * inbox)
