@@ -28,7 +28,7 @@ SOURCES += main.cpp \
     LayoutEditor.cpp \
     ScancodeList.cpp \
     ThresholdEditor.cpp \
-    DviceConfig.cpp
+    DeviceConfig.cpp
 
 HEADERS  += \
     FlightController.h \

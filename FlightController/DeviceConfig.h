@@ -16,6 +16,9 @@ public:
     void setMatrixSizeParameters(std::vector<uint8_t>, std::vector<uint8_t>);
 
 signals:
+    void changed(void);
+    void uploadBlock(uint8_t, uint8_t*);
+    void downloadBlock(uint8_t, uint8_t);
 
 public slots:
     void fromDevice(void);
@@ -31,7 +34,7 @@ private:
     enum TransferDirection transferDirection;
     uint8_t currentBlock;
     void _uploadConfigBlock(void);
-    void _downloadConfigBlock(QByteArray *);
+    void _receiveConfigBlock(QByteArray *);
     void _assembleConfig(void);
 
 };

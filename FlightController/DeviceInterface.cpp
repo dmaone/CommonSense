@@ -1,14 +1,20 @@
 #include <QCoreApplication>
 #include <QMessageBox>
+#include <QDebug>
 #include <string>
 #include <algorithm>
 #include "DeviceInterface.h"
-#include "LogViewer.h"
+
 
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
-    logger(NULL), device(NULL), pollTimerId(0)
+    device(NULL), pollTimerId(0)
 {
     config = new DeviceConfig();
+    installEventFilter(config);
+
+    connect(config, SIGNAL(changed()), this, SLOT(configChanged()));
+    connect(config, SIGNAL(downloadBlock(uint8_t, uint8_t)), this, SLOT(sendCommand(uint8_t, uint8_t)));
+    connect(config, SIGNAL(uploadBlock(uint8_t, uint8_t*)), this, SLOT(sendCommand(uint8_t, uint8_t*)));
 }
 
 DeviceInterface::~DeviceInterface(void)
@@ -19,16 +25,10 @@ DeviceInterface::~DeviceInterface(void)
         qWarning("warning: error during hid_exit");
 }
 
-void DeviceInterface::setLogger(LogViewer* l)
-{
-    this->logger = l;
-    logger->logMessage("Initializing logging interface..");
-}
-
 /**
  * This is the handler of last resort for messages from device.
  * Other modules are supposed to install the event filter and process messages of interest.
- * Default behavior is to output them to the log window as strings.
+ * Default behavior is to log them as strings.
  */
 bool DeviceInterface::event(QEvent* e)
 {
@@ -37,19 +37,13 @@ bool DeviceInterface::event(QEvent* e)
         switch (payload->at(0))
         {
         case C2RESPONSE_STATUS:
-            logger->logMessage(QString("CommonSense v%1.%2, die temp %3%4 C")
-                  .arg((uint8_t)payload->at(2))
-                  .arg((uint8_t)payload->at(3))
-                  .arg((uint8_t)payload->at(4) == 1 ? '+' : '-')
-                  .arg((uint8_t)payload->at(5))
-            );
-            logger->logMessage(QString("Quenched: %1, Matrix monitoring: %2")
-                  .arg((payload->at(1) & (1 << C2DEVSTASTUS_EMERGENCY)) ? "Yes":"No")
-                  .arg((payload->at(1) & (1 << C2DEVSTASTUS_MATRIXOUTPUT)) ? "Yes":"No")
-            );
+            qInfo().nospace() << "CommonSense v" << (uint8_t)payload->at(2) << "." << (uint8_t)payload->at(3)
+                              << ", die temp " << (payload->at(4) == 1 ? '+' : '-') << (uint8_t)payload->at(5) << "C";
+            qInfo().nospace() << "Quenched: " << (bool)(payload->at(1) & (1 << C2DEVSTASTUS_EMERGENCY))
+                              << ", Matrix monitoring: " << (bool)(payload->at(1) & (1 << C2DEVSTASTUS_MATRIXOUTPUT));
             return true;
         default:
-            logger->logMessage(payload->constData());
+            qInfo(payload->constData());
             return true;
         }
     }
@@ -58,11 +52,12 @@ bool DeviceInterface::event(QEvent* e)
 
 void DeviceInterface::deviceMessageReceiver(void)
 {
-    logger->logMessage("Message received");
+    qInfo() << "Message received";
 }
 
 void DeviceInterface::_sendPacket()
 {
+    //qInfo() << "Sending packet" << (uint8_t)outbox[1] << (uint8_t)outbox[2];
     if (!device) return; // TODO we should be more vocal
     hid_write(device, outbox, sizeof(outbox));
 }
@@ -91,6 +86,12 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
     _sendPacket();
 }
 
+void DeviceInterface::configChanged(void)
+{
+    qInfo() << "Configuration changed!";
+    emit(deviceStatusNotification(DeviceConfigChanged));
+}
+
 void DeviceInterface::_resetTimer(int interval)
 {
     if (pollTimerId) killTimer(pollTimerId);
@@ -106,7 +107,7 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
     if (bytesRead < 0)
     {
-        logger->logMessage("Device went away. Reconnecting..");
+        qInfo() << "Device went away. Reconnecting..";
         hid_close(device);
         device = NULL;
         emit(deviceStatusNotification(DeviceDisconnected));
@@ -122,7 +123,7 @@ void DeviceInterface::_initDevice(void)
 {
     device = acquireDevice();
     if (!device) {
-        this->logger->continueMessage(".");
+        qInfo() << ".";
         _resetTimer(1000);
     }
     hid_set_nonblocking(device, 1);
@@ -136,18 +137,18 @@ hid_device* DeviceInterface::acquireDevice(void)
     hid_device *retval = NULL;
     if (hid_init())
     {
-        logger->logMessage("Cannot initialize hidapi!");
+        qInfo() << "Cannot initialize hidapi!";
         return NULL;
     }
     hid_device_info *root = hid_enumerate(0, 0);
     if (!root) {
-        logger->logMessage("No HID devices on this system?");
+        qInfo() << "No HID devices on this system?";
         return NULL;
     }
     hid_device_info *d = root;
     while (d){
           if (d->usage_page == 0x6213 && d->usage == 0x88){
-            logger->logMessage("Found a node!");
+            qInfo() << "Found a node!";
             retval = hid_open_path(d->path);
             break;
         }

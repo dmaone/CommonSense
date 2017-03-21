@@ -28,6 +28,7 @@ class FlightController : public QMainWindow
 public:
     explicit FlightController(QWidget *parent = 0);
     ~FlightController();
+    void setup(void);
     void show(void);
     enum CowValidationStatus {cvsOK, cvsMissing, cvsDuplicate};
     LogViewer* getLogViewport(void);
@@ -35,7 +36,6 @@ public:
 
 signals:
     void sendCommand(uint8_t cmd, uint8_t msg);
-    void downloadConfig(void);
 
 public slots:
     void redButtonToggle(bool);

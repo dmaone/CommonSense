@@ -23,8 +23,11 @@ FlightController::FlightController(QWidget *parent) :
     ui(new Ui::FlightController), mm(NULL), layoutEditor(NULL), thresholdEditor(NULL)
 {
     ui->setupUi(this);
+}
+
+void FlightController::setup(void)
+{
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    di.setLogger(ui->LogViewport);
     initSetupDisplay();
 
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
@@ -46,7 +49,7 @@ FlightController::FlightController(QWidget *parent) :
     connect(ui->exportButton, SIGNAL(clicked()), di.config, SLOT(toFile()));
     connect(ui->commitButton, SIGNAL(clicked()), this, SLOT(commitConfig()));
     connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
-    connect(this, SIGNAL(sendCommand(uint8_t,uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
+    connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
     di.start();
 
@@ -94,15 +97,15 @@ void FlightController::logToViewport(const QString &msg)
 
 void FlightController::revertConfig()
 {
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
     /*TODO
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
     psoc_eeprom_t* config = di.getConfigPtr();
     ui->Rows->setValue(config->matrixRows);
     ui->Cols->setValue(config->matrixCols);
     ui->normallyOpen->setChecked(config->capsenseFlags & (1 << CSF_NL));
     */
     updateSetupDisplay();
-    ui->LogViewport->logMessage("GUI synced with config");
+    qInfo() << "GUI synced with config";
 }
 
 
@@ -201,15 +204,16 @@ void FlightController::statusRequestButtonClick(void)
 
 void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
 {
+    lockTabs();
     switch (s)
     {
         case DeviceInterface::DeviceConnected:
+            emit(ui->downloadButton->clicked());
             break;
         case DeviceInterface::DeviceDisconnected:
             ui->mainPanel->setCurrentIndex(0);
-            lockTabs();
             break;
-        case DeviceInterface::DeviceConfigLoaded:
+        case DeviceInterface::DeviceConfigChanged:
             revertConfig();
             unlockTabs();
             ui->mainPanel->setTabEnabled(1, true);
@@ -338,7 +342,7 @@ void FlightController::validateConfig(void)
 
 void FlightController::applyConfig(void)
 {
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    //TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
     // TODO psoc_eeprom_t* config = di.getConfigPtr();
 }
 

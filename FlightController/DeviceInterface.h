@@ -24,22 +24,20 @@ class DeviceInterface : public QObject
     public:
         DeviceInterface(QObject *parent = 0);
         ~DeviceInterface();
-        void setLogger(LogViewer *l);
         void start(void);
         bool event(QEvent* e);
         device_status_t* getStatus(void);
-        LogViewer* logger;
         DeviceConfig* config;
-        enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigLoaded};
+        enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigChanged};
 
     public slots:
         void sendCommand(uint8_t, QByteArray&);
         void sendCommand(uint8_t, uint8_t*);
         void sendCommand(uint8_t, uint8_t);
+        void configChanged(void);
 
     signals:
         void deviceStatusNotification(DeviceInterface::DeviceStatus);
-        void Log();
 
     protected:
         virtual void timerEvent(QTimerEvent *);

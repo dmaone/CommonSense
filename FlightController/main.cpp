@@ -16,7 +16,14 @@ void logToViewport(QtMsgType type, const QMessageLogContext &context, const QStr
 {
     if (logger)
     {
-        logger->logMessage(msg);
+        if (msg.length() < 3)
+        {
+            logger->continueMessage(msg);
+        }
+        else
+        {
+            logger->logMessage(msg);
+        }
     } else if (old_logger) {
         old_logger(type, context, msg);
     }
@@ -30,6 +37,7 @@ int main(int argc, char *argv[])
     FlightController w;
     logger = w.getLogViewport();
     old_logger = qInstallMessageHandler(logToViewport);
+    w.setup();
     w.show();
 
     return a.exec();

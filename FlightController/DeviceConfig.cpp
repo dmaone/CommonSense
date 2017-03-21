@@ -13,22 +13,22 @@ bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)), QEvent *eve
     if (event->type() == DeviceMessage::ET )
     {
         QByteArray *payload = static_cast<DeviceMessage *>(event)->getPayload();
-        if (payload->at(0) != C2RESPONSE_CONFIG)
+        if (payload->at(0) == C2RESPONSE_CONFIG)
+        {
             currentBlock++;
             switch (transferDirection)
             {
             case TransferDownload:
-                _downloadConfigBlock(payload);
-                return true;
+                _receiveConfigBlock(payload);
+                break;
             case TransferUpload:
                 _uploadConfigBlock();
-                return true;
+                break;
             default:
-                //TODO whine(QString("Received config block %1 while supposed to be idle!").arg((uint8_t)payload->at(1)));
-                return true;
+                qInfo() << "Received config block" << ((uint8_t)payload->at(1)) << "while supposed to be idle!";
             }
-            return false;
-        return true;
+            return true;
+        }
     }
     return false;
 }
@@ -39,19 +39,16 @@ bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)), QEvent *eve
  */
 void DeviceConfig::toDevice(void)
 {
-    switch(transferDirection)
+    if ( transferDirection != TransferIdle )
     {
-        case TransferIdle:
-            transferDirection = TransferUpload;
-            _assembleConfig();
-            currentBlock = 0;
-            //TODO whine("Uploading config..");
-            _uploadConfigBlock();
-            break;
-    default:
-        break;
-        //TODO whine("Not a good day to upload config!");
+        qInfo() << "Not a good day to upload config!";
+        return;
     }
+    transferDirection = TransferUpload;
+    _assembleConfig();
+    currentBlock = 0;
+    qInfo() << "Uploading config..";
+    _uploadConfigBlock();
 }
 
 /**
@@ -66,19 +63,19 @@ void DeviceConfig::_uploadConfigBlock(void)
         case TransferUpload:
             if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
             {
-                //TODO whine ("done!");
+                qInfo() << "done!";
                 transferDirection = TransferIdle;
                 return;
             }
-            //TODO this->logger->continueMessage(".");
+            qInfo(".");
             uint8_t payload[63];
             payload[0] = currentBlock;
             memcpy(payload+31, config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
-            //TODO sendCommand(C2CMD_UPLOAD_CONFIG, payload);
+            emit(uploadBlock(C2CMD_UPLOAD_CONFIG, payload));
             break;
-    default:
-        break;
-        //TODO whine("Not a good day to upload config block!");
+        default:
+            break;
+            qInfo() << "Not a good day to upload config block!";
     }
 
 }
@@ -87,19 +84,19 @@ void DeviceConfig::fromDevice()
 {
     switch(transferDirection)
     {
-    case TransferIdle:
-        transferDirection = TransferDownload;
-        currentBlock = 0;
-        //TODO whine("Downloading config..");
-        break;
-    case TransferDownload:
-        //TODO whine("Already downloading! Re-requesting current block");
-        break;
-    default:
-        //TODO whine("Not a good day to download config!");
-        return;
+        case TransferIdle:
+            transferDirection = TransferDownload;
+            currentBlock = 0;
+            qInfo() << "Downloading config..";
+            break;
+        case TransferDownload:
+            qInfo() << "Already downloading! Re-requesting current block";
+            break;
+        default:
+            qInfo() << "Not a good day to download config!";
+            return;
     }
-    //TODO sendCommand(C2CMD_DOWNLOAD_CONFIG, currentBlock);
+    emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
 }
 
 /**
@@ -107,26 +104,23 @@ void DeviceConfig::fromDevice()
  * Receives one block from device, writes it to local config.
  * @param payload - packet payload
  */
-void DeviceConfig::_downloadConfigBlock(QByteArray *payload)
+void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
 {
-    switch(transferDirection)
+    if ( transferDirection != TransferDownload )
     {
-        case TransferDownload:
-            if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
-            {
-                //TODO whine ("done!");
-                transferDirection = TransferIdle;
-                //TODO emit(deviceStatusNotification(DeviceConfigLoaded));
-                return;
-            }
-            //TODO this->logger->continueMessage(".");
-            memcpy(config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
-            //TODO sendCommand(C2CMD_DOWNLOAD_CONFIG, currentBlock);
-            break;
-    default:
-        break;
-        //TODO whine("Not a good day to download config block!");
+        qInfo() << "Not a good day to download config block!";
+        return;
     }
+    if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
+    {
+        qInfo() << "done!";
+        transferDirection = TransferIdle;
+        emit(changed());
+        return;
+    }
+    qInfo(".");
+    memcpy(config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
+    emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
 }
 
 void DeviceConfig::_assembleConfig(void)

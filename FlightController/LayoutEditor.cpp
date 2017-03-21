@@ -16,7 +16,7 @@ LayoutEditor::LayoutEditor(QWidget *parent) :
     grid(new QGridLayout())
 {
     ui->setupUi(this);
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    // TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
     // TODO deviceConfig = di.getConfigPtr();
 }
 
@@ -132,8 +132,8 @@ void LayoutEditor::applyLayout()
     {
         for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
         {
-            uint8_t kc = display[i][j]->currentIndex();
             /* TODO
+            uint8_t kc = display[i][j]->currentIndex();
             deviceConfig->storage[STORAGE_ADDRESS((deviceConfig->row_params[i].rowNumber-1)*deviceConfig->matrixCols + deviceConfig->col_params[j].colNumber-1)] = kc;
             */
         }

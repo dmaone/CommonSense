@@ -13,7 +13,7 @@ ThresholdEditor::ThresholdEditor(QWidget *parent) :
     grid(new QGridLayout())
 {
     ui->setupUi(this);
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    //TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
     // TODO deviceConfig = di.getConfigPtr();
 }
 
@@ -73,7 +73,7 @@ void ThresholdEditor::applyThresholds()
     {
         for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
         {
-            uint8_t kc = display[i][j]->value();            
+            //TODO uint8_t kc = display[i][j]->value();
             // TODO deviceConfig->storage[(deviceConfig->row_params[i].rowNumber-1)*deviceConfig->matrixCols + deviceConfig->col_params[j].colNumber-1] = kc;
         }
     }
