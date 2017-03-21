@@ -6,31 +6,30 @@
 DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
     bValid(false), numRows(0), numCols(0), numLayers(1), transferDirection(TransferIdle)
 {
-    memset(config.raw, 0x00, sizeof(config));
+    memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
 }
 
 bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)), QEvent *event){
-    if (event->type() == DeviceMessage::ET )
+    if (event->type() != DeviceMessage::ET )
+        return false;
+
+    QByteArray *payload = static_cast<DeviceMessage *>(event)->getPayload();
+    if (payload->at(0) != C2RESPONSE_CONFIG)
+        return false;
+
+    currentBlock++;
+    switch (transferDirection)
     {
-        QByteArray *payload = static_cast<DeviceMessage *>(event)->getPayload();
-        if (payload->at(0) == C2RESPONSE_CONFIG)
-        {
-            currentBlock++;
-            switch (transferDirection)
-            {
-            case TransferDownload:
-                _receiveConfigBlock(payload);
-                break;
-            case TransferUpload:
-                _uploadConfigBlock();
-                break;
-            default:
-                qInfo() << "Received config block" << ((uint8_t)payload->at(1)) << "while supposed to be idle!";
-            }
-            return true;
-        }
+        case TransferDownload:
+            _receiveConfigBlock(payload);
+            break;
+        case TransferUpload:
+            _uploadConfigBlock();
+            break;
+        default:
+            qInfo() << "Received config block" << ((uint8_t)payload->at(1)) << "while supposed to be idle!";
     }
-    return false;
+    return true;
 }
 
 /**
@@ -44,8 +43,8 @@ void DeviceConfig::toDevice(void)
         qInfo() << "Not a good day to upload config!";
         return;
     }
-    this->transferDirection = TransferUpload;
     this->_assemble();
+    this->transferDirection = TransferUpload;
     this->currentBlock = 0;
     qInfo() << "Uploading config..";
     this->_uploadConfigBlock();
@@ -72,14 +71,12 @@ void DeviceConfig::_uploadConfigBlock(void)
             msg.command = C2CMD_UPLOAD_CONFIG;
             msg.payload[0] = currentBlock;
             // TODO: figure out magical "31 byte offset". copy back for verification? It's 1 byte short for that.
-            memcpy(msg.payload+31, config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
+            memcpy(msg.payload+31, this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
             emit(uploadBlock(msg));
             break;
         default:
-            break;
             qInfo() << "Not a good day to upload config block!";
     }
-
 }
 
 void DeviceConfig::fromDevice()
@@ -115,20 +112,21 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
     }
     if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
     {
-        return this->_unpack();
+        transferDirection = TransferIdle;
+        qInfo() << "done, unpacking...";
+        this->_unpack();
+        return;
     }
     qInfo(".");
-    memcpy(config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
+    memcpy(this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
     emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
 }
 
 void DeviceConfig::_unpack(void)
 {
-    transferDirection = TransferIdle;
-    qInfo() << "done, unpacking...";
-    this->numRows = config.matrixRows;
-    this->numCols = config.matrixCols;
-    this->numLayers = config.layerCount;
+    this->numRows   = this->_eeprom.matrixRows;
+    this->numCols   = this->_eeprom.matrixCols;
+    this->numLayers = this->_eeprom.layerCount;
     memset(this->noiseFloor, 0xfe, sizeof(this->noiseFloor));
     memset(this->noiseCeiling, 0xfe, sizeof(this->noiseCeiling));
     memset(this->layouts, 0x00, sizeof(this->layouts));
@@ -138,11 +136,12 @@ void DeviceConfig::_unpack(void)
         for (uint8_t j = 0; j < this->numCols; j++)
         {
             uint16_t offset = i*this->numCols + j;
-            this->noiseFloor[i][j] = config.stash[offset];
-            this->noiseCeiling[i][j] = config.stash[table_size + offset];
+            this->noiseFloor[i][j] = this->_eeprom.stash[offset];
+            this->noiseCeiling[i][j] = this->_eeprom.stash[table_size + offset];
+            this->skipSensing[i][j] = (this->noiseFloor[i][j] > this->noiseCeiling[i][j]);
             for (uint8_t k = 0; k < this->numLayers; k++)
             {
-                this->layouts[k][i][j] = config.stash[table_size*(k+2) + offset];
+                this->layouts[k][i][j] = this->_eeprom.stash[table_size*(k+2) + offset];
             }
         }
     }
@@ -153,7 +152,26 @@ void DeviceConfig::_unpack(void)
 
 void DeviceConfig::_assemble(void)
 {
-
+    memset(this->_eeprom.stash, 0, sizeof(this->_eeprom.stash));
+    uint8_t table_size = this->numRows * this->numCols;
+    for (uint8_t i = 0; i < this->numRows; i++)
+    {
+        for (uint8_t j = 0; j < this->numCols; j++)
+        {
+            uint16_t offset = i*this->numCols + j;
+            if (this->skipSensing[i][j])
+            {
+                this->noiseFloor[i][j]   = 255;
+                this->noiseCeiling[i][j] = 0;
+            }
+            this->_eeprom.stash[offset] = this->noiseFloor[i][j];
+            this->_eeprom.stash[table_size + offset] = this->noiseCeiling[i][j];
+            for (uint8_t k = 0; k < this->numLayers; k++)
+            {
+                this->_eeprom.stash[table_size*(k+2) + offset] = this->layouts[k][i][j];
+            }
+        }
+    }
 }
 
 
@@ -178,6 +196,7 @@ void DeviceConfig::fromFile()
 
 void DeviceConfig::toFile()
 {
+    this->_assemble();
     QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
     fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
     fd.setDefaultSuffix(QString("cfg"));
@@ -188,8 +207,7 @@ void DeviceConfig::toFile()
         QFile f(fns.at(0));
         f.open(QIODevice::WriteOnly);
         QDataStream ds(&f);
-        // TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        // TODO ds.writeRawData((const char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
+        ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
         qInfo() << QString("Exported config to %1").arg(fns.at(0));
     }
 }

@@ -18,6 +18,7 @@ public:
     uint8_t numLayers;
     uint8_t noiseFloor[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
     uint8_t noiseCeiling[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    bool    skipSensing[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
     uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
 
 signals:
@@ -35,7 +36,7 @@ protected:
     bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-    psoc_eeprom_t config;
+    psoc_eeprom_t _eeprom;
     enum TransferDirection transferDirection;
     uint8_t currentBlock;
     void _uploadConfigBlock(void);

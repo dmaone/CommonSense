@@ -6,7 +6,7 @@
 #include <stdint.h>
 #include "Events.h"
 #include "../c2/c2_protocol.h"
-#include "../c2/nvram.h"
+#include "DeviceConfig.h"
 
 namespace Ui {
 class MatrixMonitor;
@@ -22,7 +22,7 @@ public:
     void show(void);
 
 signals:
-    void sendCommand(uint8_t, uint8_t);
+    void sendCommand(c2command, uint8_t);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
@@ -34,10 +34,10 @@ private:
     uint8_t displayMode;
     QGridLayout *grid;
     QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    psoc_eeprom_t* deviceConfig;
+    DeviceConfig *deviceConfig;
     void initDisplay(void);
     void updateDisplaySize(uint8_t, uint8_t);
-    void enableOutput(uint8_t);
+    void enableTelemetry(uint8_t);
 
 private slots:
     void voltagesButtonClick(void);

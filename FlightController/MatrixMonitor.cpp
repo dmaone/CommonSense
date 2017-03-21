@@ -17,7 +17,6 @@ MatrixMonitor::MatrixMonitor(QWidget *parent) :
     ui(new Ui::MatrixMonitor),
     debug(0), displayMode(0), grid(new QGridLayout())
 {
-    this->enableOutput(0); // tell the keyboard so it does not spam us before we install handler.
     ui->setupUi(this);
     connect(ui->VoltagesButton, SIGNAL(clicked()), this, SLOT(voltagesButtonClick()));
     connect(ui->CloseButton, SIGNAL(clicked()), this, SLOT(closeButtonClick()));
@@ -25,19 +24,22 @@ MatrixMonitor::MatrixMonitor(QWidget *parent) :
     connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
     initDisplay();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
+    connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     di.installEventFilter(this);
-    // TODO deviceConfig = di.getConfigPtr();
+    deviceConfig = di.config;
 }
 
 void MatrixMonitor::show(void)
 {
-    if (deviceConfig->matrixCols && deviceConfig->matrixCols)
+    if (deviceConfig->bValid)
     {
-        updateDisplaySize(deviceConfig->matrixRows, deviceConfig->matrixCols);
+        updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
         QWidget::show();
-    } else
+    }
+    else
+    {
         QMessageBox::critical(this, "Error", "Matrix not configured - cannot monitor");
+    }
 }
 
 MatrixMonitor::~MatrixMonitor()
@@ -47,6 +49,7 @@ MatrixMonitor::~MatrixMonitor()
 
 void MatrixMonitor::initDisplay(void)
 {
+    this->enableTelemetry(0);
     for (uint8_t i = 1; i<=ABSOLUTE_MAX_COLS; i++)
     {
         grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
@@ -58,10 +61,9 @@ void MatrixMonitor::initDisplay(void)
     {
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
-            QLCDNumber *l = new QLCDNumber(3);
+            QLCDNumber *l = new QLCDNumber(2);
             l->setSegmentStyle(QLCDNumber::Filled);
             l->setMinimumHeight(25);
-            l->setMaximumWidth(40);
             l->setVisible(false);
             grid->addWidget(l, i+1, j+1, 1, 1);
             display[i][j] = l;
@@ -72,6 +74,7 @@ void MatrixMonitor::initDisplay(void)
 
 void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
 {
+    this->enableTelemetry(0);
     for (uint8_t i = 1; i<=ABSOLUTE_MAX_COLS; i++)
     {
         if (i <= ABSOLUTE_MAX_ROWS)
@@ -106,50 +109,46 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            /* TODO
-            if (deviceConfig->capsenseFlags && level > deviceConfig->storage[row*deviceConfig->matrixCols + i])
+            if (deviceConfig->noiseCeiling[row][i] && level > deviceConfig->noiseFloor[row][i] && level < deviceConfig->noiseCeiling[row][i])
+            {
                 cell->setStyleSheet("background-color: #00ff00;");
-            else if (!deviceConfig->capsense_flags.normallyOpen && level < deviceConfig->storage[row*deviceConfig->matrixCols + i])
-                cell->setStyleSheet("background-color: #00ff00;");
+            }
             else
-            */
+            {
                 cell->setStyleSheet("background-color: #ffffff;");
+            }
         }
         return true;
     }
     return false;
 }
 
-void MatrixMonitor::enableOutput(uint8_t m)
+void MatrixMonitor::enableTelemetry(uint8_t m)
 {
+    ui->VoltagesButton->setText(m ? "Stop!": "Start!");
     emit sendCommand(C2CMD_GET_MATRIX_STATE, m);
 }
 
 void MatrixMonitor::voltagesButtonClick(void)
 {
     if (ui->VoltagesButton->text() == "Stop!") {
-        ui->VoltagesButton->setText("Again!");
-        enableOutput(0);
+        this->enableTelemetry(0);
     } else {
-        ui->VoltagesButton->setText("Stop!");
-        enableOutput(1);
+        this->enableTelemetry(1);
     }
 }
 
 void MatrixMonitor::thresholdsButtonClick(void)
 {
-    for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+    if (!deviceConfig->bValid) return;
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
     {
-        for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            /* TODO
-            if (deviceConfig->capsense_flags.normallyOpen)
-            {
-                deviceConfig->storage[i*deviceConfig->matrixCols + j] = display[i][j]->value() + ui->threshold->value();
-            } else {
-                deviceConfig->storage[i*deviceConfig->matrixCols + j] = display[i][j]->value() - ui->threshold->value();
-            }
-            */
+            int16_t tmp = display[i][j]->value() - ui->threshold->value();
+            deviceConfig->noiseFloor[i][j] = (tmp > 0) ? tmp : 0;
+            deviceConfig->noiseCeiling[i][j] = display[i][j]->value() + ui->threshold->value();
+            // FIXME do an editable matrix, fillable from mm
         }
     }
 }
@@ -161,7 +160,7 @@ void MatrixMonitor::closeButtonClick(void)
 
 void MatrixMonitor::closeEvent (QCloseEvent *event)
 {
-    this->enableOutput(0);
+    this->enableTelemetry(0);
     event->accept();
 }
 
