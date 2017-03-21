@@ -125,6 +125,7 @@ void DeviceInterface::_initDevice(void)
     if (!device) {
         qInfo() << ".";
         _resetTimer(1000);
+        return;
     }
     hid_set_nonblocking(device, 1);
     emit(deviceStatusNotification(DeviceConnected));
