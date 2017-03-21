@@ -13,7 +13,7 @@
 static uint8_t Buf0Chan, Buf1Chan;
 static uint8_t Buf0TD = CY_DMA_INVALID_TD;
 static uint8_t Buf1TD = CY_DMA_INVALID_TD;
-static uint8_t Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
+static uint16_t Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
 static uint8_t current_col;
 static bool scan_in_progress;
 
