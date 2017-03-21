@@ -28,7 +28,6 @@ FlightController::FlightController(QWidget *parent) :
 void FlightController::setup(void)
 {
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    initSetupDisplay();
 
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
@@ -41,15 +40,13 @@ void FlightController::setup(void)
     connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyConfig()));
     connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
-    connect(ui->Rows, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
-    connect(ui->Cols, SIGNAL(valueChanged(int)), this, SLOT(cowsChanged(int)));
     connect(ui->importButton, SIGNAL(clicked()), di.config, SLOT(fromFile()));
     connect(ui->uploadButton, SIGNAL(clicked()), di.config, SLOT(toDevice()));
     connect(ui->downloadButton, SIGNAL(clicked()), di.config, SLOT(fromDevice()));
     connect(ui->exportButton, SIGNAL(clicked()), di.config, SLOT(toFile()));
     connect(ui->commitButton, SIGNAL(clicked()), this, SLOT(commitConfig()));
     connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
-    connect(this, SIGNAL(sendCommand(uint8_t, uint8_t)), &di, SLOT(sendCommand(uint8_t, uint8_t)));
+    connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
     di.start();
 
@@ -74,8 +71,6 @@ void FlightController::closeEvent (QCloseEvent *event)
 void FlightController::mainTabChanged(int idx)
 {
     if (idx == 1) {
-        initSetupDisplay();
-        updateSetupDisplay();
         validateConfig();
     }
 }
@@ -95,84 +90,6 @@ void FlightController::logToViewport(const QString &msg)
     ui->LogViewport->logMessage(msg);
 }
 
-void FlightController::revertConfig()
-{
-    /*TODO
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    psoc_eeprom_t* config = di.getConfigPtr();
-    ui->Rows->setValue(config->matrixRows);
-    ui->Cols->setValue(config->matrixCols);
-    ui->normallyOpen->setChecked(config->capsenseFlags & (1 << CSF_NL));
-    */
-    updateSetupDisplay();
-    qInfo() << "GUI synced with config";
-}
-
-
-QComboBox* FlightController::newMappingCombo(void)
-{
-    QComboBox *b = new QComboBox();
-    b->setInsertPolicy(QComboBox::NoInsert);
-    b->setVisible(false);
-    connect(b, SIGNAL(currentIndexChanged(int)), this, SLOT(setConfigDirty(int)));
-    return b;
-}
-
-void FlightController::initSetupDisplay(void)
-{
-    if (ui->ColumnMapping->isEnabled())
-        // Initialized already
-        return;
-    QGridLayout *lrows = new QGridLayout();
-    QGridLayout *lcols = new QGridLayout();
-    for (uint8_t i = 0; i<ABSOLUTE_MAX_ROWS; i++)
-    {
-        columns[i] = newMappingCombo();
-        lcols->addWidget(columns[i], 0, i);
-        rows[i] = newMappingCombo();
-        lrows->addWidget(rows[i], 0, i);
-    }
-    lcols->setColumnStretch(ABSOLUTE_MAX_ROWS, 1);
-    lrows->setColumnStretch(ABSOLUTE_MAX_ROWS, 1);
-    for (uint8_t i = ABSOLUTE_MAX_ROWS; i<ABSOLUTE_MAX_COLS; i++)
-    {
-        columns[i] = newMappingCombo();
-        lcols->addWidget(columns[i], 1, i - ABSOLUTE_MAX_ROWS);
-    }
-    ui->ColumnMapping->setLayout(lcols);
-    ui->ColumnMapping->setEnabled(true);
-    ui->RowMapping->setLayout(lrows);
-    ui->RowMapping->setEnabled(true);
-}
-
-void FlightController::adjustCows(QComboBox *target[], int max, int cnt)
-{
-    QStringList items;
-    items.append("--");
-    for (uint8_t i = 0; i < cnt; i++)
-        items.append(QString("%1").arg(i+1));
-    for (uint8_t i = 0; i<max; i++)
-    {
-        uint8_t idx = target[i]->currentIndex();
-        target[i]->setVisible(false);
-        target[i]->clear();
-        if (i < cnt) {
-            target[i]->addItems(items);
-            target[i]->setCurrentIndex(idx);
-            target[i]->setSizeAdjustPolicy(QComboBox::AdjustToContents);
-            target[i]->setSizePolicy(QSizePolicy::Minimum, QSizePolicy::Fixed);
-            target[i]->sizeHint().setWidth(0);
-            target[i]->setVisible(true);
-        }
-    }
-}
-
-void FlightController::updateSetupDisplay(void)
-{
-    adjustCows(rows, ABSOLUTE_MAX_ROWS, ui->Rows->value());
-    adjustCows(columns, ABSOLUTE_MAX_COLS, ui->Cols->value());
-    this->validateConfig();
-}
 
 void FlightController::matrixMonitorButtonClick(void)
 {
@@ -214,7 +131,6 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
             ui->mainPanel->setCurrentIndex(0);
             break;
         case DeviceInterface::DeviceConfigChanged:
-            revertConfig();
             unlockTabs();
             ui->mainPanel->setTabEnabled(1, true);
             emit sendCommand(C2CMD_GET_STATUS, 0);
@@ -222,56 +138,9 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
     }
 }
 
-void FlightController::cowsChanged(int idx __attribute__ ((unused)) )
-{
-    updateSetupDisplay();
-    if (mm)
-        delete mm;
-    mm = NULL;
-}
-
 void FlightController::setConfigDirty(int)
 {
     ui->validateButton->setEnabled(true);
-}
-
-FlightController::CowValidationStatus FlightController::validateCow(QComboBox **cows, int cowToCheck, int cowcnt)
-{
-    bool CowExists = false;
-    for (uint8_t i=0; i<cowcnt; i++)
-    {
-        cows[i]->setStyleSheet(QString(""));
-        if (cows[i]->currentIndex() > 0){
-            if (cowToCheck == cows[i]->currentIndex())
-            {
-                if (CowExists) {
-                    cows[i]->setStyleSheet(QString("color: White; background-color: #ff0000"));
-                    return cvsDuplicate;
-                }
-                CowExists = true;
-            }
-        }
-    }
-    return CowExists ? cvsOK : cvsMissing;
-}
-
-QString FlightController::validateCows(QComboBox** cows, int totalCows)
-{
-    // Account for disabled columns - should be cont. 0 to (total - disabled).
-    for (uint8_t i=0; i<totalCows; i++)
-    {
-        switch (this->validateCow(cows, i+1, totalCows))
-        {
-        case cvsMissing:
-            return QString("Missing: %1").arg(i+1);
-            break;
-        case cvsDuplicate:
-            return QString("Duplicate mapping for row %1").arg(i+1);
-        default:
-            break;
-        }
-    }
-    return QString();
 }
 
 void FlightController::manipulateTabs(bool dothis)
@@ -288,18 +157,6 @@ bool FlightController::reportValidationFailure(QString msg)
     lockTabs();
     QMessageBox::critical(this, "Matrix validation failure", msg);
     return false;
-}
-
-bool FlightController::matrixMappingValid(void)
-{
-    QString errmsg;
-    errmsg = this->validateCows(rows, ui->Rows->value());
-    if (!errmsg.isNull())
-        return reportValidationFailure(errmsg);
-    errmsg = this->validateCows(columns, ui->Cols->value());
-    if (!errmsg.isEmpty())
-        return reportValidationFailure(errmsg);
-    return true;
 }
 
 void FlightController::editLayoutClick(void)
@@ -327,12 +184,7 @@ void FlightController::validateConfig(void)
 {
     if (ui->mainPanel->currentIndex() == 1)
     {
-        if (!matrixMappingValid())
-            return;
 /*  FIXME This gets too boring. Better validations after the keyboard works.
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    psoc_eeprom_t* config = di.getConfigPtr();
-    if (ui->Rows->value() < config->matrixRows())
     Also do not forget to really reset all row/column-dependent stuff.
 */
     }

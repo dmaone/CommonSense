@@ -31,9 +31,9 @@ class DeviceInterface : public QObject
         enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigChanged};
 
     public slots:
-        void sendCommand(uint8_t, QByteArray&);
-        void sendCommand(uint8_t, uint8_t*);
-        void sendCommand(uint8_t, uint8_t);
+        void sendCommand(c2command, uint8_t*);
+        void sendCommand(c2command, uint8_t);
+        void sendCommand(OUT_c2packet_t);
         void configChanged(void);
 
     signals:

@@ -8,17 +8,22 @@
 class DeviceConfig : public QObject
 {
     Q_OBJECT
+
 public:
     explicit DeviceConfig(QObject *parent = 0);
-    psoc_eeprom_t *getConfigPtr(void) { return &config; }
+    bool bValid;
     enum TransferDirection {TransferIdle, TransferUpload, TransferDownload};
-    void getMatrixSizeParameters(std::vector<uint8_t>&, std::vector<uint8_t>&);
-    void setMatrixSizeParameters(std::vector<uint8_t>, std::vector<uint8_t>);
+    uint8_t numRows;
+    uint8_t numCols;
+    uint8_t numLayers;
+    uint8_t noiseFloor[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    uint8_t noiseCeiling[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
 
 signals:
     void changed(void);
-    void uploadBlock(uint8_t, uint8_t*);
-    void downloadBlock(uint8_t, uint8_t);
+    void uploadBlock(OUT_c2packet_t);
+    void downloadBlock(c2command, uint8_t);
 
 public slots:
     void fromDevice(void);
@@ -35,7 +40,8 @@ private:
     uint8_t currentBlock;
     void _uploadConfigBlock(void);
     void _receiveConfigBlock(QByteArray *);
-    void _assembleConfig(void);
+    void _unpack(void);
+    void _assemble(void);
 
 };
 

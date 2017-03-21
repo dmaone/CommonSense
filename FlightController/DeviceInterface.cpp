@@ -13,8 +13,8 @@ DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
     installEventFilter(config);
 
     connect(config, SIGNAL(changed()), this, SLOT(configChanged()));
-    connect(config, SIGNAL(downloadBlock(uint8_t, uint8_t)), this, SLOT(sendCommand(uint8_t, uint8_t)));
-    connect(config, SIGNAL(uploadBlock(uint8_t, uint8_t*)), this, SLOT(sendCommand(uint8_t, uint8_t*)));
+    connect(config, SIGNAL(downloadBlock(c2command, uint8_t)), this, SLOT(sendCommand(c2command, uint8_t)));
+    connect(config, SIGNAL(uploadBlock(OUT_c2packet_t)), this, SLOT(sendCommand(OUT_c2packet_t)));
 }
 
 DeviceInterface::~DeviceInterface(void)
@@ -59,10 +59,11 @@ void DeviceInterface::_sendPacket()
 {
     //qInfo() << "Sending packet" << (uint8_t)outbox[1] << (uint8_t)outbox[2];
     if (!device) return; // TODO we should be more vocal
+    //outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
     hid_write(device, outbox, sizeof(outbox));
 }
 
-void DeviceInterface::sendCommand(uint8_t cmd, uint8_t *msg)
+void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)
 {
     memset(outbox, 0, sizeof(outbox));
     outbox[1] = cmd;
@@ -70,15 +71,7 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t *msg)
     _sendPacket();
 }
 
-void DeviceInterface::sendCommand(uint8_t cmd, QByteArray &msg)
-{
-    memset(outbox, 0, sizeof(outbox));
-    outbox[1] = cmd;
-    memcpy(outbox+2, msg.data(), std::min(msg.length(), 63));
-    _sendPacket();
-}
-
-void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
+void DeviceInterface::sendCommand(c2command cmd, uint8_t msg)
 {
     memset(outbox, 0, sizeof(outbox));
     outbox[1] = cmd;
@@ -86,9 +79,16 @@ void DeviceInterface::sendCommand(uint8_t cmd, uint8_t msg)
     _sendPacket();
 }
 
+void DeviceInterface::sendCommand(OUT_c2packet_t cmd)
+{
+    memset(outbox, 0, sizeof(outbox));
+    memcpy(outbox+1, cmd.raw, sizeof(cmd));
+    _sendPacket();
+}
+
 void DeviceInterface::configChanged(void)
 {
-    qInfo() << "Configuration changed!";
+    qInfo() << "Loaded config from device.";
     emit(deviceStatusNotification(DeviceConfigChanged));
 }
 

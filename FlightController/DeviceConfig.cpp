@@ -4,7 +4,7 @@
 #include "DeviceConfig.h"
 
 DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
-    transferDirection(TransferIdle)
+    bValid(false), numRows(0), numCols(0), numLayers(1), transferDirection(TransferIdle)
 {
     memset(config.raw, 0x00, sizeof(config));
 }
@@ -44,11 +44,11 @@ void DeviceConfig::toDevice(void)
         qInfo() << "Not a good day to upload config!";
         return;
     }
-    transferDirection = TransferUpload;
-    _assembleConfig();
-    currentBlock = 0;
+    this->transferDirection = TransferUpload;
+    this->_assemble();
+    this->currentBlock = 0;
     qInfo() << "Uploading config..";
-    _uploadConfigBlock();
+    this->_uploadConfigBlock();
 }
 
 /**
@@ -68,10 +68,12 @@ void DeviceConfig::_uploadConfigBlock(void)
                 return;
             }
             qInfo(".");
-            uint8_t payload[63];
-            payload[0] = currentBlock;
-            memcpy(payload+31, config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
-            emit(uploadBlock(C2CMD_UPLOAD_CONFIG, payload));
+            OUT_c2packet_t msg;
+            msg.command = C2CMD_UPLOAD_CONFIG;
+            msg.payload[0] = currentBlock;
+            // TODO: figure out magical "31 byte offset". copy back for verification? It's 1 byte short for that.
+            memcpy(msg.payload+31, config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
+            emit(uploadBlock(msg));
             break;
         default:
             break;
@@ -90,7 +92,7 @@ void DeviceConfig::fromDevice()
             qInfo() << "Downloading config..";
             break;
         case TransferDownload:
-            qInfo() << "Already downloading! Re-requesting current block";
+            qInfo() << "Already downloading! Re-requesting current block just in case";
             break;
         default:
             qInfo() << "Not a good day to download config!";
@@ -111,22 +113,49 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
         qInfo() << "Not a good day to download config block!";
         return;
     }
-    if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
+    if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE))
     {
-        qInfo() << "done!";
-        transferDirection = TransferIdle;
-        emit(changed());
-        return;
+        return this->_unpack();
     }
     qInfo(".");
     memcpy(config.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
     emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
 }
 
-void DeviceConfig::_assembleConfig(void)
+void DeviceConfig::_unpack(void)
+{
+    transferDirection = TransferIdle;
+    qInfo() << "done, unpacking...";
+    this->numRows = config.matrixRows;
+    this->numCols = config.matrixCols;
+    this->numLayers = config.layerCount;
+    memset(this->noiseFloor, 0xfe, sizeof(this->noiseFloor));
+    memset(this->noiseCeiling, 0xfe, sizeof(this->noiseCeiling));
+    memset(this->layouts, 0x00, sizeof(this->layouts));
+    uint8_t table_size = this->numRows * this->numCols;
+    for (uint8_t i = 0; i < this->numRows; i++)
+    {
+        for (uint8_t j = 0; j < this->numCols; j++)
+        {
+            uint16_t offset = i*this->numCols + j;
+            this->noiseFloor[i][j] = config.stash[offset];
+            this->noiseCeiling[i][j] = config.stash[table_size + offset];
+            for (uint8_t k = 0; k < this->numLayers; k++)
+            {
+                this->layouts[k][i][j] = config.stash[table_size*(k+2) + offset];
+            }
+        }
+    }
+    this->bValid = true;
+    emit(changed());
+    return;
+}
+
+void DeviceConfig::_assemble(void)
 {
 
 }
+
 
 void DeviceConfig::fromFile()
 {

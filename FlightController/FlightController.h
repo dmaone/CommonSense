@@ -30,12 +30,11 @@ public:
     ~FlightController();
     void setup(void);
     void show(void);
-    enum CowValidationStatus {cvsOK, cvsMissing, cvsDuplicate};
     LogViewer* getLogViewport(void);
     void logToViewport(const QString&);
 
 signals:
-    void sendCommand(uint8_t cmd, uint8_t msg);
+    void sendCommand(c2command cmd, uint8_t msg);
 
 public slots:
     void redButtonToggle(bool);
@@ -46,10 +45,8 @@ public slots:
     void editLayoutClick(void);
     void editThresholdsClick(void);
     void applyConfig(void);
-    void revertConfig(void);
     void mainTabChanged(int);
     void setConfigDirty(int);
-    void cowsChanged(int);
     void deviceStatusNotification(DeviceInterface::DeviceStatus);
     void commitConfig(void);
     void rollbackConfig(void);
@@ -62,19 +59,8 @@ private:
     MatrixMonitor *mm;
     LayoutEditor *layoutEditor;
     ThresholdEditor *thresholdEditor;
-    QComboBox *rows[ABSOLUTE_MAX_ROWS];
-    QComboBox *columns[ABSOLUTE_MAX_COLS];
-    std::vector<uint8_t> row_config;
-    std::vector<uint8_t> col_config;
-    void initSetupDisplay(void);
-    void updateSetupDisplay(void);
-    void adjustCows(QComboBox**, int, int);
-    bool matrixMappingValid();
     bool reportValidationFailure(QString);
     void manipulateTabs(bool);
-    CowValidationStatus validateCow(QComboBox**, int, int);
-    QString validateCows(QComboBox**, int);
-    QComboBox* newMappingCombo(void);
     //aliases
     void lockTabs() { manipulateTabs(false);}
     void unlockTabs() { manipulateTabs(true);}
