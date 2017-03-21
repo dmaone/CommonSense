@@ -159,7 +159,9 @@ void DeviceConfig::_unpack(void)
 
 void DeviceConfig::_assemble(void)
 {
+    this->_eeprom.configVersion = 2;
     memset(this->_eeprom.stash, 0, sizeof(this->_eeprom.stash));
+    memset(this->_eeprom.Reserved, 0xff, sizeof(this->_eeprom.Reserved));
     uint8_t table_size = this->numRows * this->numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
@@ -181,7 +183,6 @@ void DeviceConfig::_assemble(void)
     }
 }
 
-
 void DeviceConfig::fromFile()
 {
     QFileDialog fd(Q_NULLPTR, "Choose one file to import from");
@@ -194,10 +195,9 @@ void DeviceConfig::fromFile()
         QFile f(fns.at(0));
         f.open(QIODevice::ReadOnly);
         QDataStream ds(&f);
-        // TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        // TODO ds.readRawData((char *)di.getConfigPtr()->raw, EEPROM_BYTESIZE);
-        qInfo() << QString("Imported config from %1").arg(fns.at(0));
-        //revertConfig();
+        ds.readRawData((char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
+        qInfo() << "Imported config from" << fns.at(0);
+        this->_unpack();
     }
 }
 
@@ -215,6 +215,6 @@ void DeviceConfig::toFile()
         f.open(QIODevice::WriteOnly);
         QDataStream ds(&f);
         ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
-        qInfo() << QString("Exported config to %1").arg(fns.at(0));
+        qInfo() << "Exported config to" << fns.at(0);
     }
 }

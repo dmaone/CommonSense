@@ -88,7 +88,7 @@ void DeviceInterface::sendCommand(OUT_c2packet_t cmd)
 
 void DeviceInterface::configChanged(void)
 {
-    qInfo() << "Loaded config from device.";
+    qInfo() << "Configuration changed.";
     emit(deviceStatusNotification(DeviceConfigChanged));
 }
 
