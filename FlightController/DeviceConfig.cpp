@@ -70,8 +70,11 @@ void DeviceConfig::_uploadConfigBlock(void)
             OUT_c2packet_t msg;
             msg.command = C2CMD_UPLOAD_CONFIG;
             msg.payload[0] = currentBlock;
-            // TODO: figure out magical "31 byte offset". copy back for verification? It's 1 byte short for that.
-            memcpy(msg.payload+31, this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock), CONFIG_TRANSFER_BLOCK_SIZE);
+            memcpy(
+                msg.payload + CONFIG_BLOCK_DATA_OFFSET,
+                this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * currentBlock),
+                CONFIG_TRANSFER_BLOCK_SIZE
+            );
             emit(uploadBlock(msg));
             break;
         default:
@@ -118,7 +121,11 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
         return;
     }
     qInfo(".");
-    memcpy(this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)), payload->data() + 32, CONFIG_TRANSFER_BLOCK_SIZE);
+    memcpy(
+        this->_eeprom.raw+(CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)),
+        payload->data() + 1 + CONFIG_BLOCK_DATA_OFFSET,
+        CONFIG_TRANSFER_BLOCK_SIZE
+    );
     emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
 }
 

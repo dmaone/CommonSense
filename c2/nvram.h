@@ -25,7 +25,6 @@
 #define CSF_NL_MASK 2
 
 #define EEPROM_BYTESIZE 2048
-#define CONFIG_TRANSFER_BLOCK_SIZE 32
 
 typedef union {
     struct {

@@ -33,7 +33,11 @@ void report_status(void)
 
 void receive_config_block(OUT_c2packet_t *inbox){
     // TODO define offset via transfer block size and packet size
-    memcpy(config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), inbox->payload+31, CONFIG_TRANSFER_BLOCK_SIZE);
+    memcpy(
+        config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE),
+        inbox->payload + CONFIG_BLOCK_DATA_OFFSET,
+        CONFIG_TRANSFER_BLOCK_SIZE
+    );
     outbox.response_type = C2RESPONSE_CONFIG;
     outbox.payload[0] = inbox->payload[0];
     usb_send(OUTBOX_EP);
@@ -42,7 +46,11 @@ void receive_config_block(OUT_c2packet_t *inbox){
 void send_config_block(OUT_c2packet_t *inbox){
     outbox.response_type = C2RESPONSE_CONFIG;
     outbox.payload[0] = inbox->payload[0];
-    memcpy(outbox.payload + 31, config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE), CONFIG_TRANSFER_BLOCK_SIZE);
+    memcpy(
+        outbox.payload + CONFIG_BLOCK_DATA_OFFSET,
+        config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE),
+        CONFIG_TRANSFER_BLOCK_SIZE
+    );
     usb_send(OUTBOX_EP);
 }
 
