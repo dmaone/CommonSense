@@ -18,9 +18,10 @@ MatrixMonitor::MatrixMonitor(QWidget *parent) :
     debug(0), displayMode(0), grid(new QGridLayout())
 {
     ui->setupUi(this);
-    connect(ui->VoltagesButton, SIGNAL(clicked()), this, SLOT(voltagesButtonClick()));
+    connect(ui->RunButton, SIGNAL(clicked()), this, SLOT(runButtonClick()));
     connect(ui->CloseButton, SIGNAL(clicked()), this, SLOT(closeButtonClick()));
-    connect(ui->ThresholdsButton, SIGNAL(clicked()), this, SLOT(thresholdsButtonClick()));
+    connect(ui->LoButton, SIGNAL(clicked()), this, SLOT(loButtonClick()));
+    connect(ui->HiButton, SIGNAL(clicked()), this, SLOT(hiButtonClick()));
     connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
     initDisplay();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
@@ -64,7 +65,6 @@ void MatrixMonitor::initDisplay(void)
             QLCDNumber *l = new QLCDNumber(2);
             l->setSegmentStyle(QLCDNumber::Filled);
             l->setMinimumHeight(25);
-            l->setVisible(false);
             grid->addWidget(l, i+1, j+1, 1, 1);
             display[i][j] = l;
         }
@@ -87,7 +87,7 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
             QLCDNumber *l = display[i][j];
-            l->setVisible((i < rows) & (j < cols));
+            l->setVisible((i < rows) && (j < cols));
         }
     }
     this->adjustSize();
@@ -104,12 +104,16 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
+
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (deviceConfig->noiseCeiling[row][i] && level > deviceConfig->noiseFloor[row][i] && level < deviceConfig->noiseCeiling[row][i])
+            if (
+                (!deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i]) or
+                (deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
+            )
             {
                 cell->setStyleSheet("background-color: #00ff00;");
             }
@@ -125,30 +129,39 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
 
 void MatrixMonitor::enableTelemetry(uint8_t m)
 {
-    ui->VoltagesButton->setText(m ? "Stop!": "Start!");
+    ui->RunButton->setText(m ? "Stop!": "Start!");
     emit sendCommand(C2CMD_GET_MATRIX_STATE, m);
 }
 
-void MatrixMonitor::voltagesButtonClick(void)
+void MatrixMonitor::runButtonClick(void)
 {
-    if (ui->VoltagesButton->text() == "Stop!") {
+    if (ui->RunButton->text() == "Stop!") {
         this->enableTelemetry(0);
     } else {
         this->enableTelemetry(1);
     }
 }
 
-void MatrixMonitor::thresholdsButtonClick(void)
+void MatrixMonitor::loButtonClick(void)
 {
     if (!deviceConfig->bValid) return;
     for (uint8_t i = 0; i<deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            int16_t tmp = display[i][j]->value() - ui->threshold->value();
-            deviceConfig->noiseFloor[i][j] = (tmp > 0) ? tmp : 0;
-            deviceConfig->noiseCeiling[i][j] = display[i][j]->value() + ui->threshold->value();
-            // FIXME do an editable matrix, fillable from mm
+            deviceConfig->deadBandLo[i][j] = display[i][j]->intValue();
+        }
+    }
+}
+
+void MatrixMonitor::hiButtonClick(void)
+{
+    if (!deviceConfig->bValid) return;
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+    {
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+        {
+            deviceConfig->deadBandHi[i][j] = display[i][j]->intValue();
         }
     }
 }

@@ -4,8 +4,10 @@
 #include <QFrame>
 #include <QGridLayout>
 #include <QSpinBox>
+#include <QCheckBox>
 #include <stdint.h>
-#include "../c2/nvram.h"
+#include "../c2/c2_protocol.h"
+#include "DeviceConfig.h"
 
 namespace Ui {
 class ThresholdEditor;
@@ -24,6 +26,8 @@ public slots:
     void importThresholds(void);
     void applyThresholds(void);
     void resetThresholds(void);
+    void updateLows(void);
+    void updateHighs(void);
 
 signals:
     logMessage(QString);
@@ -31,9 +35,14 @@ signals:
 private:
     Ui::ThresholdEditor *ui;
     QGridLayout *grid;
-    QSpinBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    psoc_eeprom_t* deviceConfig;
-    void initDisplay(uint8_t, uint8_t);
+    QWidget *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    QCheckBox *skip[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    QSpinBox *lo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    QSpinBox *hi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    DeviceConfig *deviceConfig;
+    void initDisplay();
+    void updateDisplaySize(uint8_t, uint8_t);
+
 };
 
 #endif // THRESHOLDEDITOR_H

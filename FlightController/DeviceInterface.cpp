@@ -59,7 +59,7 @@ void DeviceInterface::_sendPacket()
 {
     //qInfo() << "Sending packet" << (uint8_t)outbox[1] << (uint8_t)outbox[2];
     if (!device) return; // TODO we should be more vocal
-    //outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
+    outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
     hid_write(device, outbox, sizeof(outbox));
 }
 

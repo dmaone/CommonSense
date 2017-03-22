@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>552</width>
+    <width>637</width>
     <height>200</height>
    </rect>
   </property>
@@ -26,40 +26,17 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="7">
+   <item row="1" column="6">
+    <widget class="QPushButton" name="HiButton">
+     <property name="text">
+      <string>Set Hi</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="8">
     <widget class="QPushButton" name="CloseButton">
      <property name="text">
       <string>Close</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
-    <spacer name="horizontalSpacer">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>218</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="VoltagesButton">
-     <property name="text">
-      <string>Start</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="6">
-    <widget class="QPushButton" name="ThresholdsButton">
-     <property name="text">
-      <string>..as thresholds</string>
      </property>
     </widget>
    </item>
@@ -94,14 +71,24 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="5">
-    <widget class="QSpinBox" name="threshold">
-     <property name="value">
-      <number>15</number>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="RunButton">
+     <property name="text">
+      <string>Start</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="7">
+   <item row="1" column="5">
+    <widget class="QPushButton" name="LoButton">
+     <property name="text">
+      <string>Set Lo</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="1" colspan="8">
     <widget class="QFrame" name="Dashboard">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -117,12 +104,34 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="4">
-    <widget class="QLabel" name="label">
-     <property name="text">
-      <string>This +</string>
+   <item row="1" column="3">
+    <spacer name="horizontalSpacer_2">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
      </property>
-    </widget>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>40</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="7">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>218</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
    </item>
   </layout>
  </widget>

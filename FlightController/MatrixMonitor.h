@@ -40,9 +40,10 @@ private:
     void enableTelemetry(uint8_t);
 
 private slots:
-    void voltagesButtonClick(void);
+    void runButtonClick(void);
     void closeButtonClick(void);
-    void thresholdsButtonClick(void);
+    void loButtonClick(void);
+    void hiButtonClick(void);
     void displayModeChanged(QString);
 
 };

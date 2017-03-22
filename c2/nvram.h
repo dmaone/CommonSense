@@ -16,15 +16,8 @@
 
 #define CS_CONFIG_VERSION 2
 
-// Output Enabled
-#define CSF_OE_SHIFT 0
-#define CSF_OE_MASK 1
-
-// Normally Low
-#define CSF_NL_SHIFT 1
-#define CSF_NL_MASK 2
-
 #define EEPROM_BYTESIZE 2048
+#define COMMONSENSE_BASE_SIZE 64
 
 typedef union {
     struct {
@@ -33,7 +26,11 @@ typedef union {
         uint8_t matrixCols;
         uint8_t layerCount;
         uint8_t capsenseFlags;
-        uint8_t Reserved[11];
+        uint8_t _RESERVED0[9];
+        uint8_t guardLo;
+        uint8_t guardHi;
+        uint16_t delayLib[16]; // 2 bytes per item!
+        uint8_t _RESERVED1[16];
         // CONFIG SIZE - count up from here.
         // Storage is for layout-size-specifics and MUST NOT be sized here
         // because firmware can know sizes in advance, while FlightController can't.
@@ -41,11 +38,11 @@ typedef union {
         // Firmware. matrix dimensions compiled in.
         uint8_t noiseFloor[MATRIX_ROWS][MATRIX_COLS];
         uint8_t noiseCeiling[MATRIX_ROWS][MATRIX_COLS];
-#define COMMONSENSE_CONFIG_SIZE (16 + 2 * MATRIX_ROWS * MATRIX_COLS)
+#define COMMONSENSE_CONFIG_SIZE (COMMONSENSE_BASE_SIZE + 2 * MATRIX_ROWS * MATRIX_COLS)
         uint8_t lmstash[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE];
 #else
         // FlightController. Must work with what firmware tells it.
-#define COMMONSENSE_CONFIG_SIZE 16
+#define COMMONSENSE_CONFIG_SIZE COMMONSENSE_BASE_SIZE
         uint8_t stash[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE];
 #endif
     };

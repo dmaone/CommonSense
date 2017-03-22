@@ -16,8 +16,9 @@ public:
     uint8_t numRows;
     uint8_t numCols;
     uint8_t numLayers;
-    uint8_t noiseFloor[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
-    uint8_t noiseCeiling[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    bool    bNormallyLow;
+    uint8_t deadBandLo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    uint8_t deadBandHi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
     bool    skipSensing[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
     uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
 

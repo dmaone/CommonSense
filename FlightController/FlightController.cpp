@@ -56,7 +56,6 @@ void FlightController::show(void)
 {
     ui->mainPanel->setCurrentIndex(0);
     QMainWindow::show();
-    //DeviceInterface &di = Singleton<DeviceInterface>::instance();
 }
 
 void FlightController::closeEvent (QCloseEvent *event)
