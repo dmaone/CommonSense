@@ -36,8 +36,8 @@ typedef union {
         // because firmware can know sizes in advance, while FlightController can't.
 #ifdef MATRIX_ROWS
         // Firmware. matrix dimensions compiled in.
-        uint8_t noiseFloor[MATRIX_ROWS][MATRIX_COLS];
-        uint8_t noiseCeiling[MATRIX_ROWS][MATRIX_COLS];
+        uint8_t deadBandLo[MATRIX_ROWS][MATRIX_COLS];
+        uint8_t deadBandHi[MATRIX_ROWS][MATRIX_COLS];
 #define COMMONSENSE_CONFIG_SIZE (COMMONSENSE_BASE_SIZE + 2 * MATRIX_ROWS * MATRIX_COLS)
         uint8_t lmstash[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE];
 #else

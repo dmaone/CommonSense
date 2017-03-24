@@ -17,10 +17,12 @@ public:
     uint8_t numCols;
     uint8_t numLayers;
     bool    bNormallyLow;
-    uint8_t deadBandLo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
-    uint8_t deadBandHi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
-    bool    skipSensing[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
-    uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_ROWS];
+    uint8_t guardHi;
+    uint8_t guardLo;
+    uint8_t deadBandLo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    uint8_t deadBandHi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    bool    skipSensing[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
 
 signals:
     void changed(void);

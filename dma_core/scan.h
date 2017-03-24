@@ -38,11 +38,26 @@
 // PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
 #undef COMMONSENSE_100KHZ_MODE
 
+uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
 
-uint8_t matrix[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+uint8_t scancode_buffer[32];
+uint8_t scancode_buffer_writepos;
+uint8_t scancode_buffer_readpos;
 
 void scan_init(void);
 void scan_start(void);
 void scan_update(void);
+
+//TODO move to scancode processor module.
+typedef struct {
+    uint32_t sysTick;
+    uint8_t flags;
+    uint8_t scancode;
+} queuedScancode;
+
+queuedScancode USBQueue[128];
+uint8_t USBQueue_writepos;
+
+void process_scancode_buffer(void);
 
 /* [] END OF FILE */

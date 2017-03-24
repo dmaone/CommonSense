@@ -23,7 +23,6 @@ public:
     void show(void);
 
 public slots:
-    void importThresholds(void);
     void applyThresholds(void);
     void resetThresholds(void);
     void updateLows(void);

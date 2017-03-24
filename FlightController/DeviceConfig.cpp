@@ -118,7 +118,7 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
     {
         transferDirection = TransferIdle;
         qInfo() << "done, unpacking...";
-        this->_unpack();
+        _unpack();
         return;
     }
     qInfo(".");
@@ -132,25 +132,27 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload)
 
 void DeviceConfig::_unpack(void)
 {
-    this->numRows   = this->_eeprom.matrixRows;
-    this->numCols   = this->_eeprom.matrixCols;
-    this->numLayers = this->_eeprom.layerCount;
-    this->bNormallyLow = this->_eeprom.capsenseFlags & (1 << CSF_NL);
-    memset(this->deadBandLo, 0xfe, sizeof(this->deadBandLo));
-    memset(this->deadBandHi, 0xfe, sizeof(this->deadBandHi));
-    memset(this->layouts, 0x00, sizeof(this->layouts));
-    uint8_t table_size = this->numRows * this->numCols;
-    for (uint8_t i = 0; i < this->numRows; i++)
+    numRows   = _eeprom.matrixRows;
+    numCols   = _eeprom.matrixCols;
+    numLayers = _eeprom.layerCount;
+    bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
+    guardLo   = _eeprom.guardLo;
+    guardHi   = _eeprom.guardHi;
+    memset(deadBandLo, 0xfe, sizeof(deadBandLo));
+    memset(deadBandHi, 0xfe, sizeof(deadBandHi));
+    memset(layouts, 0x00, sizeof(layouts));
+    uint8_t table_size = numRows * numCols;
+    for (uint8_t i = 0; i < numRows; i++)
     {
-        for (uint8_t j = 0; j < this->numCols; j++)
+        for (uint8_t j = 0; j < numCols; j++)
         {
-            uint16_t offset = i*this->numCols + j;
-            this->deadBandLo[i][j] = this->_eeprom.stash[offset];
-            this->deadBandHi[i][j] = this->_eeprom.stash[table_size + offset];
-            this->skipSensing[i][j] = (this->deadBandLo[i][j] > this->deadBandHi[i][j]);
-            for (uint8_t k = 0; k < this->numLayers; k++)
+            uint16_t offset = i*numCols + j;
+            this->deadBandLo[i][j] = _eeprom.stash[offset];
+            this->deadBandHi[i][j] = _eeprom.stash[table_size + offset];
+            this->skipSensing[i][j] = (deadBandLo[i][j] > deadBandHi[i][j]);
+            for (uint8_t k = 0; k < numLayers; k++)
             {
-                this->layouts[k][i][j] = this->_eeprom.stash[table_size*(k+2) + offset];
+                layouts[k][i][j] = _eeprom.stash[table_size*(k+2) + offset];
             }
         }
     }
@@ -161,24 +163,28 @@ void DeviceConfig::_unpack(void)
 
 void DeviceConfig::_assemble(void)
 {
-    this->_eeprom.configVersion = 2;
-    memset(this->_eeprom.stash, 0, sizeof(this->_eeprom.stash));
-    memset(this->_eeprom._RESERVED0, 0xff, sizeof(this->_eeprom._RESERVED0));
-    memset(this->_eeprom._RESERVED1, 0xff, sizeof(this->_eeprom._RESERVED1));
-    uint8_t table_size = this->numRows * this->numCols;
+    _eeprom.configVersion = 2;
+    _eeprom.guardLo = guardLo;
+    _eeprom.guardHi = guardHi;
+    memset(_eeprom.stash, 0, sizeof(_eeprom.stash));
+    memset(_eeprom._RESERVED0, 0xff, sizeof(_eeprom._RESERVED0));
+    memset(_eeprom._RESERVED1, 0xff, sizeof(_eeprom._RESERVED1));
+    uint8_t table_size = numRows * numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
-        for (uint8_t j = 0; j < this->numCols; j++)
+        for (uint8_t j = 0; j < numCols; j++)
         {
-            uint16_t offset = i*this->numCols + j;
-            if (this->skipSensing[i][j])
+            uint16_t offset = i*numCols + j;
+/* TODO make it easier on the script|more visible on UI.
+            if (skipSensing[i][j])
             {
-                this->deadBandLo[i][j] = 255;
-                this->deadBandHi[i][j] = 0;
+                deadBandLo[i][j] = 255;
+                deadBandHi[i][j] = 0;
             }
-            this->_eeprom.stash[offset] = this->deadBandLo[i][j];
-            this->_eeprom.stash[table_size + offset] = this->deadBandHi[i][j];
-            for (uint8_t k = 0; k < this->numLayers; k++)
+*/
+            _eeprom.stash[offset] = deadBandLo[i][j];
+            _eeprom.stash[table_size + offset] = deadBandHi[i][j];
+            for (uint8_t k = 0; k < numLayers; k++)
             {
                 this->_eeprom.stash[table_size*(k+2) + offset] = this->layouts[k][i][j];
             }

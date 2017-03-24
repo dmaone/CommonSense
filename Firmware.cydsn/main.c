@@ -42,7 +42,15 @@ bool is_matrix_changed(void)
     {
         for (uint8_t j=0; j<config.matrixCols; j++)
         {
-            if (matrix[i][j] > config.noiseFloor[i][j] && matrix[i][j] < config.noiseCeiling[i][j])
+/*
+//FIXME move to scan loop!!! 
+ifdef NORMALLY_LOW
+            if ((matrix[i][j] >> COMMONSENSE_IIR_ORDER) < config.deadBandLo[i][j])
+else
+            if ((matrix[i][j] >> COMMONSENSE_IIR_ORDER) > config.deadBandHi[i][j])
+endif
+*/
+            if (false)
             {
                 // Inside the corridor of interest
                 current_row |= (1 << j);
@@ -138,7 +146,7 @@ int main()
         if (status_register.matrix_output > 0)
             for(uint8 i = 0; i<config.matrixRows; i++)
                 printRow(i);
-                
+        process_scancode_buffer();
         if (is_matrix_changed())
         {
             send_report();

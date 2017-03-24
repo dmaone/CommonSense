@@ -17,7 +17,6 @@ ThresholdEditor::ThresholdEditor(QWidget *parent) :
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     deviceConfig = di.config;
     initDisplay();
-    connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importThresholds()));
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyThresholds()));
     connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
     connect(ui->loPlusButton, SIGNAL(clicked()), this, SLOT(updateLows()));
@@ -121,13 +120,10 @@ void ThresholdEditor::updateHighs()
     }
 }
 
-void ThresholdEditor::importThresholds()
-{
-
-}
-
 void ThresholdEditor::applyThresholds()
 {
+    deviceConfig->guardLo = ui->loGuardSpinbox->value();
+    deviceConfig->guardHi = ui->hiGuardSpinbox->value();
     for (uint8_t i = 0; i < deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j < deviceConfig->numCols; j++)
@@ -141,12 +137,15 @@ void ThresholdEditor::applyThresholds()
 
 void ThresholdEditor::resetThresholds()
 {
+    ui->loGuardSpinbox->setValue(deviceConfig->guardLo);
+    ui->hiGuardSpinbox->setValue(deviceConfig->guardHi);
     for (uint8_t i = 0; i < deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j < deviceConfig->numCols; j++)
         {
             lo[i][j]->setValue(deviceConfig->deadBandLo[i][j]);
             hi[i][j]->setValue(deviceConfig->deadBandHi[i][j]);
+            skip[i][j]->setChecked(deviceConfig->deadBandLo[i][j] > deviceConfig->deadBandHi[i][j]);
         }
     }
     emit logMessage(QString("Updated threshold map"));

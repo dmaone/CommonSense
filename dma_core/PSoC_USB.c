@@ -11,7 +11,6 @@
 #include "globals.h"
 #include "c2/c2_protocol.h"
 #include "PSoC_USB.h"
-#include "scan.h"
 
 // for xprintf - stdio + stdarg
 #include <stdarg.h>

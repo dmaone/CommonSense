@@ -15,7 +15,7 @@
 #define BUCKLING_SPRING 1
 
 #define SWITCH_TYPE BEAMSPRING
-#define MATRIX_COLS 23
+#define MATRIX_COLS 24
 #define MATRIX_ROWS 4
 
 #include "c2/c2_protocol.h"
