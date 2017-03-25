@@ -21,12 +21,7 @@ static bool scan_in_progress;
 uint32_t matrix_status[MATRIX_ROWS];
 uint32_t row_status;
 
-CY_ISR(HWStateIRQ_ISR)
-{
-    scan_update();
-    HWState_Read(); // Clears IRQ request. Must come AFTER processing.
-    //HWStateIRQ_ClearPending();
-}
+CY_ISR_PROTO(HWStateIRQ_ISR);
 
 static void InitSensor(void)
 {
@@ -66,7 +61,7 @@ static void EnableSensor(void)
     HWState_InterruptEnable();
 }
 
-static void Drive(uint8 drv)
+inline void Drive(uint8 drv)
 {
     SenseReg_Control |= 0x01; // Untie sense from the ground
 /*
@@ -120,15 +115,18 @@ inline void filter(uint8_t row, uint8_t col, int16_t incoming)
             row_status |= (1 << col);
         }
     }
-    else if (row_status & (1 << col))
+    else
     {
-        // new key release
-        append_scancode(0x80|(row*MATRIX_COLS+col));
-        row_status &= ~(1 << col);
+        if (row_status & (1 << col))
+        {
+            // new key release
+            append_scancode(0x80|(row*MATRIX_COLS+col));
+            row_status &= ~(1 << col);
+        }
     }
 }
 
-void scan_update(void)
+CY_ISR(HWStateIRQ_ISR)
 {
     if (!scan_in_progress)
         return;
@@ -157,7 +155,9 @@ void scan_update(void)
     // There were before bandpass filter - and next_tow was defined right above the loop and made sense.
     Drive(next_row);
     current_row = next_row;
+    HWState_Read(); // Clears IRQ request. Must come AFTER processing.
 }
+
 
 void scan_init(void)
 {

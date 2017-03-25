@@ -46,7 +46,6 @@ uint8_t scancode_buffer_readpos;
 
 void scan_init(void);
 void scan_start(void);
-void scan_update(void);
 
 //TODO move to scancode processor module.
 typedef struct {

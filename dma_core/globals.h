@@ -60,6 +60,10 @@ typedef struct {
     bool matrix_output;
 } __attribute__ ((packed)) status_register_t;
 
+uint8_t tick;
+uint32_t systime;
+uint8_t usb_idletime;
+
 status_register_t status_register;
 uint8_t led_status;
 
