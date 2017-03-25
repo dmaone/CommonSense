@@ -11,11 +11,6 @@
 int main()
 {
     CyGlobalIntEnable;
-    // button pulls low. Not pressed - no bootloader.
-    //if (1u == CyPins_ReadPin(Pins_Button)) 
-    //{
-    //    Bootloader_Exit(Bootloader_EXIT_TO_BTLDB);
-    //}
     Bootloader_Start();
     // Never reached.
     for(;;)

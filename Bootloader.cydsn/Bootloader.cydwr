@@ -3377,7 +3377,7 @@
     <Data key="count" value="0" />
   </Group>
   <Group key="System3">
-    <Data key="CYDEV_CONFIG_FASTBOOT_ENABLED" value="True" />
+    <Data key="CYDEV_CONFIG_FASTBOOT_ENABLED" value="False" />
     <Data key="CYDEV_CONFIG_UNUSED_IO" value="AllowButWarn" />
     <Data key="CYDEV_CONFIGURATION_ECC" value="True" />
     <Data key="CYDEV_CONFIGURATION_MODE" value="COMPRESSED" />
