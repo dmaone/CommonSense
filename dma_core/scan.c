@@ -83,14 +83,9 @@ void scan_start(void)
     }
 }
 
-inline uint8_t scancode_buffer_next_pos(uint8_t current_pos)
-{
-    return (current_pos + 1) & SCANCODE_BUFFER_END;
-}
-
 inline void append_scancode(uint8_t scancode)
 {
-    scancode_buffer_writepos = (scancode_buffer_writepos + 1) % sizeof(scancode_buffer);
+    scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
 
@@ -195,23 +190,4 @@ void scan_init(void)
     scan_reset();
     InitSensor();
     EnableSensor();
-}
-
-//TODO move to scancode processor module.
-void process_scancode_buffer(void)
-{
-    if (scancode_buffer_readpos == scancode_buffer_writepos)
-        return;
-    scancode_buffer_readpos = scancode_buffer_next_pos(scancode_buffer_readpos);
-    while (scancode_buffer[scancode_buffer_readpos] == 0)
-    {
-        scancode_buffer_readpos = scancode_buffer_next_pos(scancode_buffer_readpos);
-    }
-    uint8_t scancode = scancode_buffer[scancode_buffer_readpos] &0x7f;
-#ifdef MATRIX_LEVELS_DEBUG
-    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode_buffer[scancode_buffer_readpos] & 0x80, scancode, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
-#else
-    xprintf("sc: %d %d @ %d ms", scancode_buffer[scancode_buffer_readpos] & 0x80, scancode, systime);
-#endif
-    scancode_buffer[scancode_buffer_readpos] = 0;
 }

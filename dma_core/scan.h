@@ -41,6 +41,8 @@
 uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
 
 #define SCANCODE_BUFFER_END 31
+#define SCANCODE_BUFFER_NEXT(X) ((X + 1) & SCANCODE_BUFFER_END)
+
 #undef MATRIX_LEVELS_DEBUG
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 uint8_t scancode_buffer[SCANCODE_BUFFER_END + 1];
@@ -55,16 +57,5 @@ void scan_init(void);
 void scan_start(void);
 void scan_reset(void);
 
-//TODO move to scancode processor module.
-typedef struct {
-    uint32_t sysTick;
-    uint8_t flags;
-    uint8_t scancode;
-} queuedScancode;
-
-queuedScancode USBQueue[128];
-uint8_t USBQueue_writepos;
-
-void process_scancode_buffer(void);
 
 /* [] END OF FILE */

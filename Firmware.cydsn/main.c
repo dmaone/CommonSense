@@ -7,11 +7,12 @@
  * published by the Free Software Foundation. 
 */
 #include "globals.h"
+#include <project.h>
 #include "PSoC_USB.h"
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
 #include "scan.h"
-#include <project.h>
+#include "pipeline.h"
 
 CY_ISR(BootIRQ_ISR)
 {
@@ -134,7 +135,8 @@ int main()
             if (status_register.matrix_output > 0)
                 for(uint8 i = 0; i<config.matrixRows; i++)
                     printRow(i);
-            process_scancode_buffer();
+
+            do_pipeline();
         }
         // Timer ISR will wake us up.
         CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
