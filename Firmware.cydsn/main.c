@@ -114,6 +114,7 @@ int main()
     {
         if (tick)
         {
+            tick = 0;
             /* Host can send double SET_INTERFACE request. */
             if (0u != USB_IsConfigurationChanged())
             {
@@ -133,8 +134,8 @@ int main()
             if (status_register.matrix_output > 0)
                 for(uint8 i = 0; i<config.matrixRows; i++)
                     printRow(i);
+            process_scancode_buffer();
         }
-        tick = 0;
         // Timer ISR will wake us up.
         CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
     }

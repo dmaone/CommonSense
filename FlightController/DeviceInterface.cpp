@@ -61,6 +61,11 @@ void DeviceInterface::_sendPacket()
     if (!device) return; // TODO we should be more vocal
     outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
     hid_write(device, outbox, sizeof(outbox));
+    // KNOWN PROBLEM - sending too fast overwhelms the MCU.
+    // This leads to missing/incorrect data.
+    // Fix is possible, but will require DMA mode w/automatic memory management.
+    // So fuck it, let's just be gentle.
+    QThread::msleep(5);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)

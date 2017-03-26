@@ -107,6 +107,7 @@ void process_msg(OUT_c2packet_t * inbox)
     case C2CMD_EWO:
         status_register.emergency_stop = inbox->payload[0];
         xprintf("EWO signal received: %d", inbox->payload[0]);
+        scan_reset();
         break;
     case C2CMD_GET_STATUS:
         report_status();
@@ -128,6 +129,7 @@ void process_msg(OUT_c2packet_t * inbox)
         CySoftwareReset(); //Does not return, no need for break.
     case C2CMD_GET_MATRIX_STATE:
         status_register.matrix_output = inbox->payload[0];
+        scan_reset();
         break;
     default:
         break;

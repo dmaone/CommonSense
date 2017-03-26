@@ -18,8 +18,8 @@ static uint8_t Buf1TD = CY_DMA_INVALID_TD;
 static int16_t Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
 static uint8_t current_row;
 static bool scan_in_progress;
-uint32_t matrix_status[MATRIX_ROWS];
-uint32_t row_status;
+static uint32_t matrix_status[MATRIX_ROWS];
+static uint32_t row_status;
 
 CY_ISR_PROTO(HWStateIRQ_ISR);
 
@@ -83,24 +83,31 @@ void scan_start(void)
     }
 }
 
+inline uint8_t scancode_buffer_next_pos(uint8_t current_pos)
+{
+    return (current_pos + 1) & SCANCODE_BUFFER_END;
+}
+
 inline void append_scancode(uint8_t scancode)
 {
     scancode_buffer_writepos = (scancode_buffer_writepos + 1) % sizeof(scancode_buffer);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
 
-inline void filter(uint8_t row, uint8_t col, int16_t incoming)
+static inline void filter(uint8_t row, uint8_t col, int16_t incoming)
 {
-    if ((incoming <= config.deadBandLo[row][col] && incoming + config.guardLo >= config.deadBandLo[row][col]) // Lower band
+    if (config.deadBandLo[row][col] == 0xff)
+        return; // Skip scanning altogether
+    if (!((incoming <= config.deadBandLo[row][col] && incoming + config.guardLo >= config.deadBandLo[row][col]) // Lower band
      || (incoming >= config.deadBandHi[row][col] && incoming - config.guardHi <= config.deadBandHi[row][col]) // Upper band
-    ) {
+    ))
+        return; // Invalid data
 #if COMMONSENSE_IIR_ORDER == 0
         // Degenerate version. But very fast! Can be used in noiseless environments.
-        matrix[row][col] = incoming;
+    matrix[row][col] = incoming;
 #else
-        matrix[row][col] += incoming - (matrix[row][col] >> COMMONSENSE_IIR_ORDER);
+    matrix[row][col] += incoming - (matrix[row][col] >> COMMONSENSE_IIR_ORDER);
 #endif
-    }
     //Key pressed?
 #if NORMALLY_LOW == 1
     if (matrix[row][col] >= (config.deadBandHi[row][col] << COMMONSENSE_IIR_ORDER))
@@ -112,15 +119,23 @@ inline void filter(uint8_t row, uint8_t col, int16_t incoming)
         {
             // new keypress
             append_scancode(row*MATRIX_COLS+col);
+#ifdef MATRIX_LEVELS_DEBUG
+            level_buffer[scancode_buffer_writepos] = matrix[row][col] & 0xff;
+            level_buffer_inst[scancode_buffer_writepos] = incoming & 0xff;
+#endif
             row_status |= (1 << col);
         }
     }
     else
     {
-        if (row_status & (1 << col))
+        if ((row_status & (1 << col)) > 0)
         {
             // new key release
             append_scancode(0x80|(row*MATRIX_COLS+col));
+#ifdef MATRIX_LEVELS_DEBUG
+            level_buffer[scancode_buffer_writepos] = matrix[row][col] & 0xff;
+            level_buffer_inst[scancode_buffer_writepos] = incoming & 0xff;
+#endif
             row_status &= ~(1 << col);
         }
     }
@@ -152,15 +167,32 @@ CY_ISR(HWStateIRQ_ISR)
     matrix_status[current_row] = row_status;
     uint8_t next_row = (current_row ? current_row : config.matrixRows) - 1;
     // Drive row. Here, because there's not enough time to read out the array (not reliably) if driven at the top.
-    // There were before bandpass filter - and next_tow was defined right above the loop and made sense.
+    // There were before bandpass filter - and next_row was defined right above the loop and made sense.
     Drive(next_row);
     current_row = next_row;
     HWState_Read(); // Clears IRQ request. Must come AFTER processing.
 }
 
+void scan_reset(void)
+{
+    for (uint8_t i=0; i<MATRIX_ROWS; i++)
+    {
+        for (uint8_t j=0; j<MATRIX_COLS; j++)
+        {
+            // Away from thresholds! Account for IIR.
+            matrix[i][j] = (config.deadBandHi[i][j] + config.deadBandLo[i][j]) << (COMMONSENSE_IIR_ORDER - 1);
+        }
+    }
+    // Our hope is to be REALLY QUICK - ISR can change those at any moment.
+    memset(scancode_buffer, 0, sizeof(scancode_buffer));
+    memset(matrix_status, 0, sizeof(matrix_status));
+    scancode_buffer_readpos = 0;
+    scancode_buffer_writepos = 0;
+}
 
 void scan_init(void)
 {
+    scan_reset();
     InitSensor();
     EnableSensor();
 }
@@ -170,4 +202,16 @@ void process_scancode_buffer(void)
 {
     if (scancode_buffer_readpos == scancode_buffer_writepos)
         return;
+    scancode_buffer_readpos = scancode_buffer_next_pos(scancode_buffer_readpos);
+    while (scancode_buffer[scancode_buffer_readpos] == 0)
+    {
+        scancode_buffer_readpos = scancode_buffer_next_pos(scancode_buffer_readpos);
+    }
+    uint8_t scancode = scancode_buffer[scancode_buffer_readpos] &0x7f;
+#ifdef MATRIX_LEVELS_DEBUG
+    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode_buffer[scancode_buffer_readpos] & 0x80, scancode, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
+#else
+    xprintf("sc: %d %d @ %d ms", scancode_buffer[scancode_buffer_readpos] & 0x80, scancode, systime);
+#endif
+    scancode_buffer[scancode_buffer_readpos] = 0;
 }

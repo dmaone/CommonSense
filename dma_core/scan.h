@@ -40,12 +40,20 @@
 
 uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
 
-uint8_t scancode_buffer[32];
+#define SCANCODE_BUFFER_END 31
+#undef MATRIX_LEVELS_DEBUG
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
+uint8_t scancode_buffer[SCANCODE_BUFFER_END + 1];
+#ifdef MATRIX_LEVELS_DEBUG
+uint8_t level_buffer[SCANCODE_BUFFER_END + 1];
+uint8_t level_buffer_inst[SCANCODE_BUFFER_END + 1];
+#endif
 uint8_t scancode_buffer_writepos;
 uint8_t scancode_buffer_readpos;
 
 void scan_init(void);
 void scan_start(void);
+void scan_reset(void);
 
 //TODO move to scancode processor module.
 typedef struct {

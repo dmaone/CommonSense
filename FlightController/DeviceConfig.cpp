@@ -175,13 +175,12 @@ void DeviceConfig::_assemble(void)
         for (uint8_t j = 0; j < numCols; j++)
         {
             uint16_t offset = i*numCols + j;
-/* TODO make it easier on the script|more visible on UI.
-            if (skipSensing[i][j])
+// TODO make it easier on the script|more visible on UI.
+            if (deadBandHi[i][j] < deadBandLo[i][j])
             {
                 deadBandLo[i][j] = 255;
                 deadBandHi[i][j] = 0;
             }
-*/
             _eeprom.stash[offset] = deadBandLo[i][j];
             _eeprom.stash[table_size + offset] = deadBandHi[i][j];
             for (uint8_t k = 0; k < numLayers; k++)
