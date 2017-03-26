@@ -142,7 +142,7 @@ void usb_init(void)
     /* Wait for device to enumerate */
     while (0u == USB_GetConfiguration())
     {
-        CyDelay(100);
+        CyDelay(10);
     }
 }
 
@@ -157,6 +157,19 @@ void usb_send(uint8_t ep)
 void usb_keyboard_send(void* bufptr, uint8_t length)
 {
     memcpy(KBD_OUTBOX, bufptr, length);
+}
+
+void usb_wakeup(void)
+{
+    // This is copied from AN
+    if (USB_RWUEnabled() != 0)
+    {
+        CyDelay(20);
+        USB_Force(USB_FORCE_K);
+        CyDelay(20);
+        USB_Force(USB_FORCE_NONE);
+        CyDelay(20);
+    }
 }
 
 void xprintf(const char *format_p, ...)
