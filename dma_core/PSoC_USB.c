@@ -159,6 +159,12 @@ void usb_keyboard_send(void* bufptr, uint8_t length)
     memcpy(KBD_OUTBOX, bufptr, length);
 }
 
+void keyboard_send()
+{
+    while (USB_GetEPState(KEYBOARD_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
+    USB_LoadInEP(KEYBOARD_EP, KBD_OUTBOX, 64);
+}
+
 void update_keyboard_mods(uint8_t mods)
 {
 }
@@ -179,6 +185,7 @@ void keyboard_press(uint8_t keycode)
             break;
         }
     }
+    keyboard_send();
 }
 
 void keyboard_release(uint8_t keycode)
@@ -202,6 +209,7 @@ void keyboard_release(uint8_t keycode)
         KBD_OUTBOX[2 + KRO_LIMIT] = 0;
         //xprintf("Released %d", keycode);
     }
+    keyboard_send();
 }
 
 void usb_wakeup(void)
