@@ -10,6 +10,9 @@
 #pragma once
 #include "globals.h"
 
+//IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122 with it's 8x16 matrix.
+#define COMMONSENSE_NOKEY 0x7f
+
 // 0 - none, 1 - 1/2, 2 - 3/4, etc.
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
 #define COMMONSENSE_IIR_ORDER 2
@@ -42,9 +45,9 @@ uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even num
 
 #define SCANCODE_BUFFER_END 31
 #define SCANCODE_BUFFER_NEXT(X) ((X + 1) & SCANCODE_BUFFER_END)
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
 #undef MATRIX_LEVELS_DEBUG
-// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 uint8_t scancode_buffer[SCANCODE_BUFFER_END + 1];
 #ifdef MATRIX_LEVELS_DEBUG
 uint8_t level_buffer[SCANCODE_BUFFER_END + 1];

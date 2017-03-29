@@ -17,3 +17,7 @@ void usb_keyboard_send(void*, uint8_t);
 void usb_wakeup(void);
 void process_msg(OUT_c2packet_t *);
 void load_config(void);
+
+void keyboard_press(uint8_t);
+void keyboard_release(uint8_t);
+void update_keyboard_mods(uint8_t);

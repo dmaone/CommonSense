@@ -179,7 +179,7 @@ void scan_reset(void)
         }
     }
     // Our hope is to be REALLY QUICK - ISR can change those at any moment.
-    memset(scancode_buffer, 0, sizeof(scancode_buffer));
+    memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
     memset(matrix_status, 0, sizeof(matrix_status));
     scancode_buffer_readpos = 0;
     scancode_buffer_writepos = 0;

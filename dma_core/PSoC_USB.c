@@ -159,6 +159,51 @@ void usb_keyboard_send(void* bufptr, uint8_t length)
     memcpy(KBD_OUTBOX, bufptr, length);
 }
 
+void update_keyboard_mods(uint8_t mods)
+{
+}
+
+void keyboard_press(uint8_t keycode)
+{
+    for (uint8_t cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)
+    {
+        if (KBD_OUTBOX[cur_pos] == keycode)
+        {
+            xprintf("Existing %d pos %d", keycode, cur_pos);
+            break;
+        }
+        else if (KBD_OUTBOX[cur_pos] == 0)
+        {
+            KBD_OUTBOX[cur_pos] = keycode;
+            xprintf("Pressed %d pos %d", keycode, cur_pos);
+            break;
+        }
+    }
+}
+
+void keyboard_release(uint8_t keycode)
+{
+    uint8_t cur_pos;
+    bool move = false;
+    for (cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)
+    {
+        if (move)
+        {
+            KBD_OUTBOX[cur_pos - 1] = KBD_OUTBOX[cur_pos];
+        }
+        else if (KBD_OUTBOX[cur_pos] == keycode)
+        {
+            move = true;
+        }
+    }
+    if (move)
+    {
+        // Key was, in fact, pressed.
+        KBD_OUTBOX[2 + KRO_LIMIT] = 0;
+        xprintf("Released %d", keycode);
+    }
+}
+
 void usb_wakeup(void)
 {
     // This is copied from AN

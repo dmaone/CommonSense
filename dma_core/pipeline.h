@@ -10,13 +10,34 @@
 #pragma once
 #include "globals.h"
 
-typedef struct {
-    uint32_t sysTick;
-    uint8_t flags;
-    uint8_t scancode;
+typedef union {
+    struct {
+        uint32_t sysTime;
+        uint8_t flags;
+        uint8_t keycode;
+    } __attribute__ ((packed));
+    uint8_t raw[6];
 } queuedScancode;
 
-queuedScancode USBQueue[128];
-uint8_t USBQueue_writepos;
+#define USBCODE_NOEVENT 1
+#define USBCODE_TRANSPARENT 0
+#define USBCODE_A 4
 
-void do_pipeline(void);
+#define USBQUEUE_RELEASED 0x80
+#define USBQUEUE_REAL_KEY 0x40
+
+#define KEYCODE_BUFFER_END 63
+#define KEYCODE_BUFFER_NEXT(X) ((X + 1) & KEYCODE_BUFFER_END)
+#define KEYCODE_BUFFER_PREV(X) ((X + KEYCODE_BUFFER_END) & KEYCODE_BUFFER_END)
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
+
+queuedScancode USBQueue[KEYCODE_BUFFER_END + 1];
+uint8_t USBQueue_readpos;
+uint8_t USBQueue_writepos;
+uint8_t mods;
+uint8_t layerMods;
+#define LAYER_MODS_SHIFT 4
+uint8_t currentLayer;
+
+void pipeline_init(void);
+void pipeline_process(void);

@@ -111,6 +111,7 @@ int main()
     SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
     SysTimer_Start();
     TimerIRQ_StartEx(Timer_ISR);
+    pipeline_init();
     for(;;)
     {
         if (tick)
@@ -136,7 +137,7 @@ int main()
                 for(uint8 i = 0; i<config.matrixRows; i++)
                     printRow(i);
 
-            do_pipeline();
+            pipeline_process();
         }
         // Timer ISR will wake us up.
         CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);

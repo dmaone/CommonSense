@@ -2,10 +2,10 @@
 
 ScancodeList::ScancodeList(): list()
 {
-    list << "-0-"; //0x00
-    list << "eKRO";
-    list << "eFAIL";
-    list << "eUNK"; //0x03
+    list << "----"; //0x00
+    list << "DEAD";
+    list << "DNU";
+    list << "DNU"; //0x03
     list << "A"; // 0x04
     list << "B";
     list << "C";

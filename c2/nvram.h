@@ -30,7 +30,8 @@ typedef union {
         uint8_t guardLo;
         uint8_t guardHi;
         uint16_t delayLib[16]; // 2 bytes per item!
-        uint8_t _RESERVED1[16];
+        uint8_t layerConditions[8];
+        uint8_t _RESERVED1[8];
         // CONFIG SIZE - count up from here.
         // Storage is for layout-size-specifics and MUST NOT be sized here
         // because firmware can know sizes in advance, while FlightController can't.
