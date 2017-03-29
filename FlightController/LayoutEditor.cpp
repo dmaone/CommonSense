@@ -16,15 +16,15 @@ LayoutEditor::LayoutEditor(QWidget *parent) :
     grid(new QGridLayout())
 {
     ui->setupUi(this);
-    // TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    // TODO deviceConfig = di.getConfigPtr();
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+    deviceConfig = di.config;
 }
 
 void LayoutEditor::show(void)
 {
-    if (deviceConfig->matrixCols && deviceConfig->matrixCols)
+    if (deviceConfig->bValid)
     {
-        initDisplay(deviceConfig->matrixRows, deviceConfig->matrixCols);
+        initDisplay(deviceConfig->numRows, deviceConfig->numCols);
         connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importLayout()));
         connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportLayout()));
         connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyLayout()));
@@ -41,19 +41,20 @@ LayoutEditor::~LayoutEditor()
 
 void LayoutEditor::initDisplay(uint8_t rows, uint8_t cols)
 {
-    for (uint8_t i = 1; i<=deviceConfig->matrixCols; i++)
+    ui->Dashboard->setLayout(grid);
+    for (uint8_t i = 1; i<=deviceConfig->numCols; i++)
     {
         grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
         grid->itemAtPosition(0, i)->widget()->setVisible(i<=cols);
-        if (i <= deviceConfig->matrixRows) {
+        if (i <= deviceConfig->numRows) {
             grid->addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1, Qt::AlignRight);
             grid->itemAtPosition(i, 0)->widget()->setVisible(i<=rows);
         }
     }
     ScancodeList scancodes;
-    for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
     {
-        for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
             QComboBox *l = new QComboBox();
             l->addItems(scancodes.list);
@@ -64,7 +65,6 @@ void LayoutEditor::initDisplay(uint8_t rows, uint8_t cols)
         }
     }
     resetLayout();
-    ui->Dashboard->setLayout(grid);
 }
 
 void LayoutEditor::importLayout()
@@ -79,16 +79,16 @@ void LayoutEditor::importLayout()
         QFile f(fns.at(0));
         f.open(QIODevice::ReadOnly);
         QTextStream ds(&f);
-        for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+        for (uint8_t i = 0; i<deviceConfig->numRows; i++)
         {
-            for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+            for (uint8_t j = 0; j<deviceConfig->numCols; j++)
             {
                 qint32 buf;
                 ds >> buf;
                 display[i][j]->setCurrentIndex((uint8_t) buf);
             }
         }
-        emit logMessage(QString("Imported layout from %1").arg(fns.at(0)));
+        qInfo() << "Imported layout from" << fns.at(0);
     }
 }
 
@@ -107,10 +107,10 @@ void LayoutEditor::exportLayout()
         ts.setIntegerBase(16);
         ts.setFieldAlignment(QTextStream::AlignRight);
         ts.setPadChar('0');
-        for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+        for (uint8_t i = 0; i<deviceConfig->numRows; i++)
         {
             QByteArray buf;
-            for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+            for (uint8_t j = 0; j<deviceConfig->numCols; j++)
             {
                 ts << qSetFieldWidth(1) << (j ? ' ' : '\n');
                 ts << "0x";
@@ -120,40 +120,29 @@ void LayoutEditor::exportLayout()
             }
         }
         ts << qSetFieldWidth(1) << '\n';
-        emit logMessage(QString("Exported layout to %1").arg(fns.at(0)));
+        qInfo() << "Exported layout to" << fns.at(0);
     }
 }
 
 void LayoutEditor::applyLayout()
 {
-    // Reverse mapping - scan by mapped, record raw.
-    // Reverse recording - from the end of the storage towards the front.
-    for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
     {
-        for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            /* TODO
-            uint8_t kc = display[i][j]->currentIndex();
-            deviceConfig->storage[STORAGE_ADDRESS((deviceConfig->row_params[i].rowNumber-1)*deviceConfig->matrixCols + deviceConfig->col_params[j].colNumber-1)] = kc;
-            */
+            deviceConfig->layouts[0][i][j] = display[i][j]->currentIndex();
         }
     }
-
 }
 
 void LayoutEditor::resetLayout()
 {
-    for (uint8_t i = 0; i<deviceConfig->matrixRows; i++)
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
     {
-        for (uint8_t j = 0; j<deviceConfig->matrixCols; j++)
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            /* TODO
-            uint8_t kc = deviceConfig->storage[STORAGE_ADDRESS(i*deviceConfig->matrixCols + j)];
-            VERIFY we select proper cell!
-            QComboBox *cell = display[i][j];
-            cell->setCurrentIndex(kc);
-             */
+            display[i][j]->setCurrentIndex(deviceConfig->layouts[0][i][j]);
         }
     }
-    emit logMessage(QString("Loaded layout from device"));
+    qInfo() << "Loaded layout from device";
 }

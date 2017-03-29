@@ -65,7 +65,7 @@ void DeviceInterface::_sendPacket()
     // This leads to missing/incorrect data.
     // Fix is possible, but will require DMA mode w/automatic memory management.
     // So fuck it, let's just be gentle.
-    QThread::msleep(5);
+    QThread::msleep(25);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)

@@ -162,7 +162,6 @@ void FlightController::editLayoutClick(void)
 {
     if (layoutEditor == NULL) {
         layoutEditor = new LayoutEditor();
-        connect(layoutEditor, SIGNAL(logMessage(QString)), ui->LogViewport, SLOT(logMessage(QString)));
     }
     layoutEditor->show();
 

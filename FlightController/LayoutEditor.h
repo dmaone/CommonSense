@@ -5,7 +5,8 @@
 #include <QGridLayout>
 #include <QComboBox>
 #include <stdint.h>
-#include "../c2/nvram.h"
+#include "../c2/c2_protocol.h"
+#include "DeviceConfig.h"
 
 namespace Ui {
 class LayoutEditor;
@@ -26,14 +27,11 @@ public slots:
     void applyLayout(void);
     void resetLayout(void);
 
-signals:
-    void logMessage(QString);
-
 private:
     Ui::LayoutEditor *ui;
     QGridLayout *grid;
     QComboBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    psoc_eeprom_t* deviceConfig;
+    DeviceConfig *deviceConfig;
     void initDisplay(uint8_t, uint8_t);
 };
 

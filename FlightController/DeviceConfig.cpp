@@ -166,9 +166,11 @@ void DeviceConfig::_assemble(void)
     _eeprom.configVersion = 2;
     _eeprom.guardLo = guardLo;
     _eeprom.guardHi = guardHi;
+    _eeprom.layerCount = numLayers;
     memset(_eeprom.stash, 0, sizeof(_eeprom.stash));
     memset(_eeprom._RESERVED0, 0xff, sizeof(_eeprom._RESERVED0));
     memset(_eeprom._RESERVED1, 0xff, sizeof(_eeprom._RESERVED1));
+    memset(_eeprom.layerConditions, 0x00, sizeof(_eeprom.layerConditions));
     uint8_t table_size = numRows * numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
