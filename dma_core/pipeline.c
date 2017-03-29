@@ -26,7 +26,7 @@ inline uint8_t process_scancode_buffer(void)
 #ifdef MATRIX_LEVELS_DEBUG
     xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & 0x80, scancode &0x7f, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
 #else
-    xprintf("sc: %d %d @ %d ms", scancode & 0x80, scancode &0x7f, systime);
+    //xprintf("sc: %d %d @ %d ms", scancode & 0x80, scancode &0x7f, systime);
 #endif
     scancode_buffer[scancode_buffer_readpos] = COMMONSENSE_NOKEY;
     return scancode;
@@ -108,14 +108,15 @@ inline void process_real_key(void)
             return;
     }
     // Resolve USB keycode using current active layers
-    for (uint8_t i=currentLayer; i > 0; i--)
+    for (uint8_t i=currentLayer; i >= 0; i--)
     {
-        usb_sc = config.lmstash[i*(MATRIX_COLS*MATRIX_ROWS)+sc];
+        usb_sc = config.lmstash[i*(MATRIX_COLS*MATRIX_ROWS)+(sc & 0x7f)];
         if (usb_sc != USBCODE_TRANSPARENT)
         {
             break;
         }
     }
+    //xprintf("SC->KC: %d -> %d", sc & 0x7f, usb_sc);
     if (usb_sc < USBCODE_A)
     {
         // Dead key.
@@ -168,7 +169,7 @@ inline void update_reports(void)
     {
         USBQueue_readpos = KEYCODE_BUFFER_NEXT(USBQueue_readpos);
     }
-    xprintf("USB queue %d - %d", USBQueue_readpos, USBQueue_writepos);
+    //xprintf("USB queue %d - %d", USBQueue_readpos, USBQueue_writepos);
     uint8_t pos = USBQueue_readpos;
     do 
     {

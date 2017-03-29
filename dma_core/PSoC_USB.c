@@ -175,7 +175,7 @@ void keyboard_press(uint8_t keycode)
         else if (KBD_OUTBOX[cur_pos] == 0)
         {
             KBD_OUTBOX[cur_pos] = keycode;
-            xprintf("Pressed %d pos %d", keycode, cur_pos);
+            //xprintf("Pressed %d pos %d", keycode, cur_pos);
             break;
         }
     }
@@ -200,7 +200,7 @@ void keyboard_release(uint8_t keycode)
     {
         // Key was, in fact, pressed.
         KBD_OUTBOX[2 + KRO_LIMIT] = 0;
-        xprintf("Released %d", keycode);
+        //xprintf("Released %d", keycode);
     }
 }
 
