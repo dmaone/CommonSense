@@ -167,6 +167,8 @@ void keyboard_send()
 
 void update_keyboard_mods(uint8_t mods)
 {
+    KBD_OUTBOX[0] = mods;
+    keyboard_send();
 }
 
 void keyboard_press(uint8_t keycode)

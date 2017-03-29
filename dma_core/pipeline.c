@@ -135,6 +135,7 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
     if ((usb_sc & 0xe0) == 0xe0)
     {
         process_mods(sc, usb_sc);
+        queue_usbcode(systime, (sc & USBQUEUE_RELEASED) | USBQUEUE_REAL_KEY, 0xe0);
         return;
     }
 /*
@@ -179,7 +180,7 @@ inline void update_reports(void)
             {
                 // Actual mods processed above and not pushed to keycode buffer.
                 // Here it means "update report from bitmap we currently have".
-                // TODO update_keyboard_mods
+                update_keyboard_mods(mods);
             }
             // -> Think of special code for collectively settings mods!
             else if (USBQueue[pos].keycode >= 0xe8)
