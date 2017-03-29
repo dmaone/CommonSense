@@ -35,10 +35,8 @@ void FlightController::setup(void)
     connect(ui->BootloaderButton, SIGNAL(clicked()), this, SLOT(bootloaderButtonClick()));
     connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(matrixMonitorButtonClick()));
     connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
-    connect(ui->validateButton, SIGNAL(clicked()), this, SLOT(validateConfig()));
     connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
     connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
-    connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyConfig()));
     connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
     connect(ui->importButton, SIGNAL(clicked()), di.config, SLOT(fromFile()));
     connect(ui->uploadButton, SIGNAL(clicked()), di.config, SLOT(toDevice()));
@@ -70,7 +68,6 @@ void FlightController::closeEvent (QCloseEvent *event)
 void FlightController::mainTabChanged(int idx)
 {
     if (idx == 1) {
-        validateConfig();
     }
 }
 
@@ -137,11 +134,6 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
     }
 }
 
-void FlightController::setConfigDirty(int)
-{
-    ui->validateButton->setEnabled(true);
-}
-
 void FlightController::manipulateTabs(bool dothis)
 {
     for (int i=0; i < ui->mainPanel->count(); i++) {
@@ -177,24 +169,6 @@ void FlightController::editThresholdsClick(void)
 
 }
 
-
-void FlightController::validateConfig(void)
-{
-    if (ui->mainPanel->currentIndex() == 1)
-    {
-/*  FIXME This gets too boring. Better validations after the keyboard works.
-    Also do not forget to really reset all row/column-dependent stuff.
-*/
-    }
-    ui->validateButton->setDisabled(true);
-    unlockTabs();
-}
-
-void FlightController::applyConfig(void)
-{
-    //TODO DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    // TODO psoc_eeprom_t* config = di.getConfigPtr();
-}
 
 void FlightController::commitConfig(void)
 {

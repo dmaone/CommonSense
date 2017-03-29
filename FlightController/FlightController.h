@@ -41,12 +41,9 @@ public slots:
     void bootloaderButtonClick(void);
     void matrixMonitorButtonClick(void);
     void statusRequestButtonClick(void);
-    void validateConfig(void);
     void editLayoutClick(void);
     void editThresholdsClick(void);
-    void applyConfig(void);
     void mainTabChanged(int);
-    void setConfigDirty(int);
     void deviceStatusNotification(DeviceInterface::DeviceStatus);
     void commitConfig(void);
     void rollbackConfig(void);

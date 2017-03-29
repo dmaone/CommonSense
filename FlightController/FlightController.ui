@@ -86,14 +86,14 @@ STOP</string>
             </property>
            </widget>
           </item>
-          <item row="11" column="0">
+          <item row="12" column="0">
            <widget class="QPushButton" name="BootloaderButton">
             <property name="text">
              <string>FW Update</string>
             </property>
            </widget>
           </item>
-          <item row="12" column="0">
+          <item row="13" column="0">
            <spacer name="verticalSpacer">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -106,14 +106,14 @@ STOP</string>
             </property>
            </spacer>
           </item>
-          <item row="13" column="0">
+          <item row="14" column="0">
            <widget class="QPushButton" name="CopyAllButton">
             <property name="text">
              <string>CopyAll</string>
             </property>
            </widget>
           </item>
-          <item row="9" column="0">
+          <item row="10" column="0">
            <spacer name="verticalSpacer_3">
             <property name="orientation">
              <enum>Qt::Vertical</enum>
@@ -129,7 +129,7 @@ STOP</string>
             </property>
            </spacer>
           </item>
-          <item row="14" column="0">
+          <item row="15" column="0">
            <widget class="QPushButton" name="ClearButton">
             <property name="text">
              <string>Clear</string>
@@ -140,6 +140,13 @@ STOP</string>
            <widget class="QPushButton" name="thresholdsButton">
             <property name="text">
              <string>Thresholds</string>
+            </property>
+           </widget>
+          </item>
+          <item row="9" column="0">
+           <widget class="QPushButton" name="layoutButton">
+            <property name="text">
+             <string>Layout</string>
             </property>
            </widget>
           </item>
@@ -168,31 +175,7 @@ STOP</string>
            <string>Basic setup</string>
           </property>
           <layout class="QGridLayout" name="gridLayout_2">
-           <item row="0" column="2">
-            <widget class="QPushButton" name="layoutButton">
-             <property name="text">
-              <string>Layout</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="3">
-            <widget class="QPushButton" name="validateButton">
-             <property name="enabled">
-              <bool>false</bool>
-             </property>
-             <property name="text">
-              <string>Validate</string>
-             </property>
-            </widget>
-           </item>
            <item row="0" column="0">
-            <widget class="QCheckBox" name="normallyOpen">
-             <property name="text">
-              <string>Normally open</string>
-             </property>
-            </widget>
-           </item>
-           <item row="0" column="1">
             <spacer name="horizontalSpacer">
              <property name="orientation">
               <enum>Qt::Horizontal</enum>
@@ -204,13 +187,6 @@ STOP</string>
               </size>
              </property>
             </spacer>
-           </item>
-           <item row="1" column="3">
-            <widget class="QPushButton" name="applyButton">
-             <property name="text">
-              <string>Apply</string>
-             </property>
-            </widget>
            </item>
           </layout>
          </widget>

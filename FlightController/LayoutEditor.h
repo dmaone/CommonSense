@@ -26,13 +26,16 @@ public slots:
     void exportLayout(void);
     void applyLayout(void);
     void resetLayout(void);
+    void switchLayer(void);
 
 private:
     Ui::LayoutEditor *ui;
     QGridLayout *grid;
     QComboBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     DeviceConfig *deviceConfig;
+    uint8_t currentLayer;
     void initDisplay(uint8_t, uint8_t);
+    void setDisplay();
 };
 
 #endif // LAYOUTEDITOR_H

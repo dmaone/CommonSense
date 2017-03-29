@@ -13,7 +13,8 @@
 LayoutEditor::LayoutEditor(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::LayoutEditor),
-    grid(new QGridLayout())
+    grid(new QGridLayout()),
+    currentLayer(0)
 {
     ui->setupUi(this);
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
@@ -29,6 +30,7 @@ void LayoutEditor::show(void)
         connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportLayout()));
         connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyLayout()));
         connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetLayout()));
+        connect(ui->switchButton, SIGNAL(clicked()), this, SLOT(switchLayer()));
         QWidget::show();
     } else
         QMessageBox::critical(this, "Error", "Matrix not configured - cannot edit layout");
@@ -42,6 +44,12 @@ LayoutEditor::~LayoutEditor()
 void LayoutEditor::initDisplay(uint8_t rows, uint8_t cols)
 {
     ui->Dashboard->setLayout(grid);
+    ui->layerCombo->clear();
+    for(uint8_t i = 0; i < deviceConfig->numLayers; i++)
+    {
+        ui->layerCombo->addItem(QString("Layer %1").arg(i));
+    }
+    ui->layerCombo->setCurrentIndex(currentLayer);
     for (uint8_t i = 1; i<=deviceConfig->numCols; i++)
     {
         grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
@@ -79,15 +87,19 @@ void LayoutEditor::importLayout()
         QFile f(fns.at(0));
         f.open(QIODevice::ReadOnly);
         QTextStream ds(&f);
-        for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+        for (uint8_t l = 0; l<deviceConfig->numLayers; l++)
         {
-            for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+            for (uint8_t i = 0; i<deviceConfig->numRows; i++)
             {
-                qint32 buf;
-                ds >> buf;
-                display[i][j]->setCurrentIndex((uint8_t) buf);
+                for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+                {
+                    qint32 buf;
+                    ds >> buf;
+                    deviceConfig->layouts[l][i][j] = (uint8_t)buf;
+                }
             }
         }
+        setDisplay();
         qInfo() << "Imported layout from" << fns.at(0);
     }
 }
@@ -100,6 +112,7 @@ void LayoutEditor::exportLayout()
     fd.setAcceptMode(QFileDialog::AcceptSave);
     if (fd.exec())
     {
+        applyLayout();
         QStringList fns = fd.selectedFiles();
         QFile f(fns.at(0));
         f.open(QIODevice::WriteOnly);
@@ -107,17 +120,21 @@ void LayoutEditor::exportLayout()
         ts.setIntegerBase(16);
         ts.setFieldAlignment(QTextStream::AlignRight);
         ts.setPadChar('0');
-        for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+        for (uint8_t l = 0; l<deviceConfig->numLayers; l++)
         {
-            QByteArray buf;
-            for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+            for (uint8_t i = 0; i<deviceConfig->numRows; i++)
             {
-                ts << qSetFieldWidth(1) << (j ? ' ' : '\n');
-                ts << "0x";
-                ts.setFieldWidth(2);
-                ts << (uint8_t)display[i][j]->currentIndex();
+                QByteArray buf;
+                for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+                {
+                    ts << qSetFieldWidth(1) << (j ? ' ' : '\n');
+                    ts << "0x";
+                    ts.setFieldWidth(2);
+                    ts << deviceConfig->layouts[l][i][j];
 
+                }
             }
+            ts << qSetFieldWidth(1) << '\n';
         }
         ts << qSetFieldWidth(1) << '\n';
         qInfo() << "Exported layout to" << fns.at(0);
@@ -130,19 +147,30 @@ void LayoutEditor::applyLayout()
     {
         for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            deviceConfig->layouts[0][i][j] = display[i][j]->currentIndex();
+            deviceConfig->layouts[currentLayer][i][j] = display[i][j]->currentIndex();
+        }
+    }
+}
+
+void LayoutEditor::setDisplay()
+{
+    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+    {
+        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+        {
+            display[i][j]->setCurrentIndex(deviceConfig->layouts[currentLayer][i][j]);
         }
     }
 }
 
 void LayoutEditor::resetLayout()
 {
-    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
-    {
-        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
-        {
-            display[i][j]->setCurrentIndex(deviceConfig->layouts[0][i][j]);
-        }
-    }
+    setDisplay();
     qInfo() << "Loaded layout from device";
+}
+
+void LayoutEditor::switchLayer()
+{
+    currentLayer = ui->layerCombo->currentIndex();
+    setDisplay();
 }
