@@ -110,9 +110,10 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
                or (displayMode == 2 and level > cell->intValue())
             )
                 cell->display(level);
-            if (
-                (!deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i]) or
-                (deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
+            if ((deviceConfig->deadBandLo[row][i] != 255) && (
+                    (!deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
+                    || (deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i])
+                )
             )
             {
                 cell->setStyleSheet("background-color: #00ff00;");
