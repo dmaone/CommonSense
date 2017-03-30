@@ -209,7 +209,20 @@ void keyboard_release(uint8_t keycode)
     keyboard_send();
 }
 
-// We need 16 bit values - so I kind of know what I'm doing.
+void update_keyboard_report(queuedScancode *key)
+{
+    //xprintf("Updating report for %d", key->keycode);
+    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    {
+        keyboard_press(key->keycode);
+    }
+    else
+    {
+        keyboard_release(key->keycode);
+    }
+}
+
+// Report consists of 16 bit values - so I kind of know what I'm doing.
 static uint16_t *consumer_outbox = CONSUMER_OUTBOX;
 
 const uint16_t consumer_mapping[16] = {
@@ -294,6 +307,21 @@ void update_consumer_report(queuedScancode *key)
     {
         consumer_release(keycode);
     }
+}
+
+void update_system_report(queuedScancode *key)
+{
+    uint8_t key_index = key->keycode - 0xa5;
+    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    {
+        SYSTEM_OUTBOX[0] |= (1 << key_index);
+    }
+    else
+    {
+        SYSTEM_OUTBOX[0] &= ~(1 << key_index);
+    }
+    while (USB_GetEPState(SYSTEM_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
+    USB_LoadInEP(SYSTEM_EP, SYSTEM_OUTBOX, 1);
 }
 
 void usb_wakeup(void)

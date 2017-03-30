@@ -193,16 +193,7 @@ inline void update_reports(void)
             }
             else
             {
-                if ((USBQueue[pos].flags & USBQUEUE_RELEASED) == 0)
-                {
-                    //xprintf("Pressed %d %d", USBQueue[pos].flags, USBQueue[pos].keycode);
-                    keyboard_press(USBQueue[pos].keycode);
-                }
-                else
-                {
-                    //xprintf("Released %d %d", USBQueue[pos].flags, USBQueue[pos].keycode);
-                    keyboard_release(USBQueue[pos].keycode);
-                }
+                update_keyboard_report(&USBQueue[pos]);
             }
             USBQueue[pos].keycode = USBCODE_NOEVENT;
             if (pos == USBQueue_readpos && pos != USBQueue_writepos)

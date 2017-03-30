@@ -19,7 +19,7 @@ void usb_wakeup(void);
 void process_msg(OUT_c2packet_t *);
 void load_config(void);
 
-void keyboard_press(uint8_t);
-void keyboard_release(uint8_t);
+void update_keyboard_report(queuedScancode *key);
 void update_keyboard_mods(uint8_t);
 void update_consumer_report(queuedScancode *key);
+void update_system_report(queuedScancode *key);
