@@ -167,17 +167,22 @@ ScancodeList::ScancodeList(): list()
     list << "Cl/Agn";
     list << "CrSel";
     list << "ExSel";
-    list << "-rA5";
-    list << "-rA6";
-    list << "-rA7";
-    list << "-rA8";
-    list << "-rA9";
-    list << "-rAA";
-    list << "-rAB";
-    list << "-rAC";
-    list << "-rAD";
-    list << "-rAE";
-    list << "-rAF";
+
+    // 0xa5 reserved range, remapped
+
+    list << "Power";
+    list << "Sleep";
+    list << "Wake";
+    // 0xa8 - reserved, remapped to layer manipulations
+    list << "Fn1";
+    list << "Fn2";
+    list << "Fn3";
+    list << "Fn4";
+    list << "LLck1";
+    list << "LLck2";
+    list << "LLck3";
+    list << "LLck4";
+
     list << "00";
     list << "000";
     list << "ThSep";
@@ -234,4 +239,34 @@ ScancodeList::ScancodeList(): list()
     list << "RShft";
     list << "RAlt";
     list << "RGUI";
+
+    // 0xe8, reserved range mapped to media
+
+    list << ">/||"; // Play/Pause
+    list << "Mute";
+    list << "Vol++";
+    list << "Vol--";
+    list << "Eject";
+    list << "-r-D";
+    list << "-r-E";
+    list << "-r-F";
+
+    // 0xf0, reserved range mapped to media
+    list << "Play";
+    list << "||";
+    list << "Rec";
+    list << ">>";
+    list << "<<";
+    list << "NTrk";
+    list << "PTrk";
+    list << "Stop";
+    list << "-r-8";
+    list << "-r-9";
+    list << "-r-A";
+    list << "-r-B";
+    list << "-r-C";
+    list << "-r-D";
+    list << "-r-E";
+    list << "-r-F";
+
 }
