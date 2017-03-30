@@ -28,7 +28,8 @@ SOURCES += main.cpp \
     LayoutEditor.cpp \
     ScancodeList.cpp \
     ThresholdEditor.cpp \
-    DeviceConfig.cpp
+    DeviceConfig.cpp \
+    LayerConditions.cpp
 
 HEADERS  += \
     FlightController.h \
@@ -43,7 +44,8 @@ HEADERS  += \
     LayoutEditor.h \
     ScancodeList.h \
     ThresholdEditor.h \
-    DeviceConfig.h
+    DeviceConfig.h \
+    LayerConditions.h
 
 FORMS    += \
     FlightController.ui \

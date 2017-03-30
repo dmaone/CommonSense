@@ -3,8 +3,70 @@
 
 #include "DeviceConfig.h"
 
+using namespace std;
+
+LayerCondition::LayerCondition(void):
+    fnKeys(0),
+    layer_(0)
+{
+}
+
+LayerCondition::LayerCondition(unsigned char bin)
+{
+    fnKeys = (bin >> 4);
+    if (fnKeys > 15)
+        fnKeys = 0;
+
+    layer_ = bin & 0x0f;
+}
+
+LayerCondition::LayerCondition(bool fn1, bool fn2, bool fn3, bool fn4, int layer):
+    fnKeys(0),
+    layer_(layer)
+{
+    if (fn1)
+        fnKeys |= fkmFn1;
+    if (fn2)
+        fnKeys |= fkmFn2;
+    if (fn3)
+        fnKeys |= fkmFn3;
+    if (fn4)
+        fnKeys |= fkmFn4;
+}
+
+bool LayerCondition::fn1Set(void)
+{
+    return (fnKeys & fkmFn1) > 0;
+}
+
+bool LayerCondition::fn2Set(void)
+{
+    return (fnKeys & fkmFn2) > 0;
+}
+
+bool LayerCondition::fn3Set(void)
+{
+    return (fnKeys & fkmFn3) > 0;
+}
+
+bool LayerCondition::fn4Set(void)
+{
+    return (fnKeys & fkmFn4) > 0;
+}
+
+int LayerCondition::layer(void)
+{
+    return layer_;
+}
+
+unsigned char LayerCondition::toBin(void)
+{
+    return (fnKeys << 4) | (layer_ & 0xf);
+}
+
 DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
-    bValid(false), numRows(0), numCols(0), numLayers(1), bNormallyLow(false),
+    bValid(false), numRows(0), numCols(0), numLayers(MAX_LAYERS),
+    numLayerConditions(MAX_LAYER_CONDITIONS),bNormallyLow(false),
     transferDirection(TransferIdle)
 {
     memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
@@ -170,7 +232,6 @@ void DeviceConfig::_assemble(void)
     memset(_eeprom.stash, 0, sizeof(_eeprom.stash));
     memset(_eeprom._RESERVED0, 0xff, sizeof(_eeprom._RESERVED0));
     memset(_eeprom._RESERVED1, 0xff, sizeof(_eeprom._RESERVED1));
-    memset(_eeprom.layerConditions, 0x00, sizeof(_eeprom.layerConditions));
     uint8_t table_size = numRows * numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
@@ -227,4 +288,26 @@ void DeviceConfig::toFile()
         ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
         qInfo() << "Exported config to" << fns.at(0);
     }
+}
+
+std::vector<LayerCondition> DeviceConfig::layerConditions(void)
+{
+    vector<LayerCondition> cnds(numLayerConditions);
+    for(uint8_t i=0; i < numLayerConditions; i++)
+    {
+        cnds[i] = LayerCondition(_eeprom.layerConditions[i]);
+    }
+    return cnds;
+}
+
+void DeviceConfig::setLayerCondition(int conditionIdx, LayerCondition cnd)
+{
+    _eeprom.layerConditions[conditionIdx] = cnd.toBin();
+}
+
+void DeviceConfig::setLayerConditions(std::vector<LayerCondition> lcs)
+{
+    int numLCs = lcs.size();
+    for (int i = 0; i < numLCs; i++)
+        setLayerCondition(i, lcs[i]);
 }

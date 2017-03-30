@@ -15,6 +15,7 @@
 #include <ThresholdEditor.h>
 #include <QComboBox>
 #include "../c2/c2_protocol.h"
+#include "LayerConditions.h"
 
 namespace Ui {
 class FlightController;
@@ -56,9 +57,6 @@ private:
     MatrixMonitor *mm;
     LayoutEditor *layoutEditor;
     ThresholdEditor *thresholdEditor;
-    bool reportValidationFailure(QString);
-    void manipulateTabs(bool);
-    //aliases
-    void lockTabs() { manipulateTabs(false);}
-    void unlockTabs() { manipulateTabs(true);}
+    LayerConditions *layerConditions;
+    void lockTabs(bool lock);
 };

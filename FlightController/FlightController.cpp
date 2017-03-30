@@ -46,6 +46,8 @@ void FlightController::setup(void)
     connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
     connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
+    layerConditions = new LayerConditions(di.config);
+    ui->layerConditionBox->layout()->addWidget(layerConditions);
     di.start();
 
 }
@@ -117,7 +119,7 @@ void FlightController::statusRequestButtonClick(void)
 
 void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
 {
-    lockTabs();
+    lockTabs(true);
     switch (s)
     {
         case DeviceInterface::DeviceConnected:
@@ -127,27 +129,21 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
             ui->mainPanel->setCurrentIndex(0);
             break;
         case DeviceInterface::DeviceConfigChanged:
-            unlockTabs();
+            lockTabs(false);
+            layerConditions->init();
             ui->mainPanel->setTabEnabled(1, true);
             emit sendCommand(C2CMD_GET_STATUS, 0);
             break;
     }
 }
 
-void FlightController::manipulateTabs(bool dothis)
+void FlightController::lockTabs(bool disable)
 {
     for (int i=0; i < ui->mainPanel->count(); i++) {
         if (i == ui->mainPanel->currentIndex())
             continue;
-        ui->mainPanel->setTabEnabled(i, dothis);
+        ui->mainPanel->setTabEnabled(i, !disable);
     }
-}
-
-bool FlightController::reportValidationFailure(QString msg)
-{
-    lockTabs();
-    QMessageBox::critical(this, "Matrix validation failure", msg);
-    return false;
 }
 
 void FlightController::editLayoutClick(void)

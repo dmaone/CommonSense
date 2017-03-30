@@ -13,6 +13,7 @@
 #define ABSOLUTE_MAX_ROWS 16
 #define ABSOLUTE_MAX_COLS 32
 #define MAX_LAYERS 8
+#define MAX_LAYER_CONDITIONS 8
 
 /*
  * The data block for the control channel is 64 bytes, both up and down.
