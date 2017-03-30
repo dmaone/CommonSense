@@ -20,8 +20,8 @@
     <snType>SILICON_NUMBER</snType>
   </Descriptor>
   <Descriptor xsi:type="Configuration_Descriptor">
-    <wTotalLength>0x003B</wTotalLength>
-    <bNumInterfaces>0x02</bNumInterfaces>
+    <wTotalLength>0x0054</wTotalLength>
+    <bNumInterfaces>0x03</bNumInterfaces>
     <bConfigurationValue>0x00</bConfigurationValue>
     <bmAttributes>0xA0</bmAttributes>
     <bMaxPower>0x64</bMaxPower>
@@ -70,10 +70,10 @@
       <HID_Item Type="USAGE_MAXIMUM" Code="40" Size="1" Value="5" />
       <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="1" />
       <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="5" />
-      <HID_Item Type="FEATURE" Code="176" Size="1" Value="2" />
+      <HID_Item Type="OUTPUT" Code="144" Size="1" Value="2" Desc="(Var)" />
       <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="3" />
       <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="1" />
-      <HID_Item Type="FEATURE" Code="176" Size="1" Value="1" />
+      <HID_Item Type="OUTPUT" Code="144" Size="1" Value="1" Desc="(Con)" />
       <HID_Item Type="END_COLLECTION" Code="192" Size="0" Value="0" />
     </Items>
   </Descriptor>
@@ -124,6 +124,43 @@
     <bEndpointAddress>0x88</bEndpointAddress>
     <bmAttributes>0x03</bmAttributes>
     <wMaxPacketSize>0x0040</wMaxPacketSize>
+  </Descriptor>
+  <Descriptor xsi:type="Interface_Descriptor">
+    <bInterfaceClass>0x03</bInterfaceClass>
+    <bInterfaceSubClass>0x00</bInterfaceSubClass>
+    <bAlternateSetting>0x00</bAlternateSetting>
+    <bInterfaceNumber>0x02</bInterfaceNumber>
+    <bNumEndpoints>0x01</bNumEndpoints>
+    <bInterfaceProtocol>0x00</bInterfaceProtocol>
+    <iInterface>CommonSense multimedia controls</iInterface>
+  </Descriptor>
+  <Descriptor xsi:type="HID_Descriptor">
+    <bcdHID>0x0000</bcdHID>
+    <bCountryCode>0x00</bCountryCode>
+    <bNumDescriptors>0x01</bNumDescriptors>
+    <bDescriptorType>0x22</bDescriptorType>
+    <wDescriptorLength>0x0017</wDescriptorLength>
+  </Descriptor>
+  <Descriptor xsi:type="ReportTemplate" Report_Name="Consumer">
+    <Items>
+      <HID_Item Type="USAGE_PAGE" Code="4" Size="1" Value="12" Desc="(Consumer Devices)" />
+      <HID_Item Type="USAGE" Code="8" Size="1" Value="1" Desc="(Consumer Control)" />
+      <HID_Item Type="COLLECTION" Code="160" Size="1" Value="1" Desc="(Application)" />
+      <HID_Item Type="LOGICAL_MINIMUM" Code="20" Size="1" Value="0" Desc="(0)" />
+      <HID_Item Type="LOGICAL_MAXIMUM" Code="36" Size="2" Value="668" Desc="(668)" />
+      <HID_Item Type="USAGE_MINIMUM" Code="24" Size="1" Value="0" Desc="(0)" />
+      <HID_Item Type="USAGE_MAXIMUM" Code="40" Size="2" Value="668" Desc="(668)" />
+      <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="16" Desc="(16)" />
+      <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="8" Desc="(8)" />
+      <HID_Item Type="INPUT" Code="128" Size="1" Value="0" Desc="()" />
+      <HID_Item Type="END_COLLECTION" Code="192" Size="0" Value="0" Desc="" />
+    </Items>
+  </Descriptor>
+  <Descriptor xsi:type="Endpoint_Descriptor">
+    <bInterval>0x0A</bInterval>
+    <bEndpointAddress>0x82</bEndpointAddress>
+    <bmAttributes>0x03</bmAttributes>
+    <wMaxPacketSize>0x0010</wMaxPacketSize>
   </Descriptor>
   <Descriptor xsi:type="EndpointMemoryManagement">
     <MemoryManagement>MANUAL</MemoryManagement>

@@ -122,7 +122,7 @@ inline void process_real_key(void)
         // Dead key.
         return;
     }
-    if ((usb_sc & 0xa8) == 0xa8)
+    if ((usb_sc & 0xf8) == 0xa8)
     {
         process_layerMods(sc, usb_sc);
         return;
@@ -132,7 +132,7 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
  -> Do they automatically release?
 */
     }
-    if ((usb_sc & 0xe0) == 0xe0)
+    if ((usb_sc & 0xf8) == 0xe0)
     {
         process_mods(sc, usb_sc);
         queue_usbcode(systime, (sc & USBQUEUE_RELEASED) | USBQUEUE_REAL_KEY, 0xe0);
@@ -185,7 +185,7 @@ inline void update_reports(void)
             // -> Think of special code for collectively settings mods!
             else if (USBQueue[pos].keycode >= 0xe8)
             {
-                // TODO update_consumer_report
+                update_consumer_report(&USBQueue[pos]);
             }
             else if (USBQueue[pos].keycode >= 0xa5 && USBQueue[pos].keycode <= 0xa7)
             {

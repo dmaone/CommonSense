@@ -64,11 +64,16 @@
 #define USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_OUT_BUF_SIZE (65u)
 #define USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_NUM_OUT_RPTS (1u)
 #define USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_COUNT (1u)
+#define USB_DEVICE0_CONFIGURATION0_INTERFACE2_ALTERNATE0_HID_IN_BUF_SIZE (17u)
+#define USB_DEVICE0_CONFIGURATION0_INTERFACE2_ALTERNATE0_HID_NUM_IN_RPTS (1u)
+#define USB_DEVICE0_CONFIGURATION0_INTERFACE2_ALTERNATE0_HID_COUNT (1u)
 #define USB_ENABLE_HID_CLASS                   
 #define USB_HID_RPT_1_SIZE_LSB                 (0x24u)
 #define USB_HID_RPT_1_SIZE_MSB                 (0x00u)
 #define USB_HID_RPT_2_SIZE_LSB                 (0x41u)
 #define USB_HID_RPT_2_SIZE_MSB                 (0x00u)
+#define USB_HID_RPT_3_SIZE_LSB                 (0x17u)
+#define USB_HID_RPT_3_SIZE_MSB                 (0x00u)
 #define USB_MAX_REPORTID_NUMBER                (0u)
 
 #define USB_MON_VBUS               (0u)
@@ -76,7 +81,7 @@
 #define USB_POWER_PAD_VBUS         (0u)
 #define USB_EXTERN_VND             (0u)
 #define USB_EXTERN_CLS             (0u)
-#define USB_MAX_INTERFACES_NUMBER  (2u)
+#define USB_MAX_INTERFACES_NUMBER  (3u)
 #define USB_EP_MM                  (0u)
 #define USB_EP_MA                  (0u)
 #define USB_ENABLE_BATT_CHARG_DET  (0u)
@@ -114,7 +119,7 @@
 
 /* Data endpoints availability */
 #define USB_EP1_ISR_REMOVE     (0u)
-#define USB_EP2_ISR_REMOVE     (1u)
+#define USB_EP2_ISR_REMOVE     (0u)
 #define USB_EP3_ISR_REMOVE     (1u)
 #define USB_EP4_ISR_REMOVE     (1u)
 #define USB_EP5_ISR_REMOVE     (1u)

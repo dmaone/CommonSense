@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-16"?>
+<HID_Report xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema" Report_Name="Consumer">
+  <Items>
+    <HID_Item Type="USAGE_PAGE" Code="4" Size="1" Value="12" Desc="(Consumer Devices)" />
+    <HID_Item Type="USAGE" Code="8" Size="1" Value="1" Desc="(Consumer Control)" />
+    <HID_Item Type="COLLECTION" Code="160" Size="1" Value="1" Desc="(Application)" />
+    <HID_Item Type="LOGICAL_MINIMUM" Code="20" Size="1" Value="0" Desc="(0)" />
+    <HID_Item Type="LOGICAL_MAXIMUM" Code="36" Size="2" Value="668" Desc="(668)" />
+    <HID_Item Type="USAGE_MINIMUM" Code="24" Size="1" Value="0" Desc="(0)" />
+    <HID_Item Type="USAGE_MAXIMUM" Code="40" Size="2" Value="668" Desc="(668)" />
+    <HID_Item Type="REPORT_SIZE" Code="116" Size="1" Value="16" Desc="(16)" />
+    <HID_Item Type="REPORT_COUNT" Code="148" Size="1" Value="8" Desc="(8)" />
+    <HID_Item Type="INPUT" Code="128" Size="1" Value="0" Desc="()" />
+    <HID_Item Type="END_COLLECTION" Code="192" Size="0" Value="0" Desc="" />
+  </Items>
+</HID_Report>

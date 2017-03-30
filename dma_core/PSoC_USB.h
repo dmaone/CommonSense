@@ -9,6 +9,7 @@
 
 #pragma once
 #include "scan.h"
+#include "pipeline.h"
 
 void usb_init(void);
 
@@ -21,3 +22,4 @@ void load_config(void);
 void keyboard_press(uint8_t);
 void keyboard_release(uint8_t);
 void update_keyboard_mods(uint8_t);
+void update_consumer_report(queuedScancode *key);

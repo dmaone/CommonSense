@@ -154,11 +154,6 @@ void usb_send(uint8_t ep)
     while (!(USB_GetEPState(ep) & USB_IN_BUFFER_EMPTY)) {}; // wait for buffer release
 }
 
-void usb_keyboard_send(void* bufptr, uint8_t length)
-{
-    memcpy(KBD_OUTBOX, bufptr, length);
-}
-
 void keyboard_send()
 {
     while (USB_GetEPState(KEYBOARD_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
@@ -212,6 +207,93 @@ void keyboard_release(uint8_t keycode)
         //xprintf("Released %d", keycode);
     }
     keyboard_send();
+}
+
+// We need 16 bit values - so I kind of know what I'm doing.
+static uint16_t *consumer_outbox = CONSUMER_OUTBOX;
+
+const uint16_t consumer_mapping[16] = {
+    0xcd, // Play/pause
+    0xe2, // Mute
+    0xe9, // Vol++
+    0xea, // Vol--
+    0xb8, // Eject
+    0x00,
+    0x00,
+    0x00,
+    
+    0xb0, // Play
+    0xb1, // Pause
+    0xb2, // Record
+    0xb3, // Fwd
+    0xb4, // Rev
+    0xb5, // NTrk
+    0xb6, // PTrk
+    0xb7  // Stop
+};
+
+void consumer_send()
+{
+    while (USB_GetEPState(CONSUMER_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
+    USB_LoadInEP(CONSUMER_EP, CONSUMER_OUTBOX, 16);
+}
+
+void consumer_press(uint16_t keycode)
+{
+    for (uint8_t cur_pos = 0; cur_pos < CONSUMER_KRO_LIMIT; cur_pos++)
+    {
+        if (consumer_outbox[cur_pos] == keycode)
+        {
+            xprintf("Existing %d pos %d", keycode, cur_pos);
+            break;
+        }
+        else if (consumer_outbox[cur_pos] == 0)
+        {
+            consumer_outbox[cur_pos] = keycode;
+            //xprintf("Pressed %d pos %d", keycode, cur_pos);
+            break;
+        }
+    }
+    //xprintf("C_Pressing %d", keycode);
+    consumer_send();
+}
+
+void consumer_release(uint16_t keycode)
+{
+    uint8_t cur_pos;
+    bool move = false;
+    for (cur_pos = 0; cur_pos < CONSUMER_KRO_LIMIT; cur_pos++)
+    {
+        if (move)
+        {
+            consumer_outbox[cur_pos - 1] = consumer_outbox[cur_pos];
+        }
+        else if (consumer_outbox[cur_pos] == keycode)
+        {
+            move = true;
+        }
+    }
+    if (move)
+    {
+        // Key was, in fact, pressed.
+        consumer_outbox[CONSUMER_KRO_LIMIT] = 0;
+        //xprintf("C_Released %d", keycode);
+    }
+    consumer_send();
+}
+
+void update_consumer_report(queuedScancode *key)
+{
+    //xprintf("Updating report for %d", key->keycode);
+    uint16_t keycode = consumer_mapping[key->keycode - 0xe8];
+    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    {
+        consumer_press(keycode);
+    }
+    else
+    {
+        consumer_release(keycode);
+    }
 }
 
 void usb_wakeup(void)
