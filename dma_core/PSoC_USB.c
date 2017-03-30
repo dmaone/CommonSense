@@ -144,14 +144,15 @@ void usb_init(void)
     {
         CyDelay(10);
     }
+    memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
+    memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
+    memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
 }
 
 void usb_send(uint8_t ep)
 {   
-    while (USB_GetEPState(ep) & USB_NO_EVENT_ALLOWED) {}; // wait for the green light
+    while (USB_GetEPState(ep) != USB_IN_BUFFER_EMPTY) {}; // wait for the green light
     USB_LoadInEP(ep, outbox.raw, sizeof(outbox.raw));
-    // !!!TODO!!! one can just return here if there's more than one buffer.
-    while (!(USB_GetEPState(ep) & USB_IN_BUFFER_EMPTY)) {}; // wait for buffer release
 }
 
 void keyboard_send()
@@ -320,6 +321,7 @@ void update_system_report(queuedScancode *key)
     {
         SYSTEM_OUTBOX[0] &= ~(1 << key_index);
     }
+    xprintf("System: %d", SYSTEM_OUTBOX[0]);
     while (USB_GetEPState(SYSTEM_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
     USB_LoadInEP(SYSTEM_EP, SYSTEM_OUTBOX, 1);
 }

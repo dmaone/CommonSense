@@ -83,7 +83,7 @@ uint8 USB_initVar = 0u;
         0u,
         USB_ep1_dma__TR_OUTPUT,
         USB_ep2_dma__TR_OUTPUT,
-        0u,
+        USB_ep3_dma__TR_OUTPUT,
         0u,
         0u,
         0u,

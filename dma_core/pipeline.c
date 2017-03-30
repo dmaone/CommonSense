@@ -189,7 +189,7 @@ inline void update_reports(void)
             }
             else if (USBQueue[pos].keycode >= 0xa5 && USBQueue[pos].keycode <= 0xa7)
             {
-                // TODO update_system_report
+                update_system_report(&USBQueue[pos]);
             }
             else
             {
