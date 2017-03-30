@@ -46,6 +46,7 @@
 #include "ChargeDelay.h"
 #include "TimerIRQ.h"
 #include "SysTimer.h"
+#include "ExpHdr_aliases.h"
 #include "USB_Dm_aliases.h"
 #include "USB_Dm.h"
 #include "USB_Dp_aliases.h"

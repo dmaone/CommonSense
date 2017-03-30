@@ -158,6 +158,9 @@ void usb_send(uint8_t ep)
 void keyboard_send()
 {
     while (USB_GetEPState(KEYBOARD_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
+#if NOT_A_KEYBOARD == 1
+    memset(KBD_OUTBOX, 0, 64);
+#endif
     USB_LoadInEP(KEYBOARD_EP, KBD_OUTBOX, 64);
 }
 
