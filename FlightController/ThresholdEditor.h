@@ -8,6 +8,7 @@
 #include <stdint.h>
 #include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
+#include "DeviceInterface.h"
 
 namespace Ui {
 class ThresholdEditor;
@@ -27,6 +28,7 @@ public slots:
     void resetThresholds(void);
     void updateLows(void);
     void updateHighs(void);
+    void receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
 
 signals:
     logMessage(QString);

@@ -7,6 +7,7 @@
 #include <stdint.h>
 #include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
+#include "DeviceInterface.h"
 
 namespace Ui {
 class LayoutEditor;
@@ -27,6 +28,7 @@ public slots:
     void applyLayout(void);
     void resetLayout(void);
     void switchLayer(void);
+    void receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
 
 private:
     Ui::LayoutEditor *ui;

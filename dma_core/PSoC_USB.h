@@ -13,8 +13,7 @@
 
 void usb_init(void);
 
-void usb_send(uint8_t);
-void usb_keyboard_send(void*, uint8_t);
+void usb_send_c2();
 void usb_wakeup(void);
 void process_msg(OUT_c2packet_t *);
 void load_config(void);

@@ -97,7 +97,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
     if (event->type() == DeviceMessage::ET )
     {
         QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-        if (pl->at(0) != C2RESPONSE_MATRIX_STATUS)
+        if (pl->at(0) != C2RESPONSE_MATRIX_ROW)
             return false;
         uint8_t row = pl->at(1);
         uint8_t max_cols = pl->at(2);

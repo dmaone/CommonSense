@@ -29,6 +29,7 @@ class DeviceInterface : public QObject
         device_status_t* getStatus(void);
         DeviceConfig* config;
         enum DeviceStatus {DeviceConnected, DeviceDisconnected, DeviceConfigChanged};
+        enum KeyStatus {KeyPressed, KeyReleased};
 
     public slots:
         void sendCommand(c2command, uint8_t*);
@@ -38,6 +39,7 @@ class DeviceInterface : public QObject
 
     signals:
         void deviceStatusNotification(DeviceInterface::DeviceStatus);
+        void scancodeReceived(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
 
     protected:
         virtual void timerEvent(QTimerEvent *);

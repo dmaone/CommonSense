@@ -41,6 +41,7 @@
 #define KRO_LIMIT 62
 
 // USB stuff
+#define OUTBOX_SIZE(X) (sizeof(X)-1)
 #define KEYBOARD_EP 1
 #define KBD_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_RPT_SCB
 #define KBD_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_BUF
@@ -49,7 +50,6 @@
 #define CONSUMER_KRO_LIMIT 8
 #define CONSUMER_EP 2
 #define CONSUMER_OUTBOX USB_DEVICE0_CONFIGURATION0_INTERFACE2_ALTERNATE0_HID_IN_BUF
-
 #define SYSTEM_EP 3
 #define SYSTEM_OUTBOX USB_DEVICE0_CONFIGURATION0_INTERFACE3_ALTERNATE0_HID_IN_BUF
 
@@ -65,6 +65,7 @@ psoc_eeprom_t config;
 typedef struct {
     bool emergency_stop;
     bool matrix_output;
+    bool setup_mode;
 } __attribute__ ((packed)) status_register_t;
 
 uint8_t tick;

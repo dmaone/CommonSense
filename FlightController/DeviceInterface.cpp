@@ -39,8 +39,17 @@ bool DeviceInterface::event(QEvent* e)
         case C2RESPONSE_STATUS:
             qInfo().nospace() << "CommonSense v" << (uint8_t)payload->at(2) << "." << (uint8_t)payload->at(3)
                               << ", die temp " << (payload->at(4) == 1 ? '+' : '-') << (uint8_t)payload->at(5) << "C";
-            qInfo().nospace() << "Quenched: " << (bool)(payload->at(1) & (1 << C2DEVSTASTUS_EMERGENCY))
-                              << ", Matrix monitoring: " << (bool)(payload->at(1) & (1 << C2DEVSTASTUS_MATRIXOUTPUT));
+            qInfo().nospace() << "Quenched: " << (bool)(payload->at(1) & (1 << C2DEVSTATUS_EMERGENCY))
+                              << ", Matrix monitoring: " << (bool)(payload->at(1) & (1 << C2DEVSTATUS_MATRIX_OUTPUT))
+                              << ", setup mode: " << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE));
+            return true;
+        case C2RESPONSE_SCANCODE:
+            uint8_t scancodeReleased, scancode, row, col;
+            scancodeReleased = 0x80;
+            scancode = payload->at(1);
+            col = (scancode & ~scancodeReleased) % config->numCols;
+            row = ((scancode & ~scancodeReleased) - col) / config->numCols;
+            emit scancodeReceived(row, col, (scancode & scancodeReleased) ? KeyReleased : KeyPressed);
             return true;
         default:
             qInfo(payload->constData());
@@ -65,7 +74,7 @@ void DeviceInterface::_sendPacket()
     // This leads to missing/incorrect data.
     // Fix is possible, but will require DMA mode w/automatic memory management.
     // So fuck it, let's just be gentle.
-    QThread::msleep(25);
+    QThread::msleep(50);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)
@@ -94,7 +103,7 @@ void DeviceInterface::sendCommand(OUT_c2packet_t cmd)
 void DeviceInterface::configChanged(void)
 {
     qInfo() << "Configuration changed.";
-    emit(deviceStatusNotification(DeviceConfigChanged));
+    emit deviceStatusNotification(DeviceConfigChanged);
 }
 
 void DeviceInterface::_resetTimer(int interval)

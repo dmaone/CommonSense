@@ -9,6 +9,7 @@
 #include <project.h>
 
 #include "scan.h"
+#include "PSoC_USB.h"
 
 static uint8_t Buf0Chan, Buf1Chan;
 static uint8_t Buf0TD = CY_DMA_INVALID_TD;
@@ -85,6 +86,8 @@ void scan_start(void)
 
 inline void append_scancode(uint8_t scancode)
 {
+    if (status_register.emergency_stop)
+        return;
     scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
@@ -160,7 +163,7 @@ CY_ISR(HWStateIRQ_ISR)
         }
     }
     matrix_status[current_row] = row_status;
-    uint8_t next_row = (current_row ? current_row : config.matrixRows) - 1;
+    uint8_t next_row = (current_row ? current_row : MATRIX_ROWS) - 1;
     // Drive row. Here, because there's not enough time to read out the array (not reliably) if driven at the top.
     // There were before bandpass filter - and next_row was defined right above the loop and made sense.
     Drive(next_row);
@@ -190,4 +193,19 @@ void scan_init(void)
     scan_reset();
     InitSensor();
     EnableSensor();
+}
+
+void report_matrix_readouts(void)
+{
+    for(uint8 i = 0; i<MATRIX_ROWS; i++)
+    {
+        outbox.response_type = C2RESPONSE_MATRIX_ROW;
+        outbox.payload[0] = i;
+        outbox.payload[1] = MATRIX_COLS;
+        for(uint8_t j=0; j<MATRIX_COLS; j++)
+        {
+            outbox.payload[2 + j] = matrix[i][j] & 0xff;
+        }
+        usb_send_c2();
+    }
 }

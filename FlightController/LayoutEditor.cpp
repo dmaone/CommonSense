@@ -68,6 +68,7 @@ void LayoutEditor::initDisplay(uint8_t rows, uint8_t cols)
             l->addItems(scancodes.list);
             l->setMaximumWidth(60);
             l->setMaximumHeight(25);
+            l->setStyleSheet("background-color: #dddddd;");
             display[i][j] = l;
             grid->addWidget(l, i+1, j+1, 1, 1);
         }
@@ -173,4 +174,16 @@ void LayoutEditor::switchLayer()
 {
     currentLayer = ui->layerCombo->currentIndex();
     setDisplay();
+}
+
+void LayoutEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status)
+{
+    if (status == DeviceInterface::KeyPressed)
+    {
+        display[row][col]->setStyleSheet("background-color: #ffffff;");
+    }
+    else
+    {
+        display[row][col]->setStyleSheet("background-color: #dddddd;");
+    }
 }

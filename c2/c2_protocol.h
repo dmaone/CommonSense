@@ -42,23 +42,31 @@ enum c2command {
     C2CMD_DOWNLOAD_CONFIG, // TO host
     C2CMD_COMMIT,
     C2CMD_ROLLBACK,
+    C2CMD_SET_MODE,
     C2CMD_GET_MATRIX_STATE
 };
 
 enum c2response {
     C2RESPONSE_STATUS = 0x00,
     C2RESPONSE_CONFIG,
-    C2RESPONSE_MATRIX_STATUS
+    C2RESPONSE_SCANCODE,
+    C2RESPONSE_MATRIX_ROW
 };
 
 enum deviceStatus {
-    C2DEVSTASTUS_EMERGENCY = 0,
-    C2DEVSTASTUS_MATRIXOUTPUT = 1,
+    C2DEVSTATUS_EMERGENCY = 0,
+    C2DEVSTATUS_MATRIX_OUTPUT,
+    C2DEVSTATUS_SETUP_MODE,
 };
 
 enum capsenseFlags {
     CSF_OE = 0,
     CSF_NL = 1,
+};
+
+enum deviceMode {
+    C2DEVMODE_NORMAL = 0,
+    C2DEVMODE_SETUP,
 };
 
 typedef union {

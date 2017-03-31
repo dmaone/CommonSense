@@ -148,5 +148,17 @@ void ThresholdEditor::resetThresholds()
             skip[i][j]->setChecked(deviceConfig->deadBandLo[i][j] > deviceConfig->deadBandHi[i][j]);
         }
     }
-    emit logMessage(QString("Updated threshold map"));
+    qInfo() << "Updated threshold map";
+}
+
+void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status)
+{
+    if (status == DeviceInterface::KeyPressed)
+    {
+        display[row][col]->setStyleSheet("background-color: #ffffff;");
+    }
+    else
+    {
+        display[row][col]->setStyleSheet("background-color: #cccccc;");
+    }
 }

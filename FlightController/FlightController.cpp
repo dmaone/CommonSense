@@ -64,6 +64,9 @@ void FlightController::closeEvent (QCloseEvent *event)
         mm->close();
     if (layoutEditor)
         layoutEditor->close();
+    if (thresholdEditor)
+        thresholdEditor->close();
+    emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
     event->accept();
 }
 
@@ -132,7 +135,8 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
             lockTabs(false);
             layerConditions->init();
             ui->mainPanel->setTabEnabled(1, true);
-            emit sendCommand(C2CMD_GET_STATUS, 0);
+            //emit sendCommand(C2CMD_GET_STATUS, 0);
+            emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
             break;
     }
 }
@@ -150,6 +154,9 @@ void FlightController::editLayoutClick(void)
 {
     if (layoutEditor == NULL) {
         layoutEditor = new LayoutEditor();
+        DeviceInterface &di = Singleton<DeviceInterface>::instance();
+        connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+                layoutEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
     }
     layoutEditor->show();
 
@@ -159,7 +166,9 @@ void FlightController::editThresholdsClick(void)
 {
     if (thresholdEditor == NULL) {
         thresholdEditor = new ThresholdEditor();
-        connect(thresholdEditor, SIGNAL(logMessage(QString)), ui->LogViewport, SLOT(logMessage(QString)));
+        DeviceInterface &di = Singleton<DeviceInterface>::instance();
+        connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+                thresholdEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
     }
     thresholdEditor->show();
 

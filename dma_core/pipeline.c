@@ -108,6 +108,13 @@ inline void process_real_key(void)
 // This also must clear USB queue of all physical keys pending. Special case "macro not playing" - just init all buffers.
             return;
     }
+    if (status_register.setup_mode)
+    {
+        outbox.response_type = C2RESPONSE_SCANCODE;
+        outbox.payload[0] = sc;
+        usb_send_c2();
+        return;
+    }
     // Resolve USB keycode using current active layers
     for (uint8_t i=currentLayer; i >= 0; i--)
     {
