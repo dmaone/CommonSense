@@ -67,25 +67,25 @@ typedef union {
         uint8_t versionMajor;
         uint8_t versionMinor;
         uint8_t dieTemp;
-    };
+    } __attribute__ ((packed));
     uint8_t raw[4];
-} __attribute__ ((packed)) device_status_t;
+} device_status_t;
 
 typedef union {
     struct {
         unsigned char response_type;
         unsigned char payload[63];
-    };
+    } __attribute__ ((packed));
     uint8_t raw[64];
-} __attribute__ ((packed)) IN_c2packet_t;
+} IN_c2packet_t;
 
 typedef union {
     struct {
         unsigned char command;
         unsigned char payload[63];
-    };
+    } __attribute__ ((packed));
     uint8_t raw[64];
-} __attribute__ ((packed)) OUT_c2packet_t;
+} OUT_c2packet_t;
 
 #define CONFIG_TRANSFER_BLOCK_SIZE 32
 #define CONFIG_BLOCK_DATA_OFFSET 1
