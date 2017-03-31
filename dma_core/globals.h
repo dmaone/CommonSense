@@ -23,7 +23,7 @@
 
 
 // Main safety switch
-#define NOT_A_KEYBOARD 1
+#define NOT_A_KEYBOARD 0
 
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01

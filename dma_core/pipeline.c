@@ -108,7 +108,6 @@ inline void process_real_key(void)
 // This also must clear USB queue of all physical keys pending. Special case "macro not playing" - just init all buffers.
             return;
     }
-    CyPins_SetPin(ExpHdr_1);
     // Resolve USB keycode using current active layers
     for (uint8_t i=currentLayer; i >= 0; i--)
     {
@@ -153,7 +152,6 @@ NOTE2: we still want to maintain order?
     Otherwise linked list is probably what's doctor ordered (though expensive at 4B per pointer plus memory management)
 */
     queue_usbcode(systime, (sc & USBQUEUE_RELEASED) | USBQUEUE_REAL_KEY, usb_sc);
-    CyPins_ClearPin(ExpHdr_1);
     return;
 }
 
@@ -196,9 +194,7 @@ inline void update_reports(void)
             }
             else
             {
-                CyPins_SetPin(ExpHdr_2);
                 update_keyboard_report(&USBQueue[pos]);
-                CyPins_ClearPin(ExpHdr_2);
             }
             USBQueue[pos].keycode = USBCODE_NOEVENT;
             if (pos == USBQueue_readpos && pos != USBQueue_writepos)

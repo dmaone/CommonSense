@@ -85,10 +85,8 @@ void scan_start(void)
 
 inline void append_scancode(uint8_t scancode)
 {
-    CyPins_SetPin(ExpHdr_0);
     scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
-    CyPins_ClearPin(ExpHdr_0);
 }
 
 static inline void filter(uint8_t row, uint8_t col, int16_t incoming)
