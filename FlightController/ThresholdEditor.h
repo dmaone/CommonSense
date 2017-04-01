@@ -5,8 +5,6 @@
 #include <QGridLayout>
 #include <QSpinBox>
 #include <QCheckBox>
-#include <stdint.h>
-#include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 
@@ -19,7 +17,7 @@ class ThresholdEditor : public QFrame
     Q_OBJECT
 
 public:
-    explicit ThresholdEditor(QWidget *parent = 0);
+    explicit ThresholdEditor(DeviceConfig *config, QWidget *parent = 0);
     ~ThresholdEditor();
     void show(void);
 
@@ -29,9 +27,6 @@ public slots:
     void updateLows(void);
     void updateHighs(void);
     void receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
-
-signals:
-    logMessage(QString);
 
 private:
     Ui::ThresholdEditor *ui;

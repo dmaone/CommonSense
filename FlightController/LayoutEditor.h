@@ -18,7 +18,7 @@ class LayoutEditor : public QFrame
     Q_OBJECT
 
 public:
-    explicit LayoutEditor(QWidget *parent = 0);
+    explicit LayoutEditor(DeviceConfig *config, QWidget *parent = 0);
     ~LayoutEditor();
     void show(void);
 
@@ -36,7 +36,8 @@ private:
     QComboBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     DeviceConfig *deviceConfig;
     uint8_t currentLayer;
-    void initDisplay(uint8_t, uint8_t);
+    void initDisplay(void);
+    void sizeDisplay(uint8_t, uint8_t);
     void setDisplay();
 };
 

@@ -40,10 +40,11 @@ signals:
 public slots:
     void redButtonToggle(bool);
     void bootloaderButtonClick(void);
-    void matrixMonitorButtonClick(void);
+    void showKeyMonitor(void);
     void statusRequestButtonClick(void);
     void editLayoutClick(void);
     void editThresholdsClick(void);
+    void showLayerConditions(void);
     void mainTabChanged(int);
     void deviceStatusNotification(DeviceInterface::DeviceStatus);
     void commitConfig(void);
@@ -54,9 +55,12 @@ protected:
 
 private:
     Ui::FlightController *ui;
-    MatrixMonitor *mm;
+    MatrixMonitor *matrixMonitor;
     LayoutEditor *layoutEditor;
     ThresholdEditor *thresholdEditor;
     LayerConditions *layerConditions;
-    void lockTabs(bool lock);
+    void lockUI(bool lock);
+
+private slots:
+    void on_action_Setup_mode_triggered(bool bMode);
 };

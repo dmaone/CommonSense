@@ -90,7 +90,7 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
             l->setVisible((i < rows) && (j < cols));
         }
     }
-    this->adjustSize();
+    adjustSize();
 }
 
 bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *event){

@@ -17,6 +17,7 @@ LogViewer::LogViewer(QWidget *parent): QPlainTextEdit(parent)
 void LogViewer::logMessage(QString msg)
 {
     this->appendPlainText(msg);
+    repaint();
 }
 
 void LogViewer::continueMessage(QString msg)
@@ -24,6 +25,7 @@ void LogViewer::continueMessage(QString msg)
     this->moveCursor(QTextCursor::End);
     this->insertPlainText(msg);
     this->moveCursor(QTextCursor::End);
+    repaint();
 }
 
 void LogViewer::clearButtonClick(void)

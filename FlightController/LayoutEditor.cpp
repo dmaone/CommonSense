@@ -10,22 +10,23 @@
 #include "singleton.h"
 #include "ScancodeList.h"
 
-LayoutEditor::LayoutEditor(QWidget *parent) :
+LayoutEditor::LayoutEditor(DeviceConfig *config, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::LayoutEditor),
     grid(new QGridLayout()),
     currentLayer(0)
 {
     ui->setupUi(this);
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    deviceConfig = di.config;
+    deviceConfig = config;
+    initDisplay();
 }
 
 void LayoutEditor::show(void)
 {
     if (deviceConfig->bValid)
     {
-        initDisplay(deviceConfig->numRows, deviceConfig->numCols);
+        qInfo() << "Loading layer editor, please wait..";
+        sizeDisplay(deviceConfig->numRows, deviceConfig->numCols);
         connect(ui->importButton, SIGNAL(clicked()), this, SLOT(importLayout()));
         connect(ui->exportButton, SIGNAL(clicked()), this, SLOT(exportLayout()));
         connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyLayout()));
@@ -41,39 +42,65 @@ LayoutEditor::~LayoutEditor()
     delete ui;
 }
 
-void LayoutEditor::initDisplay(uint8_t rows, uint8_t cols)
+void LayoutEditor::initDisplay(void)
 {
     ui->Dashboard->setLayout(grid);
+    for (uint8_t i = 1; i<=ABSOLUTE_MAX_COLS; i++)
+    {
+        grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
+        if (i <= ABSOLUTE_MAX_ROWS) {
+            grid->addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1, Qt::AlignRight);
+        }
+    }
+    // Do not populate lists here - makes startup SLOW
+    for (uint8_t i = 0; i<ABSOLUTE_MAX_ROWS; i++)
+    {
+        for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
+        {
+            display[i][j] = NULL;
+        }
+    }
+}
+
+void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols)
+{
     ui->layerCombo->clear();
     for(uint8_t i = 0; i < deviceConfig->numLayers; i++)
     {
         ui->layerCombo->addItem(QString("Layer %1").arg(i));
     }
     ui->layerCombo->setCurrentIndex(currentLayer);
-    for (uint8_t i = 1; i<=deviceConfig->numCols; i++)
+    for (uint8_t i = 1; i<=ABSOLUTE_MAX_COLS; i++)
     {
-        grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
         grid->itemAtPosition(0, i)->widget()->setVisible(i<=cols);
-        if (i <= deviceConfig->numRows) {
-            grid->addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1, Qt::AlignRight);
+        if (i <= ABSOLUTE_MAX_ROWS) {
             grid->itemAtPosition(i, 0)->widget()->setVisible(i<=rows);
         }
     }
     ScancodeList scancodes;
-    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+    for (uint8_t i = 0; i<ABSOLUTE_MAX_ROWS; i++)
     {
-        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+        for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
-            QComboBox *l = new QComboBox();
-            l->addItems(scancodes.list);
-            l->setMaximumWidth(60);
-            l->setMaximumHeight(25);
-            l->setStyleSheet("background-color: #dddddd;");
-            display[i][j] = l;
-            grid->addWidget(l, i+1, j+1, 1, 1);
+            if (!display[i][j])
+            {
+                QComboBox *l = new QComboBox();
+                l->addItems(scancodes.list);
+                l->setMaximumWidth(60);
+                l->setMaximumHeight(25);
+                l->setStyleSheet("background-color: #dddddd;");
+                display[i][j] = l;
+                grid->addWidget(l, i+1, j+1, 1, 1);
+                if (j == 0)
+                {
+                    qInfo() << ".";
+                }
+            }
+            display[i][j]->setVisible((i < rows) && (j < cols));
         }
     }
     resetLayout();
+    adjustSize();
 }
 
 void LayoutEditor::importLayout()
@@ -178,6 +205,8 @@ void LayoutEditor::switchLayer()
 
 void LayoutEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status)
 {
+    if (!display[row][col])
+        return;
     if (status == DeviceInterface::KeyPressed)
     {
         display[row][col]->setStyleSheet("background-color: #ffffff;");

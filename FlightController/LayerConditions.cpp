@@ -103,5 +103,6 @@ void LayerConditions::init(void)
     for (int i = 1; i < grid->columnCount(); i++)
         grid->setColumnStretch(i, 1);
     grid->setColumnStretch(grid->columnCount(), 4);
+    setWindowTitle("Layer Mods");
 
 }

@@ -20,9 +20,22 @@
 
 FlightController::FlightController(QWidget *parent) :
     QMainWindow(parent),
-    ui(new Ui::FlightController), mm(NULL), layoutEditor(NULL), thresholdEditor(NULL)
+    ui(new Ui::FlightController)
 {
     ui->setupUi(this);
+
+    DeviceInterface &di = Singleton<DeviceInterface>::instance();
+
+    matrixMonitor = new MatrixMonitor();
+    layoutEditor = new LayoutEditor(di.config);
+    connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+            layoutEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+
+    thresholdEditor = new ThresholdEditor(di.config);
+    connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+            thresholdEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+
+    layerConditions = new LayerConditions(di.config);
 }
 
 void FlightController::setup(void)
@@ -32,41 +45,44 @@ void FlightController::setup(void)
     connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport, SLOT(clearButtonClick()));
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
     connect(ui->RedButton, SIGNAL(toggled(bool)), this, SLOT(redButtonToggle(bool)));
+
     connect(ui->BootloaderButton, SIGNAL(clicked()), this, SLOT(bootloaderButtonClick()));
-    connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(matrixMonitorButtonClick()));
+    connect(ui->action_Update_Firmware, SIGNAL(triggered()), this, SLOT(bootloaderButtonClick()));
+
+    connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(showKeyMonitor()));
+    connect(ui->action_Key_Monitor, SIGNAL(triggered()), this, SLOT(showKeyMonitor()));
+
     connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
+
     connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
+    connect(ui->action_Layout, SIGNAL(triggered()), this, SLOT(editLayoutClick()));
+
+    connect(ui->layerModsButton, SIGNAL(clicked()), this, SLOT(showLayerConditions()));
+    connect(ui->action_Layer_mods, SIGNAL(triggered()), this, SLOT(showLayerConditions()));
+
     connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
-    connect(ui->mainPanel, SIGNAL(currentChanged(int)), this, SLOT(mainTabChanged(int)));
-    connect(ui->importButton, SIGNAL(clicked()), di.config, SLOT(fromFile()));
-    connect(ui->uploadButton, SIGNAL(clicked()), di.config, SLOT(toDevice()));
-    connect(ui->downloadButton, SIGNAL(clicked()), di.config, SLOT(fromDevice()));
-    connect(ui->exportButton, SIGNAL(clicked()), di.config, SLOT(toFile()));
-    connect(ui->commitButton, SIGNAL(clicked()), this, SLOT(commitConfig()));
-    connect(ui->rollbackButton, SIGNAL(clicked()), this, SLOT(rollbackConfig()));
+    connect(ui->action_Thresholds, SIGNAL(triggered()), this, SLOT(editThresholdsClick()));
+
+    connect(ui->action_Open, SIGNAL(triggered()), di.config, SLOT(fromFile()));
+    connect(ui->action_Upload, SIGNAL(triggered()), di.config, SLOT(toDevice()));
+    connect(ui->action_Download, SIGNAL(triggered()), di.config, SLOT(fromDevice()));
+    connect(ui->action_Save, SIGNAL(triggered()), di.config, SLOT(toFile()));
+    connect(ui->action_Commit, SIGNAL(triggered()), this, SLOT(commitConfig()));
+    connect(ui->action_Rollback, SIGNAL(triggered()), this, SLOT(rollbackConfig()));
     connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
-    layerConditions = new LayerConditions(di.config);
-    ui->layerConditionBox->layout()->addWidget(layerConditions);
     di.start();
-
 }
 
 void FlightController::show(void)
 {
-    ui->mainPanel->setCurrentIndex(0);
     QMainWindow::show();
 }
 
 void FlightController::closeEvent (QCloseEvent *event)
 {
-    if (mm)
-        mm->close();
-    if (layoutEditor)
-        layoutEditor->close();
-    if (thresholdEditor)
-        thresholdEditor->close();
     emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
+    QApplication::quit();
     event->accept();
 }
 
@@ -92,12 +108,9 @@ void FlightController::logToViewport(const QString &msg)
 }
 
 
-void FlightController::matrixMonitorButtonClick(void)
+void FlightController::showKeyMonitor(void)
 {
-    if (mm == NULL) {
-        mm = new MatrixMonitor();
-    }
-    mm->show();
+    matrixMonitor->show();
 }
 
 void FlightController::redButtonToggle(bool state)
@@ -122,58 +135,47 @@ void FlightController::statusRequestButtonClick(void)
 
 void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
 {
-    lockTabs(true);
+    lockUI(true);
     switch (s)
     {
         case DeviceInterface::DeviceConnected:
-            emit(ui->downloadButton->clicked());
+            emit ui->action_Download->triggered();
             break;
         case DeviceInterface::DeviceDisconnected:
-            ui->mainPanel->setCurrentIndex(0);
             break;
         case DeviceInterface::DeviceConfigChanged:
-            lockTabs(false);
+            lockUI(false);
             layerConditions->init();
-            ui->mainPanel->setTabEnabled(1, true);
-            //emit sendCommand(C2CMD_GET_STATUS, 0);
             emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
+            ui->action_Setup_mode->setChecked(true);
             break;
     }
 }
 
-void FlightController::lockTabs(bool disable)
+void FlightController::lockUI(bool lock)
 {
-    for (int i=0; i < ui->mainPanel->count(); i++) {
-        if (i == ui->mainPanel->currentIndex())
-            continue;
-        ui->mainPanel->setTabEnabled(i, !disable);
-    }
+    ui->statusRequestButton->setDisabled(lock);
+    ui->MatrixMonitorButton->setDisabled(lock);
+    ui->thresholdsButton->setDisabled(lock);
+    ui->layoutButton->setDisabled(lock);
+    ui->layerModsButton->setDisabled(lock);
+    ui->BootloaderButton->setDisabled(lock);
 }
 
 void FlightController::editLayoutClick(void)
 {
-    if (layoutEditor == NULL) {
-        layoutEditor = new LayoutEditor();
-        DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
-                layoutEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
-    }
     layoutEditor->show();
-
 }
 
 void FlightController::editThresholdsClick(void)
 {
-    if (thresholdEditor == NULL) {
-        thresholdEditor = new ThresholdEditor();
-        DeviceInterface &di = Singleton<DeviceInterface>::instance();
-        connect(&di, SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
-                thresholdEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
-    }
     thresholdEditor->show();
-
 }
 
+void FlightController::showLayerConditions(void)
+{
+    layerConditions->show();
+}
 
 void FlightController::commitConfig(void)
 {
@@ -195,3 +197,7 @@ void FlightController::rollbackConfig(void)
         sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
+void FlightController::on_action_Setup_mode_triggered(bool bMode)
+{
+    emit sendCommand(C2CMD_SET_MODE, bMode ? C2DEVMODE_SETUP : C2DEVMODE_NORMAL);
+}

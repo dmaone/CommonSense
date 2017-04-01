@@ -8,28 +8,32 @@
 #include "singleton.h"
 #include "../c2/c2_protocol.h"
 
-ThresholdEditor::ThresholdEditor(QWidget *parent) :
+ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent) :
     QFrame(parent),
     ui(new Ui::ThresholdEditor),
     grid(new QGridLayout())
 {
     ui->setupUi(this);
-    DeviceInterface &di = Singleton<DeviceInterface>::instance();
-    deviceConfig = di.config;
+    deviceConfig = config;
     initDisplay();
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyThresholds()));
     connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
     connect(ui->loPlusButton, SIGNAL(clicked()), this, SLOT(updateLows()));
     connect(ui->hiPlusButton, SIGNAL(clicked()), this, SLOT(updateHighs()));
-    updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
 }
 
 void ThresholdEditor::show(void)
 {
     if (deviceConfig->bValid)
+    {
+        updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
+        resetThresholds();
         QWidget::show();
+    }
     else
+    {
         QMessageBox::critical(this, "Error", "Matrix not configured - cannot edit");
+    }
 }
 
 ThresholdEditor::~ThresholdEditor()
@@ -71,7 +75,6 @@ void ThresholdEditor::initDisplay()
         }
     }
     ui->Dashboard->setLayout(grid);
-    resetThresholds();
 }
 
 void ThresholdEditor::updateDisplaySize(uint8_t rows, uint8_t cols)
@@ -89,7 +92,7 @@ void ThresholdEditor::updateDisplaySize(uint8_t rows, uint8_t cols)
             display[i][j]->setVisible((i < rows) & (j < cols));
         }
     }
-    this->adjustSize();
+    adjustSize();
 }
 
 void ThresholdEditor::updateLows()
@@ -134,7 +137,6 @@ void ThresholdEditor::applyThresholds()
     }
 }
 
-
 void ThresholdEditor::resetThresholds()
 {
     ui->loGuardSpinbox->setValue(deviceConfig->guardLo);
@@ -148,7 +150,7 @@ void ThresholdEditor::resetThresholds()
             skip[i][j]->setChecked(deviceConfig->deadBandLo[i][j] > deviceConfig->deadBandHi[i][j]);
         }
     }
-    qInfo() << "Updated threshold map";
+    qInfo() << "Loaded threshold map";
 }
 
 void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status)
