@@ -1,5 +1,12 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <DesignWideResources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://cypress.com/xsd/cydwr">
+  <Group key="Analog2">
+    <Group key="NET_ROUTING" />
+    <Group key="RIPUP_ROUTE">
+      <Data key="Net_35957" value="131354599153502352" />
+      <Data key="Net_35979" value="131354599024116340" />
+    </Group>
+  </Group>
   <Group key="Clock2">
     <Data key="ClockSolver" value="1" />
     <Group key="DesigneWideClks" />
@@ -3824,7 +3831,7 @@
     </Group>
     <Group key="14f470b7-5aaf-40a1-b4bd-9b2bdc04b8ea">
       <Group key="0">
-        <Data key="Port Format" value="3,6" />
+        <Data key="Port Format" value="0,0" />
       </Group>
     </Group>
     <Group key="82abd659-c6e6-4159-ac54-73b6be653ba6/7e0d1a6c-1235-4546-a71b-ea6e528924f8">
@@ -3863,7 +3870,7 @@
         <Data key="Port Format" value="12,6" />
       </Group>
       <Group key="3">
-        <Data key="Port Format" value="2,7" />
+        <Data key="Port Format" value="12,7" />
       </Group>
     </Group>
     <Group key="804fa8d0-e538-48ce-86b7-a6c7c91ac578">
@@ -4088,7 +4095,7 @@
     </Group>
     <Group key="ef60dc53-dd2f-4fd5-8c75-d0631e7a6bfe">
       <Group key="0">
-        <Data key="Port Format" value="0,0" />
+        <Data key="Port Format" value="2,7" />
       </Group>
       <Group key="1">
         <Data key="Port Format" value="0,1" />
