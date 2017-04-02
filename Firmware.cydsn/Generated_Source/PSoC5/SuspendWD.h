@@ -60,7 +60,7 @@ extern uint8 SuspendWD_initVar;
 /***************************************
 * Initial Parameter
 ***************************************/
-#define SuspendWD_INITIAL_PERIOD               (3u)
+#define SuspendWD_INITIAL_PERIOD               (4u)
 
 
 /***************************************

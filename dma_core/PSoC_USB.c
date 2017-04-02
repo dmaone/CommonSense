@@ -15,6 +15,8 @@
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
 
+CY_ISR_PROTO(Suspend_ISR);
+
 void report_status(void)
 {
     memset(outbox.raw, 0, sizeof(outbox));
@@ -306,23 +308,20 @@ void update_system_report(queuedScancode *key)
     USB_SEND_REPORT(SYSTEM);
 }
 
-
 void usb_init(void)
 {
     USB_Start(0u, USB_5V_OPERATION);
-    power_state = DEVSTATE_FULL_THROTTLE;
+    USBSuspendIRQ_StartEx(Suspend_ISR);
+    USBSuspendIRQ_Disable(); // So it doesn't fire and put us in suspend RIGHT AWAY
+    power_state = DEVSTATE_WARMUP;
     SuspendWD_Start();
     usb_configure();
 }
 
 void usb_configure(void)
 {
-
     /* Wait for device to enumerate */
-    while (0u == USB_GetConfiguration())
-    {
-        CyDelay(10);
-    }
+    while (0u == USB_GetConfiguration()) {};
     memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
     memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
     memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
@@ -342,15 +341,29 @@ void usb_wakeup(void)
     }
 }
 
-CY_ISR(Suspend_ISR)
+void usb_suspend_monitor_start(void)
 {
-    power_state = DEVSTATE_SUSPENDING;
-    USB_Suspend();
+    USBSuspendIRQ_ClearPending();
+    USBSuspendIRQ_Enable();
 }
 
-void USB_DP_ISR_ExitCallback(void)
+void usb_suspend_monitor_stop(void)
 {
+    USBSuspendIRQ_Disable();
+}
+
+CY_ISR(Suspend_ISR)
+{
+CyPins_SetPin(ExpHdr_1);
+    power_state = DEVSTATE_SUSPENDING;
+CyPins_ClearPin(ExpHdr_1);
+}
+
+void USB_DP_ISR_EntryCallback(void)
+{
+CyPins_SetPin(ExpHdr_1);
     power_state = DEVSTATE_RESUMING;
+CyPins_ClearPin(ExpHdr_1);
 }
 
 void xprintf(const char *format_p, ...)

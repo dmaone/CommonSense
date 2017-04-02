@@ -149,15 +149,13 @@ CY_ISR(EoC_ISR)
             filter(current_row, i + ADC_CHANNELS, Buf1Mem[_ADC_COL_OFFSET(i)]);
         }
     }
-    // Before driving, so stray interrupt won't lead to us skipping pending int.
-    // But not too much before, so we don't get called before we're done.
-    EoCIRQ_ClearPending(); 
     matrix_status[current_row] = row_status;
     if (current_row == 0)
     {
         // End of the scan pass. Loop if full throttle, otherwise stop.
         if (power_state != DEVSTATE_FULL_THROTTLE)
         {
+            scan_in_progress = false;
             return;
         }
         current_row = MATRIX_ROWS;

@@ -12,6 +12,7 @@
 #include "pipeline.h"
 
 #define SUSPEND_SYSTIMER_DIVISOR 10
+#define SUSPEND_WARMUP_DELAY 30 // Because resume Force_K's for 20ms, no SoF can get thru that.
 
 enum devicePowerStates {
     DEVSTATE_FULL_THROTTLE = 0,
@@ -19,12 +20,15 @@ enum devicePowerStates {
     DEVSTATE_WATCH,
     DEVSTATE_SUSPENDING,
     DEVSTATE_RESUMING,
+    DEVSTATE_WARMUP,
 };
 
 uint8_t power_state;
 
 void usb_init(void);
 void usb_configure(void);
+void usb_suspend_monitor_start(void);
+void usb_suspend_monitor_stop(void);
 
 void usb_send_c2();
 void usb_wakeup(void);

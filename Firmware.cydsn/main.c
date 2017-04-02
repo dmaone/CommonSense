@@ -27,8 +27,10 @@ CY_ISR(Timer_ISR)
 
 void nap(void)
 {
+    usb_suspend_monitor_stop();
+    uint8_t rwu = USB_RWUEnabled();
     USB_Suspend();
-    if (USB_RWUEnabled() == 0)
+    if (rwu == 0)
     {
         power_state = DEVSTATE_SLEEP;
         CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
@@ -36,7 +38,8 @@ void nap(void)
     else
     {
         power_state = DEVSTATE_WATCH;
-        CyIMO_SetFreq(CY_IMO_FREQ_3MHZ);
+        //SetFreq hangs us dry.
+        //CyIMO_SetFreq(CY_IMO_FREQ_24MHZ);
 // CyFlash_SetWaitCycles(3);
 // CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
     }
@@ -44,10 +47,16 @@ void nap(void)
 
 void wake(void)
 {
-    power_state = DEVSTATE_FULL_THROTTLE;
-    CyIMO_SetFreq(CY_IMO_FREQ_USB);
-    scan_start();
     USB_Resume();
+    power_state = DEVSTATE_WARMUP;
+    //CyIMO_SetFreq(CY_IMO_FREQ_USB);
+}
+
+void full_on(void)
+{
+    power_state = DEVSTATE_FULL_THROTTLE;
+    usb_suspend_monitor_start();
+    scan_start();
 }
 
 int main()
@@ -55,6 +64,10 @@ int main()
     BootIRQ_StartEx(BootIRQ_ISR);
     CyGlobalIntEnable; /* Enable global interrupts. */
     load_config();
+    SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
+    SysTimer_Start();
+    TimerIRQ_StartEx(Timer_ISR);
+
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
     status_register.setup_mode = NOT_A_KEYBOARD;
@@ -62,9 +75,7 @@ int main()
     scan_init();
     pipeline_init(); // calls scan_reset
     scan_start(); // We are starting in full power - must do that initial kick
-    SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
-    SysTimer_Start();
-    TimerIRQ_StartEx(Timer_ISR);
+    usb_configure();
     for(;;)
     {
         switch (power_state)
@@ -98,20 +109,33 @@ int main()
             case DEVSTATE_WATCH:
                 if (tick > SUSPEND_SYSTIMER_DIVISOR)
                 {
+CyPins_SetPin(ExpHdr_2);
                     tick = 0;
-                    scan_start();
-                    if (pipeline_process_wakeup())
+                    //scan_start();
+                    //if (pipeline_process_wakeup())
                     {
-                        usb_wakeup();
+                    //    usb_wakeup();
                     }
+CyPins_ClearPin(ExpHdr_2);
                 }
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
-            case DEVSTATE_RESUMING:
-                wake();
-                break;
             case DEVSTATE_SUSPENDING:
                 nap();
+                break;
+            case DEVSTATE_RESUMING:
+                tick = 0;
+                wake();
+                break;
+            case DEVSTATE_WARMUP:
+                if (0u != USB_IsConfigurationChanged())
+                {
+                    usb_configure();
+                }
+                if (tick > SUSPEND_WARMUP_DELAY)
+                {
+                    full_on();
+                }
                 break;
             default:
                 // Stray interrupt? We'd better stay awake.
