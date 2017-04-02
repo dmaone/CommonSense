@@ -15,3 +15,4 @@
 
 /*Define your macro callbacks here */
     /*For more information, refer to the Macro Callbacks topic in the PSoC Creator Help.*/
+#define USBFS_DP_ISR_EXIT_CALLBACK

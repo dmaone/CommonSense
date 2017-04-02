@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: HWStateIRQ.c  
+* File Name: EoCIRQ.c  
 * Version 1.70
 *
 *  Description:
@@ -18,15 +18,15 @@
 
 #include <cydevice_trm.h>
 #include <CyLib.h>
-#include <HWStateIRQ.h>
+#include <EoCIRQ.h>
 #include "cyapicallbacks.h"
 
-#if !defined(HWStateIRQ__REMOVED) /* Check for removal by optimization */
+#if !defined(EoCIRQ__REMOVED) /* Check for removal by optimization */
 
 /*******************************************************************************
 *  Place your includes, defines and code here 
 ********************************************************************************/
-/* `#START HWStateIRQ_intc` */
+/* `#START EoCIRQ_intc` */
 
 /* `#END` */
 
@@ -42,7 +42,7 @@ CY_ISR_PROTO(IntDefaultHandler);
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_Start
+* Function Name: EoCIRQ_Start
 ********************************************************************************
 *
 * Summary:
@@ -58,24 +58,24 @@ CY_ISR_PROTO(IntDefaultHandler);
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_Start(void)
+void EoCIRQ_Start(void)
 {
     /* For all we know the interrupt is active. */
-    HWStateIRQ_Disable();
+    EoCIRQ_Disable();
 
-    /* Set the ISR to point to the HWStateIRQ Interrupt. */
-    HWStateIRQ_SetVector(&HWStateIRQ_Interrupt);
+    /* Set the ISR to point to the EoCIRQ Interrupt. */
+    EoCIRQ_SetVector(&EoCIRQ_Interrupt);
 
     /* Set the priority. */
-    HWStateIRQ_SetPriority((uint8)HWStateIRQ_INTC_PRIOR_NUMBER);
+    EoCIRQ_SetPriority((uint8)EoCIRQ_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    HWStateIRQ_Enable();
+    EoCIRQ_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_StartEx
+* Function Name: EoCIRQ_StartEx
 ********************************************************************************
 *
 * Summary:
@@ -101,24 +101,24 @@ void HWStateIRQ_Start(void)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_StartEx(cyisraddress address)
+void EoCIRQ_StartEx(cyisraddress address)
 {
     /* For all we know the interrupt is active. */
-    HWStateIRQ_Disable();
+    EoCIRQ_Disable();
 
-    /* Set the ISR to point to the HWStateIRQ Interrupt. */
-    HWStateIRQ_SetVector(address);
+    /* Set the ISR to point to the EoCIRQ Interrupt. */
+    EoCIRQ_SetVector(address);
 
     /* Set the priority. */
-    HWStateIRQ_SetPriority((uint8)HWStateIRQ_INTC_PRIOR_NUMBER);
+    EoCIRQ_SetPriority((uint8)EoCIRQ_INTC_PRIOR_NUMBER);
 
     /* Enable it. */
-    HWStateIRQ_Enable();
+    EoCIRQ_Enable();
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_Stop
+* Function Name: EoCIRQ_Stop
 ********************************************************************************
 *
 * Summary:
@@ -131,22 +131,22 @@ void HWStateIRQ_StartEx(cyisraddress address)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_Stop(void)
+void EoCIRQ_Stop(void)
 {
     /* Disable this interrupt. */
-    HWStateIRQ_Disable();
+    EoCIRQ_Disable();
 
     /* Set the ISR to point to the passive one. */
-    HWStateIRQ_SetVector(&IntDefaultHandler);
+    EoCIRQ_SetVector(&IntDefaultHandler);
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_Interrupt
+* Function Name: EoCIRQ_Interrupt
 ********************************************************************************
 *
 * Summary:
-*   The default Interrupt Service Routine for HWStateIRQ.
+*   The default Interrupt Service Routine for EoCIRQ.
 *
 *   Add custom code between the coments to keep the next version of this file
 *   from over writting your code.
@@ -157,27 +157,27 @@ void HWStateIRQ_Stop(void)
 *   None
 *
 *******************************************************************************/
-CY_ISR(HWStateIRQ_Interrupt)
+CY_ISR(EoCIRQ_Interrupt)
 {
-    #ifdef HWStateIRQ_INTERRUPT_INTERRUPT_CALLBACK
-        HWStateIRQ_Interrupt_InterruptCallback();
-    #endif /* HWStateIRQ_INTERRUPT_INTERRUPT_CALLBACK */ 
+    #ifdef EoCIRQ_INTERRUPT_INTERRUPT_CALLBACK
+        EoCIRQ_Interrupt_InterruptCallback();
+    #endif /* EoCIRQ_INTERRUPT_INTERRUPT_CALLBACK */ 
 
     /*  Place your Interrupt code here. */
-    /* `#START HWStateIRQ_Interrupt` */
+    /* `#START EoCIRQ_Interrupt` */
 
     /* `#END` */
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_SetVector
+* Function Name: EoCIRQ_SetVector
 ********************************************************************************
 *
 * Summary:
-*   Change the ISR vector for the Interrupt. Note calling HWStateIRQ_Start
+*   Change the ISR vector for the Interrupt. Note calling EoCIRQ_Start
 *   will override any effect this method would have had. To set the vector 
-*   before the component has been started use HWStateIRQ_StartEx instead.
+*   before the component has been started use EoCIRQ_StartEx instead.
 * 
 *   When defining ISR functions, the CY_ISR and CY_ISR_PROTO macros should be 
 *   used to provide consistent definition across compilers:
@@ -197,18 +197,18 @@ CY_ISR(HWStateIRQ_Interrupt)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_SetVector(cyisraddress address)
+void EoCIRQ_SetVector(cyisraddress address)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    ramVectorTable[CYINT_IRQ_BASE + (uint32)HWStateIRQ__INTC_NUMBER] = address;
+    ramVectorTable[CYINT_IRQ_BASE + (uint32)EoCIRQ__INTC_NUMBER] = address;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_GetVector
+* Function Name: EoCIRQ_GetVector
 ********************************************************************************
 *
 * Summary:
@@ -221,26 +221,26 @@ void HWStateIRQ_SetVector(cyisraddress address)
 *   Address of the ISR in the interrupt vector table.
 *
 *******************************************************************************/
-cyisraddress HWStateIRQ_GetVector(void)
+cyisraddress EoCIRQ_GetVector(void)
 {
     cyisraddress * ramVectorTable;
 
     ramVectorTable = (cyisraddress *) *CYINT_VECT_TABLE;
 
-    return ramVectorTable[CYINT_IRQ_BASE + (uint32)HWStateIRQ__INTC_NUMBER];
+    return ramVectorTable[CYINT_IRQ_BASE + (uint32)EoCIRQ__INTC_NUMBER];
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_SetPriority
+* Function Name: EoCIRQ_SetPriority
 ********************************************************************************
 *
 * Summary:
 *   Sets the Priority of the Interrupt. 
 *
-*   Note calling HWStateIRQ_Start or HWStateIRQ_StartEx will 
+*   Note calling EoCIRQ_Start or EoCIRQ_StartEx will 
 *   override any effect this API would have had. This API should only be called
-*   after HWStateIRQ_Start or HWStateIRQ_StartEx has been called. 
+*   after EoCIRQ_Start or EoCIRQ_StartEx has been called. 
 *   To set the initial priority for the component, use the Design-Wide Resources
 *   Interrupt Editor.
 *
@@ -255,14 +255,14 @@ cyisraddress HWStateIRQ_GetVector(void)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_SetPriority(uint8 priority)
+void EoCIRQ_SetPriority(uint8 priority)
 {
-    *HWStateIRQ_INTC_PRIOR = priority << 5;
+    *EoCIRQ_INTC_PRIOR = priority << 5;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_GetPriority
+* Function Name: EoCIRQ_GetPriority
 ********************************************************************************
 *
 * Summary:
@@ -277,19 +277,19 @@ void HWStateIRQ_SetPriority(uint8 priority)
 *    PSoC 4: Priority is from 0 to 3.
 *
 *******************************************************************************/
-uint8 HWStateIRQ_GetPriority(void)
+uint8 EoCIRQ_GetPriority(void)
 {
     uint8 priority;
 
 
-    priority = *HWStateIRQ_INTC_PRIOR >> 5;
+    priority = *EoCIRQ_INTC_PRIOR >> 5;
 
     return priority;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_Enable
+* Function Name: EoCIRQ_Enable
 ********************************************************************************
 *
 * Summary:
@@ -304,15 +304,15 @@ uint8 HWStateIRQ_GetPriority(void)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_Enable(void)
+void EoCIRQ_Enable(void)
 {
     /* Enable the general interrupt. */
-    *HWStateIRQ_INTC_SET_EN = HWStateIRQ__INTC_MASK;
+    *EoCIRQ_INTC_SET_EN = EoCIRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_GetState
+* Function Name: EoCIRQ_GetState
 ********************************************************************************
 *
 * Summary:
@@ -325,15 +325,15 @@ void HWStateIRQ_Enable(void)
 *   1 if enabled, 0 if disabled.
 *
 *******************************************************************************/
-uint8 HWStateIRQ_GetState(void)
+uint8 EoCIRQ_GetState(void)
 {
     /* Get the state of the general interrupt. */
-    return ((*HWStateIRQ_INTC_SET_EN & (uint32)HWStateIRQ__INTC_MASK) != 0u) ? 1u:0u;
+    return ((*EoCIRQ_INTC_SET_EN & (uint32)EoCIRQ__INTC_MASK) != 0u) ? 1u:0u;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_Disable
+* Function Name: EoCIRQ_Disable
 ********************************************************************************
 *
 * Summary:
@@ -346,15 +346,15 @@ uint8 HWStateIRQ_GetState(void)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_Disable(void)
+void EoCIRQ_Disable(void)
 {
     /* Disable the general interrupt. */
-    *HWStateIRQ_INTC_CLR_EN = HWStateIRQ__INTC_MASK;
+    *EoCIRQ_INTC_CLR_EN = EoCIRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_SetPending
+* Function Name: EoCIRQ_SetPending
 ********************************************************************************
 *
 * Summary:
@@ -373,14 +373,14 @@ void HWStateIRQ_Disable(void)
 *   interrupts).
 *
 *******************************************************************************/
-void HWStateIRQ_SetPending(void)
+void EoCIRQ_SetPending(void)
 {
-    *HWStateIRQ_INTC_SET_PD = HWStateIRQ__INTC_MASK;
+    *EoCIRQ_INTC_SET_PD = EoCIRQ__INTC_MASK;
 }
 
 
 /*******************************************************************************
-* Function Name: HWStateIRQ_ClearPending
+* Function Name: EoCIRQ_ClearPending
 ********************************************************************************
 *
 * Summary:
@@ -398,9 +398,9 @@ void HWStateIRQ_SetPending(void)
 *   None
 *
 *******************************************************************************/
-void HWStateIRQ_ClearPending(void)
+void EoCIRQ_ClearPending(void)
 {
-    *HWStateIRQ_INTC_CLR_PD = HWStateIRQ__INTC_MASK;
+    *EoCIRQ_INTC_CLR_PD = EoCIRQ__INTC_MASK;
 }
 
 #endif /* End check for removal by optimization */

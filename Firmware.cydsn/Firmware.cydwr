@@ -621,15 +621,18 @@
       <Data key="e261f250-bb91-406c-842a-8aab322eb24b" value="Analog" />
     </Group>
     <Group key="Interrupt">
-      <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="HWStateIRQ" />
+      <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="EoCIRQ" />
       <Data key="8de28a89-32f9-4016-91de-2cd63cc3c2b4" value="BootIRQ" />
       <Data key="82abd659-c6e6-4159-ac54-73b6be653ba6/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="ADC0_IRQ" />
+      <Data key="230217a0-461d-490b-a25b-00e7699c055c/8c70c28a-acdf-4af1-b803-ce0c58edb918" value="USB_ep_3" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/13a8975c-7fb7-4bb9-91f3-189a6b7c1d86" value="USB_ep_1" />
+      <Data key="230217a0-461d-490b-a25b-00e7699c055c/52c66e35-efb9-4cb3-a434-6304eda17cd2" value="USB_ep_2" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/70277391-b927-4e50-8d12-6874a5c53f72" value="USB_bus_reset" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/ad494e85-04e3-4023-8b83-7735d1f660ea" value="USB_ep_8" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/d91ea660-bc91-4817-b29b-2fe86c305500" value="USB_arb_int" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/dc6da32b-30f7-48b3-b8a1-dbf0214d8c83" value="USB_dp_int" />
       <Data key="230217a0-461d-490b-a25b-00e7699c055c/ef9224ec-f8a6-4df0-8a49-e09ce75cefa7" value="USB_ep_0" />
+      <Data key="611099ee-b91e-41c3-95e2-b4631c409531" value="USBSuspendIRQ" />
       <Data key="9595021b-b20f-4fb9-9fb6-8a720efe50ab" value="TimerIRQ" />
       <Data key="a0c2fa85-a4f0-4a93-bce5-cf13a0c38093/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="ADC1_IRQ" />
     </Group>
@@ -3754,12 +3757,15 @@
     <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="3" />
     <Data key="8de28a89-32f9-4016-91de-2cd63cc3c2b4" value="0" />
     <Data key="82abd659-c6e6-4159-ac54-73b6be653ba6/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="7" />
+    <Data key="230217a0-461d-490b-a25b-00e7699c055c/8c70c28a-acdf-4af1-b803-ce0c58edb918" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/13a8975c-7fb7-4bb9-91f3-189a6b7c1d86" value="4" />
+    <Data key="230217a0-461d-490b-a25b-00e7699c055c/52c66e35-efb9-4cb3-a434-6304eda17cd2" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/70277391-b927-4e50-8d12-6874a5c53f72" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/ad494e85-04e3-4023-8b83-7735d1f660ea" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/d91ea660-bc91-4817-b29b-2fe86c305500" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/dc6da32b-30f7-48b3-b8a1-dbf0214d8c83" value="4" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/ef9224ec-f8a6-4df0-8a49-e09ce75cefa7" value="4" />
+    <Data key="611099ee-b91e-41c3-95e2-b4631c409531" value="0" />
     <Data key="9595021b-b20f-4fb9-9fb6-8a720efe50ab" value="5" />
     <Data key="a0c2fa85-a4f0-4a93-bce5-cf13a0c38093/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="7" />
   </Group>

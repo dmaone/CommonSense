@@ -143,38 +143,16 @@ void process_msg(OUT_c2packet_t * inbox)
     }
 }
 
-void usb_init(void)
-{
-
-    /* Wait for device to enumerate */
-    while (0u == USB_GetConfiguration())
-    {
-        CyDelay(10);
-    }
-    memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
-    memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
-    memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
-}
-
 void usb_send_c2(void)
 {   
-    while (USB_GetEPState(OUTBOX_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for the green light
+    USB_WAIT_FOR_EP(OUTBOX_EP);
     USB_LoadInEP(OUTBOX_EP, outbox.raw, sizeof(outbox.raw));
-}
-
-void keyboard_send()
-{
-    while (USB_GetEPState(KEYBOARD_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
-#if NOT_A_KEYBOARD == 1
-    memset(KBD_OUTBOX, 0, OUTBOX_SIZE(KBD_OUTBOX));
-#endif
-    USB_LoadInEP(KEYBOARD_EP, KBD_OUTBOX, OUTBOX_SIZE(KBD_OUTBOX));
 }
 
 void update_keyboard_mods(uint8_t mods)
 {
     KBD_OUTBOX[0] = mods;
-    keyboard_send();
+    USB_SEND_REPORT(KBD);
 }
 
 inline void keyboard_press(uint8_t keycode)
@@ -229,7 +207,7 @@ void update_keyboard_report(queuedScancode *key)
     {
         keyboard_release(key->keycode);
     }
-    keyboard_send();
+    USB_SEND_REPORT(KBD);
 }
 
 // Report consists of 16 bit values - so I kind of know what I'm doing here.
@@ -310,11 +288,7 @@ void update_consumer_report(queuedScancode *key)
     {
         consumer_release(keycode);
     }
-    while (USB_GetEPState(CONSUMER_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
-#if NOT_A_KEYBOARD == 1
-    memset(CONSUMER_OUTBOX, 0, OUTBOX_SIZE(CONSUMER_OUTBOX));
-#endif
-    USB_LoadInEP(CONSUMER_EP, CONSUMER_OUTBOX, OUTBOX_SIZE(CONSUMER_OUTBOX));
+    USB_SEND_REPORT(CONSUMER);
 }
 
 void update_system_report(queuedScancode *key)
@@ -329,16 +303,35 @@ void update_system_report(queuedScancode *key)
         SYSTEM_OUTBOX[0] &= ~(1 << key_index);
     }
     xprintf("System: %d", SYSTEM_OUTBOX[0]);
-#if NOT_A_KEYBOARD == 1
-    memset(SYSTEM_OUTBOX, 0, OUTBOX_SIZE(SYSTEM_OUTBOX));
-#endif
-    while (USB_GetEPState(SYSTEM_EP) != USB_IN_BUFFER_EMPTY) {}; // wait for buffer release
-    USB_LoadInEP(SYSTEM_EP, SYSTEM_OUTBOX, OUTBOX_SIZE(SYSTEM_OUTBOX));
+    USB_SEND_REPORT(SYSTEM);
+}
+
+
+void usb_init(void)
+{
+    USB_Start(0u, USB_5V_OPERATION);
+    power_state = DEVSTATE_FULL_THROTTLE;
+    SuspendWD_Start();
+    usb_configure();
+}
+
+void usb_configure(void)
+{
+
+    /* Wait for device to enumerate */
+    while (0u == USB_GetConfiguration())
+    {
+        CyDelay(10);
+    }
+    memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
+    memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
+    memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
 }
 
 void usb_wakeup(void)
 {
-    // This is copied from AN
+    // This is copied from AN - times are a violated a bit.
+    // Let's leave this on cypress' conscience :)
     if (USB_RWUEnabled() != 0)
     {
         CyDelay(20);
@@ -347,6 +340,17 @@ void usb_wakeup(void)
         USB_Force(USB_FORCE_NONE);
         CyDelay(20);
     }
+}
+
+CY_ISR(Suspend_ISR)
+{
+    power_state = DEVSTATE_SUSPENDING;
+    USB_Suspend();
+}
+
+void USB_DP_ISR_ExitCallback(void)
+{
+    power_state = DEVSTATE_RESUMING;
 }
 
 void xprintf(const char *format_p, ...)

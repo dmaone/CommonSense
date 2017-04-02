@@ -21,24 +21,34 @@ CY_ISR(BootIRQ_ISR)
 
 CY_ISR(Timer_ISR)
 {
-    tick = 1;
+    tick++;
     systime++;
-    if (USB_CheckActivity())
+}
+
+void nap(void)
+{
+    USB_Suspend();
+    if (USB_RWUEnabled() == 0)
     {
-        usb_idletime++;
+        power_state = DEVSTATE_SLEEP;
+        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
     }
     else
     {
-        usb_idletime = 0;
+        power_state = DEVSTATE_WATCH;
+        CyIMO_SetFreq(CY_IMO_FREQ_3MHZ);
+// CyFlash_SetWaitCycles(3);
+// CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
     }
 }
 
-// power modes
-// CyIMO_SetFreq(CY_IMO_FREQ_3MHZ);
-// CyFlash_SetWaitCycles(3);
-// CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
-// disable fast IMO on startup
-
+void wake(void)
+{
+    power_state = DEVSTATE_FULL_THROTTLE;
+    CyIMO_SetFreq(CY_IMO_FREQ_USB);
+    scan_start();
+    USB_Resume();
+}
 
 int main()
 {
@@ -48,43 +58,65 @@ int main()
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
     status_register.setup_mode = NOT_A_KEYBOARD;
-    scan_init();
-    scan_start(); // fill matrix state, check if ADC is operational
-    CyDelay(10);
-    USB_Start(0u, USB_5V_OPERATION);
     usb_init();
+    scan_init();
+    pipeline_init(); // calls scan_reset
+    scan_start(); // We are starting in full power - must do that initial kick
     SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
     SysTimer_Start();
     TimerIRQ_StartEx(Timer_ISR);
-    pipeline_init();
     for(;;)
     {
-        if (tick)
+        switch (power_state)
         {
-            tick = 0;
-            /* Host can send double SET_INTERFACE request. */
-            if (0u != USB_IsConfigurationChanged())
-            {
-                usb_init();
-                usb_idletime = 0;
-            }
-            if (CTRLR_SCB.status == USB_XFER_STATUS_ACK)
-            {
-                process_msg((void*)CTRLR_INBOX);
-                CTRLR_SCB.status = USB_XFER_IDLE;
-            }
-            if (KBD_SCB.status == USB_XFER_STATUS_ACK)
-            {
-                led_status = KBD_INBOX[0];
-                KBD_SCB.status = USB_XFER_IDLE;
-            }
-            if (status_register.matrix_output > 0)
-                report_matrix_readouts();
-
-            pipeline_process();
+            case DEVSTATE_FULL_THROTTLE:
+                if (tick)
+                {
+                    tick = 0;
+                    /* Host can send double SET_INTERFACE request. */
+                    if (0u != USB_IsConfigurationChanged())
+                    {
+                        usb_configure();
+                    }
+                    if (CTRLR_SCB.status == USB_XFER_STATUS_ACK)
+                    {
+                        process_msg((void*)CTRLR_INBOX);
+                        CTRLR_SCB.status = USB_XFER_IDLE;
+                    }
+                    if (KBD_SCB.status == USB_XFER_STATUS_ACK)
+                    {
+                        led_status = KBD_INBOX[0];
+                        KBD_SCB.status = USB_XFER_IDLE;
+                    }
+                    if (status_register.matrix_output > 0)
+                        report_matrix_readouts();
+                    pipeline_process();
+                }
+                // Timer ISR will wake us up.
+                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+                break;
+            case DEVSTATE_WATCH:
+                if (tick > SUSPEND_SYSTIMER_DIVISOR)
+                {
+                    tick = 0;
+                    scan_start();
+                    if (pipeline_process_wakeup())
+                    {
+                        usb_wakeup();
+                    }
+                }
+                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+                break;
+            case DEVSTATE_RESUMING:
+                wake();
+                break;
+            case DEVSTATE_SUSPENDING:
+                nap();
+                break;
+            default:
+                // Stray interrupt? We'd better stay awake.
+                break;
         }
-        // Timer ISR will wake us up.
-        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
     }
 }
 

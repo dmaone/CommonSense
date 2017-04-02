@@ -25,9 +25,9 @@ inline uint8_t process_scancode_buffer(void)
     }
     uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
 #ifdef MATRIX_LEVELS_DEBUG
-    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & 0x80, scancode &0x7f, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
+    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK, scancode & SCANCODE_MASK, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
 #else
-    //xprintf("sc: %d %d @ %d ms", scancode & 0x80, scancode &0x7f, systime);
+    //xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK, systime);
 #endif
     scancode_buffer[scancode_buffer_readpos] = COMMONSENSE_NOKEY;
     return scancode;
@@ -38,13 +38,13 @@ inline void process_layerMods(uint8_t sc, uint8_t keycode)
     // codes A8-AB - momentary selection, AC-AF - permanent
     if (keycode & 0x04)
     {
-        if ((sc & 0x80) == 0) {
+        if ((sc & KEY_UP_MASK) == 0) {
             // Press
             currentLayer = keycode & 0x03;
         }
         // Release is ignored
     } else {
-        if ((sc & 0x80) == 0) {
+        if ((sc & KEY_UP_MASK) == 0) {
             // Press
             layerMods |= (1 << ((keycode & 0x03) + LAYER_MODS_SHIFT));
         } else {
@@ -65,7 +65,7 @@ inline void process_layerMods(uint8_t sc, uint8_t keycode)
 
 inline void process_mods(uint8_t sc, uint8_t keycode)
 {
-    if ((sc & 0x80) == 0) {
+    if ((sc & KEY_UP_MASK) == 0) {
         // Press
         mods |= (1 << (keycode & 0x07));
     } else {
@@ -99,7 +99,7 @@ inline void process_real_key(void)
             // Nothing to do.
             return;
     }
-    if (sc == (COMMONSENSE_NOKEY | 0x80))
+    if (sc == (COMMONSENSE_NOKEY | KEY_UP_MASK))
     {
 // TODO need to generate COMMONSENSE_NOKEY release to signal no keys pressed - to deal with stuck keys.
 // Those will appear due to layers - suppose you press the key, then switch layer which has another key at that SC position.
@@ -118,13 +118,13 @@ inline void process_real_key(void)
     // Resolve USB keycode using current active layers
     for (uint8_t i=currentLayer; i >= 0; i--)
     {
-        usb_sc = config.lmstash[i*(MATRIX_COLS*MATRIX_ROWS)+(sc & 0x7f)];
+        usb_sc = config.lmstash[i*(MATRIX_COLS*MATRIX_ROWS)+(sc & SCANCODE_MASK)];
         if (usb_sc != USBCODE_TRANSPARENT)
         {
             break;
         }
     }
-    //xprintf("SC->KC: %d -> %d", sc & 0x7f, usb_sc);
+    //xprintf("SC->KC: %d -> %d", sc & SCANCODE_MASK, usb_sc);
     if (usb_sc < USBCODE_A)
     {
         // Dead key.
@@ -234,8 +234,14 @@ inline void pipeline_process(void)
     update_reports();
 }
 
+uint8_t pipeline_process_wakeup(void)
+{
+    return (process_scancode_buffer() & KEY_UP_MASK) == 0 ? 1 : 0;
+}
+
 void pipeline_init(void)
 {
+    scan_reset();
     USBQueue_readpos  = 0;
     USBQueue_writepos = 0;
     memset(USBQueue, USBCODE_NOEVENT, sizeof(USBQueue));

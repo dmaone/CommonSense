@@ -22,7 +22,7 @@ static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static uint32_t row_status;
 
-CY_ISR_PROTO(HWStateIRQ_ISR);
+CY_ISR_PROTO(EoC_ISR);
 
 static void InitSensor(void)
 {
@@ -33,13 +33,11 @@ static void InitSensor(void)
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
     ADC0_Start();
-    ADC0_SetResolution(ADC_RESOLUTION);
     ADC1_Start();
+    ADC0_SetResolution(ADC_RESOLUTION);
     ADC1_SetResolution(ADC_RESOLUTION);
-    CyDelayUs(10); // Give ADCs time to warm up
     ChargeDelay_Start();
-    scancode_buffer_readpos = 0;
-    scancode_buffer_writepos = 0;
+    scan_reset();
 }
 
 static void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src_addr, uint32 dst_addr)
@@ -58,8 +56,7 @@ static void EnableSensor(void)
     BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
     BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
     (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
-    HWStateIRQ_StartEx(HWStateIRQ_ISR);
-    HWState_InterruptEnable();
+    EoCIRQ_StartEx(EoC_ISR);
 }
 
 inline void Drive(uint8 drv)
@@ -72,16 +69,6 @@ inline void Drive(uint8 drv)
 */
     //SetPin should not be used because it doesn't trigger start circuitry
     DriveReg0_Write(1 << drv);
-}
-
-void scan_start(void)
-{
-    if (!scan_in_progress)
-    {
-        current_row = 0;
-        Drive(current_row);
-        scan_in_progress = true;
-    }
 }
 
 inline void append_scancode(uint8_t scancode)
@@ -129,7 +116,7 @@ static inline void filter(uint8_t row, uint8_t col, int16_t incoming)
         if ((row_status & (1 << col)) > 0)
         {
             // new key release
-            append_scancode(0x80|(row*MATRIX_COLS+col));
+            append_scancode(KEY_UP_MASK|(row*MATRIX_COLS+col));
 #ifdef MATRIX_LEVELS_DEBUG
             level_buffer[scancode_buffer_writepos] = matrix[row][col] & 0xff;
             level_buffer_inst[scancode_buffer_writepos] = incoming & 0xff;
@@ -139,10 +126,10 @@ static inline void filter(uint8_t row, uint8_t col, int16_t incoming)
     }
 }
 
-CY_ISR(HWStateIRQ_ISR)
+CY_ISR(EoC_ISR)
 {
-    if (!scan_in_progress)
-        return;
+    // If there's no scan in progress - one row will be filled by garbage.
+    // Which is no big deal.
 #ifdef COMMONSENSE_100KHZ_MODE
     Drive(0);
     return;
@@ -162,13 +149,32 @@ CY_ISR(HWStateIRQ_ISR)
             filter(current_row, i + ADC_CHANNELS, Buf1Mem[_ADC_COL_OFFSET(i)]);
         }
     }
+    // Before driving, so stray interrupt won't lead to us skipping pending int.
+    // But not too much before, so we don't get called before we're done.
+    EoCIRQ_ClearPending(); 
     matrix_status[current_row] = row_status;
-    uint8_t next_row = (current_row ? current_row : MATRIX_ROWS) - 1;
+    if (current_row == 0)
+    {
+        // End of the scan pass. Loop if full throttle, otherwise stop.
+        if (power_state != DEVSTATE_FULL_THROTTLE)
+        {
+            return;
+        }
+        current_row = MATRIX_ROWS;
+    }
+    current_row--;
     // Drive row. Here, because there's not enough time to read out the array (not reliably) if driven at the top.
-    // There were before bandpass filter - and next_row was defined right above the loop and made sense.
-    Drive(next_row);
-    current_row = next_row;
-    HWState_Read(); // Clears IRQ request. Must come AFTER processing.
+    Drive(current_row);
+}
+
+void scan_start(void)
+{
+    if (!scan_in_progress)
+    {
+        current_row = MATRIX_ROWS - 1;
+        Drive(current_row);
+        scan_in_progress = true;
+    }
 }
 
 void scan_reset(void)
@@ -190,7 +196,6 @@ void scan_reset(void)
 
 void scan_init(void)
 {
-    scan_reset();
     InitSensor();
     EnableSensor();
 }

@@ -13,6 +13,9 @@
 //IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122 with it's 8x16 matrix.
 #define COMMONSENSE_NOKEY 0x7f
 
+#define KEY_UP_MASK 0x80
+#define SCANCODE_MASK 0x7f
+
 // 0 - none, 1 - 1/2, 2 - 3/4, etc.
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
 #define COMMONSENSE_IIR_ORDER 2

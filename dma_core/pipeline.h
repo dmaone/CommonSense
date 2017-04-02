@@ -41,3 +41,4 @@ uint8_t currentLayer;
 
 void pipeline_init(void);
 void pipeline_process(void);
+uint8_t pipeline_process_wakeup(void);

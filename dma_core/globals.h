@@ -41,8 +41,10 @@
 #define KRO_LIMIT 62
 
 // USB stuff
+#define USB_REMOTE_WAKEUP
+
 #define OUTBOX_SIZE(X) (sizeof(X)-1)
-#define KEYBOARD_EP 1
+#define KBD_EP 1
 #define KBD_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_RPT_SCB
 #define KBD_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_BUF
 #define KBD_OUTBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_IN_BUF
@@ -70,8 +72,6 @@ typedef struct {
 
 uint8_t tick;
 uint32_t systime;
-uint8_t usb_idletime;
-
 status_register_t status_register;
 uint8_t led_status;
 

@@ -37,7 +37,7 @@ extern uint8 SysTimer_initVar;
 **************************************/
 
 #define SysTimer_Resolution                 16u
-#define SysTimer_UsingFixedFunction         1u
+#define SysTimer_UsingFixedFunction         0u
 #define SysTimer_UsingHWCaptureCounter      0u
 #define SysTimer_SoftwareCaptureMode        0u
 #define SysTimer_SoftwareTriggerMode        0u
