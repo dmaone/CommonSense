@@ -44,8 +44,6 @@
 // PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
 #undef COMMONSENSE_100KHZ_MODE
 
-uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
-
 #define SCANCODE_BUFFER_END 31
 #define SCANCODE_BUFFER_NEXT(X) ((X + 1) & SCANCODE_BUFFER_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.

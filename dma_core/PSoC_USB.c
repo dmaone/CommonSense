@@ -308,62 +308,105 @@ void update_system_report(queuedScancode *key)
     USB_SEND_REPORT(SYSTEM);
 }
 
-void usb_init(void)
-{
-    USB_Start(0u, USB_5V_OPERATION);
-    USBSuspendIRQ_StartEx(Suspend_ISR);
-    USBSuspendIRQ_Disable(); // So it doesn't fire and put us in suspend RIGHT AWAY
-    power_state = DEVSTATE_WARMUP;
-    SuspendWD_Start();
-    usb_configure();
-}
-
-void usb_configure(void)
-{
-    /* Wait for device to enumerate */
-    while (0u == USB_GetConfiguration()) {};
-    memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
-    memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
-    memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
-}
-
-void usb_wakeup(void)
-{
-    // This is copied from AN - times are a violated a bit.
-    // Let's leave this on cypress' conscience :)
-    if (USB_RWUEnabled() != 0)
-    {
-        CyDelay(20);
-        USB_Force(USB_FORCE_K);
-        CyDelay(20);
-        USB_Force(USB_FORCE_NONE);
-        CyDelay(20);
-    }
-}
-
 void usb_suspend_monitor_start(void)
 {
-    USBSuspendIRQ_ClearPending();
-    USBSuspendIRQ_Enable();
+CyPins_SetPin(ExpHdr_1);
+    SuspendWD_Stop();
+    SuspendWD_WriteCounter(0);
+    SuspendWD_Start();
+    USBSuspendIRQ_StartEx(Suspend_ISR); // Does disabling for you, safe to use that way.
+CyPins_ClearPin(ExpHdr_1);
 }
 
 void usb_suspend_monitor_stop(void)
 {
-    USBSuspendIRQ_Disable();
+CyPins_SetPin(ExpHdr_1);
+    USBSuspendIRQ_Stop();
+CyPins_ClearPin(ExpHdr_1);
+}
+
+void usb_init(void)
+{
+    USB_Start(0u, USB_5V_OPERATION);
+    power_state = DEVSTATE_FULL_THROTTLE;
+}
+
+void usb_configure(void)
+{
+    /* clear results */
+    memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
+    memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
+    memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
+    /* Wait for device to enumerate */
+    while (0u == USB_GetConfiguration()) {};
+    usb_suspend_monitor_start();
+}
+
+void usb_wakeup(void)
+{
+    if (USB_RWUEnabled() != 0)
+    {
+        USB_Force(USB_FORCE_K);
+        CyDelay(5);
+        USB_Force(USB_FORCE_NONE);
+        CyDelay(5);
+    }
+}
+
+void nap(void)
+{
+    // TODO reconfigure monitor period to provide periodic wakeups for monitor-in-suspend
+    usb_suspend_monitor_stop();
+    uint8_t rwu = 1; //USB_RWUEnabled();
+    USB_Suspend();
+    if (rwu == 0)
+    {
+        power_state = DEVSTATE_SLEEP;
+        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+    }
+    else
+    {
+        power_state = DEVSTATE_WATCH;
+        //SetFreq hangs us dry.
+        //CyIMO_SetFreq(CY_IMO_FREQ_24MHZ);
+// CyFlash_SetWaitCycles(3);
+// CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
+    }
+}
+
+void wake(void)
+{
+    USB_Resume();
+    power_state = DEVSTATE_FULL_THROTTLE;
+    scan_start();
+    usb_suspend_monitor_start();
+    //CyIMO_SetFreq(CY_IMO_FREQ_USB);
 }
 
 CY_ISR(Suspend_ISR)
 {
-CyPins_SetPin(ExpHdr_1);
+//CyPins_SetPin(ExpHdr_1);
+    if (power_state == DEVSTATE_SUSPENDING)
+    {
+//CyPins_ClearPin(ExpHdr_1);
+        return;
+    }
+//CyPins_ClearPin(ExpHdr_1);
+    if ((USB_Dp_PS & USB_Dp_MASK) != 0) // That's "USB_Dp_Read" - saving on call overhead
+    {
+        return; // Long K state, apparently we're resuming.
+    }
+    if ((USB_Dm_PS & USB_Dm_MASK) == 0) // That's "USB_Dm_Read" - saving on call overhead
+    {
+        CySoftwareReset(); // Long SE0 = bus reset. Play Kurt Cobain.
+    }
+    // Suspend is when no activity and J (=Dm is high)
     power_state = DEVSTATE_SUSPENDING;
-CyPins_ClearPin(ExpHdr_1);
 }
 
 void USB_DP_ISR_EntryCallback(void)
 {
-CyPins_SetPin(ExpHdr_1);
     power_state = DEVSTATE_RESUMING;
-CyPins_ClearPin(ExpHdr_1);
 }
 
 void xprintf(const char *format_p, ...)

@@ -22,6 +22,9 @@ static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static uint32_t row_status;
 
+uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
+
+
 CY_ISR_PROTO(EoC_ISR);
 
 static void InitSensor(void)

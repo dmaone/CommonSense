@@ -25,48 +25,15 @@ CY_ISR(Timer_ISR)
     systime++;
 }
 
-void nap(void)
-{
-    usb_suspend_monitor_stop();
-    uint8_t rwu = USB_RWUEnabled();
-    USB_Suspend();
-    if (rwu == 0)
-    {
-        power_state = DEVSTATE_SLEEP;
-        CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
-    }
-    else
-    {
-        power_state = DEVSTATE_WATCH;
-        //SetFreq hangs us dry.
-        //CyIMO_SetFreq(CY_IMO_FREQ_24MHZ);
-// CyFlash_SetWaitCycles(3);
-// CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
-    }
-}
-
-void wake(void)
-{
-    USB_Resume();
-    power_state = DEVSTATE_WARMUP;
-    //CyIMO_SetFreq(CY_IMO_FREQ_USB);
-}
-
-void full_on(void)
-{
-    power_state = DEVSTATE_FULL_THROTTLE;
-    usb_suspend_monitor_start();
-    scan_start();
-}
-
 int main()
 {
-    BootIRQ_StartEx(BootIRQ_ISR);
     CyGlobalIntEnable; /* Enable global interrupts. */
-    load_config();
+    BootIRQ_StartEx(BootIRQ_ISR);
     SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
     SysTimer_Start();
     TimerIRQ_StartEx(Timer_ISR);
+
+    load_config();
 
     status_register.matrix_output = 0;
     status_register.emergency_stop = 0;
@@ -75,16 +42,17 @@ int main()
     scan_init();
     pipeline_init(); // calls scan_reset
     scan_start(); // We are starting in full power - must do that initial kick
-    usb_configure();
     for(;;)
     {
         switch (power_state)
         {
             case DEVSTATE_FULL_THROTTLE:
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(2);
+CyPins_ClearPin(ExpHdr_2);
                 if (tick)
                 {
                     tick = 0;
-                    /* Host can send double SET_INTERFACE request. */
                     if (0u != USB_IsConfigurationChanged())
                     {
                         usb_configure();
@@ -106,39 +74,42 @@ int main()
                 // Timer ISR will wake us up.
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
+            case DEVSTATE_SLEEP:
             case DEVSTATE_WATCH:
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(4);
+CyPins_ClearPin(ExpHdr_2);
                 if (tick > SUSPEND_SYSTIMER_DIVISOR)
                 {
-CyPins_SetPin(ExpHdr_2);
+CyPins_SetPin(ExpHdr_0);
                     tick = 0;
                     //scan_start();
                     //if (pipeline_process_wakeup())
                     {
                     //    usb_wakeup();
                     }
-CyPins_ClearPin(ExpHdr_2);
+CyPins_ClearPin(ExpHdr_0);
                 }
-                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+//                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SUSPENDING:
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(6);
+CyPins_ClearPin(ExpHdr_2);
                 nap();
                 break;
             case DEVSTATE_RESUMING:
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(8);
+CyPins_ClearPin(ExpHdr_2);
                 tick = 0;
                 wake();
                 break;
-            case DEVSTATE_WARMUP:
-                if (0u != USB_IsConfigurationChanged())
-                {
-                    usb_configure();
-                }
-                if (tick > SUSPEND_WARMUP_DELAY)
-                {
-                    full_on();
-                }
-                break;
             default:
                 // Stray interrupt? We'd better stay awake.
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(24);
+CyPins_ClearPin(ExpHdr_2);
                 break;
         }
     }
