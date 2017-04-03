@@ -18,19 +18,18 @@ static uint8_t Buf0TD = CY_DMA_INVALID_TD;
 static uint8_t Buf1TD = CY_DMA_INVALID_TD;
 // signedness intentional! Simplifies comparison logic
 // high byte from ADC must be zero, so should be safe.
-static int16_t Buf0Mem[PTK_CHANNELS], Buf1Mem[PTK_CHANNELS];
+static int16_t BufMem[PTK_CHANNELS * NUM_ADCs];
 static uint8_t current_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
-static uint32_t row_status;
 
 static uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
 
 static void InitSensor(void)
 {
     // Init DMA, each burst requires a request 
-    Buf0Chan = Buf0_DmaInitialize(sizeof *Buf0Mem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    Buf1Chan = Buf1_DmaInitialize(sizeof *Buf1Mem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf0Chan = Buf0_DmaInitialize(sizeof *BufMem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf1Chan = Buf1_DmaInitialize(sizeof *BufMem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     uint8 enableInterrupts = CyEnterCriticalSection();
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
@@ -47,7 +46,7 @@ static void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src
     (void)CyDmaClearPendingDrq(*chan);
     if (*td == CY_DMA_INVALID_TD) *td = CyDmaTdAllocate();
     // transferCount is actually bytes, not transactions.
-    (void) CyDmaTdSetConfiguration(*td, (uint16)sizeof Buf0Mem, *td, (channel_config | (uint8)TD_INC_DST_ADR));
+    (void) CyDmaTdSetConfiguration(*td, (uint16)ADC_BUFFER_BYTESIZE, *td, (channel_config | (uint8)TD_INC_DST_ADR));
     (void) CyDmaTdSetAddress(*td, LO16(src_addr), LO16(dst_addr));
     (void) CyDmaChSetInitialTd(*chan, *td);
     (void) CyDmaChEnable(*chan, 1);
@@ -55,8 +54,8 @@ static void BufferSetup(uint8* chan, uint8* td, uint8 channel_config, uint32 src
 
 static void EnableSensor(void)
 {
-    BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)Buf0Mem);
-    BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, (uint32)Buf1Mem);
+    BufferSetup(&Buf0Chan, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)BufMem);
+    BufferSetup(&Buf1Chan, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, ADC_BUFFER_BYTESIZE + (uint32)BufMem);
     (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
     EoCIRQ_StartEx(EoC_ISR);
 }
@@ -81,53 +80,6 @@ inline void append_scancode(uint8_t scancode)
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
 
-static inline void filter(uint8_t row, uint8_t col, int16_t incoming)
-{
-    if (config.deadBandLo[row][col] == 0xff)
-        return; // Skip scanning altogether
-    if (!((incoming <= config.deadBandLo[row][col] && incoming + config.guardLo >= config.deadBandLo[row][col]) // Lower band
-     || (incoming >= config.deadBandHi[row][col] && incoming - config.guardHi <= config.deadBandHi[row][col]) // Upper band
-    ))
-        return; // Invalid data
-#if COMMONSENSE_IIR_ORDER == 0
-        // Degenerate version. But very fast! Can be used in noiseless environments.
-    matrix[row][col] = incoming;
-#else
-    matrix[row][col] += incoming - (matrix[row][col] >> COMMONSENSE_IIR_ORDER);
-#endif
-    //Key pressed?
-#if NORMALLY_LOW == 1
-    if (matrix[row][col] >= (config.deadBandHi[row][col] << COMMONSENSE_IIR_ORDER))
-#else
-    if (matrix[row][col] <= (config.deadBandLo[row][col] << COMMONSENSE_IIR_ORDER))
-#endif
-    {
-        if ((row_status & (1 << col)) == 0)
-        {
-            // new keypress
-            append_scancode(row*MATRIX_COLS+col);
-#ifdef MATRIX_LEVELS_DEBUG
-            level_buffer[scancode_buffer_writepos] = matrix[row][col] & 0xff;
-            level_buffer_inst[scancode_buffer_writepos] = incoming & 0xff;
-#endif
-            row_status |= (1 << col);
-        }
-    }
-    else
-    {
-        if ((row_status & (1 << col)) > 0)
-        {
-            // new key release
-            append_scancode(KEY_UP_MASK|(row*MATRIX_COLS+col));
-#ifdef MATRIX_LEVELS_DEBUG
-            level_buffer[scancode_buffer_writepos] = matrix[row][col] & 0xff;
-            level_buffer_inst[scancode_buffer_writepos] = incoming & 0xff;
-#endif
-            row_status &= ~(1 << col);
-        }
-    }
-}
-
 CY_ISR(EoC_ISR)
 {
     // If there's no scan in progress - one row will be filled by garbage.
@@ -137,19 +89,76 @@ CY_ISR(EoC_ISR)
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    row_status = matrix_status[current_row];
-    for(uint8_t i=0; i<ADC_CHANNELS; i++) {
-        // When monitoring matrix we're interested in raw feed.
-        if (status_register.matrix_output)
+    uint32 row_status = matrix_status[current_row];
+    uint8 current_col = 0;
+    uint8 adc_buffer_pos = ADC_BUF_INITIAL_OFFSET;
+    for (uint8 i=0; i<NUM_ADCs; i++)
+    {
+        for(uint8_t j=0; j<ADC_CHANNELS; j++)
         {
-            matrix[current_row][i]                  = Buf0Mem[_ADC_COL_OFFSET(i)];
-            matrix[current_row][i + ADC_CHANNELS]   = Buf1Mem[_ADC_COL_OFFSET(i)];
+            if (status_register.matrix_output)
+            {
+                // When monitoring matrix we're interested in raw feed.
+                matrix[current_row][current_col] = BufMem[adc_buffer_pos];
+            }
+            else if (config.deadBandHi[current_row][current_col] != 0)
+            {
+                if (
+                    !(
+                        (
+                            BufMem[adc_buffer_pos] <= config.deadBandLo[current_row][current_col] 
+                            && BufMem[adc_buffer_pos] + config.guardLo >= config.deadBandLo[current_row][current_col]
+                        ) // Lower band
+                        || 
+                        (
+                        BufMem[adc_buffer_pos] >= config.deadBandHi[current_row][current_col]
+                        && BufMem[adc_buffer_pos] - config.guardHi <= config.deadBandHi[current_row][current_col]
+                        ) // Upper band
+                    )
+                )
+                    continue;
+#if COMMONSENSE_IIR_ORDER == 0
+                // Degenerate version. But very fast! Can be used in noiseless environments.
+                matrix[current_row][current_col] = BufMem[adc_buffer_pos];
+#else
+                matrix[current_row][current_col] += BufMem[adc_buffer_pos] - (matrix[current_row][current_col] >> COMMONSENSE_IIR_ORDER);
+#endif
+    //Key pressed?
+#if NORMALLY_LOW == 1
+                if (matrix[current_row][current_col] >= (config.deadBandHi[current_row][current_col] << COMMONSENSE_IIR_ORDER))
+#else
+                if (matrix[current_row][current_col] <= (config.deadBandLo[current_row][current_col] << COMMONSENSE_IIR_ORDER))
+#endif
+                {
+                    if ((row_status & (1 << current_col)) == 0)
+                    {
+            // new keypress
+                        append_scancode(current_row*MATRIX_COLS + current_col);
+#ifdef MATRIX_LEVELS_DEBUG
+                        level_buffer[scancode_buffer_writepos] = matrix[current_row][current_col] & 0xff;
+                        level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
+#endif
+                        row_status |= (1 << current_col);
+                    }
+                }
+                else
+                {
+                    if ((row_status & (1 << current_col)) > 0)
+                    {
+            // new key release
+                        append_scancode(KEY_UP_MASK|(current_row*MATRIX_COLS+current_col));
+#ifdef MATRIX_LEVELS_DEBUG
+                        level_buffer[scancode_buffer_writepos] = matrix[current_row][current_col] & 0xff;
+                        level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
+#endif
+                        row_status &= ~(1 << current_col);
+                    }
+                }
+            }
+            current_col++;
+            adc_buffer_pos += 2;
         }
-        else
-        {
-            filter(current_row, i, Buf0Mem[_ADC_COL_OFFSET(i)]);
-            filter(current_row, i + ADC_CHANNELS, Buf1Mem[_ADC_COL_OFFSET(i)]);
-        }
+        adc_buffer_pos += ADC_BUF_INTER_ROW_GAP;
     }
     matrix_status[current_row] = row_status;
     if (current_row == 0)

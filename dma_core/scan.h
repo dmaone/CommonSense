@@ -25,6 +25,9 @@
 // SYNC WITH PTK CHANNELS!!! MANUALLY BECAUSE GUI ACTIONS REQUIRED!!!
 #define ADC_CHANNELS 12
 
+// This is to ease calculations, there are things hardcoded in buffer management!!
+#define NUM_ADCs 2
+
 // Should be [number of columns per ADC + 1] * 2 + 1 - so 19 for MF, 27 for BS
 // TRICKY PART: Count7(which is part of PTK) counts down. 
 // So column 0 must be connected to highest input on the MUX
@@ -33,8 +36,12 @@
 #define PTK_CHANNELS 27
 // DO NOT FORGET TO UPDATE PTK COMPONENT TO MATCH ^!
 
-// If you ever change the above to the even value - update "+ 1" accordingly! (+0 or +2..)
-#define _ADC_COL_OFFSET(i) ((i<<1) + 1)
+// For even values of the above - both offsets need to be updated!
+#define ADC_BUF_INITIAL_OFFSET 1
+#define ADC_BUF_INTER_ROW_GAP 3
+
+// Below is per ADC.
+#define ADC_BUFFER_BYTESIZE (PTK_CHANNELS * 2)
 
 // Don't forget to set PTK to 5 channels for 100kHz mode! 
 // 3 channels is too low - pulse reset logic activates at ch2 selection
