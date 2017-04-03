@@ -15,6 +15,10 @@
 #define BUCKLING_SPRING 1
 
 #define SWITCH_TYPE BEAMSPRING
+
+/*
+ * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
+ */
 #define MATRIX_COLS 24
 #define MATRIX_ROWS 4
 
@@ -35,7 +39,7 @@
  * in order for the data to be correctly interpreted by the BIOS.
  * -- HID Spec, v1.11, Appendix B: "Boot Interface Descriptors"
  *
- * The BIOS will ignore any extensions to reports. 
+ * The BIOS will ignore any extensions to reports.
  * -- Same place.
  */
 #define KRO_LIMIT 62

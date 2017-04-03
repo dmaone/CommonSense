@@ -23,7 +23,8 @@ static uint8_t current_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 
-static uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
+static uint16 matrix[MATRIX_ROWS][MATRIX_COLS];
+static uint16 *matrix_ptr = (uint16 *)&matrix;
 
 static void InitSensor(void)
 {
@@ -90,20 +91,26 @@ CY_ISR(EoC_ISR)
     // The rest of the code is dead in 100kHz mode.
 #endif
     uint32 row_status = matrix_status[current_row];
-    uint8 current_col = 0;
-    uint8 adc_buffer_pos = ADC_BUF_INITIAL_OFFSET;
+    uint8 current_col = -1;
+    uint8 adc_buffer_pos = ADC_BUF_INITIAL_OFFSET-2;
     for (uint8 i=0; i<NUM_ADCs; i++)
     {
         for(uint8_t j=0; j<ADC_CHANNELS; j++)
         {
+            current_col++;
+            adc_buffer_pos += 2;
+            // Here you need matrix-sized array of uint8!! matrix[][] won't do!!
+            uint8 key_index = (uint32)&config.deadBandHi[current_row][current_col] - (uint32)&config.deadBandHi;
             if (status_register.matrix_output)
             {
                 // When monitoring matrix we're interested in raw feed.
-                matrix[current_row][current_col] = BufMem[adc_buffer_pos];
+                matrix_ptr[key_index] = BufMem[adc_buffer_pos];
+                continue;
             }
-            else if (config.deadBandHi[current_row][current_col] != 0)
+            else if (config.deadBandHi[current_row][current_col] == 0)
             {
-                if (
+                continue;
+            } else if (
                     !(
                         (
                             BufMem[adc_buffer_pos] <= config.deadBandLo[current_row][current_col] 
@@ -115,48 +122,47 @@ CY_ISR(EoC_ISR)
                         && BufMem[adc_buffer_pos] - config.guardHi <= config.deadBandHi[current_row][current_col]
                         ) // Upper band
                     )
-                )
-                    continue;
+            )
+            {
+                continue;
+            }
 #if COMMONSENSE_IIR_ORDER == 0
-                // Degenerate version. But very fast! Can be used in noiseless environments.
-                matrix[current_row][current_col] = BufMem[adc_buffer_pos];
+            // Degenerate version. But very fast! Can be used in noiseless environments.
+            matrix_ptr[key_index] = BufMem[adc_buffer_pos];
 #else
-                matrix[current_row][current_col] += BufMem[adc_buffer_pos] - (matrix[current_row][current_col] >> COMMONSENSE_IIR_ORDER);
+            matrix_ptr[key_index] += BufMem[adc_buffer_pos] - (matrix_ptr[key_index] >> COMMONSENSE_IIR_ORDER);
 #endif
     //Key pressed?
 #if NORMALLY_LOW == 1
-                if (matrix[current_row][current_col] >= (config.deadBandHi[current_row][current_col] << COMMONSENSE_IIR_ORDER))
+            if (matrix_ptr[key_index] >= (config.deadBandHi[current_row][current_col] << COMMONSENSE_IIR_ORDER))
 #else
-                if (matrix[current_row][current_col] <= (config.deadBandLo[current_row][current_col] << COMMONSENSE_IIR_ORDER))
+            if (matrix_ptr[key_index] <= (config.deadBandLo[current_row][current_col] << COMMONSENSE_IIR_ORDER))
 #endif
+            {
+                if ((row_status & (1 << current_col)) == 0)
                 {
-                    if ((row_status & (1 << current_col)) == 0)
-                    {
             // new keypress
-                        append_scancode(current_row*MATRIX_COLS + current_col);
+                    append_scancode(key_index);
 #ifdef MATRIX_LEVELS_DEBUG
-                        level_buffer[scancode_buffer_writepos] = matrix[current_row][current_col] & 0xff;
-                        level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
+                    level_buffer[scancode_buffer_writepos] = matrix_ptr[key_index] & 0xff;
+                    level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
 #endif
-                        row_status |= (1 << current_col);
-                    }
-                }
-                else
-                {
-                    if ((row_status & (1 << current_col)) > 0)
-                    {
-            // new key release
-                        append_scancode(KEY_UP_MASK|(current_row*MATRIX_COLS+current_col));
-#ifdef MATRIX_LEVELS_DEBUG
-                        level_buffer[scancode_buffer_writepos] = matrix[current_row][current_col] & 0xff;
-                        level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
-#endif
-                        row_status &= ~(1 << current_col);
-                    }
+                    row_status |= (1 << current_col);
                 }
             }
-            current_col++;
-            adc_buffer_pos += 2;
+            else
+            {
+                if ((row_status & (1 << current_col)) > 0)
+                {
+            // new key release
+                    append_scancode(KEY_UP_MASK|key_index);
+#ifdef MATRIX_LEVELS_DEBUG
+                    level_buffer[scancode_buffer_writepos] = matrix_ptr[key_index] & 0xff;
+                    level_buffer_inst[scancode_buffer_writepos] = BufMem[adc_buffer_pos] & 0xff;
+#endif
+                    row_status &= ~(1 << current_col);
+                }
+            }
         }
         adc_buffer_pos += ADC_BUF_INTER_ROW_GAP;
     }
