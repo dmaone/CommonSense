@@ -21,7 +21,8 @@ enum devicePowerStates {
     DEVSTATE_RESUMING,
 };
 
-uint8_t power_state;
+//Modified by ISR!
+volatile uint8_t power_state;
 
 void usb_init(void);
 void usb_configure(void);

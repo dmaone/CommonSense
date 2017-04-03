@@ -20,6 +20,8 @@
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
 #define COMMONSENSE_IIR_ORDER 2
 
+#define ADC_RESOLUTION 10
+
 // SYNC WITH PTK CHANNELS!!! MANUALLY BECAUSE GUI ACTIONS REQUIRED!!!
 #define ADC_CHANNELS 12
 
@@ -33,10 +35,6 @@
 
 // If you ever change the above to the even value - update "+ 1" accordingly! (+0 or +2..)
 #define _ADC_COL_OFFSET(i) ((i<<1) + 1)
-
-#define ADC_RESOLUTION 10
-
-
 
 // Don't forget to set PTK to 5 channels for 100kHz mode! 
 // 3 channels is too low - pulse reset logic activates at ch2 selection

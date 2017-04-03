@@ -11,6 +11,8 @@
 #include "scan.h"
 #include "PSoC_USB.h"
 
+CY_ISR_PROTO(EoC_ISR);
+
 static uint8_t Buf0Chan, Buf1Chan;
 static uint8_t Buf0TD = CY_DMA_INVALID_TD;
 static uint8_t Buf1TD = CY_DMA_INVALID_TD;
@@ -22,10 +24,7 @@ static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static uint32_t row_status;
 
-uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
-
-
-CY_ISR_PROTO(EoC_ISR);
+static uint16_t matrix[MATRIX_ROWS][MATRIX_COLS+1]; // Need to leave space for even number of columns.
 
 static void InitSensor(void)
 {
@@ -62,7 +61,7 @@ static void EnableSensor(void)
     EoCIRQ_StartEx(EoC_ISR);
 }
 
-inline void Drive(uint8 drv)
+static inline void Drive(uint8 drv)
 {
     SenseReg_Control |= 0x01; // Untie sense from the ground
 /*
@@ -180,6 +179,7 @@ void scan_start(void)
 
 void scan_reset(void)
 {
+    uint8 enableInterrupts = CyEnterCriticalSection();
     for (uint8_t i=0; i<MATRIX_ROWS; i++)
     {
         for (uint8_t j=0; j<MATRIX_COLS; j++)
@@ -188,11 +188,11 @@ void scan_reset(void)
             matrix[i][j] = (config.deadBandHi[i][j] + config.deadBandLo[i][j]) << (COMMONSENSE_IIR_ORDER - 1);
         }
     }
-    // Our hope is to be REALLY QUICK - ISR can change those at any moment.
     memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
     memset(matrix_status, 0, sizeof(matrix_status));
     scancode_buffer_readpos = 0;
     scancode_buffer_writepos = 0;
+    CyExitCriticalSection(enableInterrupts);
 }
 
 void scan_init(void)

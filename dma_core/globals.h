@@ -70,8 +70,10 @@ typedef struct {
     bool setup_mode;
 } __attribute__ ((packed)) status_register_t;
 
-uint8_t tick;
-uint32_t systime;
+//Modified by ISR!
+volatile uint8_t tick;
+volatile uint32_t systime;
+
 status_register_t status_register;
 uint8_t led_status;
 
