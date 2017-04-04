@@ -147,7 +147,7 @@ void process_msg(OUT_c2packet_t * inbox)
 
 void usb_send_c2(void)
 {   
-    USB_WAIT_FOR_EP(OUTBOX_EP);
+    USB_WAIT_FOR_IN_EP(OUTBOX_EP);
     USB_LoadInEP(OUTBOX_EP, outbox.raw, sizeof(outbox.raw));
 }
 
@@ -422,4 +422,4 @@ void xprintf(const char *format_p, ...)
     vsnprintf((char *)outbox.raw, sizeof(outbox), format_p, va);
     va_end(va);
     usb_send_c2();
-} 
+}

@@ -46,6 +46,6 @@ void update_system_report(queuedScancode *key);
 #define _WIPE_OUTBOX(OUTBOX)
 #endif
 
-#define USB_WAIT_FOR_EP(EP) while (USB_GetEPState(EP) != USB_IN_BUFFER_EMPTY) { if (power_state != DEVSTATE_FULL_THROTTLE) return; }
+#define USB_WAIT_FOR_IN_EP(EP) while (USB_GetEPState(EP) != USB_IN_BUFFER_EMPTY) { if (power_state != DEVSTATE_FULL_THROTTLE) return; }
 
-#define USB_SEND_REPORT(TYPE) USB_WAIT_FOR_EP(TYPE##_EP); _WIPE_OUTBOX(TYPE##_OUTBOX); USB_LoadInEP(TYPE##_EP, TYPE##_OUTBOX, OUTBOX_SIZE(TYPE##_OUTBOX));
+#define USB_SEND_REPORT(TYPE) USB_WAIT_FOR_IN_EP(TYPE##_EP); _WIPE_OUTBOX(TYPE##_OUTBOX); USB_LoadInEP(TYPE##_EP, TYPE##_OUTBOX, OUTBOX_SIZE(TYPE##_OUTBOX));

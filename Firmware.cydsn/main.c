@@ -54,21 +54,23 @@ int main()
                     {
                         usb_configure();
                     }
+                    uint8_t enableInterrupts = CyEnterCriticalSection();
                     if (CTRLR_SCB.status == USB_XFER_STATUS_ACK)
                     {
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(4);
-CyPins_ClearPin(ExpHdr_2);
-                        process_msg((void*)CTRLR_INBOX);
+                        static OUT_c2packet_t inbox;
+                        memcpy(&inbox, (void*)CTRLR_INBOX, sizeof(inbox));
                         CTRLR_SCB.status = USB_XFER_IDLE;
+                        // processing message sends USB packets, interrupts are vital.
+                        CyExitCriticalSection(enableInterrupts);
+                        process_msg(&inbox);
+                        enableInterrupts = CyEnterCriticalSection();
                     }
                     if (KBD_SCB.status == USB_XFER_STATUS_ACK)
                     {
-                        uint8_t enableInterrupts = CyEnterCriticalSection();
                         led_status = KBD_INBOX[0];
                         KBD_SCB.status = USB_XFER_IDLE;
-                        CyExitCriticalSection(enableInterrupts);
                     }
+                    CyExitCriticalSection(enableInterrupts);
                     if (status_register.matrix_output > 0)
                         report_matrix_readouts();
                     pipeline_process();
@@ -97,6 +99,7 @@ CyPins_ClearPin(ExpHdr_2);
                 nap();
                 break;
             case DEVSTATE_RESUMING:
+                // only from deep sleep - RWU goes straight to full throttle.
                 tick = 0;
                 wake();
                 break;

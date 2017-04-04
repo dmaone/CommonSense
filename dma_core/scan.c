@@ -194,7 +194,7 @@ void scan_start(void)
 
 void scan_reset(void)
 {
-    uint8 enableInterrupts = CyEnterCriticalSection();
+    uint8_t enableInterrupts = CyEnterCriticalSection();
     for (uint8_t i=0; i<MATRIX_ROWS; i++)
     {
         for (uint8_t j=0; j<MATRIX_COLS; j++)
