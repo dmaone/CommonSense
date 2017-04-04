@@ -19,7 +19,7 @@ static uint8_t Buf1TD = CY_DMA_INVALID_TD;
 // signedness intentional! Simplifies comparison logic
 // high byte from ADC must be zero, so should be safe.
 static int16_t BufMem[PTK_CHANNELS * NUM_ADCs];
-static uint8_t current_row;
+static uint8 current_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 
@@ -186,7 +186,7 @@ void scan_start(void)
 {
     if (!scan_in_progress)
     {
-        current_row = MATRIX_ROWS - 1;
+        current_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
         Drive(current_row);
         scan_in_progress = true;
     }
