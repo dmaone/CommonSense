@@ -47,9 +47,6 @@ int main()
         switch (power_state)
         {
             case DEVSTATE_FULL_THROTTLE:
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(2);
-CyPins_ClearPin(ExpHdr_2);
                 if (tick)
                 {
                     tick = 0;
@@ -76,14 +73,11 @@ CyPins_ClearPin(ExpHdr_2);
                 break;
             case DEVSTATE_SLEEP:
             case DEVSTATE_WATCH:
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(4);
-CyPins_ClearPin(ExpHdr_2);
                 if (tick > SUSPEND_SYSTIMER_DIVISOR)
                 {
 CyPins_SetPin(ExpHdr_0);
                     tick = 0;
-                    //scan_start();
+                    scan_start();
                     //if (pipeline_process_wakeup())
                     {
                     //    usb_wakeup();
@@ -93,23 +87,14 @@ CyPins_ClearPin(ExpHdr_0);
 //                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SUSPENDING:
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(6);
-CyPins_ClearPin(ExpHdr_2);
                 nap();
                 break;
             case DEVSTATE_RESUMING:
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(8);
-CyPins_ClearPin(ExpHdr_2);
                 tick = 0;
                 wake();
                 break;
             default:
                 // Stray interrupt? We'd better stay awake.
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(24);
-CyPins_ClearPin(ExpHdr_2);
                 break;
         }
     }

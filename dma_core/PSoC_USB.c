@@ -310,19 +310,15 @@ void update_system_report(queuedScancode *key)
 
 void usb_suspend_monitor_start(void)
 {
-CyPins_SetPin(ExpHdr_1);
     SuspendWD_Stop();
     SuspendWD_WriteCounter(0);
     SuspendWD_Start();
     USBSuspendIRQ_StartEx(Suspend_ISR); // Does disabling for you, safe to use that way.
-CyPins_ClearPin(ExpHdr_1);
 }
 
 void usb_suspend_monitor_stop(void)
 {
-CyPins_SetPin(ExpHdr_1);
     USBSuspendIRQ_Stop();
-CyPins_ClearPin(ExpHdr_1);
 }
 
 void usb_init(void)
@@ -385,27 +381,26 @@ void wake(void)
 
 CY_ISR(Suspend_ISR)
 {
-//CyPins_SetPin(ExpHdr_1);
     if (power_state == DEVSTATE_SUSPENDING)
     {
-//CyPins_ClearPin(ExpHdr_1);
         return;
     }
-//CyPins_ClearPin(ExpHdr_1);
-    if ((USB_Dp_PS & USB_Dp_MASK) != 0) // That's "USB_Dp_Read" - saving on call overhead
+    //"USB_Dp_Read()" != 0 && USB_Dm_Read() == 0
+    if ((USB_Dp_PS & (USB_Dp__MASK | USB_Dm__MASK)) == USB_Dp__MASK)
     {
-        return; // Long K state, apparently we're resuming.
+        // Suspend is when no activity for 3ms and J (=Dp is high)
+        power_state = DEVSTATE_SUSPENDING;
     }
-    if ((USB_Dm_PS & USB_Dm_MASK) == 0) // That's "USB_Dm_Read" - saving on call overhead
-    {
-        CySoftwareReset(); // Long SE0 = bus reset. Play Kurt Cobain.
-    }
-    // Suspend is when no activity and J (=Dm is high)
-    power_state = DEVSTATE_SUSPENDING;
+    // bus reset while awake is handled by component.
+    // suspend state is handled by DP ISR
 }
 
 void USB_DP_ISR_EntryCallback(void)
 {
+    if (power_state == DEVSTATE_RESUMING)
+    {
+        return;
+    }
     power_state = DEVSTATE_RESUMING;
 }
 
