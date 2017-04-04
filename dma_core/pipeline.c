@@ -16,12 +16,13 @@ inline uint8_t process_scancode_buffer(void)
 {
     if (scancode_buffer_readpos == scancode_buffer_writepos)
         return COMMONSENSE_NOKEY;
-    scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
     // Skip zeroes that might be there
-    // TODO infinite loop guard
     while (scancode_buffer[scancode_buffer_readpos] == COMMONSENSE_NOKEY)
     {
         scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(1);
+CyPins_ClearPin(ExpHdr_2);
     }
     uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
 #ifdef MATRIX_LEVELS_DEBUG
@@ -234,9 +235,18 @@ inline void pipeline_process(void)
     update_reports();
 }
 
-uint8_t pipeline_process_wakeup(void)
+inline bool pipeline_process_wakeup(void)
 {
-    return (process_scancode_buffer() & KEY_UP_MASK) == 0 ? 1 : 0;
+    uint8 sc = process_scancode_buffer();
+    if (sc == COMMONSENSE_NOKEY)
+    {
+        return false;
+    }
+    if ((sc & KEY_UP_MASK) == 0)
+    {
+        return true;
+    }
+    return false;
 }
 
 void pipeline_init(void)

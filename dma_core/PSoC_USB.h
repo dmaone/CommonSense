@@ -30,7 +30,7 @@ void nap(void);
 void wake(void);
 
 void usb_send_c2();
-void usb_wakeup(void);
+void usb_send_wakeup(void);
 void process_msg(OUT_c2packet_t *);
 void load_config(void);
 

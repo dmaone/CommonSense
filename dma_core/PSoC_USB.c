@@ -318,6 +318,7 @@ void usb_suspend_monitor_start(void)
 
 void usb_suspend_monitor_stop(void)
 {
+    SuspendWD_Stop();
     USBSuspendIRQ_Stop();
 }
 
@@ -338,22 +339,11 @@ void usb_configure(void)
     usb_suspend_monitor_start();
 }
 
-void usb_wakeup(void)
-{
-    if (USB_RWUEnabled() != 0)
-    {
-        USB_Force(USB_FORCE_K);
-        CyDelay(5);
-        USB_Force(USB_FORCE_NONE);
-        CyDelay(5);
-    }
-}
-
 void nap(void)
 {
     // TODO reconfigure monitor period to provide periodic wakeups for monitor-in-suspend
     usb_suspend_monitor_stop();
-    uint8_t rwu = 1; //USB_RWUEnabled();
+    uint8_t rwu = USB_RWUEnabled();
     USB_Suspend();
     if (rwu == 0)
     {
@@ -379,10 +369,30 @@ void wake(void)
     //CyIMO_SetFreq(CY_IMO_FREQ_USB);
 }
 
+void usb_send_wakeup(void)
+{
+    CyDelay(5); // Just in case, not to violate spec by waking immediately.
+    wake();
+    usb_suspend_monitor_stop();
+    USB_Force(USB_FORCE_K);
+    CyDelay(5);
+    USB_Force(USB_FORCE_NONE);
+    /*
+     * Host must send resume for at least 20ms (USB 2.0 spec 7.1.7.7).
+     * So, 15 more.
+     * We also officially have 10ms to wake.
+     * Let's sit here a bit longer
+     * so we don't have to worry about suspend watchdog shutting us down.
+     */
+    CyDelay(15 + 2);
+    usb_suspend_monitor_start();
+}
+
 CY_ISR(Suspend_ISR)
 {
     if (power_state == DEVSTATE_SUSPENDING)
     {
+        // !!!HACK!!! we use this state in RWU to disable ISR w/o disabling IRQ!!!
         return;
     }
     //"USB_Dp_Read()" != 0 && USB_Dm_Read() == 0
@@ -391,6 +401,7 @@ CY_ISR(Suspend_ISR)
         // Suspend is when no activity for 3ms and J (=Dp is high)
         power_state = DEVSTATE_SUSPENDING;
     }
+    USB_Force(USB_FORCE_NONE);
     // bus reset while awake is handled by component.
     // suspend state is handled by DP ISR
 }

@@ -56,13 +56,18 @@ int main()
                     }
                     if (CTRLR_SCB.status == USB_XFER_STATUS_ACK)
                     {
+CyPins_SetPin(ExpHdr_2);
+CyDelayUs(4);
+CyPins_ClearPin(ExpHdr_2);
                         process_msg((void*)CTRLR_INBOX);
                         CTRLR_SCB.status = USB_XFER_IDLE;
                     }
                     if (KBD_SCB.status == USB_XFER_STATUS_ACK)
                     {
+                        uint8_t enableInterrupts = CyEnterCriticalSection();
                         led_status = KBD_INBOX[0];
                         KBD_SCB.status = USB_XFER_IDLE;
+                        CyExitCriticalSection(enableInterrupts);
                     }
                     if (status_register.matrix_output > 0)
                         report_matrix_readouts();
@@ -72,19 +77,21 @@ int main()
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SLEEP:
+                // We're supposed to be in deeper sleep so not ever getting here.
+                // But if not - keep things warm, sleep the CPU.
+                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+                break;
             case DEVSTATE_WATCH:
                 if (tick > SUSPEND_SYSTIMER_DIVISOR)
                 {
-CyPins_SetPin(ExpHdr_0);
                     tick = 0;
                     scan_start();
-                    //if (pipeline_process_wakeup())
+                    if (pipeline_process_wakeup())
                     {
-                    //    usb_wakeup();
+                        usb_send_wakeup();
                     }
-CyPins_ClearPin(ExpHdr_0);
                 }
-//                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+                CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SUSPENDING:
                 nap();
@@ -94,7 +101,8 @@ CyPins_ClearPin(ExpHdr_0);
                 wake();
                 break;
             default:
-                // Stray interrupt? We'd better stay awake.
+                // Stray interrupt? 
+                // We'd better stay awake and sort it out next iteration.
                 break;
         }
     }
