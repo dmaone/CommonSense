@@ -44,6 +44,10 @@ bool DeviceInterface::event(QEvent* e)
                               << ", setup mode: " << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE));
             return true;
         case C2RESPONSE_SCANCODE:
+            if (!config->bValid)
+            {
+                return true;
+            }
             uint8_t scancodeReleased, scancode, row, col;
             scancodeReleased = 0x80;
             scancode = payload->at(1);
@@ -71,6 +75,7 @@ void DeviceInterface::_sendPacket()
     if (!device) return; // TODO we should be more vocal
     outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
     hid_write(device, outbox, sizeof(outbox));
+    QThread::msleep(10);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)
