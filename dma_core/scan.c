@@ -144,6 +144,7 @@ CY_ISR(Result_ISR)
     {
         current_col--;
         adc_buffer_pos -= 2;
+
         // Here you need matrix-sized array of uint8!! matrix[][] won't do!!
         register uint8_t key_index = (uint32)&config.deadBandHi[reading_row][current_col] - (uint32)&config.deadBandHi;
         register uint8_t hi = config.deadBandHi[reading_row][current_col];
@@ -172,7 +173,9 @@ CY_ISR(Result_ISR)
         // Degenerate version. But very fast! Can be used in noiseless environments.
         matrix_ptr[key_index] = readout;
 #else
-        matrix_ptr[key_index] += readout - (matrix_ptr[key_index] >> COMMONSENSE_IIR_ORDER);
+        // IIR filter - readable version minimizing array lookups.
+        readout -= (matrix_ptr[key_index] >> COMMONSENSE_IIR_ORDER);
+        matrix_ptr[key_index] += readout;
 #endif
 //Key pressed?
 #if NORMALLY_LOW == 1
