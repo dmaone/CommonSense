@@ -75,7 +75,6 @@ void DeviceInterface::_sendPacket()
     if (!device) return; // TODO we should be more vocal
     outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
     hid_write(device, outbox, sizeof(outbox));
-    QThread::msleep(10);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)

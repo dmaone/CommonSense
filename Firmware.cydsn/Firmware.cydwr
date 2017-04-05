@@ -602,6 +602,11 @@
     </Group>
   </Group>
   <Data key="DataVersionKey" value="2" />
+  <Group key="DMA">
+    <Data key="0d9ff8f3-8159-4373-8139-c4d3de97e2e0" value="0" />
+    <Data key="c6811e97-be8d-4eb7-b2ff-7faaa1f55302" value="1" />
+    <Data key="d42e528f-d62d-45b4-b216-d9fdfdf5e14d" value="1" />
+  </Group>
   <Group key="DWRInstGuidMapping">
     <Group key="Clock">
       <Data key="6e7e6b05-3192-437a-a0c3-145116943512" value="BUS_CLK" />
@@ -620,6 +625,11 @@
       <Data key="dec7c0f7-97cf-4c9e-813b-c2e627d54f61" value="SEQ_CLK" />
       <Data key="e261f250-bb91-406c-842a-8aab322eb24b" value="Analog" />
     </Group>
+    <Group key="DMA">
+      <Data key="0d9ff8f3-8159-4373-8139-c4d3de97e2e0" value="FinalBuf" />
+      <Data key="c6811e97-be8d-4eb7-b2ff-7faaa1f55302" value="Buf1" />
+      <Data key="d42e528f-d62d-45b4-b216-d9fdfdf5e14d" value="Buf0" />
+    </Group>
     <Group key="Interrupt">
       <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="EoCIRQ" />
       <Data key="8de28a89-32f9-4016-91de-2cd63cc3c2b4" value="BootIRQ" />
@@ -635,6 +645,7 @@
       <Data key="611099ee-b91e-41c3-95e2-b4631c409531" value="USBSuspendIRQ" />
       <Data key="9595021b-b20f-4fb9-9fb6-8a720efe50ab" value="TimerIRQ" />
       <Data key="a0c2fa85-a4f0-4a93-bce5-cf13a0c38093/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="ADC1_IRQ" />
+      <Data key="d7019a74-fe8d-4003-b1a3-f9379c77cde9" value="ResultIRQ" />
     </Group>
     <Group key="Pin">
       <Data key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844" value="D1" />
@@ -3754,7 +3765,7 @@
     </Group>
   </Group>
   <Group key="Interrupt">
-    <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="3" />
+    <Data key="5d6813bd-1c53-4b72-bd07-c46ff578d8fb" value="5" />
     <Data key="8de28a89-32f9-4016-91de-2cd63cc3c2b4" value="0" />
     <Data key="82abd659-c6e6-4159-ac54-73b6be653ba6/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="7" />
     <Data key="230217a0-461d-490b-a25b-00e7699c055c/8c70c28a-acdf-4af1-b803-ce0c58edb918" value="4" />
@@ -3768,6 +3779,7 @@
     <Data key="611099ee-b91e-41c3-95e2-b4631c409531" value="0" />
     <Data key="9595021b-b20f-4fb9-9fb6-8a720efe50ab" value="5" />
     <Data key="a0c2fa85-a4f0-4a93-bce5-cf13a0c38093/b73dcd38-4bce-4cd7-acec-33f53e91ccd6" value="7" />
+    <Data key="d7019a74-fe8d-4003-b1a3-f9379c77cde9" value="4" />
   </Group>
   <Group key="Pin2">
     <Group key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844">
