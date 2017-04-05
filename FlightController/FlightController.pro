@@ -13,10 +13,10 @@ TEMPLATE = app
 
 
 win32 {
-    LIBS += -L$$PWD/../hidapi/windows/Debug/ -lhidapi -lsetupapi
+    LIBS += -L$$PWD/../../hidapi/windows/.libs -lhidapi -lsetupapi
     CONFIG += static
-    INCLUDEPATH += ../hidapi/hidapi
-    SOURCES += ../hidapi/windows/hid.c
+    INCLUDEPATH += ../../hidapi/hidapi
+    SOURCES += ../../hidapi/windows/hid.c
 }
 
 SOURCES += main.cpp \
