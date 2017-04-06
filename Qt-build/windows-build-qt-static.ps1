@@ -164,7 +164,7 @@ DEFINES += QT_STATIC_BUILD
 
     # Configure, compile and install Qt.
     Push-Location $QtSrcDir
-    cmd /c "configure.bat -static -debug-and-release -platform win32-g++ -prefix $QtDir `        -qt-zlib -qt-pcre -qt-libpng -qt-libjpeg -qt-freetype -opengl desktop -no-openssl `        -opensource -confirm-license `        -make libs -nomake tools -nomake examples -nomake tests"
+    cmd /c "configure.bat -static -release -platform win32-g++ -prefix $QtDir `	-no-sql-odbc -no-sql-sqlite`	-qt-zlib -qt-pcre -qt-libpng -qt-libjpeg -qt-freetype`	-opengl desktop -no-openssl -opensource -confirm-license `        -make libs -nomake tools -nomake examples -nomake tests"
     mingw32-make -k -j4
     mingw32-make -k install
     Pop-Location
