@@ -9,16 +9,18 @@ QT       += core gui widgets
 TARGET = FlightController
 TEMPLATE = app
 
+CONFIG += static
+INCLUDEPATH += ../hidapi/hidapi
+LIBS += -lhidapi
+
 win32 {
     LIBS += -L$$PWD/../hidapi/windows/.libs -lsetupapi
+    RC_FILE = WindowsIcon.rc
 }
 macx {
     LIBS += -L$$PWD/../hidapi/mac/.libs -rpath @executable_path/../Frameworks
     ICON = FlightController.icns
 }
-CONFIG += static
-INCLUDEPATH += ../hidapi/hidapi
-LIBS += -lhidapi
 
 SOURCES += main.cpp \
     FlightController.cpp \
