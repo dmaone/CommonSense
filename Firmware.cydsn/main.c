@@ -47,6 +47,9 @@ int main()
         switch (power_state)
         {
             case DEVSTATE_FULL_THROTTLE:
+#ifdef DEBUG_STATE_MACHINE
+                PIN_DEBUG(2, 1)
+#endif
                 if (tick)
                 {
                     tick = 0;
@@ -79,11 +82,17 @@ int main()
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SLEEP:
+#ifdef DEBUG_STATE_MACHINE
+                PIN_DEBUG(2, 2)
+#endif
                 // We're supposed to be in deeper sleep so not ever getting here.
                 // But if not - keep things warm, sleep the CPU.
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_WATCH:
+#ifdef DEBUG_STATE_MACHINE
+                PIN_DEBUG(2, 3)
+#endif
                 if (tick > SUSPEND_SYSTIMER_DIVISOR)
                 {
                     tick = 0;
@@ -96,14 +105,23 @@ int main()
                 CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
                 break;
             case DEVSTATE_SUSPENDING:
+#ifdef DEBUG_STATE_MACHINE
+    PIN_DEBUG(2, 4)
+#endif
                 nap();
                 break;
             case DEVSTATE_RESUMING:
+#ifdef DEBUG_STATE_MACHINE
+                PIN_DEBUG(2, 5)
+#endif
                 // only from deep sleep - RWU goes straight to full throttle.
                 tick = 0;
                 wake();
                 break;
             default:
+#ifdef DEBUG_STATE_MACHINE
+                PIN_DEBUG(2, 6)
+#endif
                 // Stray interrupt? 
                 // We'd better stay awake and sort it out next iteration.
                 break;

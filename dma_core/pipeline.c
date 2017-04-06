@@ -20,9 +20,6 @@ inline uint8_t process_scancode_buffer(void)
     while (scancode_buffer[scancode_buffer_readpos] == COMMONSENSE_NOKEY)
     {
         scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
-CyPins_SetPin(ExpHdr_2);
-CyDelayUs(1);
-CyPins_ClearPin(ExpHdr_2);
     }
     uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
 #ifdef MATRIX_LEVELS_DEBUG

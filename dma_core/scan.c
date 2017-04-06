@@ -21,7 +21,7 @@ static uint8_t FinalBufTD[2];
 // high byte from ADC must be zero, so should be safe.
 static int16_t BufMem[PTK_CHANNELS * NUM_ADCs];
 static int16_t Results[ADC_CHANNELS * 2 * NUM_ADCs];
-static uint8 driving_row, reading_row;
+static uint8_t reading_row, driving_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 
@@ -104,6 +104,9 @@ inline void append_scancode(uint8_t scancode)
 
 CY_ISR(EoC_ISR)
 {
+#ifdef DEBUG_INTERRUPTS
+    PIN_DEBUG(1, 1)
+#endif
     // If there's no scan in progress - one row will be filled by garbage.
     // Which is no big deal.
 #ifdef COMMONSENSE_100KHZ_MODE
@@ -120,6 +123,7 @@ CY_ISR(EoC_ISR)
         if (power_state != DEVSTATE_FULL_THROTTLE)
         {
             scan_in_progress = false;
+            CyExitCriticalSection(enableInterrupts); // Important - otherwise interrupts are left disabled!
             return;
         }
         driving_row = MATRIX_ROWS;
@@ -133,6 +137,9 @@ CY_ISR(EoC_ISR)
 
 CY_ISR(Result_ISR)
 {
+#ifdef DEBUG_INTERRUPTS
+    PIN_DEBUG(1, 2)
+#endif
 #ifdef COMMONSENSE_100KHZ_MODE
     return;
     // The rest of the code is dead in 100kHz mode.

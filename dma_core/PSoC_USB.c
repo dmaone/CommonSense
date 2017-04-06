@@ -390,9 +390,11 @@ void usb_send_wakeup(void)
 
 CY_ISR(Suspend_ISR)
 {
+#ifdef DEBUG_INTERRUPTS
+    PIN_DEBUG(1, 5)
+#endif
     if (power_state == DEVSTATE_SUSPENDING)
     {
-        // !!!HACK!!! we use this state in RWU to disable ISR w/o disabling IRQ!!!
         return;
     }
     //"USB_Dp_Read()" != 0 && USB_Dm_Read() == 0
@@ -401,13 +403,15 @@ CY_ISR(Suspend_ISR)
         // Suspend is when no activity for 3ms and J (=Dp is high)
         power_state = DEVSTATE_SUSPENDING;
     }
-    USB_Force(USB_FORCE_NONE);
     // bus reset while awake is handled by component.
     // suspend state is handled by DP ISR
 }
 
 void USB_DP_ISR_EntryCallback(void)
 {
+#ifdef DEBUG_INTERRUPTS
+    PIN_DEBUG(1, 4)
+#endif
     if (power_state == DEVSTATE_RESUMING)
     {
         return;
