@@ -28,6 +28,8 @@
 
 // Main safety switch
 #define NOT_A_KEYBOARD 0
+#undef DEBUG_STATE_MACHINE
+#undef DEBUG_INTERRUPTS
 
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01
@@ -73,6 +75,8 @@ typedef struct {
     bool matrix_output;
     bool setup_mode;
 } __attribute__ ((packed)) status_register_t;
+
+#define PIN_DEBUG(POSITION, DELAY) CyPins_SetPin(ExpHdr_##POSITION);CyDelayUs(DELAY);CyPins_ClearPin(ExpHdr_##POSITION);
 
 //Modified by ISR!
 volatile uint8_t tick;
