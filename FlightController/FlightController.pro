@@ -4,20 +4,21 @@
 #
 #-------------------------------------------------
 
-QT       += core gui
-
-greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
+QT       += core gui widgets
 
 TARGET = FlightController
 TEMPLATE = app
 
-
 win32 {
-    LIBS += -L$$PWD/../../hidapi/windows/.libs -lhidapi -lsetupapi
-    CONFIG += static
-    INCLUDEPATH += ../../hidapi/hidapi
-    SOURCES += ../../hidapi/windows/hid.c
+    LIBS += -L$$PWD/../hidapi/windows/.libs -lsetupapi
 }
+macx {
+    LIBS += -L$$PWD/../hidapi/mac/.libs -rpath @executable_path/../Frameworks
+    ICON = FlightController.icns
+}
+CONFIG += static
+INCLUDEPATH += ../hidapi/hidapi
+LIBS += -lhidapi
 
 SOURCES += main.cpp \
     FlightController.cpp \
