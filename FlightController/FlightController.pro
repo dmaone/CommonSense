@@ -11,15 +11,17 @@ TEMPLATE = app
 
 CONFIG += static
 INCLUDEPATH += ../hidapi/hidapi
-LIBS += -lhidapi
 
 win32 {
-    LIBS += -L$$PWD/../hidapi/windows/.libs -lsetupapi
+    LIBS += -L$$PWD/../hidapi/windows/.libs -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
 macx {
-    LIBS += -L$$PWD/../hidapi/mac/.libs -rpath @executable_path/../Frameworks
+    LIBS += -L$$PWD/../hidapi/mac/.libs -lhidapi -rpath @executable_path/../Frameworks
     ICON = FlightController.icns
+}
+linux {
+    LIBS += -L$$PWD/../hidapi/linux/.libs -lhidapi-hidraw
 }
 
 SOURCES += main.cpp \

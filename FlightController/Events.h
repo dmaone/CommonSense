@@ -7,7 +7,7 @@
  * published by the Free Software Foundation. 
 */
 #pragma once
-#include <QTCore>
+#include <QtCore>
 
 class DeviceMessage: public QEvent {
  public:

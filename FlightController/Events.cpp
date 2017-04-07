@@ -7,8 +7,8 @@
  * published by the Free Software Foundation. 
 */
 
+#include <QtCore>
 #include "Events.h"
-#include <QTCore>
 
 const QEvent::Type DeviceMessage::ET = static_cast<QEvent::Type>(QEvent::registerEventType());
 

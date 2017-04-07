@@ -1,5 +1,5 @@
 #include <QFileDialog>
-#include <Qfile>
+#include <QFile>
 
 #include "DeviceConfig.h"
 

@@ -83,8 +83,8 @@ void LayerConditions::init(void)
         QLabel *arrowLabel = new QLabel(QChar(0x2192));
 
         QComboBox *layerCombo = new QComboBox();
-        for (int i = 0; i < config->numLayers; i++)
-            layerCombo->addItem(i == 0 ? "Base Layer" : QString("Layer %1").arg(i), i);
+        for (int j = 0; j < config->numLayers; j++)
+            layerCombo->addItem(j == 0 ? "Base Layer" : QString("Layer %1").arg(j), j);
         layerCombo->setCurrentIndex(cnds[i].layer());
 
         grid->addWidget(fn1Check, i + 1, 2);

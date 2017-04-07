@@ -8,7 +8,7 @@
 */
 #include <QMessageBox>
 #include "FlightController.h"
-#include "ui_flightcontroller.h"
+#include "ui_FlightController.h"
 #include "MatrixMonitor.h"
 
 #include "singleton.h"
