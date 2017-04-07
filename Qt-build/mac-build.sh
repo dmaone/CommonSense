@@ -1,4 +1,7 @@
-#!/bin/sh
+#!/bin/bash
+
+BUILD_DIR=build-macx
+QT_BIN=$HOME/Qt5.8.0/5.8/clang_64/bin/
 
 echo "Preparing icon set"
 pushd ../FlightController-icons
@@ -19,3 +22,12 @@ sudo xcode-select -s /Applications/Xcode.app/Contents/Developer
 echo "now running xcodebuild - you need to accept license for Qt to resolve SDK path!!!"
 xcodebuild
 echo "If xcodebuild returns error - it's okay! Means it's working."
+
+mkdir $BUILD_DIR
+pushd $BUILD_DIR
+$QT_BIN/qmake ../../FlightController.pro -r -spec macx-clang
+make
+$QT_BIN/macdeployqt FlightController.app -verbose=2 -dmg
+popd
+mv $BUILD_DIR/FlightController.dmg .
+

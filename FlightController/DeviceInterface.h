@@ -8,7 +8,7 @@
 */
 
 #pragma once
-#include "hidapi.h"
+#include "hidapi/hidapi.h"
 #include "Events.h"
 #include <QObject>
 #include "LogViewer.h"

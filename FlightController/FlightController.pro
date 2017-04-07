@@ -10,7 +10,9 @@ TARGET = FlightController
 TEMPLATE = app
 
 CONFIG += static
-INCLUDEPATH += ../hidapi/hidapi
+
+# Not needed for linux, but doesn't hurt.
+INCLUDEPATH += ../hidapi
 
 win32 {
     LIBS += -L$$PWD/../hidapi/windows/.libs -lhidapi -lsetupapi
@@ -21,7 +23,7 @@ macx {
     ICON = FlightController.icns
 }
 linux {
-    LIBS += -L$$PWD/../hidapi/linux/.libs -lhidapi-hidraw
+    LIBS += -lhidapi-hidraw
 }
 
 SOURCES += main.cpp \
