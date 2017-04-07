@@ -23,11 +23,12 @@ echo "now running xcodebuild - you need to accept license for Qt to resolve SDK 
 xcodebuild
 echo "If xcodebuild returns error - it's okay! Means it's working."
 
+test -d $BUILD_DIR && rm -rf $BUILD_DIR
 mkdir $BUILD_DIR
 pushd $BUILD_DIR
-$QT_BIN/qmake ../../FlightController.pro -r -spec macx-clang
-make
-$QT_BIN/macdeployqt FlightController.app -verbose=2 -dmg
+echo $QT_BIN
+$QT_BIN/qmake ../../FlightController/FlightController.pro -r -spec macx-clang
+make && $QT_BIN/macdeployqt FlightController.app -verbose=2 -dmg
 popd
-mv $BUILD_DIR/FlightController.dmg .
+mv -f $BUILD_DIR/FlightController.dmg .
 

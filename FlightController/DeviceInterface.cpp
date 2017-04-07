@@ -161,21 +161,18 @@ hid_device* DeviceInterface::acquireDevice(void)
         return NULL;
     }
     hid_device_info *d = root;
-#ifdef __linux__
-    uint8_t devs_left = 2;
-#endif
     while (d){
 //        qInfo() << d->path << d->vendor_id << d->product_id;
         // Usage and usage page are win and mac only :(
 #ifdef __linux__
         if (d->vendor_id == 0x4114)
 #else
-        if (d->usage_page == 0x6213 && d->usage == 0x88){
+        if (d->usage_page == 0x6213 && d->usage == 0x88)
 #endif
         {
             qInfo() << "Found a node!";
 #ifdef __linux__
-            if (--devs_left == 0)
+            if (d->interface_number == 1)
 #endif
             {
                 qInfo() << "Trying to use" << d->path;
