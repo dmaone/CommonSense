@@ -15,6 +15,8 @@ DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
     connect(config, SIGNAL(changed()), this, SLOT(configChanged()));
     connect(config, SIGNAL(downloadBlock(c2command, uint8_t)), this, SLOT(sendCommand(c2command, uint8_t)));
     connect(config, SIGNAL(uploadBlock(OUT_c2packet_t)), this, SLOT(sendCommand(OUT_c2packet_t)));
+
+    connect(config, SIGNAL(sendCommand(c2command, uint8_t)), this, SLOT(sendCommand(c2command, uint8_t)));
 }
 
 DeviceInterface::~DeviceInterface(void)

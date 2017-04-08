@@ -1,5 +1,6 @@
 #include <QFileDialog>
 #include <QFile>
+#include <QMessageBox>
 
 #include "DeviceConfig.h"
 
@@ -294,6 +295,27 @@ void DeviceConfig::toFile()
         qInfo() << "Exported config to" << fns.at(0);
         settings.setValue(DEVICECONFIG_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }
+}
+
+
+void DeviceConfig::commit(void)
+{
+    QMessageBox::StandardButton result = QMessageBox::question(NULL,
+            "Saving EEPROM!",
+            "Do you want to write the config that is now in the device, to EEPROM?",
+            QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        emit sendCommand(C2CMD_COMMIT, 1u);
+}
+
+void DeviceConfig::rollback(void)
+{
+    QMessageBox::StandardButton result = QMessageBox::question(NULL,
+            "Resetting device!",
+            "Device will be reset, config will be restored from EEPROM and downloaded to host. OK?",
+            QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes)
+        emit sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
 std::vector<LayerCondition> DeviceConfig::layerConditions(void)

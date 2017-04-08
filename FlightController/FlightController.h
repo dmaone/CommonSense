@@ -47,8 +47,6 @@ public slots:
     void showLayerConditions(void);
     void mainTabChanged(int);
     void deviceStatusNotification(DeviceInterface::DeviceStatus);
-    void commitConfig(void);
-    void rollbackConfig(void);
 
 protected:
     void closeEvent(QCloseEvent *);

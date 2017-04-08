@@ -67,8 +67,8 @@ void FlightController::setup(void)
     connect(ui->action_Upload, SIGNAL(triggered()), di.config, SLOT(toDevice()));
     connect(ui->action_Download, SIGNAL(triggered()), di.config, SLOT(fromDevice()));
     connect(ui->action_Save, SIGNAL(triggered()), di.config, SLOT(toFile()));
-    connect(ui->action_Commit, SIGNAL(triggered()), this, SLOT(commitConfig()));
-    connect(ui->action_Rollback, SIGNAL(triggered()), this, SLOT(rollbackConfig()));
+    connect(ui->action_Commit, SIGNAL(triggered()), di.config, SLOT(commit()));
+    connect(ui->action_Rollback, SIGNAL(triggered()), di.config, SLOT(rollback()));
     connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
     di.start();
@@ -175,26 +175,6 @@ void FlightController::editThresholdsClick(void)
 void FlightController::showLayerConditions(void)
 {
     layerConditions->show();
-}
-
-void FlightController::commitConfig(void)
-{
-    QMessageBox::StandardButton result = QMessageBox::question(this,
-            "Saving EEPROM!",
-            "Do you want to write the config that is now in the device, to EEPROM?",
-            QMessageBox::Yes | QMessageBox::No);
-    if (result == QMessageBox::Yes)
-        sendCommand(C2CMD_COMMIT, 1u);
-}
-
-void FlightController::rollbackConfig(void)
-{
-    QMessageBox::StandardButton result = QMessageBox::question(this,
-            "Resetting device!",
-            "Device will be reset, config will be restored from EEPROM and downloaded to host. OK?",
-            QMessageBox::Yes | QMessageBox::No);
-    if (result == QMessageBox::Yes)
-        sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
 void FlightController::on_action_Setup_mode_triggered(bool bMode)

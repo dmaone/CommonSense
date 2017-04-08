@@ -61,12 +61,15 @@ signals:
     void changed(void);
     void uploadBlock(OUT_c2packet_t);
     void downloadBlock(c2command, uint8_t);
+    void sendCommand(c2command, uint8_t);
 
 public slots:
     void fromDevice(void);
     void toDevice(void);
     void fromFile(void);
     void toFile(void);
+    void commit(void);
+    void rollback(void);
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
