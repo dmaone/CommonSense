@@ -34,6 +34,9 @@ int main(int argc, char *argv[])
     logger = NULL;
     old_logger = NULL;
     QApplication a(argc, argv);
+    QCoreApplication::setOrganizationDomain("jwbh.ru");
+    QCoreApplication::setOrganizationName("DMA Labs");
+    QCoreApplication::setApplicationName("FlightController");
     FlightController w;
     logger = w.getLogViewport();
     old_logger = qInstallMessageHandler(logToViewport);

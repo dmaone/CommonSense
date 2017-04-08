@@ -9,6 +9,8 @@
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 
+#define LAYOUTS_DIR_KEY "settings_dir"
+
 namespace Ui {
 class LayoutEditor;
 }

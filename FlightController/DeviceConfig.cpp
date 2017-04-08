@@ -256,7 +256,9 @@ void DeviceConfig::_assemble(void)
 
 void DeviceConfig::fromFile()
 {
+    QSettings settings;
     QFileDialog fd(Q_NULLPTR, "Choose one file to import from");
+    fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
     fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
     fd.setDefaultSuffix(QString("cfg"));
     fd.setFileMode(QFileDialog::ExistingFile);
@@ -268,14 +270,17 @@ void DeviceConfig::fromFile()
         QDataStream ds(&f);
         ds.readRawData((char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
         qInfo() << "Imported config from" << fns.at(0);
+        settings.setValue(DEVICECONFIG_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
         this->_unpack();
     }
 }
 
 void DeviceConfig::toFile()
 {
+    QSettings settings;
     this->_assemble();
     QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
+    fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
     fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
     fd.setDefaultSuffix(QString("cfg"));
     fd.setAcceptMode(QFileDialog::AcceptSave);
@@ -287,6 +292,7 @@ void DeviceConfig::toFile()
         QDataStream ds(&f);
         ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
         qInfo() << "Exported config to" << fns.at(0);
+        settings.setValue(DEVICECONFIG_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }
 }
 

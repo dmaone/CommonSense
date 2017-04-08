@@ -105,7 +105,9 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols)
 
 void LayoutEditor::importLayout()
 {
+    QSettings settings;
     QFileDialog fd(this, "Choose one file to import from");
+    fd.setDirectory(settings.value(LAYOUTS_DIR_KEY).toString());
     fd.setNameFilter(tr("Layout files(*.l)"));
     fd.setDefaultSuffix(QString("l"));
     fd.setFileMode(QFileDialog::ExistingFile);
@@ -129,12 +131,15 @@ void LayoutEditor::importLayout()
         }
         setDisplay();
         qInfo() << "Imported layout from" << fns.at(0);
+        settings.setValue(LAYOUTS_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }
 }
 
 void LayoutEditor::exportLayout()
 {
+    QSettings settings;
     QFileDialog fd(this, "Choose one file to export to");
+    fd.setDirectory(settings.value(LAYOUTS_DIR_KEY).toString());
     fd.setNameFilter(tr("layout files(*.l)"));
     fd.setDefaultSuffix(QString("l"));
     fd.setAcceptMode(QFileDialog::AcceptSave);
@@ -166,6 +171,7 @@ void LayoutEditor::exportLayout()
         }
         ts << qSetFieldWidth(1) << '\n';
         qInfo() << "Exported layout to" << fns.at(0);
+        settings.setValue(LAYOUTS_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }
 }
 
