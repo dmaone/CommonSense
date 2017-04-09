@@ -1,6 +1,7 @@
-#include "LayerConditions.h"
 #include <QLabel>
 #include <QComboBox>
+
+#include "LayerConditions.h"
 
 using namespace std;
 
