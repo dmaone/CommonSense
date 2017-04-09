@@ -5,8 +5,6 @@
 #include "Events.h"
 #include "../c2/nvram.h"
 
-#define DEVICECONFIG_DIR_KEY "settings_dir"
-
 class LayerCondition
 {
     public:

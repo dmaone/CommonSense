@@ -4,6 +4,7 @@
 #include <QFileDialog>
 #include <QTextStream>
 
+#include "settings.h"
 #include "LayoutEditor.h"
 #include "ui_LayoutEditor.h"
 #include "DeviceInterface.h"

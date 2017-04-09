@@ -2,6 +2,7 @@
 #include <QFile>
 #include <QMessageBox>
 
+#include "settings.h"
 #include "DeviceConfig.h"
 
 using namespace std;

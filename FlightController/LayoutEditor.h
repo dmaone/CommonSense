@@ -5,11 +5,10 @@
 #include <QGridLayout>
 #include <QComboBox>
 #include <stdint.h>
+
 #include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
-
-#define LAYOUTS_DIR_KEY "settings_dir"
 
 namespace Ui {
 class LayoutEditor;
