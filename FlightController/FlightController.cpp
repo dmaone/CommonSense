@@ -36,6 +36,11 @@ FlightController::FlightController(QWidget *parent) :
             thresholdEditor, SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
 
     layerConditions = new LayerConditions(di.config);
+
+    // Must be last in chain to intercept all packets!
+    loader = new FirmwareLoader();
+    connect(loader, SIGNAL(switchMode(bool)), &di, SLOT(bootloaderMode(bool)));
+    connect(loader, SIGNAL(sendPacket(Bootloader_packet_t *)), &di, SLOT(sendCommand(Bootloader_packet_t *)));
 }
 
 void FlightController::setup(void)
@@ -46,8 +51,10 @@ void FlightController::setup(void)
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
     connect(ui->RedButton, SIGNAL(toggled(bool)), this, SLOT(redButtonToggle(bool)));
 
-    connect(ui->BootloaderButton, SIGNAL(clicked()), this, SLOT(bootloaderButtonClick()));
-    connect(ui->action_Update_Firmware, SIGNAL(triggered()), this, SLOT(bootloaderButtonClick()));
+    connect(ui->BootloaderButton, SIGNAL(clicked()), loader, SLOT(start()));
+    connect(ui->action_Update_Firmware, SIGNAL(triggered()), loader, SLOT(start()));
+
+    connect(ui->actionFirmware_File, SIGNAL(triggered()), loader, SLOT(selectFile()));
 
     connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(showKeyMonitor()));
     connect(ui->action_Key_Monitor, SIGNAL(triggered()), this, SLOT(showKeyMonitor()));
@@ -71,6 +78,7 @@ void FlightController::setup(void)
     connect(ui->action_Rollback, SIGNAL(triggered()), di.config, SLOT(rollback()));
     connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
     connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)), this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
+    lockUI(true);
     di.start();
 }
 
@@ -94,12 +102,18 @@ void FlightController::mainTabChanged(int idx)
 
 FlightController::~FlightController()
 {
+    qInstallMessageHandler(*_oldLogger);
     delete ui;
 }
 
 LogViewer* FlightController::getLogViewport(void)
 {
     return ui->LogViewport;
+}
+
+void FlightController::setOldLogger(QtMessageHandler *logger)
+{
+    _oldLogger = logger;
 }
 
 void FlightController::logToViewport(const QString &msg)
@@ -116,16 +130,6 @@ void FlightController::showKeyMonitor(void)
 void FlightController::redButtonToggle(bool state)
 {
     emit sendCommand(C2CMD_EWO, state);
-}
-
-void FlightController::bootloaderButtonClick(void)
-{
-    QMessageBox::StandardButton result = QMessageBox::question(this,
-            "Are you sure?",
-            "You will lose communication with the device until reset or firmware update!",
-            QMessageBox::Yes | QMessageBox::No);
-    if (result == QMessageBox::Yes)
-        emit sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
 }
 
 void FlightController::statusRequestButtonClick(void)
@@ -149,6 +153,11 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
             emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
             ui->action_Setup_mode->setChecked(true);
             break;
+        case DeviceInterface::BootloaderConnected:
+            loader->load();
+            break;
+        default:
+            qCritical() << "Unknown device status" << s << "!";
     }
 }
 
@@ -159,7 +168,6 @@ void FlightController::lockUI(bool lock)
     ui->thresholdsButton->setDisabled(lock);
     ui->layoutButton->setDisabled(lock);
     ui->layerModsButton->setDisabled(lock);
-    ui->BootloaderButton->setDisabled(lock);
 }
 
 void FlightController::editLayoutClick(void)

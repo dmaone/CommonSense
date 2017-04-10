@@ -200,10 +200,14 @@ STOP</string>
     <property name="title">
      <string>Command</string>
     </property>
+    <addaction name="action_Setup_mode"/>
+    <addaction name="separator"/>
     <addaction name="action_Commit"/>
     <addaction name="action_Rollback"/>
+    <addaction name="separator"/>
     <addaction name="action_Update_Firmware"/>
-    <addaction name="action_Setup_mode"/>
+    <addaction name="actionFirmware_File"/>
+    <addaction name="separator"/>
    </widget>
    <addaction name="menu_File"/>
    <addaction name="menu_Window"/>
@@ -277,7 +281,7 @@ STOP</string>
   </action>
   <action name="action_Update_Firmware">
    <property name="text">
-    <string>Update &amp;Firmware</string>
+    <string>&amp;Update Firmware</string>
    </property>
    <property name="toolTip">
     <string>Update Firmware</string>
@@ -300,6 +304,11 @@ STOP</string>
    </property>
    <property name="text">
     <string>&amp;Setup mode</string>
+   </property>
+  </action>
+  <action name="actionFirmware_File">
+   <property name="text">
+    <string>Firmware &amp;File...</string>
    </property>
   </action>
  </widget>

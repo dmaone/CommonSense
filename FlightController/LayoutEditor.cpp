@@ -130,6 +130,7 @@ void LayoutEditor::importLayout()
                 }
             }
         }
+        f.close();
         setDisplay();
         qInfo() << "Imported layout from" << fns.at(0);
         settings.setValue(LAYOUTS_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
@@ -171,6 +172,7 @@ void LayoutEditor::exportLayout()
             ts << qSetFieldWidth(1) << '\n';
         }
         ts << qSetFieldWidth(1) << '\n';
+        f.close();
         qInfo() << "Exported layout to" << fns.at(0);
         settings.setValue(LAYOUTS_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }

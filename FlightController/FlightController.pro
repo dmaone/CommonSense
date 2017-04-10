@@ -36,7 +36,9 @@ SOURCES += main.cpp \
     ScancodeList.cpp \
     ThresholdEditor.cpp \
     DeviceConfig.cpp \
-    LayerConditions.cpp
+    LayerConditions.cpp \
+    FirmwareLoader.cpp \
+    CyACD.cpp
 
 HEADERS  += \
     FlightController.h \
@@ -52,7 +54,10 @@ HEADERS  += \
     ScancodeList.h \
     ThresholdEditor.h \
     DeviceConfig.h \
-    LayerConditions.h
+    LayerConditions.h \
+    FirmwareLoader.h \
+    settings.h \
+    CyACD.h
 
 FORMS    += \
     FlightController.ui \

@@ -77,7 +77,6 @@ DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
 bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)), QEvent *event){
     if (event->type() != DeviceMessage::ET )
         return false;
-
     QByteArray *payload = static_cast<DeviceMessage *>(event)->getPayload();
     if (payload->at(0) != C2RESPONSE_CONFIG)
         return false;

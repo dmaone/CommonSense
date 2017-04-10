@@ -13,9 +13,9 @@
 #include <DeviceInterface.h>
 #include <LayoutEditor.h>
 #include <ThresholdEditor.h>
-#include <QComboBox>
+#include <LayerConditions.h>
+#include <FirmwareLoader.h>
 #include "../c2/c2_protocol.h"
-#include "LayerConditions.h"
 
 namespace Ui {
 class FlightController;
@@ -32,6 +32,7 @@ public:
     void setup(void);
     void show(void);
     LogViewer* getLogViewport(void);
+    void setOldLogger(QtMessageHandler *logger);
     void logToViewport(const QString&);
 
 signals:
@@ -39,7 +40,6 @@ signals:
 
 public slots:
     void redButtonToggle(bool);
-    void bootloaderButtonClick(void);
     void showKeyMonitor(void);
     void statusRequestButtonClick(void);
     void editLayoutClick(void);
@@ -57,6 +57,8 @@ private:
     LayoutEditor *layoutEditor;
     ThresholdEditor *thresholdEditor;
     LayerConditions *layerConditions;
+    FirmwareLoader *loader;
+    QtMessageHandler *_oldLogger;
     void lockUI(bool lock);
 
 private slots:

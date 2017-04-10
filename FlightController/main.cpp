@@ -40,6 +40,7 @@ int main(int argc, char *argv[])
     FlightController w;
     logger = w.getLogViewport();
     old_logger = qInstallMessageHandler(logToViewport);
+    w.setOldLogger(&old_logger);
     w.setup();
     w.show();
 

@@ -7,7 +7,7 @@
 
 
 DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
-    device(NULL), pollTimerId(0)
+    device(NULL), pollTimerId(0), mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected)
 {
     config = new DeviceConfig();
     installEventFilter(config);
@@ -21,10 +21,7 @@ DeviceInterface::DeviceInterface(QObject *parent): QObject(parent),
 
 DeviceInterface::~DeviceInterface(void)
 {
-    if (device)
-        hid_close(device);
-    if(hid_exit())
-        qWarning("warning: error during hid_exit");
+    _releaseDevice();
 }
 
 /**
@@ -75,8 +72,12 @@ void DeviceInterface::_sendPacket()
 {
     //qInfo() << "Sending packet" << (uint8_t)outbox[1] << (uint8_t)outbox[2];
     if (!device) return; // TODO we should be more vocal
-    outbox[0] = 0x00; // libhid wants payload shifted 1 byte?
-    hid_write(device, outbox, sizeof(outbox));
+    outbox[0] = 0x00; // ReportID is not used.
+    if (hid_write(device, outbox, sizeof outbox) == -1)
+    {
+        qWarning() << "Error sending to the device..";
+        _releaseDevice();
+    }
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg)
@@ -102,10 +103,44 @@ void DeviceInterface::sendCommand(OUT_c2packet_t cmd)
     _sendPacket();
 }
 
+void DeviceInterface::sendCommand(Bootloader_packet_t *packet)
+{
+    memset(outbox, 0, sizeof(outbox));
+    uint8_t wire_length = packet->length + 7; // marker+cmd+len(2)+checksum(2)+marker
+    memcpy_s(outbox+1, wire_length, packet->raw, wire_length);
+    //qInfo() << (uint8_t)packet->raw[0] << (uint8_t)packet->raw[1] << (uint8_t)packet->raw[2] << (uint8_t)packet->raw[3]
+    //        << (uint8_t)packet->raw[4] << (uint8_t)packet->raw[5] << (uint8_t)packet->raw[6] << (uint8_t)packet->raw[7]
+    //        << (uint8_t)packet->raw[8];
+    _sendPacket();
+}
+
 void DeviceInterface::configChanged(void)
 {
     qInfo() << "Configuration changed.";
-    emit deviceStatusNotification(DeviceConfigChanged);
+    if (currentStatus == DeviceConnected)
+    {
+        emit deviceStatusNotification(DeviceConfigChanged);
+    }
+}
+
+void DeviceInterface::bootloaderMode(bool bEnabled)
+{
+    if (bEnabled)
+    {
+        qInfo() << "Entering firmware update mode.";
+        mode = DeviceInterfaceBootloader;
+        if (currentStatus == DeviceConnected)
+        {
+            emit sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
+        }
+    }
+    else
+    {
+        qInfo() << "Resuming normal operations.";
+        mode = DeviceInterfaceNormal;
+    }
+    _resetTimer(1000);
+    _releaseDevice();
 }
 
 void DeviceInterface::_resetTimer(int interval)
@@ -124,9 +159,7 @@ void DeviceInterface::timerEvent(QTimerEvent *)
     if (bytesRead < 0)
     {
         qInfo() << "Device went away. Reconnecting..";
-        hid_close(device);
-        device = NULL;
-        emit(deviceStatusNotification(DeviceDisconnected));
+        _releaseDevice();
         return;
     }
     if (bytesRead == 0)
@@ -144,9 +177,18 @@ void DeviceInterface::_initDevice(void)
         return;
     }
     hid_set_nonblocking(device, 1);
-    emit(deviceStatusNotification(DeviceConnected));
+    _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected : BootloaderConnected);
     _resetTimer(0);
     return;
+}
+
+void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus)
+{
+    if (newStatus != currentStatus)
+    {
+        currentStatus = newStatus;
+        emit deviceStatusNotification(newStatus);
+    }
 }
 
 hid_device* DeviceInterface::acquireDevice(void)
@@ -164,30 +206,53 @@ hid_device* DeviceInterface::acquireDevice(void)
     }
     hid_device_info *d = root;
     while (d){
+        bool deviceSelected = false;
+        switch (mode)
+        {
+            case DeviceInterfaceNormal:
 //        qInfo() << d->path << d->vendor_id << d->product_id;
         // Usage and usage page are win and mac only :(
 #ifdef __linux__
-        if (d->vendor_id == 0x4114)
+                if (d->vendor_id == 0x4114)
 #else
-        if (d->usage_page == 0x6213 && d->usage == 0x88)
+                if (d->usage_page == 0x6213 && d->usage == 0x88)
 #endif
+#ifdef __linux__
+                    if (d->interface_number == 1)
+#endif
+                        deviceSelected = true;
+                break;
+            case DeviceInterfaceBootloader:
+                if (d->vendor_id == 0x04b4 && d->product_id == 0xb71d)
+                    deviceSelected = true;
+                break;
+            default:
+                break;
+        }
+        if (deviceSelected)
         {
             qInfo() << "Found a node!";
-#ifdef __linux__
-            if (d->interface_number == 1)
-#endif
-            {
-                qInfo() << "Trying to use" << d->path;
-                retval = hid_open_path(d->path);
-                if (retval)
-                    break;
-                qInfo() << "Cannot open device. Linux permissions problem?";
-            }
+            qInfo() << "Trying to use" << d->path;
+            retval = hid_open_path(d->path);
+            if (retval)
+                break;
+            qInfo() << "Cannot open device. Linux permissions problem?";
         }
         d = d->next;
     }
     hid_free_enumeration(root);
     return retval;
+}
+
+void DeviceInterface::_releaseDevice(void)
+{
+    qInfo("Reacquiring device.");
+    _updateDeviceStatus(DeviceDisconnected);
+    if (device)
+        hid_close(device);
+    device = NULL;
+    if(hid_exit())
+        qWarning("warning: error during hid_exit");
 }
 
 void DeviceInterface::start(void)

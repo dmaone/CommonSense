@@ -35,6 +35,7 @@ class LayerCondition
 class DeviceConfig : public QObject
 {
     Q_OBJECT
+    Q_ENUMS(TransferDirection)
 
 public:
     explicit DeviceConfig(QObject *parent = 0);

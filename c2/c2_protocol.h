@@ -14,6 +14,9 @@
 #define ABSOLUTE_MAX_COLS 32
 #define MAX_LAYERS 8
 #define MAX_LAYER_CONDITIONS 8
+#define BOOTLOADER_MAX_PACKET_LENGTH 32
+#define BOOTLOADER_PAYLOAD_LENGTH (3 + BOOTLOADER_MAX_PACKET_LENGTH + 3)
+
 
 /*
  * The data block for the control channel is 64 bytes, both up and down.
@@ -94,6 +97,25 @@ typedef union {
     } __attribute__ ((packed));
     uint8_t raw[64];
 } OUT_c2packet_t;
+
+typedef union {
+    struct {
+        uint8_t sop;
+        uint8_t command;
+        uint16_t length; // Thank Cypress for being little-endian!
+        // ^^^^4 bytes
+        unsigned char payload[BOOTLOADER_PAYLOAD_LENGTH]; // 1B array, 2B row, 32 bytes data, +2B checksum +1b stop marker
+    } __attribute__ ((packed));
+    uint8_t raw[4 + BOOTLOADER_PAYLOAD_LENGTH];
+} Bootloader_packet_t;
+
+typedef union {
+    struct {
+        uint16_t checksum; // Thank Cypress for being little-endian!
+        uint8_t eop;
+    } __attribute__ ((packed));
+    uint8_t raw[3];
+} Bootloader_packet_trailer_t;
 
 #define CONFIG_TRANSFER_BLOCK_SIZE 32
 #define CONFIG_BLOCK_DATA_OFFSET 1
