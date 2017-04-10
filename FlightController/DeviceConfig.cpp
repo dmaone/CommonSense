@@ -302,7 +302,7 @@ void DeviceConfig::commit(void)
 {
     QMessageBox::StandardButton result = QMessageBox::question(NULL,
             "Saving EEPROM!",
-            "Do you want to write the config that is now in the device, to EEPROM?",
+            "Do you want to write the config that is now in the device, to EEPROM?\n\nNOTICE\nIf thresholds don't fully take effect after commit\nPlease reset the device by using 'Revert' menu item!",
             QMessageBox::Yes | QMessageBox::No);
     if (result == QMessageBox::Yes)
         emit sendCommand(C2CMD_COMMIT, 1u);

@@ -53,7 +53,7 @@ bool DeviceInterface::event(QEvent* e)
             col = (scancode & ~scancodeReleased) % config->numCols;
             row = ((scancode & ~scancodeReleased) - col) / config->numCols;
             emit scancodeReceived(row, col, (scancode & scancodeReleased) ? KeyReleased : KeyPressed);
-            qInfo().noquote() << QString((scancode & scancodeReleased) ? "Release:" : "Press:") << row << col;
+            qInfo().noquote() << QString((scancode & scancodeReleased) ? "+" : " -") << row+1 << col+1;
             return true;
         default:
             qInfo() << payload->constData();
