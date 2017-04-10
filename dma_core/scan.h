@@ -22,18 +22,17 @@
 
 #define ADC_RESOLUTION 10
 
-// SYNC WITH PTK CHANNELS!!! MANUALLY BECAUSE GUI ACTIONS REQUIRED!!!
-#define ADC_CHANNELS 12
-
 // This is to ease calculations, there are things hardcoded in buffer management!!
 #define NUM_ADCs 2
+
+#define ADC_CHANNELS (MATRIX_COLS / NUM_ADCs)
 
 // Should be [number of columns per ADC + 1] * 2 + 1 - so 19 for MF, 27 for BS
 // TRICKY PART: Count7(which is part of PTK) counts down. 
 // So column 0 must be connected to highest input on the MUX
 // MUX input 0 must be connected to ground - we use it to discharge ADC sampling cap.
 // So, scan sequence code sees is ch0-ch1-ch0-ch2-ch0-ch3-ch0..
-#define PTK_CHANNELS 27
+#define PTK_CHANNELS (2 * ADC_CHANNELS + 3)
 // DO NOT FORGET TO UPDATE PTK COMPONENT TO MATCH ^!
 
 // For even values of the above - both offsets need to be updated!

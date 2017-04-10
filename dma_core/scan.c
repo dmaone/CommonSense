@@ -31,9 +31,10 @@ static uint16 *matrix_ptr = (uint16 *)&matrix;
 static void InitSensor(void)
 {
     // Init DMA, each burst requires a request 
-    Buf0_DmaInitialize(sizeof *BufMem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    Buf1_DmaInitialize(sizeof *BufMem, 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
-    FinalBuf_DmaInitialize(sizeof *Results * ADC_CHANNELS * 2, 2, (uint16)(HI16(CYDEV_SRAM_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    Buf1_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+    // 1 request per ADC, get the whole ADC buffer (skip grounded channels which are at the end).
+    FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs, (uint16)(HI16(CYDEV_SRAM_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     uint8 enableInterrupts = CyEnterCriticalSection();
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);

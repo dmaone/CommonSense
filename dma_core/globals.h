@@ -14,20 +14,21 @@
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
 
-#define SWITCH_TYPE BEAMSPRING
+#define SWITCH_TYPE BUCKLING_SPRING
 
 /*
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
+ * FIX PTK channel count in TopDesign.cysch!!! See scan.c!
  */
-#define MATRIX_COLS 24
-#define MATRIX_ROWS 4
+#define MATRIX_COLS 16
+#define MATRIX_ROWS 8
 
 #include "c2/c2_protocol.h"
 #include "c2/nvram.h"
 
 
 // Main safety switch
-#define NOT_A_KEYBOARD 0
+#define NOT_A_KEYBOARD 1
 #undef DEBUG_STATE_MACHINE
 #undef DEBUG_INTERRUPTS
 
