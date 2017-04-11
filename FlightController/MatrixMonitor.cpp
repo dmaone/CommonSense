@@ -4,24 +4,25 @@
 #include <QLCDNumber>
 #include <QCloseEvent>
 #include <QMessageBox>
+#include <QFileDialog>
+#include <QFile>
+#include <QTextStream>
+
 #include "MatrixMonitor.h"
 #include "ui_MatrixMonitor.h"
 #include "DeviceInterface.h"
 #include "singleton.h"
 #include "Events.h"
 #include "../c2/c2_protocol.h"
+#include "settings.h"
 
 MatrixMonitor::MatrixMonitor(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::MatrixMonitor),
-    debug(0), displayMode(0), grid(new QGridLayout()), _warmupRows(ABSOLUTE_MAX_ROWS)
+    debug(0), displayMode(DisplayNow), filter(FilterNone), grid(new QGridLayout()), _warmupRows(ABSOLUTE_MAX_ROWS)
 {
     ui->setupUi(this);
-    connect(ui->RunButton, SIGNAL(clicked()), this, SLOT(runButtonClick()));
-    connect(ui->CloseButton, SIGNAL(clicked()), this, SLOT(closeButtonClick()));
-    connect(ui->LoButton, SIGNAL(clicked()), this, SLOT(loButtonClick()));
-    connect(ui->HiButton, SIGNAL(clicked()), this, SLOT(hiButtonClick()));
-    connect(ui->ModeSelector, SIGNAL(currentTextChanged(QString)), this, SLOT(displayModeChanged(QString)));
+
     initDisplay();
     DeviceInterface &di = Singleton<DeviceInterface>::instance();
     connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di, SLOT(sendCommand(c2command, uint8_t)));
@@ -50,9 +51,10 @@ MatrixMonitor::~MatrixMonitor()
 void MatrixMonitor::initDisplay(void)
 {
     this->enableTelemetry(0);
+    grid->setSpacing(0);
     for (uint8_t i = 1; i<=ABSOLUTE_MAX_COLS; i++)
     {
-        grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignRight);
+        grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1, Qt::AlignCenter);
         if (i <= ABSOLUTE_MAX_ROWS) {
             grid->addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1, Qt::AlignRight);
         }
@@ -99,7 +101,6 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
         }
     }
     _resetCells();
-    _warmupRows = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple of first rows.
     adjustSize();
 }
 
@@ -119,12 +120,6 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
-            _updateStatCell(row, i, level);
-            if (displayMode == 0
-               or (displayMode == 1 and level < cell->intValue())
-               or (displayMode == 2 and level > cell->intValue())
-            )
-                cell->display(level);
             if ((deviceConfig->deadBandLo[row][i] != 255) && (
                     (!deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
                     || (deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i])
@@ -137,6 +132,39 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
             {
                 cell->setStyleSheet("background-color: #ffffff;");
             }
+            switch (filter)
+            {
+                case FilterLowPass:
+                    if (level > deviceConfig->deadBandLo[row][i])
+                        continue;
+                    break;
+                case FilterHighPass:
+                    if (level < deviceConfig->deadBandHi[row][i])
+                        continue;
+                    break;
+                default:
+                    // No error to have no filter selected.
+                    break;
+            }
+            _updateStatCell(row, i, level);
+            switch (displayMode)
+            {
+                case DisplayNow:
+                    cell->display(cells[row][i].now);
+                    break;
+                case DisplayMin:
+                    cell->display(cells[row][i].min);
+                    break;
+                case DisplayMax:
+                    cell->display(cells[row][i].max);
+                    break;
+                case DisplayAvg:
+                    cell->display((uint8_t)(cells[row][i].sum / cells[row][i].sampleCount));
+                    break;
+                default:
+                    qCritical() << "Unknown display mode selected!!";
+                    close();
+            }
         }
         return true;
     }
@@ -145,20 +173,20 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
 
 void MatrixMonitor::enableTelemetry(uint8_t m)
 {
-    ui->RunButton->setText(m ? "Stop!": "Start!");
+    ui->runButton->setText(m ? "Stop!": "Start!");
     emit sendCommand(C2CMD_GET_MATRIX_STATE, m);
 }
 
-void MatrixMonitor::runButtonClick(void)
+void MatrixMonitor::on_runButton_clicked()
 {
-    if (ui->RunButton->text() == "Stop!") {
+    if (ui->runButton->text() == "Stop!") {
         this->enableTelemetry(0);
     } else {
         this->enableTelemetry(1);
     }
 }
 
-void MatrixMonitor::loButtonClick(void)
+void MatrixMonitor::on_loButton_clicked()
 {
     if (!deviceConfig->bValid) return;
     for (uint8_t i = 0; i<deviceConfig->numRows; i++)
@@ -170,7 +198,7 @@ void MatrixMonitor::loButtonClick(void)
     }
 }
 
-void MatrixMonitor::hiButtonClick(void)
+void MatrixMonitor::on_hiButton_clicked()
 {
     if (!deviceConfig->bValid) return;
     for (uint8_t i = 0; i<deviceConfig->numRows; i++)
@@ -182,7 +210,7 @@ void MatrixMonitor::hiButtonClick(void)
     }
 }
 
-void MatrixMonitor::closeButtonClick(void)
+void MatrixMonitor::on_closeButton_clicked()
 {
     this->close();
 }
@@ -193,14 +221,18 @@ void MatrixMonitor::closeEvent (QCloseEvent *event)
     event->accept();
 }
 
-void MatrixMonitor::displayModeChanged(QString s)
+void MatrixMonitor::on_modeBox_currentTextChanged(QString newValue)
 {
-    if (s == "Min")
-        displayMode = 1;
-    else if (s == "Max")
-        displayMode = 2;
+    if (newValue == "Now")
+        displayMode = DisplayNow;
+    else if (newValue == "Min")
+        displayMode = DisplayMin;
+    else if (newValue == "Max")
+        displayMode = DisplayMax;
+    else if (newValue == "Avg")
+        displayMode = DisplayAvg;
     else
-        displayMode = 0;
+        qCritical() << "Unknown display mode selected!!";
 }
 
 void MatrixMonitor::_resetCells()
@@ -209,15 +241,16 @@ void MatrixMonitor::_resetCells()
     {
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
-            cells[i][j] = {.min = 255, .max = 0, .sum = 0, .sampleCount = 0};
+            cells[i][j] = {.now = 0, .min = 255, .max = 0, .sum = 0, .sampleCount = 0};
             _updateStatCellDisplay(i, j);
         }
     }
-
+    _warmupRows = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple of first rows.
 }
 
 void MatrixMonitor::_updateStatCell(uint8_t row, uint8_t col, uint8_t level)
 {
+    cells[row][col].now = level;
     cells[row][col].min = std::min(level, cells[row][col].min);
     cells[row][col].max = std::max(level, cells[row][col].max);
     cells[row][col].sum += level;
@@ -231,4 +264,54 @@ void MatrixMonitor::_updateStatCellDisplay(uint8_t row, uint8_t col)
         statsDisplay[row][col]->setText(QString("%1 %2 %3").arg(cells[row][col].min).arg(cells[row][col].sum/cells[row][col].sampleCount).arg(cells[row][col].max));
     else
         statsDisplay[row][col]->setText(QString("-- -- --"));
+}
+
+void MatrixMonitor::on_resetButton_clicked(void)
+{
+    enableTelemetry(0);
+    _resetCells();
+}
+
+void MatrixMonitor::on_filterBox_currentTextChanged(QString newValue)
+{
+    if (newValue == "No filter")
+        filter = FilterNone;
+    else if (newValue == "Lower band")
+        filter = FilterLowPass;
+    else if (newValue == "Upper band")
+        filter = FilterHighPass;
+    else
+        qCritical() << "Unknown filter type selected!!";
+}
+
+void MatrixMonitor::on_exportButton_clicked(void)
+{
+    QSettings settings;
+    QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
+    fd.setDirectory(settings.value(SETTINGS_DIR_KEY).toString());
+    fd.setNameFilter(tr("Matrix stats(*.csv)"));
+    fd.setDefaultSuffix(QString("csv"));
+    fd.setAcceptMode(QFileDialog::AcceptSave);
+    if (fd.exec())
+    {
+        QStringList fns = fd.selectedFiles();
+        QFile f(fns.at(0));
+        f.open(QIODevice::WriteOnly);
+        QTextStream ts (&f);
+        ts << "Row,Col,Min,Max,Avg,Sum,Count\n";
+        ts.setIntegerBase(10);
+        for (uint8_t i = 0; i<deviceConfig->numRows; i++)
+        {
+            QByteArray buf;
+            for (uint8_t j = 0; j<deviceConfig->numCols; j++)
+            {
+                ts << i << "," << j << ",";
+                ts << cells[i][j].min << "," << cells[i][j].max << ",";
+                ts << cells[i][j].sum/cells[i][j].sampleCount << ",";
+                ts << cells[i][j].sum << "," << cells[i][j].sampleCount << "\n";
+            }
+        }
+        f.close();
+    }
+
 }

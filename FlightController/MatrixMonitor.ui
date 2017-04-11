@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>637</width>
+    <width>690</width>
     <height>200</height>
    </rect>
   </property>
@@ -26,22 +26,61 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="6">
-    <widget class="QPushButton" name="HiButton">
-     <property name="text">
-      <string>Set Hi</string>
+   <item row="0" column="1" colspan="14">
+    <widget class="QFrame" name="Dashboard">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
      </property>
     </widget>
    </item>
-   <item row="1" column="8">
-    <widget class="QPushButton" name="CloseButton">
+   <item row="1" column="14">
+    <widget class="QPushButton" name="closeButton">
      <property name="text">
       <string>Close</string>
      </property>
     </widget>
    </item>
+   <item row="1" column="12">
+    <spacer name="horizontalSpacer">
+     <property name="orientation">
+      <enum>Qt::Horizontal</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>218</width>
+       <height>20</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="1" column="1">
+    <widget class="QPushButton" name="runButton">
+     <property name="text">
+      <string>Start</string>
+     </property>
+     <property name="checkable">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="2">
-    <widget class="QComboBox" name="ModeSelector">
+    <widget class="QPushButton" name="resetButton">
+     <property name="text">
+      <string>Reset</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="3">
+    <widget class="QComboBox" name="modeBox">
      <property name="editable">
       <bool>false</bool>
      </property>
@@ -69,42 +108,14 @@
        <string>Max</string>
       </property>
      </item>
+     <item>
+      <property name="text">
+       <string>Avg</string>
+      </property>
+     </item>
     </widget>
    </item>
-   <item row="1" column="1">
-    <widget class="QPushButton" name="RunButton">
-     <property name="text">
-      <string>Start</string>
-     </property>
-     <property name="checkable">
-      <bool>true</bool>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="5">
-    <widget class="QPushButton" name="LoButton">
-     <property name="text">
-      <string>Set Lo</string>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="1" colspan="8">
-    <widget class="QFrame" name="Dashboard">
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="3">
+   <item row="1" column="4">
     <spacer name="horizontalSpacer_2">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -114,24 +125,67 @@
      </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>40</width>
+       <width>20</width>
        <height>20</height>
       </size>
      </property>
     </spacer>
    </item>
-   <item row="1" column="7">
-    <spacer name="horizontalSpacer">
+   <item row="1" column="5">
+    <widget class="QComboBox" name="filterBox">
+     <item>
+      <property name="text">
+       <string>No filter</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Upper band</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Lower band</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="1" column="8">
+    <spacer name="horizontalSpacer_3">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
      </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Fixed</enum>
+     </property>
      <property name="sizeHint" stdset="0">
       <size>
-       <width>218</width>
+       <width>20</width>
        <height>20</height>
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="1" column="10">
+    <widget class="QPushButton" name="hiButton">
+     <property name="text">
+      <string>Set HiThr.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="9">
+    <widget class="QPushButton" name="loButton">
+     <property name="text">
+      <string>Set LoThr.</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="13">
+    <widget class="QPushButton" name="exportButton">
+     <property name="text">
+      <string>Export</string>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>
