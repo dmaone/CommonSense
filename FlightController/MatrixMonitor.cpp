@@ -1,9 +1,8 @@
 #include <stdint.h>
+#include <algorithm>
 
 #include <QLCDNumber>
-#include <QPalette>
 #include <QCloseEvent>
-#include <QLabel>
 #include <QMessageBox>
 #include "MatrixMonitor.h"
 #include "ui_MatrixMonitor.h"
@@ -15,7 +14,7 @@
 MatrixMonitor::MatrixMonitor(QWidget *parent) :
     QFrame(parent),
     ui(new Ui::MatrixMonitor),
-    debug(0), displayMode(0), grid(new QGridLayout())
+    debug(0), displayMode(0), grid(new QGridLayout()), _warmupRows(ABSOLUTE_MAX_ROWS)
 {
     ui->setupUi(this);
     connect(ui->RunButton, SIGNAL(clicked()), this, SLOT(runButtonClick()));
@@ -62,14 +61,24 @@ void MatrixMonitor::initDisplay(void)
     {
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
+            QWidget *w = new QWidget;
+            grid->addWidget(w, i+1, j+1, 1, 1);
+            QVBoxLayout *ll = new QVBoxLayout;
+            ll->setSpacing(0);
+            w->setLayout(ll);
+
             QLCDNumber *l = new QLCDNumber(2);
             l->setSegmentStyle(QLCDNumber::Filled);
             l->setMinimumHeight(25);
-            grid->addWidget(l, i+1, j+1, 1, 1);
             display[i][j] = l;
+            ll->addWidget(l);
+            QLabel *lbl = new QLabel("-- -- --");
+            ll->addWidget(lbl, 0, Qt::AlignRight);
+            statsDisplay[i][j] = lbl;
         }
     }
     ui->Dashboard->setLayout(grid);
+    _resetCells();
 }
 
 void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
@@ -86,10 +95,11 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols)
     {
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
-            QLCDNumber *l = display[i][j];
-            l->setVisible((i < rows) && (j < cols));
+            grid->itemAtPosition(i+1, j+1)->widget()->setVisible((i < rows) && (j < cols));
         }
     }
+    _resetCells();
+    _warmupRows = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple of first rows.
     adjustSize();
 }
 
@@ -99,12 +109,17 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
         if (pl->at(0) != C2RESPONSE_MATRIX_ROW)
             return false;
+        if (_warmupRows > 0)
+        {
+            _warmupRows--;
+            return true;
+        }
         uint8_t row = pl->at(1);
         uint8_t max_cols = pl->at(2);
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
-
+            _updateStatCell(row, i, level);
             if (displayMode == 0
                or (displayMode == 1 and level < cell->intValue())
                or (displayMode == 2 and level > cell->intValue())
@@ -186,4 +201,34 @@ void MatrixMonitor::displayModeChanged(QString s)
         displayMode = 2;
     else
         displayMode = 0;
+}
+
+void MatrixMonitor::_resetCells()
+{
+    for (uint8_t i = 0; i<ABSOLUTE_MAX_ROWS; i++)
+    {
+        for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
+        {
+            cells[i][j] = {.min = 255, .max = 0, .sum = 0, .sampleCount = 0};
+            _updateStatCellDisplay(i, j);
+        }
+    }
+
+}
+
+void MatrixMonitor::_updateStatCell(uint8_t row, uint8_t col, uint8_t level)
+{
+    cells[row][col].min = std::min(level, cells[row][col].min);
+    cells[row][col].max = std::max(level, cells[row][col].max);
+    cells[row][col].sum += level;
+    cells[row][col].sampleCount++;
+    _updateStatCellDisplay(row, col);
+}
+
+void MatrixMonitor::_updateStatCellDisplay(uint8_t row, uint8_t col)
+{
+    if (cells[row][col].sampleCount)
+        statsDisplay[row][col]->setText(QString("%1 %2 %3").arg(cells[row][col].min).arg(cells[row][col].sum/cells[row][col].sampleCount).arg(cells[row][col].max));
+    else
+        statsDisplay[row][col]->setText(QString("-- -- --"));
 }
