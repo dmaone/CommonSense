@@ -292,6 +292,7 @@ void DeviceConfig::toFile()
         f.open(QIODevice::WriteOnly);
         QDataStream ds(&f);
         ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
+        f.close();
         qInfo() << "Exported config to" << fns.at(0);
         settings.setValue(DEVICECONFIG_DIR_KEY, QFileInfo(fns.at(0)).canonicalPath());
     }
