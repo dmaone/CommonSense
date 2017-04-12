@@ -120,10 +120,11 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
-            if ((deviceConfig->deadBandLo[row][i] != 255) && (
-                    (!deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
-                    || (deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i])
-                )
+            if (deviceConfig->deadBandHi[row][i] == 0)
+                continue;
+            if ((!deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
+              || (deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i])
+
             )
             {
                 cell->setStyleSheet("background-color: #00ff00;");
@@ -243,6 +244,7 @@ void MatrixMonitor::_resetCells()
         {
             cells[i][j] = {.now = 0, .min = 255, .max = 0, .sum = 0, .sampleCount = 0};
             _updateStatCellDisplay(i, j);
+            display[i][j]->display(0);
         }
     }
     _warmupRows = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple of first rows.
@@ -307,7 +309,10 @@ void MatrixMonitor::on_exportButton_clicked(void)
             {
                 ts << i << "," << j << ",";
                 ts << cells[i][j].min << "," << cells[i][j].max << ",";
-                ts << cells[i][j].sum/cells[i][j].sampleCount << ",";
+                if (cells[i][j].sampleCount)
+                    ts << cells[i][j].sum/cells[i][j].sampleCount << ",";
+                else
+                    ts << "0,";
                 ts << cells[i][j].sum << "," << cells[i][j].sampleCount << "\n";
             }
         }
