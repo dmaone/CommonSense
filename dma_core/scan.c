@@ -85,7 +85,6 @@ static void EnableSensor(void)
 
 static inline void Drive(uint8 drv)
 {
-    SenseReg_Control |= 0x01; // Untie sense from the ground
 /*
  * CyPins_SetPinDriveMode is HELLISHLY expensive (about 1us/call)
  * So changing drive mode in realtime to enhance crosstalk immunity is _not_ a good idea.
