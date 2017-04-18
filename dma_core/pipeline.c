@@ -141,7 +141,7 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
     if ((usb_sc & 0xf8) == 0xe0)
     {
         process_mods(sc, usb_sc);
-        queue_usbcode(systime, (sc & USBQUEUE_RELEASED) | USBQUEUE_REAL_KEY, 0xe0);
+        queue_usbcode(systime, (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK, 0xe0);
         return;
     }
 /*
@@ -156,7 +156,7 @@ NOTE: queue_usbcode skips non-zero cells in the buffer. Think what to do on over
 NOTE2: we still want to maintain order?
     Otherwise linked list is probably what's doctor ordered (though expensive at 4B per pointer plus memory management)
 */
-    queue_usbcode(systime, (sc & USBQUEUE_RELEASED) | USBQUEUE_REAL_KEY, usb_sc);
+    queue_usbcode(systime, (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK, usb_sc);
     return;
 }
 
@@ -166,6 +166,14 @@ NOTE2: we still want to maintain order?
  */ 
 inline void update_reports(void)
 {
+    if (cooldown_timer > 0)
+    {
+        // Slow down! Delay 0 controls update rate. 
+        // we should be called every millisecond - so setting delay0 to 10 will essentially makes it 100Hz keyboard 
+        // with latency of 1kHz one.
+        cooldown_timer--;
+        return;
+    }
     if (USBQueue_readpos == USBQueue_writepos && USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
     {
         return;
@@ -208,6 +216,7 @@ inline void update_reports(void)
                 // Also if not the last item - we don't want to overrun the buffer.
                 USBQueue_readpos = KEYCODE_BUFFER_NEXT(pos);
             }
+            cooldown_timer = config.delayLib[0]; // Actual update happened - reset cooldown.
             break;
         }
     } while (pos != USBQueue_writepos);
@@ -248,8 +257,10 @@ inline bool pipeline_process_wakeup(void)
 
 void pipeline_init(void)
 {
+    // Pipeline is worked on in main loop only, no point disabling IRQs to avoid preemption.
     scan_reset();
     USBQueue_readpos  = 0;
     USBQueue_writepos = 0;
+    cooldown_timer = 0;
     memset(USBQueue, USBCODE_NOEVENT, sizeof(USBQueue));
 }

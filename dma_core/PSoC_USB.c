@@ -201,7 +201,7 @@ inline void keyboard_release(uint8_t keycode)
 void update_keyboard_report(queuedScancode *key)
 {
     //xprintf("Updating report for %d", key->keycode);
-    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    if ((key->flags & USBQUEUE_RELEASED_MASK) == 0)
     {
         keyboard_press(key->keycode);
     }
@@ -282,7 +282,7 @@ void update_consumer_report(queuedScancode *key)
 {
     //xprintf("Updating report for %d", key->keycode);
     uint16_t keycode = consumer_mapping[key->keycode - 0xe8];
-    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    if ((key->flags & USBQUEUE_RELEASED_MASK) == 0)
     {
         consumer_press(keycode);
     }
@@ -296,7 +296,7 @@ void update_consumer_report(queuedScancode *key)
 void update_system_report(queuedScancode *key)
 {
     uint8_t key_index = key->keycode - 0xa5;
-    if ((key->flags & USBQUEUE_RELEASED) == 0)
+    if ((key->flags & USBQUEUE_RELEASED_MASK) == 0)
     {
         SYSTEM_OUTBOX[0] |= (1 << key_index);
     }

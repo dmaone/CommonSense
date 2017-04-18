@@ -8,7 +8,7 @@
 
 DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
     bValid(false), numRows(0), numCols(0), numLayers(MAX_LAYERS),
-    numLayerConditions(MAX_LAYER_CONDITIONS),bNormallyLow(false),
+    numLayerConditions(MAX_LAYER_CONDITIONS), numDelays(MAX_DELAYS), bNormallyLow(false),
     transferDirection(TransferIdle)
 {
     memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
@@ -279,4 +279,19 @@ void DeviceConfig::setLayerConditions(std::vector<LayerCondition> lcs)
     int numLCs = lcs.size();
     for (int i = 0; i < numLCs; i++)
         setLayerCondition(i, lcs[i]);
+}
+
+std::vector<uint16_t> DeviceConfig::delays(void)
+{
+    std::vector<uint16_t> retval(numDelays);
+    for(uint8_t i=0; i < numDelays; i++)
+    {
+        retval[i] = _eeprom.delayLib[i];
+    }
+    return retval;
+}
+
+void DeviceConfig::setDelay(int delayIdx, uint16_t delay_ms)
+{
+    _eeprom.delayLib[delayIdx] = delay_ms;
 }

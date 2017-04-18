@@ -14,6 +14,9 @@
 #define ABSOLUTE_MAX_COLS 32
 #define MAX_LAYERS 8
 #define MAX_LAYER_CONDITIONS 8
+#define MAX_DELAYS 16
+// Careful when changing above - may need to check nvram.h sizes.
+
 #define BOOTLOADER_MAX_PACKET_LENGTH 32
 #define BOOTLOADER_PAYLOAD_LENGTH (3 + BOOTLOADER_MAX_PACKET_LENGTH + 3)
 

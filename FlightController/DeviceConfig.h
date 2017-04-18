@@ -19,6 +19,7 @@ public:
     uint8_t numCols;
     uint8_t numLayers;
     uint8_t numLayerConditions;
+    uint8_t numDelays;
     bool    bNormallyLow;
     uint8_t guardHi;
     uint8_t guardLo;
@@ -29,6 +30,8 @@ public:
     std::vector<LayerCondition> layerConditions(void);
     void setLayerCondition(int conditionIdx, LayerCondition cnd);
     void setLayerConditions(std::vector<LayerCondition> lcs);
+    std::vector<uint16_t> delays(void);
+    void setDelay(int delayIdx, uint16_t delay_ms);
 
 signals:
     void changed(void);

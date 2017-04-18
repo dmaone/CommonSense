@@ -9,14 +9,13 @@
 #include <QMessageBox>
 #include "FlightController.h"
 #include "ui_FlightController.h"
-#include "MatrixMonitor.h"
 
-#include "singleton.h"
-#include "DeviceInterface.h"
-#include "DeviceConfig.h"
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
-
+#include "singleton.h"
+#include "MatrixMonitor.h"
+#include "DeviceInterface.h"
+#include "DeviceConfig.h"
 
 FlightController::FlightController(QWidget *parent) :
     QMainWindow(parent),
@@ -37,6 +36,8 @@ FlightController::FlightController(QWidget *parent) :
 
     layerConditions = new LayerConditions(di.config);
 
+    _delays = new Delays(di.config);
+
     // Must be last in chain to intercept all packets!
     loader = new FirmwareLoader();
     connect(loader, SIGNAL(switchMode(bool)), &di, SLOT(bootloaderMode(bool)));
@@ -51,15 +52,15 @@ void FlightController::setup(void)
     connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport, SLOT(copyAllButtonClick()));
     connect(ui->RedButton, SIGNAL(toggled(bool)), this, SLOT(redButtonToggle(bool)));
 
-    connect(ui->BootloaderButton, SIGNAL(clicked()), loader, SLOT(start()));
-    connect(ui->action_Update_Firmware, SIGNAL(triggered()), loader, SLOT(start()));
-
     connect(ui->actionFirmware_File, SIGNAL(triggered()), loader, SLOT(selectFile()));
+
+    connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
 
     connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this, SLOT(showKeyMonitor()));
     connect(ui->action_Key_Monitor, SIGNAL(triggered()), this, SLOT(showKeyMonitor()));
 
-    connect(ui->statusRequestButton, SIGNAL(clicked()), this, SLOT(statusRequestButtonClick()));
+    connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
+    connect(ui->action_Thresholds, SIGNAL(triggered()), this, SLOT(editThresholdsClick()));
 
     connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
     connect(ui->action_Layout, SIGNAL(triggered()), this, SLOT(editLayoutClick()));
@@ -67,8 +68,10 @@ void FlightController::setup(void)
     connect(ui->layerModsButton, SIGNAL(clicked()), this, SLOT(showLayerConditions()));
     connect(ui->action_Layer_mods, SIGNAL(triggered()), this, SLOT(showLayerConditions()));
 
-    connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
-    connect(ui->action_Thresholds, SIGNAL(triggered()), this, SLOT(editThresholdsClick()));
+    connect(ui->delaysButton, SIGNAL(clicked()), this, SLOT(editDelays()));
+
+    connect(ui->BootloaderButton, SIGNAL(clicked()), loader, SLOT(start()));
+    connect(ui->action_Update_Firmware, SIGNAL(triggered()), loader, SLOT(start()));
 
     connect(ui->action_Open, SIGNAL(triggered()), di.config, SLOT(fromFile()));
     connect(ui->action_Upload, SIGNAL(triggered()), di.config, SLOT(toDevice()));
@@ -150,6 +153,7 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
         case DeviceInterface::DeviceConfigChanged:
             lockUI(false);
             layerConditions->init();
+            _delays->init();
             emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
             ui->action_Setup_mode->setChecked(true);
             break;
@@ -168,6 +172,7 @@ void FlightController::lockUI(bool lock)
     ui->thresholdsButton->setDisabled(lock);
     ui->layoutButton->setDisabled(lock);
     ui->layerModsButton->setDisabled(lock);
+    ui->delaysButton->setDisabled(lock);
 }
 
 void FlightController::editLayoutClick(void)
@@ -188,4 +193,9 @@ void FlightController::showLayerConditions(void)
 void FlightController::on_action_Setup_mode_triggered(bool bMode)
 {
     emit sendCommand(C2CMD_SET_MODE, bMode ? C2DEVMODE_SETUP : C2DEVMODE_NORMAL);
+}
+
+void FlightController::editDelays()
+{
+    _delays->show();
 }

@@ -28,7 +28,7 @@
 
 
 // Main safety switch
-#define NOT_A_KEYBOARD 1
+#define NOT_A_KEYBOARD 0
 #undef DEBUG_STATE_MACHINE
 #undef DEBUG_INTERRUPTS
 

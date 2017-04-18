@@ -9,13 +9,16 @@
 #pragma once
 
 #include <QMainWindow>
-#include <MatrixMonitor.h>
-#include <DeviceInterface.h>
-#include <LayoutEditor.h>
-#include <ThresholdEditor.h>
-#include <LayerConditions.h>
-#include <FirmwareLoader.h>
+
 #include "../c2/c2_protocol.h"
+
+#include "MatrixMonitor.h"
+#include "DeviceInterface.h"
+#include "LayoutEditor.h"
+#include "ThresholdEditor.h"
+#include "LayerConditions.h"
+#include "FirmwareLoader.h"
+#include "Delays.h"
 
 namespace Ui {
 class FlightController;
@@ -57,10 +60,12 @@ private:
     LayoutEditor *layoutEditor;
     ThresholdEditor *thresholdEditor;
     LayerConditions *layerConditions;
+    Delays *_delays;
     FirmwareLoader *loader;
     QtMessageHandler *_oldLogger;
     void lockUI(bool lock);
 
 private slots:
     void on_action_Setup_mode_triggered(bool bMode);
+    void editDelays(void);
 };

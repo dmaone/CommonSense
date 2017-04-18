@@ -3,8 +3,6 @@
 
 #include "LayerConditions.h"
 
-using namespace std;
-
 LayerConditionWatcher::LayerConditionWatcher(DeviceConfig *config,
         int conditionIndex, QCheckBox *fn1Check, QCheckBox *fn2Check,
         QCheckBox *fn3Check, QCheckBox *fn4Check, QComboBox *layerCombo,
@@ -45,7 +43,7 @@ LayerConditions::LayerConditions(DeviceConfig *config, QWidget *parent) : QWidge
 
 void LayerConditions::init(void)
 {
-    vector<LayerCondition> cnds = config->layerConditions();
+    std::vector<LayerCondition> cnds = config->layerConditions();
     // Destroy
     QLayoutItem *item;
     while ((item = grid->takeAt(0)) != NULL)
@@ -105,5 +103,4 @@ void LayerConditions::init(void)
         grid->setColumnStretch(i, 1);
     grid->setColumnStretch(grid->columnCount(), 4);
     setWindowTitle("Layer Mods");
-
 }

@@ -23,8 +23,8 @@ typedef union {
 #define USBCODE_TRANSPARENT 0
 #define USBCODE_A 4
 
-#define USBQUEUE_RELEASED 0x80
-#define USBQUEUE_REAL_KEY 0x40
+#define USBQUEUE_RELEASED_MASK 0x80
+#define USBQUEUE_REAL_KEY_MASK 0x40
 
 #define KEYCODE_BUFFER_END 63
 #define KEYCODE_BUFFER_NEXT(X) ((X + 1) & KEYCODE_BUFFER_END)
@@ -38,6 +38,9 @@ uint8_t mods;
 uint8_t layerMods;
 #define LAYER_MODS_SHIFT 4
 uint8_t currentLayer;
+
+
+uint16_t cooldown_timer;
 
 void pipeline_init(void);
 void pipeline_process(void);

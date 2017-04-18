@@ -39,7 +39,8 @@ SOURCES += main.cpp \
     LayerConditions.cpp \
     FirmwareLoader.cpp \
     CyACD.cpp \
-    LayerCondition.cpp
+    LayerCondition.cpp \
+    Delays.cpp
 
 HEADERS  += \
     ../c2/c2_protocol.h \
@@ -59,7 +60,8 @@ HEADERS  += \
     LayerConditions.h \
     FirmwareLoader.h \
     CyACD.h \
-    LayerCondition.h
+    LayerCondition.h \
+    Delays.h
 
 FORMS    += \
     FlightController.ui \
