@@ -6,6 +6,7 @@
 #include <QComboBox>
 #include <QGridLayout>
 #include "DeviceConfig.h"
+#include "LayerCondition.h"
 
 #define NUM_FNS 4
 

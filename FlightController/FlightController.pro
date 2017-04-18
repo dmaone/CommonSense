@@ -38,26 +38,28 @@ SOURCES += main.cpp \
     DeviceConfig.cpp \
     LayerConditions.cpp \
     FirmwareLoader.cpp \
-    CyACD.cpp
+    CyACD.cpp \
+    LayerCondition.cpp
 
 HEADERS  += \
+    ../c2/c2_protocol.h \
+    ../c2/nvram.h \
+    call_once.h \
+    singleton.h \
+    settings.h \
     FlightController.h \
     LogViewer.h \
     DeviceInterface.h \
     Events.h \
-    call_once.h \
-    singleton.h \
-    ../c2/c2_protocol.h \
     MatrixMonitor.h \
-    ../c2/nvram.h \
     LayoutEditor.h \
     ScancodeList.h \
     ThresholdEditor.h \
     DeviceConfig.h \
     LayerConditions.h \
     FirmwareLoader.h \
-    settings.h \
-    CyACD.h
+    CyACD.h \
+    LayerCondition.h
 
 FORMS    += \
     FlightController.ui \
