@@ -41,6 +41,7 @@ uint8_t currentLayer;
 
 
 uint16_t cooldown_timer;
+uint32_t pipeline_bitmap[((MATRIX_COLS * MATRIX_ROWS) >> 5) + 1];
 
 void pipeline_init(void);
 void pipeline_process(void);

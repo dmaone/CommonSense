@@ -163,6 +163,10 @@ NOTE2: we still want to maintain order?
 /*
     Idea: not move readpos until keycode after it is processed. 
     So, readpos to writepos would be the working area.
+
+    TODO: maintain bitmap of currently pressed keys to release them on reset and for better KRO handling.
+    TODO: implement out of order key release?
+    NOTE ^ ^^ very rare situations where this is needed.
  */ 
 inline void update_reports(void)
 {
@@ -209,6 +213,12 @@ inline void update_reports(void)
             {
                 update_keyboard_report(&USBQueue[pos]);
             }
+            if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0)
+            {
+                // We only throttle keypresses. Key release doesn't slow us down - 
+                // minimum duration is guaranteed by fact that key release goes after key press and keypress triggers cooldown.
+                cooldown_timer = config.delayLib[0]; // Actual update happened - reset cooldown.
+            }
             USBQueue[pos].keycode = USBCODE_NOEVENT;
             if (pos == USBQueue_readpos && pos != USBQueue_writepos)
             {
@@ -216,7 +226,6 @@ inline void update_reports(void)
                 // Also if not the last item - we don't want to overrun the buffer.
                 USBQueue_readpos = KEYCODE_BUFFER_NEXT(pos);
             }
-            cooldown_timer = config.delayLib[0]; // Actual update happened - reset cooldown.
             break;
         }
     } while (pos != USBQueue_writepos);
@@ -262,5 +271,6 @@ void pipeline_init(void)
     USBQueue_readpos  = 0;
     USBQueue_writepos = 0;
     cooldown_timer = 0;
-    memset(USBQueue, USBCODE_NOEVENT, sizeof(USBQueue));
+    memset(USBQueue, USBCODE_NOEVENT, sizeof USBQueue);
+    memset(pipeline_bitmap, 0, sizeof pipeline_bitmap);
 }
