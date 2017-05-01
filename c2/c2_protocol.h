@@ -46,6 +46,7 @@ enum c2command {
     // Bootloader command must keep it's place or you lose firmware update capability.
     C2CMD_UPLOAD_CONFIG, // FROM host
     C2CMD_DOWNLOAD_CONFIG, // TO host
+    C2CMD_APPLY_CONFIG, // reinits sensitive parts
     C2CMD_COMMIT,
     C2CMD_ROLLBACK,
     C2CMD_SET_MODE,
@@ -73,6 +74,20 @@ enum capsenseFlags {
 enum deviceMode {
     C2DEVMODE_NORMAL = 0,
     C2DEVMODE_SETUP,
+};
+
+enum expMode {
+    EXP_MODE_DISABLED = 0,
+
+    EXP_MODE_SOLENOID,
+    EXP_MODE_LEDS,
+};
+
+const char * const expModeNames[] = {
+    "Disabled",
+
+    "Solenoid",
+    "Lock LEDs",
 };
 
 typedef union {

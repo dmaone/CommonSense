@@ -40,7 +40,8 @@ SOURCES += main.cpp \
     FirmwareLoader.cpp \
     CyACD.cpp \
     LayerCondition.cpp \
-    Delays.cpp
+    Delays.cpp \
+    ExpansionHeader.cpp
 
 HEADERS  += \
     ../c2/c2_protocol.h \
@@ -61,12 +62,14 @@ HEADERS  += \
     FirmwareLoader.h \
     CyACD.h \
     LayerCondition.h \
-    Delays.h
+    Delays.h \
+    ExpansionHeader.h
 
 FORMS    += \
     FlightController.ui \
     MatrixMonitor.ui \
     LayoutEditor.ui \
-    ThresholdEditor.ui
+    ThresholdEditor.ui \
+    ExpansionHeader.ui
 
 DISTFILES +=

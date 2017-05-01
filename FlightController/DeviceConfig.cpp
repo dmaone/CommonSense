@@ -68,6 +68,7 @@ void DeviceConfig::_uploadConfigBlock(void)
             {
                 qInfo() << "done!";
                 transferDirection = TransferIdle;
+                emit sendCommand(C2CMD_APPLY_CONFIG, 1);
                 return;
             }
             qInfo(".");
@@ -294,4 +295,20 @@ std::vector<uint16_t> DeviceConfig::delays(void)
 void DeviceConfig::setDelay(int delayIdx, uint16_t delay_ms)
 {
     _eeprom.delayLib[delayIdx] = delay_ms;
+}
+
+std::vector<uint8_t> DeviceConfig::expHeaderParams(void)
+{
+    std::vector<uint8_t> retval;
+    retval.push_back(_eeprom.expMode);
+    retval.push_back(_eeprom.expParam1);
+    retval.push_back(_eeprom.expParam2);
+    return retval;
+}
+
+void DeviceConfig::setExpHeaderParams(uint8_t mode, uint8_t param1, uint8_t param2)
+{
+    _eeprom.expMode = mode;
+    _eeprom.expParam1 = param1;
+    _eeprom.expParam2 = param2;
 }

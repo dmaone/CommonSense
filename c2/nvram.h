@@ -26,7 +26,10 @@ typedef union {
         uint8_t matrixCols;
         uint8_t layerCount;
         uint8_t capsenseFlags;
-        uint8_t _RESERVED0[9];
+        uint8_t expMode;
+        uint8_t expParam1;
+        uint8_t expParam2;
+        uint8_t _RESERVED0[6];
         uint8_t guardLo;
         uint8_t guardHi;
         uint16_t delayLib[MAX_DELAYS]; // 2 bytes per item!

@@ -19,6 +19,7 @@
 #include "LayerConditions.h"
 #include "FirmwareLoader.h"
 #include "Delays.h"
+#include "ExpansionHeader.h"
 
 namespace Ui {
 class FlightController;
@@ -61,6 +62,7 @@ private:
     ThresholdEditor *thresholdEditor;
     LayerConditions *layerConditions;
     Delays *_delays;
+    ExpansionHeader *_expHeader;
     FirmwareLoader *loader;
     QtMessageHandler *_oldLogger;
     void lockUI(bool lock);
@@ -68,4 +70,6 @@ private:
 private slots:
     void on_action_Setup_mode_triggered(bool bMode);
     void editDelays(void);
+    void editExpHeader(void);
+
 };

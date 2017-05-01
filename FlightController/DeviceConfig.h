@@ -32,6 +32,8 @@ public:
     void setLayerConditions(std::vector<LayerCondition> lcs);
     std::vector<uint16_t> delays(void);
     void setDelay(int delayIdx, uint16_t delay_ms);
+    std::vector<uint8_t> expHeaderParams(void);
+    void setExpHeaderParams(uint8_t mode, uint8_t param1, uint8_t param2);
 
 signals:
     void changed(void);

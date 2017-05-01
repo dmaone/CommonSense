@@ -33,6 +33,7 @@ void usb_send_c2();
 void usb_send_wakeup(void);
 void process_msg(OUT_c2packet_t *);
 void load_config(void);
+void apply_config(void);
 
 void update_keyboard_report(queuedScancode *key);
 void update_keyboard_mods(uint8_t);

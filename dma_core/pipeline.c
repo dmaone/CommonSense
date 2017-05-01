@@ -11,6 +11,7 @@
 #include "pipeline.h"
 #include "scan.h"
 #include "PSoC_USB.h"
+#include "exp.h"
 
 inline uint8_t process_scancode_buffer(void)
 {
@@ -160,6 +161,7 @@ NOTE2: we still want to maintain order?
     return;
 }
 
+#define NO_COOLDOWN USBQueue[pos].flags |= USBQUEUE_RELEASED_MASK;
 /*
     Idea: not move readpos until keycode after it is processed. 
     So, readpos to writepos would be the working area.
@@ -199,7 +201,16 @@ inline void update_reports(void)
                 // Actual mods processed above and not pushed to keycode buffer.
                 // Here it means "update report from bitmap we currently have".
                 update_keyboard_mods(mods);
+                NO_COOLDOWN
             }
+            else if (USBQueue[pos].keycode < USBCODE_A)
+            {
+                // side effect - key transparent till the bottom will toggle exp. header
+                // But it should not ever be put on queue!
+                exp_toggle();
+                NO_COOLDOWN
+            }
+            // Codes you want filtered from reports MUST BE ABOVE THIS LINE!
             // -> Think of special code for collectively settings mods!
             else if (USBQueue[pos].keycode >= 0xe8)
             {
@@ -218,6 +229,7 @@ inline void update_reports(void)
                 // We only throttle keypresses. Key release doesn't slow us down - 
                 // minimum duration is guaranteed by fact that key release goes after key press and keypress triggers cooldown.
                 cooldown_timer = config.delayLib[0]; // Actual update happened - reset cooldown.
+                exp_keypress(USBQueue[pos].keycode); // Let the downstream filter by keycode
             }
             USBQueue[pos].keycode = USBCODE_NOEVENT;
             if (pos == USBQueue_readpos && pos != USBQueue_writepos)

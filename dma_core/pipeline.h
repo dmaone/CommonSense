@@ -19,8 +19,9 @@ typedef union {
     uint8_t raw[6];
 } queuedScancode;
 
-#define USBCODE_NOEVENT 1
 #define USBCODE_TRANSPARENT 0
+#define USBCODE_NOEVENT 1
+#define USBCODE_EXP_TOGGLE 3
 #define USBCODE_A 4
 
 #define USBQUEUE_RELEASED_MASK 0x80

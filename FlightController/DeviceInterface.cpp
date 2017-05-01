@@ -75,7 +75,7 @@ void DeviceInterface::_sendPacket()
     outbox[0] = 0x00; // ReportID is not used.
     if (hid_write(device, outbox, sizeof outbox) == -1)
     {
-        qWarning() << "Error sending to the device..";
+        qWarning() << "Error sending to the device, will reconnect..";
         _releaseDevice();
     }
 }
@@ -246,9 +246,9 @@ hid_device* DeviceInterface::acquireDevice(void)
 
 void DeviceInterface::_releaseDevice(void)
 {
-    qInfo("Reacquiring device.");
-    _updateDeviceStatus(DeviceDisconnected);
     if (device)
+        qInfo("Releasing device.");
+        _updateDeviceStatus(DeviceDisconnected);
         hid_close(device);
     device = NULL;
     if(hid_exit())

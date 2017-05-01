@@ -11,6 +11,7 @@
 #include "globals.h"
 #include "c2/c2_protocol.h"
 #include "PSoC_USB.h"
+#include "exp.h"
 
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
@@ -89,6 +90,11 @@ void load_config(void){
     }
 }
 
+void apply_config(void){
+    exp_init();
+    pipeline_init(); // calls scan_reset
+}
+
 void save_config(void){
     set_hardware_parameters();
     EEPROM_Start();
@@ -129,6 +135,11 @@ void process_msg(OUT_c2packet_t * inbox)
         break;
     case C2CMD_DOWNLOAD_CONFIG:
         send_config_block(inbox);
+        break;
+    case C2CMD_APPLY_CONFIG:
+        xprintf("Applying config..");
+        apply_config();
+        report_status();
         break;
     case C2CMD_COMMIT:
         save_config();

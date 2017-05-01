@@ -38,6 +38,8 @@ FlightController::FlightController(QWidget *parent) :
 
     _delays = new Delays(di.config);
 
+    _expHeader = new ExpansionHeader(di.config);
+
     // Must be last in chain to intercept all packets!
     loader = new FirmwareLoader();
     connect(loader, SIGNAL(switchMode(bool)), &di, SLOT(bootloaderMode(bool)));
@@ -69,6 +71,10 @@ void FlightController::setup(void)
     connect(ui->action_Layer_mods, SIGNAL(triggered()), this, SLOT(showLayerConditions()));
 
     connect(ui->delaysButton, SIGNAL(clicked()), this, SLOT(editDelays()));
+    connect(ui->action_Delays, SIGNAL(triggered()), this, SLOT(editDelays()));
+
+    connect(ui->expButton, SIGNAL(clicked()), this, SLOT(editExpHeader()));
+    connect(ui->action_Exp_Header, SIGNAL(triggered()), this, SLOT(editExpHeader()));
 
     connect(ui->BootloaderButton, SIGNAL(clicked()), loader, SLOT(start()));
     connect(ui->action_Update_Firmware, SIGNAL(triggered()), loader, SLOT(start()));
@@ -151,11 +157,12 @@ void FlightController::deviceStatusNotification(DeviceInterface::DeviceStatus s)
         case DeviceInterface::DeviceDisconnected:
             break;
         case DeviceInterface::DeviceConfigChanged:
-            lockUI(false);
-            layerConditions->init();
-            _delays->init();
             emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
             ui->action_Setup_mode->setChecked(true);
+            layerConditions->init();
+            _delays->init();
+            _expHeader->init();
+            lockUI(false);
             break;
         case DeviceInterface::BootloaderConnected:
             loader->load();
@@ -173,6 +180,7 @@ void FlightController::lockUI(bool lock)
     ui->layoutButton->setDisabled(lock);
     ui->layerModsButton->setDisabled(lock);
     ui->delaysButton->setDisabled(lock);
+    ui->expButton->setDisabled(lock);
 }
 
 void FlightController::editLayoutClick(void)
@@ -198,4 +206,9 @@ void FlightController::on_action_Setup_mode_triggered(bool bMode)
 void FlightController::editDelays()
 {
     _delays->show();
+}
+
+void FlightController::editExpHeader()
+{
+    _expHeader->show();
 }

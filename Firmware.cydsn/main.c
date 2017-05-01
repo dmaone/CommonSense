@@ -13,6 +13,7 @@
 #include "c2/nvram.h"
 #include "scan.h"
 #include "pipeline.h"
+#include "exp.h"
 
 CY_ISR(BootIRQ_ISR)
 {
@@ -40,7 +41,7 @@ int main()
     status_register.setup_mode = NOT_A_KEYBOARD;
     usb_init();
     scan_init();
-    pipeline_init(); // calls scan_reset
+    apply_config();
     scan_start(); // We are starting in full power - must do that initial kick
     for(;;)
     {
@@ -52,6 +53,7 @@ int main()
 #endif
                 if (tick)
                 {
+                    exp_tick(tick);
                     tick = 0;
                     if (0u != USB_IsConfigurationChanged())
                     {
@@ -72,6 +74,7 @@ int main()
                     {
                         led_status = KBD_INBOX[0];
                         KBD_SCB.status = USB_XFER_IDLE;
+                        exp_setLEDs(led_status);
                     }
                     CyExitCriticalSection(enableInterrupts);
                     if (status_register.matrix_output > 0)
