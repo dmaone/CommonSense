@@ -33,7 +33,6 @@
 // MUX input 0 must be connected to ground - we use it to discharge ADC sampling cap.
 // So, scan sequence code sees is ch0-ch1-ch0-ch2-ch0-ch3-ch0..
 #define PTK_CHANNELS (2 * ADC_CHANNELS + 3)
-// DO NOT FORGET TO UPDATE PTK COMPONENT TO MATCH ^!
 
 // For even values of the above - both offsets need to be updated!
 #define ADC_BUF_INITIAL_OFFSET 1

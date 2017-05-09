@@ -36,6 +36,7 @@ static void InitSensor(void)
     // 1 request per ADC, get the whole ADC buffer (skip grounded channels which are at the end).
     FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs, (uint16)(HI16(CYDEV_SRAM_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     uint8 enableInterrupts = CyEnterCriticalSection();
+    (*(reg8 *)PTK_ChannelCounter__PERIOD_REG) = (PTK_CHANNELS - 1); // Load number of channels. See Count7/WritePeriod for details.
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
     ADC0_Start();
