@@ -7,8 +7,6 @@ you need [msys32](https://msys2.github.io/). Here's [a good guide](https://wiki.
 
 !!!WARNING!!! you need "msys MinGW 32 bit" shell !!!
 
-Pre-requisites:
-
 ```
 pacman -S autoconf automake libtool gcc
 ```
@@ -37,7 +35,7 @@ make
 you should have libhidapi[something] in [platform]/.libs - leave it there.
 
 
-##Ubuntu 16.04
+## Ubuntu 16.04
 ```
 sudo apt-get install libhidapi-dev libhidapi-hidraw0
 ```
@@ -107,7 +105,7 @@ xcodebuild will require you to accept license. If it complains about no XCode pr
 
 You have working Qt environment now.
 
-/DETOUR
+## /DETOUR
 
 ```
 git clone https://github.com/dmaone/CommonSense.git
