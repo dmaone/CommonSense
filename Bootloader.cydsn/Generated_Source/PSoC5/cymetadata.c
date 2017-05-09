@@ -64,7 +64,7 @@ CY_CUST_NVL_SECTION
 #error "Unsupported toolchain"
 #endif
 const uint8 cy_meta_custnvl[] = {
-    0xFFu, 0xC0u, 0x43u, 0x06u
+    0x00u, 0x00u, 0x40u, 0x06u
 };
 
 #if defined(__GNUC__) || defined(__ARMCC_VERSION)

@@ -318,29 +318,17 @@ void SetAnalogRoutingPumps(uint8 enabled)
 
 void cyfitter_cfg(void)
 {
-	/* IOPINS0_0 Address: CYREG_PRT0_DR Size (bytes): 10 */
-	static const uint8 CYCODE BS_IOPINS0_0_VAL[] = {
-		0x01u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u, 0x01u, 0x00u};
-
-	/* IOPINS0_7 Address: CYREG_PRT12_DR Size (bytes): 10 */
-	static const uint8 CYCODE BS_IOPINS0_7_VAL[] = {
-		0x03u, 0x00u, 0x00u, 0x03u, 0x00u, 0x00u, 0x00u, 0x00u, 0x03u, 0x00u};
-
 	/* IOPINS0_8 Address: CYREG_PRT15_DR Size (bytes): 10 */
 	static const uint8 CYCODE BS_IOPINS0_8_VAL[] = {
-		0x41u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u, 0xC1u, 0x00u};
-
-	/* IOPINS0_1 Address: CYREG_PRT1_DR Size (bytes): 10 */
-	static const uint8 CYCODE BS_IOPINS0_1_VAL[] = {
-		0x01u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u, 0x01u, 0x00u};
+		0x40u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0xC0u, 0x00u};
 
 	/* IOPINS0_2 Address: CYREG_PRT2_DR Size (bytes): 10 */
 	static const uint8 CYCODE BS_IOPINS0_2_VAL[] = {
-		0x01u, 0x00u, 0x00u, 0x01u, 0x00u, 0x00u, 0x00u, 0x00u, 0x01u, 0x00u};
+		0x02u, 0x00u, 0x00u, 0x02u, 0x02u, 0x00u, 0x00u, 0x00u, 0x02u, 0x00u};
 
 	/* IOPINS0_3 Address: CYREG_PRT3_DR Size (bytes): 10 */
 	static const uint8 CYCODE BS_IOPINS0_3_VAL[] = {
-		0x21u, 0x00u, 0x00u, 0x21u, 0x00u, 0x00u, 0x00u, 0x00u, 0x01u, 0x00u};
+		0x20u, 0x00u, 0x00u, 0x20u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u, 0x00u};
 
 #ifdef CYGlobalIntDisable
 	/* Disable interrupts by default. Let user enable if/when they want. */
@@ -357,7 +345,7 @@ void cyfitter_cfg(void)
 	{
 		static const uint32 CYCODE cy_cfg_addr_table[] = {
 			0x40004501u, /* Base address: 0x40004500 Count: 1 */
-			0x40005206u, /* Base address: 0x40005200 Count: 6 */
+			0x40005203u, /* Base address: 0x40005200 Count: 3 */
 			0x40011701u, /* Base address: 0x40011700 Count: 1 */
 			0x40011901u, /* Base address: 0x40011900 Count: 1 */
 			0x40014003u, /* Base address: 0x40014000 Count: 3 */
@@ -372,12 +360,9 @@ void cyfitter_cfg(void)
 
 		static const cy_cfg_addrvalue_t CYCODE cy_cfg_data_table[] = {
 			{0x7Eu, 0x02u},
-			{0x04u, 0x01u},
-			{0x0Cu, 0x01u},
-			{0x14u, 0x01u},
-			{0x1Cu, 0x21u},
-			{0x64u, 0x03u},
-			{0x7Cu, 0x41u},
+			{0x14u, 0x02u},
+			{0x1Cu, 0x20u},
+			{0x7Cu, 0x40u},
 			{0xEEu, 0x0Au},
 			{0xEEu, 0x0Au},
 			{0x33u, 0x80u},
@@ -409,7 +394,9 @@ void cyfitter_cfg(void)
 
 		static const cfg_memset_t CYCODE cfg_memset_list [] = {
 			/* address, size */
+			{(void CYFAR *)(CYREG_PRT0_DR), 32u},
 			{(void CYFAR *)(CYREG_PRT4_DR), 48u},
+			{(void CYFAR *)(CYREG_PRT12_DR), 16u},
 			{(void CYFAR *)(CYDEV_UCFG_B0_P0_U0_BASE), 4096u},
 			{(void CYFAR *)(CYDEV_UCFG_B1_P2_U0_BASE), 2048u},
 			{(void CYFAR *)(CYDEV_UCFG_DSI0_BASE), 2560u},
@@ -439,10 +426,7 @@ void cyfitter_cfg(void)
 
 
 	/* Perform second pass device configuration. These items must be configured in specific order after the regular configuration is done. */
-	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT0_DR), (const void CYCODE *)(BS_IOPINS0_0_VAL), 10u);
-	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT12_DR), (const void CYCODE *)(BS_IOPINS0_7_VAL), 10u);
 	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT15_DR), (const void CYCODE *)(BS_IOPINS0_8_VAL), 10u);
-	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT1_DR), (const void CYCODE *)(BS_IOPINS0_1_VAL), 10u);
 	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT2_DR), (const void CYCODE *)(BS_IOPINS0_2_VAL), 10u);
 	CYCONFIGCPYCODE((void CYFAR *)(CYREG_PRT3_DR), (const void CYCODE *)(BS_IOPINS0_3_VAL), 10u);
 	/* Switch Boost to the precision bandgap reference from its internal reference */
