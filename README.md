@@ -6,7 +6,7 @@ You can also fry the chip using it. If you break it - you own all the parts.
 It is currently configured to use CY8C5667LTI-LP009, but you can change the chip in Project->Device Selector menu.
 So it should work with CY8CKIT-059. Here's how.
 
-#Soldering:
+=Soldering=
 
 SOLDER IT SO THAT CHIP IS FACING AWAY FROM THE BACKPLATE.
 It's in CAPS because I was stupid enough to solder it chip (and LED) _to_ backplate and have trouble seeing LED. I'm also lazy enough not to resolder.
@@ -17,7 +17,7 @@ What matters is that you connect BOTH plates and PCB ground to the controller gr
 
 You'll need 35 pins. That's not much more than the kit has - so choose the layout wisely.
 
-##RECOMMENDATIONS.
+==RECOMMENDATIONS==
 * P0[2] and P0[4] MUST be electrically connected to +5V (Well.. that's one STRONG recommendation. Not following it will lead to WILD readings, because those pins are ADC voltage references.).
 * P12(all pins of it) cannot be used for analog connections. That means you can only assign Rows to those pins.
 * D0 and D1 MUST be electrically connected to the ground. Use P0[3] for D0 and P3[2] for D1 (you can't use those pins for anything else anyway - they have 1uF capacitors connected to them). Can be any pins except P12[x] though.
@@ -29,7 +29,7 @@ So, for 16-column keyboard, real columns will be Cols[4] - Cols[11] and Cols[16]
 * Rows. Simplest part. No restrictions.
 
 So.
-##Recommended pinout:
+==Recommended pinout==
 * D0: P0[3]
 * D1: P3[2]
 * Rows: P0[0, 1, 5, 6, 7], P15[3, 4, 5]. Alternatively, P12 can be used to free more analog-capable pins, but watch for ExpHdr pins.
@@ -39,8 +39,8 @@ So.
 
 Whew. Hopefully you're done with soldering now.
 
-#Building the firmware
-## Build bootloader
+=Building the firmware=
+==Build bootloader==
 * Open PSoC Creator
 * Open "CY8CKIT-059 Bootloader.cywrk" workspace
 * Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097".
@@ -54,7 +54,7 @@ If there's no files at the location - in the left pane, right-click on "Workspac
 
 Congratulations. Now for the main course!
 
-## Build main firmware
+==Build main firmware==
 Firmware is in model F mode - "normally low". Look into dma_core/globals.h to switch to beamspring mode - #define SWITCH_TYPE
 
 * Open PSoC Creator, open CommonSense.cywrk workspace.
@@ -66,15 +66,15 @@ Firmware is in model F mode - "normally low". Look into dma_core/globals.h to sw
 ..I was able to plug both ends into the same USB hub (thinkpad docking station) without frying anything - but your mileage may vary. I DO NOT RECOMMEND IT, IT'S A STUPID DWARF TRICK.
 You may optionally break the kitprog away in a symbolic gesture, but a) if I were you, I wouldn't and b) if you would - cut the laminate at the break line first. Not all the way (though you may if you have a dremel or a saw around), but enough so the board doesn't buckle so horribly. Oh, and soldering probably have to wait until this moment at least.
 
-# Build FlightController
+=Build FlightController=
 See Qt-build/README.md
 
-# Configure keyboard
+=Configure keyboard=
 
 With empty EEPROM, keyboard won't work. You need to initialize it. There are config files in misc/ directory which should be a good starting point.
 To load it into device, run FlightController, Config->Open, Config->Upload. BEWARE, thresholds may be set absolutely wrong!
 
-## Configuring thresholds
+==Configuring thresholds==
 Short version: 
 * Click "Key Monitor" button. 
 * Click "Start!". Get the idea of levels that should be there - press keys, observe readings going up and down. Small numbers below 7-segment indicators are min/avg/max.
@@ -90,6 +90,6 @@ The idea is that only readings of [(LowThreshold-LoGuard) - LowThreshold] and [H
 So set thresholds so that the band is reasonably centered on the average readout for the key.
 For the beamspring thresholds stay the same, but activation is when signal goes LOW, not high.
 
-## Configuring layouts
+==Configuring layouts==
 pretty straightforward. If thresholds are configured, pressed keys will be highlighted white.
 Import and export will load and save to file. Structure is compatible with xwhatsit layout files.
