@@ -40,8 +40,8 @@ So.
 
 Whew. Hopefully you're done with soldering now.
 
-# Building the firmware
-## Build bootloader
+# Building
+## Bootloader
 * Open PSoC Creator
 * Open "CY8CKIT-059 Bootloader.cywrk" workspace
 * Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097".
@@ -55,7 +55,7 @@ If there's no files at the location - in the left pane, right-click on "Workspac
 
 Congratulations. Now for the main course!
 
-## Build main firmware
+## Firmware
 
 Firmware is in model F mode - "normally low". Look into dma_core/globals.h to switch to beamspring mode - #define SWITCH_TYPE
 
@@ -70,9 +70,9 @@ Firmware is in model F mode - "normally low". Look into dma_core/globals.h to sw
 
 You may optionally break the kitprog away in a symbolic gesture, but a) if I were you, I wouldn't and b) if you would - cut the laminate at the break line first. Not all the way (though you may if you have a dremel or a saw around), but enough so the board doesn't buckle so horribly. Oh, and soldering probably have to wait until this moment at least.
 
-# Build FlightController
+## FlightController
 
-See Qt-build/README.md
+[Separate file](Qt-build/README.md)
 
 # Configure keyboard
 
