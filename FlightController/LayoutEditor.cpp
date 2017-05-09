@@ -225,3 +225,8 @@ void LayoutEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::Ke
         display[row][col]->setStyleSheet("background-color: #dddddd;");
     }
 }
+
+void LayoutEditor::on_closeButton_clicked()
+{
+    this->close();
+}

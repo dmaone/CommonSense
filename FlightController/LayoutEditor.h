@@ -40,6 +40,9 @@ private:
     void initDisplay(void);
     void sizeDisplay(uint8_t, uint8_t);
     void setDisplay();
+
+private slots:
+    void on_closeButton_clicked(void);
 };
 
 #endif // LAYOUTEDITOR_H

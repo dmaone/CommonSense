@@ -20,6 +20,23 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
+   <item row="0" column="0" colspan="16">
+    <widget class="QFrame" name="Dashboard">
+     <property name="frameShape">
+      <enum>QFrame::StyledPanel</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0">
+    <widget class="QPushButton" name="applyButton">
+     <property name="text">
+      <string>Apply</string>
+     </property>
+    </widget>
+   </item>
    <item row="1" column="2">
     <widget class="QLabel" name="label">
      <property name="text">
@@ -56,41 +73,10 @@
      </property>
     </spacer>
    </item>
-   <item row="1" column="0">
-    <widget class="QPushButton" name="applyButton">
-     <property name="text">
-      <string>Apply</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="13">
-    <widget class="QPushButton" name="revertButton">
-     <property name="text">
-      <string>Revert</string>
-     </property>
-    </widget>
-   </item>
    <item row="1" column="3">
     <widget class="QSpinBox" name="loGuardSpinbox">
      <property name="value">
       <number>10</number>
-     </property>
-    </widget>
-   </item>
-   <item row="0" column="0" colspan="14">
-    <widget class="QFrame" name="Dashboard">
-     <property name="frameShape">
-      <enum>QFrame::StyledPanel</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Raised</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="7">
-    <widget class="QToolButton" name="hiPlusButton">
-     <property name="text">
-      <string>Adjust Hi</string>
      </property>
     </widget>
    </item>
@@ -123,16 +109,10 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="8">
-    <widget class="QSpinBox" name="hiStepSpinbox">
-     <property name="minimum">
-      <number>-20</number>
-     </property>
-     <property name="maximum">
-      <number>20</number>
-     </property>
-     <property name="value">
-      <number>-5</number>
+   <item row="1" column="7">
+    <widget class="QToolButton" name="hiPlusButton">
+     <property name="text">
+      <string>Adjust Hi</string>
      </property>
     </widget>
    </item>
@@ -151,6 +131,19 @@
       </size>
      </property>
     </spacer>
+   </item>
+   <item row="1" column="8">
+    <widget class="QSpinBox" name="hiStepSpinbox">
+     <property name="minimum">
+      <number>-20</number>
+     </property>
+     <property name="maximum">
+      <number>20</number>
+     </property>
+     <property name="value">
+      <number>-5</number>
+     </property>
+    </widget>
    </item>
    <item row="1" column="10">
     <widget class="QToolButton" name="loPlusButton">
@@ -173,6 +166,20 @@
      </property>
      <property name="displayIntegerBase">
       <number>10</number>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="14">
+    <widget class="QPushButton" name="closeButton">
+     <property name="text">
+      <string>Close</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="13">
+    <widget class="QPushButton" name="revertButton">
+     <property name="text">
+      <string>Revert</string>
      </property>
     </widget>
    </item>

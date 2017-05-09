@@ -39,6 +39,9 @@ private:
     void initDisplay();
     void updateDisplaySize(uint8_t, uint8_t);
 
+private slots:
+    void on_closeButton_clicked(void);
+
 };
 
 #endif // THRESHOLDEDITOR_H

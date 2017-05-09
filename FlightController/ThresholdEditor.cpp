@@ -164,3 +164,8 @@ void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface:
         display[row][col]->setStyleSheet("background-color: #cccccc;");
     }
 }
+
+void ThresholdEditor::on_closeButton_clicked()
+{
+    this->close();
+}
