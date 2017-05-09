@@ -83,7 +83,7 @@ enum expMode {
     EXP_MODE_LEDS,
 };
 
-const char * const expModeNames[] = {
+static const char * const expModeNames[] = {
     "Disabled",
 
     "Solenoid",
