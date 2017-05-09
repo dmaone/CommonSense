@@ -9,9 +9,9 @@
 #include <stdio.h>
 #include <project.h>
 #include "globals.h"
-#include "c2/c2_protocol.h"
-#include "PSoC_USB.h"
 #include "exp.h"
+
+#include "PSoC_USB.h"
 
 // for xprintf - stdio + stdarg
 #include <stdarg.h>

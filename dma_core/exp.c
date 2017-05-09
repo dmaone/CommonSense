@@ -8,9 +8,9 @@
 */
 
 #include <project.h>
+#include "globals.h"
 
 #include "exp.h"
-#include "../c2/c2_protocol.h"
 
 static uint8_t leds;
 static uint8_t solenoid_queue;

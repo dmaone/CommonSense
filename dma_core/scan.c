@@ -8,8 +8,9 @@
 */
 #include <project.h>
 
-#include "scan.h"
 #include "PSoC_USB.h"
+
+#include "scan.h"
 
 CY_ISR_PROTO(EoC_ISR);
 CY_ISR_PROTO(Result_ISR);

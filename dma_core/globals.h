@@ -10,11 +10,15 @@
 #pragma once
 // LIB.H!!!
 #define FORCE_BIT(VAR, BN, TO) ((VAR & (!(1<<BN))) + (TO << BN))
-// /LIB.H!!!
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
+// /LIB.H!!!
 
+// Do not touch above definitions. To change switch type change this.
 #define SWITCH_TYPE BUCKLING_SPRING
+
+// Main safety switch
+#define NOT_A_KEYBOARD 0
 
 /*
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
@@ -27,8 +31,6 @@
 #include "c2/nvram.h"
 
 
-// Main safety switch
-#define NOT_A_KEYBOARD 0
 #undef DEBUG_STATE_MACHINE
 #undef DEBUG_INTERRUPTS
 

@@ -9,8 +9,6 @@
 #include "globals.h"
 #include <project.h>
 #include "PSoC_USB.h"
-#include "c2/c2_protocol.h"
-#include "c2/nvram.h"
 #include "scan.h"
 #include "pipeline.h"
 #include "exp.h"
