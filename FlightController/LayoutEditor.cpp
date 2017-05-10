@@ -87,8 +87,6 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols)
             {
                 QComboBox *l = new QComboBox();
                 l->addItems(scancodes.list);
-                l->setMaximumWidth(60);
-                l->setMaximumHeight(25);
                 l->setStyleSheet("background-color: #dddddd;");
                 display[i][j] = l;
                 grid->addWidget(l, i+1, j+1, 1, 1);
