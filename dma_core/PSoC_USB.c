@@ -170,6 +170,11 @@ void update_keyboard_mods(uint8_t mods)
 
 inline void keyboard_press(uint8_t keycode)
 {
+    if ((keycode & 0xf8) == 0xe0)
+    {
+        KBD_OUTBOX[0] |= (1 << (keycode & 0x07));
+        return;
+    }
     for (uint8_t cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)
     {
         if (KBD_OUTBOX[cur_pos] == keycode)
@@ -188,6 +193,11 @@ inline void keyboard_press(uint8_t keycode)
 
 inline void keyboard_release(uint8_t keycode)
 {
+    if ((keycode & 0xf8) == 0xe0)
+    {
+        KBD_OUTBOX[0] &= ~(1 << (keycode & 0x07));
+        return;
+    }
     uint8_t cur_pos;
     bool move = false;
     for (cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)

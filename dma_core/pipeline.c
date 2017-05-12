@@ -62,17 +62,6 @@ inline void process_layerMods(uint8_t sc, uint8_t keycode)
     }
 }
 
-inline void process_mods(uint8_t sc, uint8_t keycode)
-{
-    if ((sc & KEY_UP_MASK) == 0) {
-        // Press
-        mods |= (1 << (keycode & 0x07));
-    } else {
-        // Release
-        mods &= ~(1 << (keycode & 0x07));
-    }
-}
-
 inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode)
 {
     // Trick - even if current buffer position is empty, write to the next one.
@@ -139,12 +128,6 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
  -> Do they automatically release?
 */
     }
-    if ((usb_sc & 0xf8) == 0xe0)
-    {
-        process_mods(sc, usb_sc);
-        queue_usbcode(systime, (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK, 0xe0);
-        return;
-    }
 /*
     Check for macro triggers here
         if USBC+mods = macro trigger:
@@ -196,14 +179,7 @@ inline void update_reports(void)
     {
         if (USBQueue[pos].keycode != USBCODE_NOEVENT && USBQueue[pos].sysTime <= systime)
         {
-            if (USBQueue[pos].keycode == 0xe0)
-            {
-                // Actual mods processed above and not pushed to keycode buffer.
-                // Here it means "update report from bitmap we currently have".
-                update_keyboard_mods(mods);
-                NO_COOLDOWN
-            }
-            else if (USBQueue[pos].keycode < USBCODE_A)
+            if (USBQueue[pos].keycode < USBCODE_A)
             {
                 // side effect - key transparent till the bottom will toggle exp. header
                 // But it should not ever be put on queue!
