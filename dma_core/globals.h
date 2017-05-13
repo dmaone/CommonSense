@@ -22,7 +22,6 @@
 
 /*
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
- * FIX PTK channel count in TopDesign.cysch!!! See scan.c!
  */
 #define MATRIX_COLS 16
 #define MATRIX_ROWS 8
