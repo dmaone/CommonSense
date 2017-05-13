@@ -138,7 +138,7 @@ void DeviceConfig::_unpack(void)
 {
     numRows   = _eeprom.matrixRows;
     numCols   = _eeprom.matrixCols;
-    numLayers = _eeprom.layerCount;
+    numLayers = _eeprom.matrixLayers;
     bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
     guardLo   = _eeprom.guardLo;
     guardHi   = _eeprom.guardHi;
@@ -170,7 +170,6 @@ void DeviceConfig::_assemble(void)
     _eeprom.configVersion = 2;
     _eeprom.guardLo = guardLo;
     _eeprom.guardHi = guardHi;
-    _eeprom.layerCount = numLayers;
     memset(_eeprom.stash, 0, sizeof(_eeprom.stash));
     memset(_eeprom._RESERVED0, 0xff, sizeof(_eeprom._RESERVED0));
     memset(_eeprom._RESERVED1, 0xff, sizeof(_eeprom._RESERVED1));

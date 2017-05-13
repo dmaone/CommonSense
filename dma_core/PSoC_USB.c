@@ -65,6 +65,7 @@ void set_hardware_parameters(void)
     config.capsenseFlags = FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
     config.matrixRows = MATRIX_ROWS;
     config.matrixCols = MATRIX_COLS;
+    config.matrixLayers = MATRIX_LAYERS;
 }
 
 void load_config(void){

@@ -106,7 +106,7 @@ inline void process_real_key(void)
     // Resolve USB keycode using current active layers
     for (uint8_t i=currentLayer; i >= 0; i--)
     {
-        usb_sc = config.lmstash[i*(MATRIX_COLS*MATRIX_ROWS)+(sc & SCANCODE_MASK)];
+        usb_sc = config.layers[i][sc & SCANCODE_MASK];
         if (usb_sc != USBCODE_TRANSPARENT)
         {
             break;

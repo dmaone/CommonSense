@@ -19,12 +19,18 @@
 #define EEPROM_BYTESIZE 2048
 #define COMMONSENSE_BASE_SIZE 64
 
+#ifdef MATRIX_ROWS
+// Firmware. matrix dimensions compiled in.
+#define COMMONSENSE_MATRIX_SIZE (MATRIX_ROWS * MATRIX_COLS)
+#define COMMONSENSE_CONFIG_SIZE (COMMONSENSE_BASE_SIZE + 2 * COMMONSENSE_MATRIX_SIZE)
+#endif
+
 typedef union {
     struct {
         uint8_t configVersion;
         uint8_t matrixRows;
         uint8_t matrixCols;
-        uint8_t layerCount;
+        uint8_t matrixLayers;
         uint8_t capsenseFlags;
         uint8_t expMode;
         uint8_t expParam1;
@@ -39,11 +45,10 @@ typedef union {
         // Storage is for layout-size-specifics and MUST NOT be sized here
         // because firmware can know sizes in advance, while FlightController can't.
 #ifdef MATRIX_ROWS
-        // Firmware. matrix dimensions compiled in.
         uint8_t deadBandLo[MATRIX_ROWS][MATRIX_COLS];
         uint8_t deadBandHi[MATRIX_ROWS][MATRIX_COLS];
-#define COMMONSENSE_CONFIG_SIZE (COMMONSENSE_BASE_SIZE + 2 * MATRIX_ROWS * MATRIX_COLS)
-        uint8_t lmstash[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE];
+        uint8_t layers[MATRIX_LAYERS][COMMONSENSE_MATRIX_SIZE];
+        uint8_t macros[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE - (MATRIX_LAYERS * COMMONSENSE_MATRIX_SIZE)];
 #else
         // FlightController. Must work with what firmware tells it.
 #define COMMONSENSE_CONFIG_SIZE COMMONSENSE_BASE_SIZE
