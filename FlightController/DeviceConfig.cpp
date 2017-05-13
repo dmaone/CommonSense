@@ -142,8 +142,8 @@ void DeviceConfig::_unpack(void)
     bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
     guardLo   = _eeprom.guardLo;
     guardHi   = _eeprom.guardHi;
-    memset(deadBandLo, 0xfe, sizeof(deadBandLo));
-    memset(deadBandHi, 0xfe, sizeof(deadBandHi));
+    memset(deadBandLo, EMPTY_FLASH_BYTE, sizeof(deadBandLo));
+    memset(deadBandHi, EMPTY_FLASH_BYTE, sizeof(deadBandHi));
     memset(layouts, 0x00, sizeof(layouts));
     uint8_t table_size = numRows * numCols;
     for (uint8_t i = 0; i < numRows; i++)
@@ -170,9 +170,9 @@ void DeviceConfig::_assemble(void)
     _eeprom.configVersion = 2;
     _eeprom.guardLo = guardLo;
     _eeprom.guardHi = guardHi;
-    memset(_eeprom.stash, 0, sizeof(_eeprom.stash));
-    memset(_eeprom._RESERVED0, 0xff, sizeof(_eeprom._RESERVED0));
-    memset(_eeprom._RESERVED1, 0xff, sizeof(_eeprom._RESERVED1));
+    memset(_eeprom.stash, EMPTY_FLASH_BYTE, sizeof(_eeprom.stash));
+    memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
+    memset(_eeprom._RESERVED1, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED1));
     uint8_t table_size = numRows * numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
@@ -193,6 +193,20 @@ void DeviceConfig::_assemble(void)
             }
         }
     }
+    uint16_t macros_start = table_size * (numLayers + 2);
+    /*
+    // Crude memcpy of a test macro F24 -> Shift-A
+    static const uint8_t filler[] = {
+        115, 0, 6, // F24, default flags, 6 bytes
+        0x40, 0xe1, // Press, LShift
+        0x00, 4, // Type, A
+        0x60, 0xe1, // Release, LShift
+    };
+    for (uint8_t i = 0; i < sizeof filler; i++)
+    {
+        this->_eeprom.stash[macros_start + i] = filler[i];
+    }
+    */
 }
 
 void DeviceConfig::fromFile()

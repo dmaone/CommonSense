@@ -62,6 +62,32 @@ inline void process_layerMods(uint8_t sc, uint8_t keycode)
     }
 }
 
+/*
+ * Data structure: [scancode][flags][data length][macro data]
+ */
+inline uint_fast16_t lookup_macro(uint8_t flags, uint8_t keycode)
+{
+    uint_fast16_t ptr = 0;
+    do
+    {
+#if USBQUEUE_RELEASED_MASK != MACRO_FLAG_ONKEYUP
+#error Please rewrite check below - it is no longer valid
+#endif
+        if (
+            config.macros[ptr] == keycode
+         && (flags & USBQUEUE_RELEASED_MASK) == (config.macros[ptr+1] & MACRO_FLAG_ONKEYUP)
+        )
+        {
+            return ptr;
+        }
+        else
+        {
+            ptr += config.macros[ptr+2];
+        }
+    } while ( ptr < sizeof config.macros && config.macros[ptr] != EMPTY_FLASH_BYTE );
+    return MACRO_NOT_FOUND;
+}
+
 inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode)
 {
     // Trick - even if current buffer position is empty, write to the next one.
@@ -75,6 +101,37 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode)
     USBQueue[USBQueue_writepos].sysTime = time;
     USBQueue[USBQueue_writepos].flags = flags;
     USBQueue[USBQueue_writepos].keycode = keycode;
+}
+
+void play_macro(uint_fast16_t macro_start)
+{
+    uint8_t *mptr = &config.macros[macro_start] + 3;
+    uint8_t *macro_end = mptr + config.macros[macro_start + 2];
+    uint32_t now = systime;
+    uint_fast16_t delay;
+    uint8_t keyflags;
+    while(mptr <= macro_end)
+    {
+        switch (*mptr >> 6)
+        {
+            case 0:
+                // Press+release, timing from delayLib
+                delay = config.delayLib[(*mptr >> 2) & 0x0f];
+                mptr++;
+                queue_usbcode(now, 0, *mptr);
+                now += delay;
+                queue_usbcode(now, USBQUEUE_RELEASED_MASK, *mptr);
+                break;
+            case 1:
+                // Press or release
+                keyflags = (*mptr & MACRO_KEY_UPDOWN_RELEASE) ? USBQUEUE_RELEASED_MASK : 0;
+                mptr++;
+                queue_usbcode(now, keyflags, *mptr);
+                break;
+            default: return;
+        }
+        mptr++;
+    }
 }
 
 inline void process_real_key(void)
@@ -128,19 +185,22 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
  -> Do they automatically release?
 */
     }
-/*
-    Check for macro triggers here
-        if USBC+mods = macro trigger:
-            play macro to USBCB setting timestamps
-        return;
-*/
-
+    uint8_t keyflags = (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK;
+    uint_fast16_t macro_ptr = lookup_macro(keyflags, usb_sc);
+    if (macro_ptr == MACRO_NOT_FOUND)
+    {
 /*        
 NOTE: queue_usbcode skips non-zero cells in the buffer. Think what to do on overflow.
 NOTE2: we still want to maintain order?
     Otherwise linked list is probably what's doctor ordered (though expensive at 4B per pointer plus memory management)
 */
-    queue_usbcode(systime, (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK, usb_sc);
+        queue_usbcode(systime, keyflags, usb_sc);
+    }
+    else
+    {
+        play_macro(macro_ptr);
+        // play macro
+    }
     return;
 }
 

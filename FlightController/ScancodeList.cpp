@@ -1,5 +1,10 @@
 #include "ScancodeList.h"
 
+
+
+
+
+
 ScancodeList::ScancodeList(): list()
 {
     list << "----"; //0x00
@@ -167,14 +172,10 @@ ScancodeList::ScancodeList(): list()
     list << "Cl/Agn";
     list << "CrSel";
     list << "ExSel";
-
-    // 0xa5 reserved range, remapped
-
-    list << "Power";
+    list << "Power"; // 0xa5-7 reserved range, remapped
     list << "Sleep";
     list << "Wake";
-    // 0xa8 - reserved, remapped to layer manipulations
-    list << "Fn1";
+    list << "Fn1"; // 0xa8 - reserved, remapped to layer manipulations
     list << "Fn2";
     list << "Fn3";
     list << "Fn4";
@@ -182,7 +183,6 @@ ScancodeList::ScancodeList(): list()
     list << "LLck2";
     list << "LLck3";
     list << "LLck4";
-
     list << "00";
     list << "000";
     list << "ThSep";
@@ -238,10 +238,7 @@ ScancodeList::ScancodeList(): list()
     list << "RCtrl";
     list << "RShft";
     list << "RAlt";
-    list << "RGUI";
-
-    // 0xe8, reserved range mapped to media
-
+    list << "RGUI"; // 0xe7, below is reserved range mapped to media
     list << ">/||"; // Play/Pause
     list << "Mute";
     list << "Vol++";
@@ -250,9 +247,7 @@ ScancodeList::ScancodeList(): list()
     list << "-r-D";
     list << "-r-E";
     list << "-r-F";
-
-    // 0xf0, reserved range mapped to media
-    list << "Play";
+    list << "Play"; // 0xf0, reserved range mapped to media
     list << "||";
     list << "Rec";
     list << ">>";

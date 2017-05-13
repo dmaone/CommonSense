@@ -137,3 +137,5 @@ typedef union {
 
 #define CONFIG_TRANSFER_BLOCK_SIZE 32
 #define CONFIG_BLOCK_DATA_OFFSET 1
+
+#define MACRO_FLAG_ONKEYUP 0x80

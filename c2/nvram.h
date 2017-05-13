@@ -57,3 +57,5 @@ typedef union {
     };
     uint8_t raw[EEPROM_BYTESIZE];
 } psoc_eeprom_t;
+
+#define EMPTY_FLASH_BYTE 0xff
