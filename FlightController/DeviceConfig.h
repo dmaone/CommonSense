@@ -26,7 +26,7 @@ public:
     uint8_t deadBandLo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     uint8_t deadBandHi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     bool    skipSensing[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    uint8_t layouts[MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     std::vector<LayerCondition> layerConditions(void);
     void setLayerCondition(int conditionIdx, LayerCondition cnd);
     void setLayerConditions(std::vector<LayerCondition> lcs);

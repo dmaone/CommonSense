@@ -32,8 +32,8 @@ typedef union {
         uint8_t _RESERVED0[6];
         uint8_t guardLo;
         uint8_t guardHi;
-        uint16_t delayLib[MAX_DELAYS]; // 2 bytes per item!
-        uint8_t layerConditions[8];
+        uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
+        uint8_t layerConditions[NUM_LAYER_CONDITIONS];
         uint8_t _RESERVED1[8];
         // CONFIG SIZE - count up from here.
         // Storage is for layout-size-specifics and MUST NOT be sized here

@@ -7,8 +7,8 @@
 #include "LayerCondition.h"
 
 DeviceConfig::DeviceConfig(QObject *parent) : QObject(parent),
-    bValid(false), numRows(0), numCols(0), numLayers(MAX_LAYERS),
-    numLayerConditions(MAX_LAYER_CONDITIONS), numDelays(MAX_DELAYS), bNormallyLow(false),
+    bValid(false), numRows(0), numCols(0), numLayers(ABSOLUTE_MAX_LAYERS),
+    numLayerConditions(NUM_LAYER_CONDITIONS), numDelays(NUM_DELAYS), bNormallyLow(false),
     transferDirection(TransferIdle)
 {
     memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
