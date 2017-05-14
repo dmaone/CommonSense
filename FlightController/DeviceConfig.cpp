@@ -201,6 +201,11 @@ void DeviceConfig::_assemble(void)
         0x40, 0xe1, // Press, LShift
         0x00, 4, // Type, A
         0x60, 0xe1, // Release, LShift
+        229, 0xc0, 6, // RShift, release|tap, 6 bytes
+        0x40, 0xe1, // Press, LShift
+        00, 5, // Type, B
+        0x60, 0xe1, // Release, LShift
+        0xff // last byte, so that I can put comma at the end of the block
     };
     for (uint8_t i = 0; i < sizeof filler; i++)
     {

@@ -13,6 +13,9 @@
 #include "PSoC_USB.h"
 #include "exp.h"
 
+uint8_t pipeline_prev_usbkey;
+uint32_t pipeline_prev_usbkey_time;
+
 inline uint8_t process_scancode_buffer(void)
 {
     if (scancode_buffer_readpos == scancode_buffer_writepos)
@@ -70,19 +73,19 @@ inline uint_fast16_t lookup_macro(uint8_t flags, uint8_t keycode)
     uint_fast16_t ptr = 0;
     do
     {
-#if USBQUEUE_RELEASED_MASK != MACRO_FLAG_ONKEYUP
+#if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
 #error Please rewrite check below - it is no longer valid
 #endif
         if (
             config.macros[ptr] == keycode
-         && (flags & USBQUEUE_RELEASED_MASK) == (config.macros[ptr+1] & MACRO_FLAG_ONKEYUP)
+         && (flags & USBQUEUE_RELEASED_MASK) == (config.macros[ptr+1] & MACRO_TYPE_ONKEYUP)
         )
         {
             return ptr;
         }
         else
         {
-            ptr += config.macros[ptr+2];
+            ptr += config.macros[ptr+2] + 3;
         }
     } while ( ptr < sizeof config.macros && config.macros[ptr] != EMPTY_FLASH_BYTE );
     return MACRO_NOT_FOUND;
@@ -103,7 +106,7 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode)
     USBQueue[USBQueue_writepos].keycode = keycode;
 }
 
-void play_macro(uint_fast16_t macro_start)
+inline void play_macro(uint_fast16_t macro_start)
 {
     uint8_t *mptr = &config.macros[macro_start] + 3;
     uint8_t *macro_end = mptr + config.macros[macro_start + 2];
@@ -187,20 +190,27 @@ TODO resolve problem where pressed mod keys are missing on the new layer.
     }
     uint8_t keyflags = (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK;
     uint_fast16_t macro_ptr = lookup_macro(keyflags, usb_sc);
-    if (macro_ptr == MACRO_NOT_FOUND)
+    bool do_play = (macro_ptr != MACRO_NOT_FOUND);
+    bool do_queue = !do_play; // eat the macro-producing code.
+    if (do_play && (sc & USBQUEUE_RELEASED_MASK) && (config.macros[macro_ptr+1] & MACRO_TYPE_TAP))
     {
+        // Tap macro. Check if previous event was this key down and it's not too late.
+        do_queue = true;
+        if ((usb_sc != pipeline_prev_usbkey) || (pipeline_prev_usbkey_time + config.delayLib[DELAYS_TAP] < systime))
+        {
+            // Nope!
+            do_play = false;
+        }
+    }
+    pipeline_prev_usbkey = usb_sc;
+    pipeline_prev_usbkey_time = systime;
 /*        
 NOTE: queue_usbcode skips non-zero cells in the buffer. Think what to do on overflow.
 NOTE2: we still want to maintain order?
     Otherwise linked list is probably what's doctor ordered (though expensive at 4B per pointer plus memory management)
 */
-        queue_usbcode(systime, keyflags, usb_sc);
-    }
-    else
-    {
-        play_macro(macro_ptr);
-        // play macro
-    }
+    if (do_queue) queue_usbcode(systime, keyflags, usb_sc);
+    if (do_play) play_macro(macro_ptr);
     return;
 }
 
@@ -264,7 +274,7 @@ inline void update_reports(void)
             {
                 // We only throttle keypresses. Key release doesn't slow us down - 
                 // minimum duration is guaranteed by fact that key release goes after key press and keypress triggers cooldown.
-                cooldown_timer = config.delayLib[0]; // Actual update happened - reset cooldown.
+                cooldown_timer = config.delayLib[DELAYS_EVENT]; // Actual update happened - reset cooldown.
                 exp_keypress(USBQueue[pos].keycode); // Let the downstream filter by keycode
             }
             USBQueue[pos].keycode = USBCODE_NOEVENT;

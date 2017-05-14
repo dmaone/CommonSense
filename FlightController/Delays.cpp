@@ -49,7 +49,13 @@ void Delays::init()
     int count = delays.size();
     for (int i = 0; i < count; i++)
     {
-        QLabel *rowLabel = new QLabel(i == 0 ? QString("Event delay") : QString("%1").arg(i));
+        QLabel *rowLabel;
+        switch (i)
+        {
+            case 0: rowLabel = new QLabel(QString("Event delay")); break;
+            case 1: rowLabel = new QLabel(QString("Tap delay")); break;
+            default: rowLabel = new QLabel(QString("%1").arg(i)); break;
+        }
         rowLabel->setAlignment(Qt::AlignRight | Qt::AlignCenter);
         _grid->addWidget(rowLabel, i, 0);
 
