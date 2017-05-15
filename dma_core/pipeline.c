@@ -344,5 +344,4 @@ void pipeline_init(void)
     USBQueue_writepos = 0;
     cooldown_timer = 0;
     memset(USBQueue, USBCODE_NOEVENT, sizeof USBQueue);
-    memset(pipeline_bitmap, 0, sizeof pipeline_bitmap);
 }
