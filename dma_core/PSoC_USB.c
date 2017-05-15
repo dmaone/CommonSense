@@ -71,7 +71,7 @@ void set_hardware_parameters(void)
 void load_config(void){
     EEPROM_Start();
     CyDelayUs(5);
-    // Copypaste from EEPROM.c/EEPROM_ReadByte! Use with causion!
+    // Copypaste from EEPROM.c/EEPROM_ReadByte! Use with caution!
     uint8 interruptState;
     interruptState = CyEnterCriticalSection();
     /* Request access to EEPROM for reading.
@@ -169,45 +169,47 @@ void update_keyboard_mods(uint8_t mods)
     USB_SEND_REPORT(KBD);
 }
 
+// Very similar to consumer_press, but keycode there is uint16_t :(
 inline void keyboard_press(uint8_t keycode)
 {
     if ((keycode & 0xf8) == 0xe0)
     {
-        KBD_OUTBOX[0] |= (1 << (keycode & 0x07));
+        keyboard_report.mods |= (1 << (keycode & 0x07));
         return;
     }
-    for (uint8_t cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)
+    for (uint8_t cur_pos = 0; cur_pos < sizeof keyboard_report.keys; cur_pos++)
     {
-        if (KBD_OUTBOX[cur_pos] == keycode)
+        if (keyboard_report.keys[cur_pos] == keycode)
         {
             xprintf("Existing %d pos %d", keycode, cur_pos);
-            break;
+            return;
         }
-        else if (KBD_OUTBOX[cur_pos] == 0)
+        else if (keyboard_report.keys[cur_pos] == 0)
         {
-            KBD_OUTBOX[cur_pos] = keycode;
-            //xprintf("Pressed %d pos %d", keycode, cur_pos);
-            break;
+            keyboard_report.keys[cur_pos] = keycode;
+            keyboard_report_usage = cur_pos + 1;
+            //xprintf("Pressed %d pos %d, usage %d", keycode, cur_pos, keyboard_report_usage);
+            return;
         }
     }
 }
 
+// Very similar to consumer_release, but keycode there is uint16_t :(
 inline void keyboard_release(uint8_t keycode)
 {
     if ((keycode & 0xf8) == 0xe0)
     {
-        KBD_OUTBOX[0] &= ~(1 << (keycode & 0x07));
+        keyboard_report.mods &= ~(1 << (keycode & 0x07));
         return;
     }
-    uint8_t cur_pos;
     bool move = false;
-    for (cur_pos = 2; cur_pos < 2 + KRO_LIMIT; cur_pos++)
+    for (uint8_t cur_pos = 0; cur_pos < sizeof keyboard_report.keys; cur_pos++)
     {
         if (move)
         {
-            KBD_OUTBOX[cur_pos - 1] = KBD_OUTBOX[cur_pos];
+            keyboard_report.keys[cur_pos - 1] = keyboard_report.keys[cur_pos];
         }
-        else if (KBD_OUTBOX[cur_pos] == keycode)
+        else if (keyboard_report.keys[cur_pos] == keycode)
         {
             move = true;
         }
@@ -215,8 +217,9 @@ inline void keyboard_release(uint8_t keycode)
     if (move)
     {
         // Key was, in fact, pressed.
-        KBD_OUTBOX[2 + KRO_LIMIT] = 0;
-        //xprintf("Released %d", keycode);
+        keyboard_report.keys[sizeof keyboard_report.keys - 1] = 0;
+        keyboard_report_usage--;
+        //xprintf("Released %d, usage %d", keycode, keyboard_report_usage);
     }
 }
 
@@ -231,11 +234,15 @@ void update_keyboard_report(queuedScancode *key)
     {
         keyboard_release(key->keycode);
     }
+    memcpy(KBD_OUTBOX, keyboard_report.raw, OUTBOX_SIZE(KBD_OUTBOX));
+    if (keyboard_report_usage > KBD_KRO_LIMIT)
+    {
+        // on rollover error ALL keys must report ERO.
+        memset(KBD_OUTBOX+2, USBCODE_ERO, KBD_KRO_LIMIT);
+        xprintf("Keyboard rollover error");
+    }
     USB_SEND_REPORT(KBD);
 }
-
-// Report consists of 16 bit values - so I kind of know what I'm doing here.
-static uint16_t *consumer_outbox = (uint16_t *)&CONSUMER_OUTBOX;
 
 const uint16_t consumer_mapping[16] = {
     0xcd, // Play/pause
@@ -258,18 +265,19 @@ const uint16_t consumer_mapping[16] = {
 //16
 };
 
+// Very similar to keyboard_press, but keycode there is uint8_t :(
 static inline void consumer_press(uint16_t keycode)
 {
     for (uint8_t cur_pos = 0; cur_pos < CONSUMER_KRO_LIMIT; cur_pos++)
     {
-        if (consumer_outbox[cur_pos] == keycode)
+        if (consumer_report[cur_pos] == keycode)
         {
             xprintf("Existing %d pos %d", keycode, cur_pos);
             break;
         }
-        else if (consumer_outbox[cur_pos] == 0)
+        else if (consumer_report[cur_pos] == 0)
         {
-            consumer_outbox[cur_pos] = keycode;
+            consumer_report[cur_pos] = keycode;
             //xprintf("Pressed %d pos %d", keycode, cur_pos);
             break;
         }
@@ -277,6 +285,7 @@ static inline void consumer_press(uint16_t keycode)
     //xprintf("C_Pressing %d", keycode);
 }
 
+// Very similar to keyboard_release, but keycode there is uint8_t :(
 static inline void consumer_release(uint16_t keycode)
 {
     uint8_t cur_pos;
@@ -285,9 +294,9 @@ static inline void consumer_release(uint16_t keycode)
     {
         if (move)
         {
-            consumer_outbox[cur_pos - 1] = consumer_outbox[cur_pos];
+            consumer_report[cur_pos - 1] = consumer_report[cur_pos];
         }
-        else if (consumer_outbox[cur_pos] == keycode)
+        else if (consumer_report[cur_pos] == keycode)
         {
             move = true;
         }
@@ -295,7 +304,7 @@ static inline void consumer_release(uint16_t keycode)
     if (move)
     {
         // Key was, in fact, pressed.
-        consumer_outbox[CONSUMER_KRO_LIMIT] = 0;
+        consumer_report[CONSUMER_KRO_LIMIT - 1] = 0;
         //xprintf("C_Released %d", keycode);
     }
 }
@@ -312,6 +321,7 @@ void update_consumer_report(queuedScancode *key)
     {
         consumer_release(keycode);
     }
+    memcpy(CONSUMER_OUTBOX, consumer_report, OUTBOX_SIZE(CONSUMER_OUTBOX));
     USB_SEND_REPORT(CONSUMER);
 }
 
@@ -320,13 +330,14 @@ void update_system_report(queuedScancode *key)
     uint8_t key_index = key->keycode - 0xa5;
     if ((key->flags & USBQUEUE_RELEASED_MASK) == 0)
     {
-        SYSTEM_OUTBOX[0] |= (1 << key_index);
+        system_report[0] |= (1 << key_index);
     }
     else
     {
-        SYSTEM_OUTBOX[0] &= ~(1 << key_index);
+        system_report[0] &= ~(1 << key_index);
     }
-    xprintf("System: %d", SYSTEM_OUTBOX[0]);
+    memcpy(SYSTEM_OUTBOX, system_report, OUTBOX_SIZE(SYSTEM_OUTBOX));    
+    //xprintf("System: %d", SYSTEM_OUTBOX[0]);
     USB_SEND_REPORT(SYSTEM);
 }
 
@@ -348,17 +359,39 @@ void usb_init(void)
 {
     USB_Start(0u, USB_5V_OPERATION);
     power_state = DEVSTATE_FULL_THROTTLE;
+    memset (keyboard_report.raw, 0, sizeof keyboard_report.raw);
+    keyboard_report_usage = 0;
+    memset (consumer_report, 0, sizeof consumer_report);
 }
 
 void usb_configure(void)
 {
-    /* clear results */
     memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
     memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
     memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
     /* Wait for device to enumerate */
     while (0u == USB_GetConfiguration()) {};
     usb_suspend_monitor_start();
+}
+
+#define RESET_SINGLE(R, O) \
+memset(R, 0, sizeof R); \
+if (memcmp(R, O##_OUTBOX, OUTBOX_SIZE(O##_OUTBOX)) != 0) \
+{ \
+    memset(O##_OUTBOX, 0, OUTBOX_SIZE(O##_OUTBOX)); \
+    USB_SEND_REPORT(O); \
+}
+
+/*
+ * updates host only if there were stuck keys, to avoid N reports on every "last key depressed".
+ */
+void reset_reports(void)
+{
+    RESET_SINGLE(keyboard_report.raw, KBD)
+    keyboard_report_usage = 0;
+    RESET_SINGLE(consumer_report, CONSUMER)
+    RESET_SINGLE(system_report, SYSTEM)
+    //xprintf("reports reset");
 }
 
 void nap(void)

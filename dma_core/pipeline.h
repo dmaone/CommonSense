@@ -22,6 +22,7 @@ typedef union {
 
 #define USBCODE_TRANSPARENT 0
 #define USBCODE_NOEVENT 1
+#define USBCODE_ERO 1
 #define USBCODE_EXP_TOGGLE 3
 #define USBCODE_A 4
 
@@ -39,6 +40,8 @@ typedef union {
 queuedScancode USBQueue[KEYCODE_BUFFER_END + 1];
 uint8_t USBQueue_readpos;
 uint8_t USBQueue_writepos;
+#define USBQUEUE_IS_EMPTY (USBQueue_readpos == USBQueue_writepos && USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
+
 uint8_t mods;
 uint8_t layerMods;
 #define LAYER_MODS_SHIFT 4

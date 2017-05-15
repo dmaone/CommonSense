@@ -25,6 +25,7 @@ static int16_t Results[ADC_CHANNELS * 2 * NUM_ADCs];
 static uint8_t reading_row, driving_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
+static bool matrix_was_active;
 
 static uint16 matrix[MATRIX_ROWS][MATRIX_COLS];
 static uint16 *matrix_ptr = (uint16 *)&matrix;
@@ -125,8 +126,7 @@ CY_ISR(EoC_ISR)
         if (power_state != DEVSTATE_FULL_THROTTLE)
         {
             scan_in_progress = false;
-            CyExitCriticalSection(enableInterrupts); // Important - otherwise interrupts are left disabled!
-            return;
+            goto EoC_final; // Important - otherwise interrupts are left disabled!
         }
         driving_row = MATRIX_ROWS;
     }
@@ -134,6 +134,8 @@ CY_ISR(EoC_ISR)
     // Drive row.
     // DMA channel reading out results has priority, so this should not overwrite the results buffer.
     Drive(driving_row);
+
+EoC_final:
     CyExitCriticalSection(enableInterrupts);
 }
 
@@ -219,6 +221,21 @@ CY_ISR(Result_ISR)
         }
     }
     matrix_status[reading_row] = row_status;
+    if (reading_row == 0)
+    {
+        // End of matrix reading cycle.
+        row_status = 0;
+        for (uint8_t i = 0; i < MATRIX_ROWS; i++)
+        {
+            row_status |= matrix_status[i];
+        }
+        if (row_status == 0 && matrix_was_active)
+        {
+            // Signal that last key was released
+            append_scancode(KEY_UP_MASK|COMMONSENSE_NOKEY);
+        }
+        matrix_was_active = row_status > 0 ? true : false;
+    }
 }
 
 void scan_start(void)

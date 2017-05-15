@@ -16,25 +16,6 @@
 uint8_t pipeline_prev_usbkey;
 uint32_t pipeline_prev_usbkey_time;
 
-inline uint8_t process_scancode_buffer(void)
-{
-    if (scancode_buffer_readpos == scancode_buffer_writepos)
-        return COMMONSENSE_NOKEY;
-    // Skip zeroes that might be there
-    while (scancode_buffer[scancode_buffer_readpos] == COMMONSENSE_NOKEY)
-    {
-        scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
-    }
-    uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
-#ifdef MATRIX_LEVELS_DEBUG
-    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK, scancode & SCANCODE_MASK, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
-#else
-    //xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK, systime);
-#endif
-    scancode_buffer[scancode_buffer_readpos] = COMMONSENSE_NOKEY;
-    return scancode;
-}
-
 inline void process_layerMods(uint8_t sc, uint8_t keycode)
 {
     // codes A8-AB - momentary selection, AC-AF - permanent
@@ -137,6 +118,30 @@ inline void play_macro(uint_fast16_t macro_start)
     }
 }
 
+inline uint8_t process_scancode_buffer(void)
+{
+    if (scancode_buffer_readpos == scancode_buffer_writepos)
+        return COMMONSENSE_NOKEY;
+    // Skip zeroes that might be there
+    while (scancode_buffer[scancode_buffer_readpos] == COMMONSENSE_NOKEY)
+    {
+        scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
+    }
+    uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
+#ifdef MATRIX_LEVELS_DEBUG
+    xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK, scancode & SCANCODE_MASK, systime, level_buffer[scancode_buffer_readpos], level_buffer_inst[scancode_buffer_readpos]);
+#else
+    //xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK, systime);
+#endif
+    scancode_buffer[scancode_buffer_readpos] = COMMONSENSE_NOKEY;
+    return scancode;
+}
+
+inline void push_back_scancode(uint8_t sc)
+{
+    scancode_buffer[scancode_buffer_readpos] = sc;
+}
+
 inline void process_real_key(void)
 {
     uint8_t sc, usb_sc;
@@ -149,12 +154,21 @@ inline void process_real_key(void)
     }
     if (sc == (COMMONSENSE_NOKEY | KEY_UP_MASK))
     {
-// TODO need to generate COMMONSENSE_NOKEY release to signal no keys pressed - to deal with stuck keys.
-// Those will appear due to layers - suppose you press the key, then switch layer which has another key at that SC position.
-// When you release the key - non-existent key release is generated, which is not that bad, but first key is stuck forever.
-// Need to do it only once after the last physical key is released.
-// This also must clear USB queue of all physical keys pending. Special case "macro not playing" - just init all buffers.
-            return;
+/*
+ * This is "All keys are up" signal, sun keyboard-style.
+ * It is used to deal with stuck keys. Those appear due to layers - suppose you press the key, 
+ * then switch layer which has another key at that SC position.
+ * When you release the key - non-existent key release is generated, which is not that bad, but first key is stuck forever.
+ */
+        if (!USBQUEUE_IS_EMPTY)
+        {
+            push_back_scancode(sc);
+        }
+        else
+        {
+            reset_reports();
+        }
+        return;
     }
     if (status_register.setup_mode)
     {
@@ -233,7 +247,7 @@ inline void update_reports(void)
         cooldown_timer--;
         return;
     }
-    if (USBQueue_readpos == USBQueue_writepos && USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
+    if (USBQUEUE_IS_EMPTY)
     {
         return;
     }
