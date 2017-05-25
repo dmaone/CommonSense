@@ -47,6 +47,7 @@ public slots:
     void showKeyMonitor(void);
     void statusRequestButtonClick(void);
     void editLayoutClick(void);
+    void editMacrosClick(void);
     void editThresholdsClick(void);
     void showLayerConditions(void);
     void mainTabChanged(int);

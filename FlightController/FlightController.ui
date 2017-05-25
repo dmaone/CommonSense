@@ -17,13 +17,6 @@
    <layout class="QHBoxLayout" name="horizontalLayout">
     <item>
      <layout class="QGridLayout" name="gridLayout">
-      <item row="15" column="0">
-       <widget class="QPushButton" name="BootloaderButton">
-        <property name="text">
-         <string>Update FW</string>
-        </property>
-       </widget>
-      </item>
       <item row="6" column="0">
        <widget class="QPushButton" name="statusRequestButton">
         <property name="text">
@@ -31,7 +24,7 @@
         </property>
        </widget>
       </item>
-      <item row="16" column="0">
+      <item row="22" column="0">
        <spacer name="verticalSpacer">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -44,10 +37,47 @@
         </property>
        </spacer>
       </item>
+      <item row="21" column="0">
+       <widget class="QPushButton" name="BootloaderButton">
+        <property name="text">
+         <string>Update FW</string>
+        </property>
+       </widget>
+      </item>
       <item row="7" column="0">
        <widget class="QPushButton" name="MatrixMonitorButton">
         <property name="text">
          <string>Key monitor</string>
+        </property>
+       </widget>
+      </item>
+      <item row="24" column="0">
+       <widget class="QPushButton" name="ClearButton">
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+      <item row="5" column="0">
+       <spacer name="verticalSpacer_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <property name="sizeType">
+         <enum>QSizePolicy::Fixed</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>20</width>
+          <height>13</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="8" column="0">
+       <widget class="QPushButton" name="thresholdsButton">
+        <property name="text">
+         <string>Thresholds</string>
         </property>
        </widget>
       </item>
@@ -74,44 +104,7 @@ STOP</string>
         </property>
        </widget>
       </item>
-      <item row="8" column="0">
-       <widget class="QPushButton" name="thresholdsButton">
-        <property name="text">
-         <string>Thresholds</string>
-        </property>
-       </widget>
-      </item>
-      <item row="18" column="0">
-       <widget class="QPushButton" name="ClearButton">
-        <property name="text">
-         <string>Clear</string>
-        </property>
-       </widget>
-      </item>
-      <item row="5" column="0">
-       <spacer name="verticalSpacer_2">
-        <property name="orientation">
-         <enum>Qt::Vertical</enum>
-        </property>
-        <property name="sizeType">
-         <enum>QSizePolicy::Fixed</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>20</width>
-          <height>13</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-      <item row="9" column="0">
-       <widget class="QPushButton" name="layoutButton">
-        <property name="text">
-         <string>Layout</string>
-        </property>
-       </widget>
-      </item>
-      <item row="13" column="0">
+      <item row="19" column="0">
        <spacer name="verticalSpacer_3">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
@@ -127,31 +120,45 @@ STOP</string>
         </property>
        </spacer>
       </item>
-      <item row="17" column="0">
+      <item row="11" column="0">
+       <widget class="QPushButton" name="layoutButton">
+        <property name="text">
+         <string>Layout</string>
+        </property>
+       </widget>
+      </item>
+      <item row="23" column="0">
        <widget class="QPushButton" name="CopyAllButton">
         <property name="text">
          <string>CopyAll</string>
         </property>
        </widget>
       </item>
-      <item row="12" column="0">
+      <item row="16" column="0">
+       <widget class="QPushButton" name="expButton">
+        <property name="text">
+         <string>Exp. Header</string>
+        </property>
+       </widget>
+      </item>
+      <item row="14" column="0">
        <widget class="QPushButton" name="delaysButton">
         <property name="text">
          <string>Delays</string>
         </property>
        </widget>
       </item>
-      <item row="10" column="0">
+      <item row="9" column="0">
        <widget class="QPushButton" name="layerModsButton">
         <property name="text">
          <string>Layer mods</string>
         </property>
        </widget>
       </item>
-      <item row="11" column="0">
-       <widget class="QPushButton" name="expButton">
+      <item row="12" column="0">
+       <widget class="QPushButton" name="macrosButton">
         <property name="text">
-         <string>Exp. Header</string>
+         <string>Macros</string>
         </property>
        </widget>
       </item>
@@ -206,10 +213,11 @@ STOP</string>
     </property>
     <addaction name="action_Key_Monitor"/>
     <addaction name="action_Thresholds"/>
-    <addaction name="action_Layout"/>
     <addaction name="action_Layer_mods"/>
-    <addaction name="action_Exp_Header"/>
+    <addaction name="action_Layout"/>
+    <addaction name="action_Macros"/>
     <addaction name="action_Delays"/>
+    <addaction name="action_Exp_Header"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="title">
@@ -307,7 +315,7 @@ STOP</string>
   </action>
   <action name="action_Layer_mods">
    <property name="text">
-    <string>Layer &amp;mods</string>
+    <string>L&amp;ayer mods</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+M</string>
@@ -333,7 +341,12 @@ STOP</string>
   </action>
   <action name="action_Delays">
    <property name="text">
-    <string>Delays</string>
+    <string>&amp;Delays</string>
+   </property>
+  </action>
+  <action name="action_Macros">
+   <property name="text">
+    <string>&amp;Macros</string>
    </property>
   </action>
  </widget>

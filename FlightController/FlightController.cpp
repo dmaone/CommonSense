@@ -64,11 +64,14 @@ void FlightController::setup(void)
     connect(ui->thresholdsButton, SIGNAL(clicked()), this, SLOT(editThresholdsClick()));
     connect(ui->action_Thresholds, SIGNAL(triggered()), this, SLOT(editThresholdsClick()));
 
+    connect(ui->layerModsButton, SIGNAL(clicked()), this, SLOT(showLayerConditions()));
+    connect(ui->action_Layer_mods, SIGNAL(triggered()), this, SLOT(showLayerConditions()));
+
     connect(ui->layoutButton, SIGNAL(clicked()), this, SLOT(editLayoutClick()));
     connect(ui->action_Layout, SIGNAL(triggered()), this, SLOT(editLayoutClick()));
 
-    connect(ui->layerModsButton, SIGNAL(clicked()), this, SLOT(showLayerConditions()));
-    connect(ui->action_Layer_mods, SIGNAL(triggered()), this, SLOT(showLayerConditions()));
+    connect(ui->macrosButton, SIGNAL(clicked()), this, SLOT(editMacrosClick()));
+    connect(ui->action_Macros, SIGNAL(triggered()), this, SLOT(editMacrosClick()));
 
     connect(ui->delaysButton, SIGNAL(clicked()), this, SLOT(editDelays()));
     connect(ui->action_Delays, SIGNAL(triggered()), this, SLOT(editDelays()));
@@ -186,6 +189,11 @@ void FlightController::lockUI(bool lock)
 void FlightController::editLayoutClick(void)
 {
     layoutEditor->show();
+}
+
+void FlightController::editMacrosClick(void)
+{
+    //macrosEditor->show();
 }
 
 void FlightController::editThresholdsClick(void)
