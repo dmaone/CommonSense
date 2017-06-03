@@ -28,5 +28,5 @@ script:
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
       chmod +x Qt-build/travis-build-linux.sh
-      TAG_NAME=${TRAVIS_TAG} ./Qt-build/travis-build-linux.sh
+      #TAG_NAME=${TRAVIS_TAG} ./Qt-build/travis-build-linux.sh
     fi
