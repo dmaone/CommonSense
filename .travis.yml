@@ -23,10 +23,6 @@ before_install:
       sudo apt-get install -qq libhidapi-dev libhidapi-hidraw0
     fi
 
-before_script:
-  - mkdir build
-  - cd build
-
 script:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
