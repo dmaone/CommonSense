@@ -20,7 +20,7 @@ before_install:
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
       sudo apt-get update -qq
-      sudo apt-get install -qq libhidapi-dev libhidapi-hidraw0 qt5-default
+      sudo apt-get install -qq libhidapi-dev libhidapi-hidraw0
     fi
 
 before_script:
@@ -31,6 +31,6 @@ script:
   - |
     if [[ "$TRAVIS_OS_NAME" == "linux" ]]
     then
-      qmake ../FlightController/FlightController.pro -r -spec linux-g++-64
-      make
+      chmod +x Qt-build/travis-build-linux.sh
+      TAG_NAME=${TRAVIS_TAG} ./Qt-build/travis-build-linux.sh
     fi
