@@ -3,6 +3,9 @@ language: cpp
 os:
   - linux
 
+dist: trusty
+sudo: required
+
 branches:
   only:
     - master
