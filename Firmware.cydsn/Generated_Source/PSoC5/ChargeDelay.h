@@ -18,8 +18,8 @@
 #if !defined(CY_PWM_ChargeDelay_H)
 #define CY_PWM_ChargeDelay_H
 
-#include "cytypes.h"
 #include "cyfitter.h"
+#include "cytypes.h"
 #include "CyLib.h" /* For CyEnterCriticalSection() and CyExitCriticalSection() functions */
 
 extern uint8 ChargeDelay_initVar;

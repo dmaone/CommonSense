@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cyPm.h
-* \version 5.50
+* \version 5.60
 *
 * \brief Provides the function definitions for the power management API.
 *
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -289,6 +289,12 @@ typedef struct cyPmBackupStruct
 
     uint8 wakeupTrim0;
     uint8 wakeupTrim1;
+    
+    #if(CY_PSOC5)
+
+        uint8 wakeupTrim3;
+
+    #endif  /* (CY_PSOC5) */    
 
     uint8 scctData[28u];   /* SC/CT routing registers  */
 
@@ -316,6 +322,12 @@ typedef struct cyPmBackupStruct
 /* Power Mode Wakeup Trim Register 1 */
 #define CY_PM_PWRSYS_WAKE_TR1_REG           (* (reg8 *) CYREG_PWRSYS_WAKE_TR1 )
 #define CY_PM_PWRSYS_WAKE_TR1_PTR           (  (reg8 *) CYREG_PWRSYS_WAKE_TR1 )
+
+#if(CY_PSOC5)
+    /* Power Mode Wakeup Trim Register 3 */
+    #define CY_PM_PWRSYS_WAKE_TR3_REG           (* (reg8 *) CYREG_PWRSYS_WAKE_TR3 )
+    #define CY_PM_PWRSYS_WAKE_TR3_PTR           (  (reg8 *) CYREG_PWRSYS_WAKE_TR3 )
+#endif  /* (CY_PSOC5) */
 
 /* Master clock Divider Value Register */
 #define CY_PM_CLKDIST_MSTR0_REG             (* (reg8 *) CYREG_CLKDIST_MSTR0 )
@@ -632,6 +644,7 @@ typedef struct cyPmBackupStruct
 
     #define CY_PM_PWRSYS_WAKE_TR0       (0xFFu)
     #define CY_PM_PWRSYS_WAKE_TR1       (0xB0u)
+    #define CY_PM_PWRSYS_WAKE_TR3       (0xFFu)
 
 #endif  /* (CY_PSOC5) */
 

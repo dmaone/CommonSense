@@ -15,8 +15,6 @@
 *******************************************************************************/
 
 #include "SuspendWD.h"
-#include "CyLib.h"
-
 
 uint8 SuspendWD_initVar = 0u;
 
