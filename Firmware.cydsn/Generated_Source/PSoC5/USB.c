@@ -413,7 +413,7 @@ void USB_Init(void)
 * Function Name: USB_InitComponent
 ****************************************************************************//**
 *
-*   This function initializes the componentís global variables and initiates
+*   This function initializes the component‚Äôs global variables and initiates
 *   communication with the host by pull-up D+ line.
 *
 * \param device:
@@ -1307,7 +1307,7 @@ uint16 USB_GetEPCount(uint8 epNumber)
 * Function Name: USB_LoadInEP
 ****************************************************************************//**
 *
-*  This function performs different functionality depending on the Componentís
+*  This function performs different functionality depending on the Component‚Äôs
 *  configured Endpoint Buffer Management. This parameter is defined in
 *  the Descriptor Root in Component Configure window.
 *
@@ -1608,7 +1608,7 @@ void USB_LoadInEP(uint8 epNumber, const uint8 pData[], uint16 length)
 * Function Name: USB_ReadOutEP
 ****************************************************************************//**
 *
-*   This function performs different functionality depending on the Componentís
+*   This function performs different functionality depending on the Component‚Äôs
 *   configured Endpoint Buffer Management. This parameter is defined in the
 *   Descriptor Root in Component Configure window.
 *
@@ -1829,7 +1829,7 @@ uint16 USB_ReadOutEP(uint8 epNumber, uint8 pData[], uint16 length)
 * Function Name: USB_LoadInEP16
 ****************************************************************************//**
 *
-*  This function performs different functionality depending on the Componentís
+*  This function performs different functionality depending on the Component‚Äôs
 *  configured Endpoint Buffer Management. This parameter is defined in
 *  the Descriptor Root in Component Configure window.
 *
@@ -2057,7 +2057,7 @@ void USB_LoadInEP16(uint8 epNumber, const uint8 pData[], uint16 length)
 * Function Name: USB_ReadOutEP16
 ****************************************************************************//**
 *
-*   This function performs different functionality depending on the Componentís
+*   This function performs different functionality depending on the Component‚Äôs
 *   configured Endpoint Buffer Management. This parameter is defined in the
 *   Descriptor Root in Component Configure window.
 *
@@ -2311,7 +2311,7 @@ void USB_DisableOutEP(uint8 epNumber)
 * Function Name: USB_Force
 ****************************************************************************//**
 *
-*  This function forces a USB J, K, or SE0 state on the D+/Dñ lines. It provides
+*  This function forces a USB J, K, or SE0 state on the D+/D‚Äì lines. It provides
 *  the necessary mechanism for a USB device application to perform a USB Remote
 *  Wakeup. For more information, see the USB 2.0 Specification for details on
 *  Suspend and Resume.
@@ -2320,9 +2320,9 @@ void USB_DisableOutEP(uint8 epNumber)
 *        Symbolic names  and their associated values are listed here:
 *    State                      |Description
 *    ---------------------------|----------------------------------------------
-*    USB_FORCE_J   | Force a J State onto the D+/Dñ lines
-*    USB_FORCE_K   | Force a K State onto the D+/Dñ lines
-*    USB_FORCE_SE0 | Force a Single Ended 0 onto the D+/Dñ lines
+*    USB_FORCE_J   | Force a J State onto the D+/D‚Äì lines
+*    USB_FORCE_K   | Force a K State onto the D+/D‚Äì lines
+*    USB_FORCE_SE0 | Force a Single Ended 0 onto the D+/D‚Äì lines
 *    USB_FORCE_NONE| Return bus to SIE control
 *
 *
@@ -2538,8 +2538,8 @@ void USB_DisableSofInt(void)
     *   implement the BCD algorithm to detect the USB host port type.
     *   The USBFS_Start() API should be called after this API if the USB
     *   communication needs to be initiated with the host.
-    *   *Note* This API is generated only if the ìEnable Battery Charging 
-    *   Detectionî option is enabled in the ìAdvancedî tab of the component GUI.
+    *   *Note* This API is generated only if the ‚ÄúEnable Battery Charging 
+    *   Detection‚Äù option is enabled in the ‚ÄúAdvanced‚Äù tab of the component GUI.
     *   *Note* API implements the steps 2-4 of the BCD algorithm which are 
     *   - Data Contact Detect
     *   - Primary Detection 

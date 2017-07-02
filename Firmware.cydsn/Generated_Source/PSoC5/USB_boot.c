@@ -102,7 +102,7 @@ void USB_CyBtldrCommReset(void)
 *
 * \return
 *  Returns CYRET_SUCCESS if no problem was encountered or returns the value that 
-*  best describes the problem. For more information, see the ìReturn Codesî 
+*  best describes the problem. For more information, see the ‚ÄúReturn Codes‚Äù 
 *  section of the System Reference Guide.
 *
 * \reentrant
@@ -161,7 +161,7 @@ cystatus USB_CyBtldrCommWrite(const uint8 pData[], uint16 size, uint16 *count, u
 *
 * \return
 *  Returns CYRET_SUCCESS if no problem was encountered or returns the value that 
-*  best describes the problem. For more information, see the ìReturn Codesî 
+*  best describes the problem. For more information, see the ‚ÄúReturn Codes‚Äù 
 *  section of the System Reference Guide.
 *
 * \reentrant
