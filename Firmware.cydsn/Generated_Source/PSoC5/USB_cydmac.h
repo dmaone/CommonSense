@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_cydmac.h
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file provides macros implemenation of DMA_P4 functions.

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_episr.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file contains the Data endpoint Interrupt Service Routines.

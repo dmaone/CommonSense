@@ -102,6 +102,8 @@ inline void play_macro(uint_fast16_t macro_start)
                 // Press+release, timing from delayLib
                 delay = config.delayLib[(*mptr >> 2) & 0x0f];
                 mptr++;
+                // FIXME possible to queue USB_NOEVENT.
+                // This will most likely trigger exp. header, but may be as bad as infinite loop.
                 queue_usbcode(now, 0, *mptr);
                 now += delay;
                 queue_usbcode(now, USBQUEUE_RELEASED_MASK, *mptr);

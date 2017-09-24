@@ -23,7 +23,8 @@
 #define ADC_RESOLUTION 10
 
 // This is to ease calculations, there are things hardcoded in buffer management!!
-#define NUM_ADCs 2
+// For 1 and 2 ADCs, that is.
+#define NUM_ADCs 1
 
 #define ADC_CHANNELS (MATRIX_COLS / NUM_ADCs)
 

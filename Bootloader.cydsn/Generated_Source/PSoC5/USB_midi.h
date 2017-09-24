@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_midi.h
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file provides function prototypes and constants for the USBFS component 

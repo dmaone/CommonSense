@@ -13,7 +13,6 @@
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 #include "singleton.h"
-#include "MatrixMonitor.h"
 #include "DeviceInterface.h"
 #include "DeviceConfig.h"
 

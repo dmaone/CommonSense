@@ -1,6 +1,6 @@
 /*******************************************************************************
 * File Name: ADC0.h
-* Version 3.0
+* Version 3.10
 *
 * Description:
 *  This file contains the function prototypes and constants used in
@@ -30,7 +30,7 @@
 /* Check to see if required defines such as CY_PSOC5LP are available */
 /* They are defined starting with cy_boot v3.0 */
 #if !defined (CY_PSOC5LP)
-    #error Component ADC_SAR_v3_0 requires cy_boot v3.0 or later
+    #error Component ADC_SAR_v3_10 requires cy_boot v3.0 or later
 #endif /* (CY_PSOC5LP) */
 
 

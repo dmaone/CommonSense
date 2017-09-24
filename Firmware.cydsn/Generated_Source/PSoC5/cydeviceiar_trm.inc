@@ -1,7 +1,7 @@
 ;
 ; File Name: cydeviceiar_trm.inc
 ; 
-; PSoC Creator  4.1
+; PSoC Creator  4.1 Update 1
 ;
 ; Description:
 ; This file provides all of the address values for the entire PSoC device.

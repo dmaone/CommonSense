@@ -1,6 +1,6 @@
 ;******************************************************************************
 ; File Name: USB_cdc.inf
-; Version 3.10
+; Version 3.20
 ;
 ; Description:
 ;  Windows USB CDC setup file for USBUART Device.

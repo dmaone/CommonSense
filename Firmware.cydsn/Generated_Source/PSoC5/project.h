@@ -1,7 +1,7 @@
 /*******************************************************************************
 * File Name: project.h
 * 
-* PSoC Creator  4.1
+* PSoC Creator  4.1 Update 1
 *
 * Description:
 * It contains references to all generated header files and should not be modified.
@@ -38,9 +38,7 @@
 #include "DirveReg3.h"
 #include "DriveReg0.h"
 #include "ADC0.h"
-#include "ADC1.h"
 #include "Buf0_dma.h"
-#include "Buf1_dma.h"
 #include "ChargeDelay.h"
 #include "TimerIRQ.h"
 #include "SysTimer.h"
@@ -56,9 +54,6 @@
 #include "ADC0_IRQ.h"
 #include "ADC0_ExtVref_aliases.h"
 #include "ADC0_ExtVref.h"
-#include "ADC1_IRQ.h"
-#include "ADC1_ExtVref_aliases.h"
-#include "ADC1_ExtVref.h"
 #include "core_cm3_psoc5.h"
 #include "CyDmac.h"
 #include "CyFlash.h"

@@ -1,6 +1,6 @@
 /*******************************************************************************
 * File Name: ADC0_PM.c
-* Version 3.0
+* Version 3.10
 *
 * Description:
 *  This file provides Sleep/WakeUp APIs functionality.

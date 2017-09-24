@@ -19,7 +19,7 @@
 #define EXP_SCRLOCK_PIN ExpHdr_2
 
 #define EXP_SOLENOID_POWER ExpHdr_0
-#define EXP_SOLENOID_CONTROL ExpHdr_1
+#define EXP_SOLENOID_CONTROL ExpHdr_2
 
 void exp_init(void);
 void exp_toggle(void);

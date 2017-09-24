@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file Cm3Start.c
-* \version 5.50
+* \version 5.60
 *
 *  \brief
 *  Startup code for the ARM CM3.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2016, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2008-2017, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -267,11 +267,11 @@ void * _sbrk (int nbytes)
     void *      returnValue;
 
     /* The statically held previous end of the heap, with its initialization. */
-    static void *heapPointer = (void *) &end;                 /* Previous end */
+    static uint8 *heapPointer = (uint8 *) &end;                 /* Previous end */
 
-    if (((heapPointer + nbytes) - (void *) &end) <= CYDEV_HEAP_SIZE)
+    if (((heapPointer + nbytes) - (uint8 *) &end) <= CYDEV_HEAP_SIZE)
     {
-        returnValue  = heapPointer;
+        returnValue  = (void *) heapPointer;
         heapPointer += nbytes;
     }
     else

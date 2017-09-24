@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cyPm.c
-* \version 5.50
+* \version 5.60
 *
 * \brief Provides an API for the power management.
 *
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2016, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -1384,9 +1384,17 @@ static void CyPmHibSaveSet(void)
     ***************************************************************************/
     cyPmBackup.wakeupTrim0 = CY_PM_PWRSYS_WAKE_TR0_REG;
     cyPmBackup.wakeupTrim1 = CY_PM_PWRSYS_WAKE_TR1_REG;
+    
+    #if(CY_PSOC5)
+        cyPmBackup.wakeupTrim3 = CY_PM_PWRSYS_WAKE_TR3_REG;
+    #endif  /* (CY_PSOC5) */    
 
     CY_PM_PWRSYS_WAKE_TR0_REG = CY_PM_PWRSYS_WAKE_TR0;
     CY_PM_PWRSYS_WAKE_TR1_REG = CY_PM_PWRSYS_WAKE_TR1;
+    
+    #if(CY_PSOC5)
+        CY_PM_PWRSYS_WAKE_TR3_REG = CY_PM_PWRSYS_WAKE_TR3;
+    #endif  /* (CY_PSOC5) */    
 }
 
 
@@ -1440,6 +1448,10 @@ static void CyPmHibRestore(void)
     ***************************************************************************/
     CY_PM_PWRSYS_WAKE_TR0_REG = cyPmBackup.wakeupTrim0;
     CY_PM_PWRSYS_WAKE_TR1_REG = cyPmBackup.wakeupTrim1;
+
+    #if(CY_PSOC5)
+        CY_PM_PWRSYS_WAKE_TR3_REG = cyPmBackup.wakeupTrim3;
+    #endif  /* (CY_PSOC5) */    
 }
 
 

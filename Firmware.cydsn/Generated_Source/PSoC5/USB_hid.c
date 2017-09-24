@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_hid.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file contains the USB HID Class request handler. 

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_midi.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  MIDI Streaming request handler.
@@ -302,7 +302,7 @@ void USB_MIDI_Init(void)
             }
 
         #if (USB_EP_MANAGEMENT_DMA_AUTO)
-            /* Enable OUT endpoint for communiation. */
+            /* Enable OUT endpoint for communication */
             USB_EnableOutEP(USB_midi_out_ep);
         #endif  /* (USB_EP_MANAGEMENT_DMA_AUTO) */
         }
@@ -446,7 +446,7 @@ void USB_MIDI_Init(void)
     *  3 IN EP LENGTH | Complete SySEx message(without EOSEX byte) in midiMsg. The length is limited by the max BULK EP size(64)
     *  MIDI_SYSEX     | Start or continuation of SysEx message (put event bytes in midiMsg buffer)
     *  MIDI_EOSEX     | End of SysEx message (put event bytes in midiMsg buffer)
-    *  MIDI_TUNEREQ   | Tune Request message (single byte system common msg)
+    *  MIDI_TUNEREQ   | Tune Request message (single byte system common message)
     *  0xF8 - 0xFF    | Single byte real-time message
     *
     *  \param midiMsg: pointer to MIDI message.
@@ -475,7 +475,6 @@ void USB_MIDI_Init(void)
                                                                 
     {
         uint8 retError = USB_FALSE;
-        uint8 msgIndex;
 
         /* Protect PrepareInBuffer() function from concurrent calls */
     #if (USB_MIDI_EXT_MODE >= USB_ONE_EXT_INTRF)
@@ -498,44 +497,47 @@ void USB_MIDI_Init(void)
             {
                 USB_PrepareInBuffer(ic, midiMsg, ic, cable);
             }
-            else
+            else /* Only SysEx message is greater than 4 bytes */
             {
-                /* Only SysEx message is greater than 4 bytes */
-                msgIndex = 0u;
-
+                /* Convert SysEx message into midi message format */
+                uint8 idx = 0u;
                 do
                 {
-                    USB_PrepareInBuffer(USB_MIDI_SYSEX, &midiMsg[msgIndex],
+                    /* Process 3 bytes of message until 0-2 bytes are left. These bytes are handled by MIDI_EOSEX. */
+                    USB_PrepareInBuffer(USB_MIDI_SYSEX, &midiMsg[idx],
                                                      USB_EVENT_BYTE3, cable);
 
-                    ic -= USB_EVENT_BYTE3;
-                    msgIndex += USB_EVENT_BYTE3;
+                    /* Move to next 3 bytes of message */
+                    ic  -= USB_EVENT_BYTE3;
+                    idx += USB_EVENT_BYTE3;
 
                     if (USB_midiInPointer >
                         (USB_EP[USB_midi_in_ep].bufferSize - USB_EVENT_LENGTH))
                     {
+                        /* Load message into endpoint */
                         USB_MIDI_IN_EP_Service();
 
                         if (USB_midiInPointer >
                            (USB_EP[USB_midi_in_ep].bufferSize - USB_EVENT_LENGTH))
                         {
-                            /* Error condition. HOST is not ready to receive this packet. */
+                            /* Error condition. Host is not ready to receive this packet. */
                             retError = USB_TRUE;
                             break;
                         }
                     }
                 }
-                while (ic > USB_EVENT_BYTE3);
+                while (ic >= USB_EVENT_BYTE3);
 
                 if (retError == USB_FALSE)
                 {
-                    USB_PrepareInBuffer(USB_MIDI_EOSEX, midiMsg, ic, cable);
+                    /* Handle end of message: valid size of messages is 0, 1 and 2 */
+                    USB_PrepareInBuffer(USB_MIDI_EOSEX, &midiMsg[idx], ic, cable);
                 }
             }
         }
         else
         {
-            /* Error condition. HOST is not ready to receive this packet. */
+            /* Error condition. Host is not ready to receive this packet. */
             retError = USB_TRUE;
         }
 
@@ -645,8 +647,7 @@ void USB_MIDI_Init(void)
             switch (eventLen)
             {
                 case 0u:
-                    USB_midiInBuffer[USB_midiInPointer] =
-                                                                        USB_SYSEX_ENDS_WITH1 | cable;
+                    USB_midiInBuffer[USB_midiInPointer] = USB_SYSEX_ENDS_WITH1 | cable;
                     USB_midiInPointer++;
                     USB_midiInBuffer[USB_midiInPointer] = USB_MIDI_EOSEX;
                     USB_midiInPointer++;
@@ -656,8 +657,7 @@ void USB_MIDI_Init(void)
                     USB_midiInPointer++;
                     break;
                 case 1u:
-                    USB_midiInBuffer[USB_midiInPointer] =
-                                                                        USB_SYSEX_ENDS_WITH2 | cable;
+                    USB_midiInBuffer[USB_midiInPointer] = USB_SYSEX_ENDS_WITH2 | cable;
                     USB_midiInPointer++;
                     USB_midiInBuffer[USB_midiInPointer] = srcBuffZero;
                     USB_midiInPointer++;
@@ -667,8 +667,7 @@ void USB_MIDI_Init(void)
                     USB_midiInPointer++;
                     break;
                 case 2u:
-                    USB_midiInBuffer[USB_midiInPointer] =
-                                                                        USB_SYSEX_ENDS_WITH3 | cable;
+                    USB_midiInBuffer[USB_midiInPointer] = USB_SYSEX_ENDS_WITH3 | cable;
                     USB_midiInPointer++;
                     USB_midiInBuffer[USB_midiInPointer] = srcBuffZero;
                     USB_midiInPointer++;

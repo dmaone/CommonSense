@@ -34,7 +34,9 @@ static void InitSensor(void)
 {
     // Init DMA, each burst requires a request 
     Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+#if NUM_ADCs > 1
     Buf1_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
+#endif
     // 1 request per ADC, get the whole ADC buffer (skip grounded channels which are at the end).
     FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs, (uint16)(HI16(CYDEV_SRAM_BASE)), (uint16)(HI16(CYDEV_SRAM_BASE)));
     uint8 enableInterrupts = CyEnterCriticalSection();
@@ -42,9 +44,11 @@ static void InitSensor(void)
     (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |= (uint8)0x20u; // Init count7
     CyExitCriticalSection(enableInterrupts);
     ADC0_Start();
-    ADC1_Start();
     ADC0_SetResolution(ADC_RESOLUTION);
+#if NUM_ADCs > 1
+    ADC1_Start();
     ADC1_SetResolution(ADC_RESOLUTION);
+#endif
     ChargeDelay_Start();
     scan_reset();
 }
@@ -64,20 +68,29 @@ static void ResultBufferSetup(void)
 {
     CyDmaClearPendingDrq(FinalBuf_DmaHandle);
     FinalBufTD[0] = CyDmaTdAllocate();
+#if NUM_ADCs == 1
+    CyDmaTdSetConfiguration(FinalBufTD[0], (uint16)(sizeof Results), FinalBufTD[0], CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR | FinalBuf__TD_TERMOUT_EN);
+    CyDmaTdSetAddress(FinalBufTD[0], LO16((uint32)&BufMem[ADC_BUF_INITIAL_OFFSET]), LO16((uint32)&Results));
+#elif NUM_ADCs == 2
     FinalBufTD[1] = CyDmaTdAllocate();
     // transferCount is actually bytes, not transactions.
     CyDmaTdSetConfiguration(FinalBufTD[0], (uint16)(sizeof Results / NUM_ADCs), FinalBufTD[1], CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR | CY_DMA_TD_AUTO_EXEC_NEXT);
     CyDmaTdSetAddress(FinalBufTD[0], LO16((uint32)&BufMem[ADC_BUF_INITIAL_OFFSET]), LO16((uint32)&Results));
     CyDmaTdSetConfiguration(FinalBufTD[1], (uint16)(sizeof Results / NUM_ADCs), FinalBufTD[0], CY_DMA_TD_INC_SRC_ADR | CY_DMA_TD_INC_DST_ADR | FinalBuf__TD_TERMOUT_EN);
     CyDmaTdSetAddress(FinalBufTD[1], LO16((uint32)&BufMem[PTK_CHANNELS + ADC_BUF_INITIAL_OFFSET]), LO16((uint32)&Results[ADC_CHANNELS * 2]));
-    CyDmaChSetInitialTd(FinalBuf_DmaHandle, FinalBufTD[0]);
+#else
+    #error only 1 and 2 ADCs are supported
+#endif
+    CyDmaChSetInitialTd(FinalBuf_DmaHandle, FinalBufTD[0]);    
     CyDmaChEnable(FinalBuf_DmaHandle, 1);
 }
 
 static void EnableSensor(void)
 {
     BufferSetup(Buf0_DmaHandle, &Buf0TD, Buf0__TD_TERMOUT_EN, (uint32)ADC0_ADC_SAR__WRK0, (uint32)BufMem);
+#if NUM_ADCs > 1
     BufferSetup(Buf1_DmaHandle, &Buf1TD, Buf1__TD_TERMOUT_EN, (uint32)ADC1_ADC_SAR__WRK0, ADC_BUFFER_BYTESIZE + (uint32)BufMem);
+#endif
     ResultBufferSetup();
     (*(reg8 *)PTK_CtrlReg__CONTROL_REG) = (uint8)0b11u; // enable counter's clock, generate counter load pulse
     // It is important that ResultIRQ priority is less (=is higher)

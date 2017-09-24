@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_std.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file contains the USB Standard request handler.
@@ -1176,7 +1176,7 @@ uint8 USB_ClearEndpointHalt(void)
         USB_EP[ep].epToggle = 0u;
         
         /* Clear toggle bit for already armed packet */
-        USB_SIE_EP_BASE.sieEp[ep].epCnt0 = (uint8) ~(uint8)USB_EPX_CNT_DATA_TOGGLE;
+        USB_SIE_EP_BASE.sieEp[ep].epCnt0 &= (uint8) ~(uint8)USB_EPX_CNT_DATA_TOGGLE;
         
         /* Return API State as it was defined before */
         USB_EP[ep].apiEpState &= (uint8) ~USB_NO_EVENT_ALLOWED;

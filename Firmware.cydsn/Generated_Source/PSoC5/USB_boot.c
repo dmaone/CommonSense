@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_boot.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file contains the Bootloader API for USBFS Component.

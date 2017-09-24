@@ -64,6 +64,10 @@ Firmware is in model F mode - "normally low". Look into dma_core/globals.h to sw
 * Open "Project "Firmware"" in the left pane, click "Pins" in "Design Wide Resources". You will see chip model and a table on the right. Assign pins according to plan.
 * Press "Ctrl-F5" (Debug -> Program). The kit should be plugged in, of course. PSoC Programmer will demand to update KitProg - it explains how.
 
+NOTE: Columns must be assigned so that last column is Cols[23]. If you have a 16-column matrix, physical leftmost column is Cols[8]. Extra columns can be left auto-assigned.
+
+NOTE2: For dual-ADC left half must end with Cols[11], right half - with Cols[23].
+
 --- it's time now to disconnect the board, peel that polyimide film off the micro USB socket and plug the host into it.
 
 ..I was able to plug both ends into the same USB hub (thinkpad docking station) without frying anything - but your mileage may vary. I DO NOT RECOMMEND IT, IT'S A STUPID DWARF TRICK.

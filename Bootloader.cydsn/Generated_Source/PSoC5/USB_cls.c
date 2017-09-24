@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file USB_cls.c
-* \version 3.10
+* \version 3.20
 *
 * \brief
 *  This file contains the USB Class request handler.
@@ -40,8 +40,8 @@
 *******************************************************************************/
 uint8 USB_DispatchClassRqst(void) 
 {
-    uint8 requestHandled;
     uint8 interfaceNumber;
+    uint8 requestHandled = USB_FALSE;
 
     /* Get interface to which request is intended. */
     switch (USB_bmRequestTypeReg & USB_RQST_RCPT_MASK)
@@ -55,7 +55,7 @@ uint8 USB_DispatchClassRqst(void)
         
         case USB_RQST_RCPT_EP:
             /* Class-specific request directed to endpoint: wIndexLoReg contains 
-            * endpoint number. Find interface related to endpoint, 
+            * endpoint number. Find interface related to endpoint. 
             */
             interfaceNumber = USB_EP[USB_wIndexLoReg & USB_DIR_UNUSED].interface;
             break;
@@ -65,61 +65,59 @@ uint8 USB_DispatchClassRqst(void)
             interfaceNumber = 0u;
             break;
     }
-
-#if (defined(USB_ENABLE_HID_CLASS) ||\
-            defined(USB_ENABLE_AUDIO_CLASS) ||\
-            defined(USB_ENABLE_CDC_CLASS) ||\
-            USB_ENABLE_MSC_CLASS)
-
-    /* Handle class request depends on interface type. */
-    switch (USB_interfaceClass[interfaceNumber])
+    
+    /* Check that interface is within acceptable range */
+    if (interfaceNumber <= USB_MAX_INTERFACES_NUMBER)
     {
-    #if defined(USB_ENABLE_HID_CLASS)
-        case USB_CLASS_HID:
-            requestHandled = USB_DispatchHIDClassRqst();
-            break;
-    #endif /* (USB_ENABLE_HID_CLASS) */
-            
-    #if defined(USB_ENABLE_AUDIO_CLASS)
-        case USB_CLASS_AUDIO:
-            requestHandled = USB_DispatchAUDIOClassRqst();
-            break;
-    #endif /* (USB_CLASS_AUDIO) */
-            
-    #if defined(USB_ENABLE_CDC_CLASS)
-        case USB_CLASS_CDC:
-            requestHandled = USB_DispatchCDCClassRqst();
-            break;
-    #endif /* (USB_ENABLE_CDC_CLASS) */
-        
-    #if (USB_ENABLE_MSC_CLASS)
-        case USB_CLASS_MSD:
-        #if (USB_HANDLE_MSC_REQUESTS)
-            /* MSC requests are handled by the component. */
-            requestHandled = USB_DispatchMSCClassRqst();
-        #elif defined(USB_DISPATCH_MSC_CLASS_RQST_CALLBACK)
-            /* MSC requests are handled by user defined callbcak. */
-            requestHandled = USB_DispatchMSCClassRqst_Callback();
-        #else
-            /* MSC requests are not handled. */
-            requestHandled = USB_FALSE;
-        #endif /* (USB_HANDLE_MSC_REQUESTS) */
-            break;
-    #endif /* (USB_ENABLE_MSC_CLASS) */
-        
-        default:
-            /* Request is not handled: unknown class request type. */
-            requestHandled = USB_FALSE;
-            break;
-    }
-#else /*No class is defined*/
-    if (0u != interfaceNumber)
-    {
-        /* Suppress warning message */
-    }
-    requestHandled = USB_FALSE;
-#endif /*HID or AUDIO or MSC or CDC class enabled*/
+    #if (defined(USB_ENABLE_HID_CLASS)   || \
+         defined(USB_ENABLE_AUDIO_CLASS) || \
+         defined(USB_ENABLE_CDC_CLASS)   || \
+         USB_ENABLE_MSC_CLASS)
 
+        /* Handle class request depends on interface type. */
+        switch (USB_interfaceClass[interfaceNumber])
+        {
+        #if defined(USB_ENABLE_HID_CLASS)
+            case USB_CLASS_HID:
+                requestHandled = USB_DispatchHIDClassRqst();
+                break;
+        #endif /* (USB_ENABLE_HID_CLASS) */
+                
+        #if defined(USB_ENABLE_AUDIO_CLASS)
+            case USB_CLASS_AUDIO:
+                requestHandled = USB_DispatchAUDIOClassRqst();
+                break;
+        #endif /* (USB_CLASS_AUDIO) */
+                
+        #if defined(USB_ENABLE_CDC_CLASS)
+            case USB_CLASS_CDC:
+                requestHandled = USB_DispatchCDCClassRqst();
+                break;
+        #endif /* (USB_ENABLE_CDC_CLASS) */
+            
+        #if (USB_ENABLE_MSC_CLASS)
+            case USB_CLASS_MSD:
+            #if (USB_HANDLE_MSC_REQUESTS)
+                /* MSC requests are handled by the component. */
+                requestHandled = USB_DispatchMSCClassRqst();
+            #elif defined(USB_DISPATCH_MSC_CLASS_RQST_CALLBACK)
+                /* MSC requests are handled by user defined callbcak. */
+                requestHandled = USB_DispatchMSCClassRqst_Callback();
+            #else
+                /* MSC requests are not handled. */
+                requestHandled = USB_FALSE;
+            #endif /* (USB_HANDLE_MSC_REQUESTS) */
+                break;
+        #endif /* (USB_ENABLE_MSC_CLASS) */
+            
+            default:
+                /* Request is not handled: unknown class request type. */
+                requestHandled = USB_FALSE;
+                break;
+        }
+    #endif /* Class support is enabled */
+    }
+    
     /* `#START USER_DEFINED_CLASS_CODE` Place your Class request here */
 
     /* `#END` */
