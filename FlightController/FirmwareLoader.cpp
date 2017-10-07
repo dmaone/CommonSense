@@ -233,7 +233,7 @@ void FirmwareLoader::_sendPacket(BootloaderVerb command, QByteArray &data)
     packet->sop = BOOTLOADER_SOP_MARKER;
     packet->command = command;
     packet->length = data.length();
-    memcpy_s(packet->payload, packet->length, data.constData(), packet->length);
+    memcpy(packet->payload, data.constData(), packet->length);
 
     Bootloader_packet_trailer_t *trailer = (Bootloader_packet_trailer_t *)&packet->payload[packet->length];
     trailer->checksum = _packetChecksum(packet);
