@@ -12,14 +12,14 @@ TEMPLATE = app
 CONFIG += static
 
 # Not needed for linux, but doesn't hurt.
-INCLUDEPATH += ../hidapi
+INCLUDEPATH += ../../hidapi
 
 win32 {
-    LIBS += -L$$PWD/../hidapi/windows/.libs -lhidapi -lsetupapi
+    LIBS += -L$$PWD/../../hidapi/windows/.libs -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
 macx {
-    LIBS += -L$$PWD/../hidapi/mac/.libs -lhidapi -rpath @executable_path/../Frameworks
+    LIBS += -L$$PWD/../../hidapi/mac/.libs -lhidapi
     ICON = FlightController.icns
 }
 linux {
