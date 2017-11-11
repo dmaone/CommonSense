@@ -26,7 +26,7 @@ navigate to CommonSense dir.
 
 ```
 git clone https://github.com/signal11/hidapi.git
-
+cd hidapi
 ./bootstrap
 ./configure
 make
@@ -78,19 +78,11 @@ Don't forget to click "Apply".
 "Unnamed" kit is automatically added, rename, select static version for qt version.
 
 # OS X build
-Since OS X application is a folder anyway - no point in making static version.
+Since OS X application is a folder anyway - no point in making static version. One can use qt from brew.
 
-You'll need an official Qt, brew version doesn't work.
+You'll need XCode. Look at the previous version of this document if the one from appstore doesn't work for you.
 
-http://download.qt.io/official_releases/qt/
-
-get and install qt-opensource-mac-x64-clang*
-
-Unfortunately, you'll need xcode. But not from appstore - officially you need XCode 5.0.0, 5.1 works too.
-
-Anyway. Install Qt, install XCode.
-
-The following is for people who try to walk this path elsewhere - mac-build.sh takes care of this.
+The detour section is for people who try to walk this path elsewhere - mac-build.sh takes care of this.
 
 ## DETOUR
 Then you'll have "Error: Could not resolve SDK path for 'macosx' and that would be it.
@@ -107,6 +99,7 @@ You have working Qt environment now.
 
 ## /DETOUR
 
+From the same path you were before building hidapi (i.e. you should have "hidapi/mac/.libs" accessible from it):
 ```
 git clone https://github.com/dmaone/CommonSense.git
 cd CommonSense/Qt-build

@@ -1,7 +1,12 @@
 #!/bin/bash
 
+QT_VERSION=5.9
 BUILD_DIR=build-macx
-QT_BIN=$HOME/Qt5.8.0/5.8/clang_64/bin/
+
+QT_PACKAGE=qt
+brew install $QT_PACKAGE
+
+export PATH="$(brew --prefix $QT_PACKAGE)/bin:$PATH"
 
 echo "Preparing icon set"
 pushd ../FlightController-icons
@@ -26,9 +31,10 @@ echo "If xcodebuild returns error - it's okay! Means it's working."
 test -d $BUILD_DIR && rm -rf $BUILD_DIR
 mkdir $BUILD_DIR
 pushd $BUILD_DIR
-echo $QT_BIN
-$QT_BIN/qmake ../../FlightController/FlightController.pro -r -spec macx-clang
-make && $QT_BIN/macdeployqt FlightController.app -verbose=2 -dmg
+# so that macdeployqt may find libhidapi
+cp ../../../hidapi/mac/.libs/libhidapi.0.dylib /usr/local/lib
+qmake ../../FlightController/FlightController.pro -r -spec macx-clang
+make && macdeployqt FlightController.app -verbose=2 -dmg
 popd
 mv -f $BUILD_DIR/FlightController.dmg .
 

@@ -107,7 +107,7 @@ void DeviceInterface::sendCommand(Bootloader_packet_t *packet)
 {
     memset(outbox, 0, sizeof(outbox));
     uint8_t wire_length = packet->length + 7; // marker+cmd+len(2)+checksum(2)+marker
-    memcpy_s(outbox+1, wire_length, packet->raw, wire_length);
+    memcpy(outbox+1, packet->raw, wire_length);
     //qInfo() << (uint8_t)packet->raw[0] << (uint8_t)packet->raw[1] << (uint8_t)packet->raw[2] << (uint8_t)packet->raw[3]
     //        << (uint8_t)packet->raw[4] << (uint8_t)packet->raw[5] << (uint8_t)packet->raw[6] << (uint8_t)packet->raw[7]
     //        << (uint8_t)packet->raw[8];
