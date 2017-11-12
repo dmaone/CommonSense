@@ -121,8 +121,8 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
             if ((deviceConfig->deadBandHi[row][i] == 0)
-             || (!deviceConfig->bNormallyLow && level < deviceConfig->deadBandLo[row][i])
-             || (deviceConfig->bNormallyLow && level > deviceConfig->deadBandHi[row][i])
+             || (!deviceConfig->bNormallyLow && level > deviceConfig->deadBandLo[row][i])
+             || (deviceConfig->bNormallyLow && level < deviceConfig->deadBandHi[row][i])
             )
             {
                 cell->setStyleSheet("background-color: #ffffff;");
