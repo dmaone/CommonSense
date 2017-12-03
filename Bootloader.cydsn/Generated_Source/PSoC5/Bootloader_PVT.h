@@ -1,6 +1,6 @@
 /****************************************************************************//**
 * \file Bootloader.c
-* \version 1.50
+* \version 1.60
 *
 * \brief
 *   Provides an API for the Bootloader.
@@ -29,7 +29,7 @@ typedef struct
 
 
 #define Bootloader_VERSION        {\
-                                            (uint8)50, \
+                                            (uint8)60, \
                                             (uint8)1, \
                                             (uint8)0x01u \
                                         }
@@ -93,7 +93,7 @@ typedef struct
 #define Bootloader_RSP_SIZE_GET_APP_STATUS    (0x02u)
 #define Bootloader_RSP_SIZE_GET_COPIER_STATUS (0x03u)
 #define Bootloader_RSP_SIZE_GET_FLASH_SIZE    (0x04u)
-#define Bootloader_RSP_SIZE_GET_METADATA      (0x56u)
+#define Bootloader_RSP_SIZE_GET_METADATA      (56u)
 
 
 /*******************************************************************************

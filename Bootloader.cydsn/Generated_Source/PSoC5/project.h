@@ -29,7 +29,6 @@
 #include "USB_pvt.h"
 #include "USB_cydmac.h"
 #include "USB_msc.h"
-#include "Pins_aliases.h"
 #include "USB_Dm_aliases.h"
 #include "USB_Dm.h"
 #include "USB_Dp_aliases.h"

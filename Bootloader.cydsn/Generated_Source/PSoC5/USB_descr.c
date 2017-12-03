@@ -44,8 +44,8 @@ const uint8 CYCODE USB_DEVICE0_DESCR[18u] = {
 /* idVendor                                */ 0xB4u, 0x04u,
 /* idProduct                               */ 0x1Du, 0xB7u,
 /* bcdDevice                               */ 0x01u, 0x30u,
-/* iManufacturer                           */ 0x03u,
-/* iProduct                                */ 0x04u,
+/* iManufacturer                           */ 0x01u,
+/* iProduct                                */ 0x02u,
 /* iSerialNumber                           */ 0x80u,
 /* bNumConfigurations                      */ 0x01u
 };
@@ -72,7 +72,7 @@ const uint8 CYCODE USB_DEVICE0_CONFIGURATION0_DESCR[41u] = {
 /*  bInterfaceClass                        */ 0x03u,
 /*  bInterfaceSubClass                     */ 0x00u,
 /*  bInterfaceProtocol                     */ 0x00u,
-/*  iInterface                             */ 0x04u,
+/*  iInterface                             */ 0x02u,
 /*********************************************************************
 * HID Class Descriptor
 *********************************************************************/
@@ -82,8 +82,8 @@ const uint8 CYCODE USB_DEVICE0_CONFIGURATION0_DESCR[41u] = {
 /*  bCountryCode                           */ 0x00u,
 /*  bNumDescriptors                        */ 0x01u,
 /*  bDescriptorType                        */ 0x22u,
-/*  wDescriptorLength (LSB)                */ USB_HID_RPT_2_SIZE_LSB,
-/*  wDescriptorLength (MSB)                */ USB_HID_RPT_2_SIZE_MSB,
+/*  wDescriptorLength (LSB)                */ USB_HID_RPT_1_SIZE_LSB,
+/*  wDescriptorLength (MSB)                */ USB_HID_RPT_1_SIZE_MSB,
 /*********************************************************************
 * Endpoint Descriptor
 *********************************************************************/
@@ -107,27 +107,13 @@ const uint8 CYCODE USB_DEVICE0_CONFIGURATION0_DESCR[41u] = {
 /*********************************************************************
 * String Descriptor Table
 *********************************************************************/
-const uint8 CYCODE USB_STRING_DESCRIPTORS[123u] = {
+const uint8 CYCODE USB_STRING_DESCRIPTORS[83u] = {
 /*********************************************************************
 * Language ID Descriptor
 *********************************************************************/
 /* Descriptor Length                       */ 0x04u,
 /* DescriptorType: STRING                  */ 0x03u,
 /* Language Id                             */ 0x09u, 0x04u,
-/*********************************************************************
-* String Descriptor: "DMA Labs"
-*********************************************************************/
-/* Descriptor Length                       */ 0x12u,
-/* DescriptorType: STRING                  */ 0x03u,
- (uint8)'D', 0u,(uint8)'M', 0u,(uint8)'A', 0u,(uint8)' ', 0u,(uint8)'L', 0u,
- (uint8)'a', 0u,(uint8)'b', 0u,(uint8)'s', 0u,
-/*********************************************************************
-* String Descriptor: "Bootloader"
-*********************************************************************/
-/* Descriptor Length                       */ 0x16u,
-/* DescriptorType: STRING                  */ 0x03u,
- (uint8)'B', 0u,(uint8)'o', 0u,(uint8)'o', 0u,(uint8)'t', 0u,(uint8)'l', 0u,
- (uint8)'o', 0u,(uint8)'a', 0u,(uint8)'d', 0u,(uint8)'e', 0u,(uint8)'r', 0u,
 /*********************************************************************
 * String Descriptor: "Cypress Semiconductor"
 *********************************************************************/
@@ -166,34 +152,6 @@ const uint8 CYCODE USB_SN_STRING_DESCRIPTOR[10] = {
 const uint8 CYCODE USB_HIDREPORT_DESCRIPTOR1[40u] = {
 /*  Descriptor Size (Not part of descriptor)*/ USB_HID_RPT_1_SIZE_LSB,
 USB_HID_RPT_1_SIZE_MSB,
-/* USAGE_PAGE                              */ 0x05u, 0x01u, 
-/* USAGE                                   */ 0x09u, 0x00u, 
-/* COLLECTION                              */ 0xA1u, 0x00u, 
-/* USAGE                                   */ 0x09u, 0x00u, 
-/* COLLECTION                              */ 0xA1u, 0x00u, 
-/* USAGE                                   */ 0x09u, 0x00u, 
-/* LOGICAL_MINIMUM                         */ 0x15u, 0x00u, 
-/* LOGICAL_MAXIMUM                         */ 0x25u, 0xFFu, 
-/* REPORT_SIZE                             */ 0x75u, 0x08u, 
-/* REPORT_COUNT                            */ 0x95u, 0x40u, 
-/* OUTPUT                                  */ 0x91u, 0x02u, 
-/* USAGE                                   */ 0x09u, 0x00u, 
-/* LOGICAL_MINIMUM                         */ 0x15u, 0x00u, 
-/* LOGICAL_MAXIMUM                         */ 0x25u, 0xFFu, 
-/* REPORT_SIZE                             */ 0x75u, 0x08u, 
-/* REPORT_COUNT                            */ 0x95u, 0x40u, 
-/* INPUT                                   */ 0x81u, 0x02u, 
-/* END_COLLECTION                          */ 0xC0u, 
-/* END_COLLECTION                          */ 0xC0u, 
-/*********************************************************************/
-/* End of the HID Report Descriptor        */ 0x00u, 0x00u};
-/*********************************************************************/
-/*********************************************************************
-* HID Report Descriptor: Generic HID
-*********************************************************************/
-const uint8 CYCODE USB_HIDREPORT_DESCRIPTOR2[40u] = {
-/*  Descriptor Size (Not part of descriptor)*/ USB_HID_RPT_2_SIZE_LSB,
-USB_HID_RPT_2_SIZE_MSB,
 /* USAGE_PAGE                              */ 0x05u, 0x01u, 
 /* USAGE                                   */ 0x09u, 0x00u, 
 /* COLLECTION                              */ 0xA1u, 0x00u, 
@@ -260,7 +218,7 @@ const T_USB_LUT CYCODE USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_TABL
     {0x00u,     &USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_IN_RPT_TABLE},
     {0x00u,     &USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_RPT_TABLE},
     {0x00u,    NULL},
-    {0x01u,     (const void *)&USB_HIDREPORT_DESCRIPTOR2[0]},
+    {0x01u,     (const void *)&USB_HIDREPORT_DESCRIPTOR1[0]},
     {0x01u,     (const void *)&USB_DEVICE0_CONFIGURATION0_DESCR[18]}
 };
 #endif /* USER_DEFINE_USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_HID_RPT_STORAGE */

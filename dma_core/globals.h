@@ -21,9 +21,12 @@
 #define NOT_A_KEYBOARD 0
 
 /*
+ * pin assignment: direct order, aligned to the right of ADC.
+ * for dual ADCs it means column X..11, X+12..23
+ *
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
  */
-#define MATRIX_COLS 16
+#define MATRIX_COLS 12
 #define MATRIX_ROWS 8
 #define MATRIX_LAYERS 4
 

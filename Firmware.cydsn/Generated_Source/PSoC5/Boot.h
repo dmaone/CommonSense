@@ -1,6 +1,6 @@
 /****************************************************************************//**
 * \file Boot.c
-* \version 1.50
+* \version 1.60
 *
 * \brief
 *   Provides an API for the Bootloadable application. The API includes a
@@ -25,7 +25,7 @@
 /* Check to see if required defines such as CY_PSOC5LP are available */
 /* They are defined starting with cy_boot v3.0 */
 #if !defined (CY_PSOC5LP)
-    #error Component Bootloadable_v1_50 requires cy_boot v3.0 or later
+    #error Component Bootloadable_v1_60 requires cy_boot v3.0 or later
 #endif /* !defined (CY_PSOC5LP) */
 
 

@@ -1,6 +1,6 @@
 /****************************************************************************//**
 * \file Bootloader.c
-* \version 1.50
+* \version 1.60
 *
 * \brief
 *   Provides an API for the Bootloader component. The API includes functions
@@ -23,7 +23,7 @@
 #include <string.h>
 
 #if (CY_BOOT_VERSION < CY_BOOT_5_0)
-#error Component Bootloader_v1_50 requires cy_boot v5.00 or later
+#error Component Bootloader_v1_60 requires cy_boot v5.00 or later
 #endif /* (CY_BOOT_VERSION >= CY_BOOT_5_0) */
 
 /*******************************************************************************
@@ -201,6 +201,12 @@ static void Bootloader_SetActiveAppInMetadata(uint8 activeApp) CYSMALL \
     if (Bootloader_MD_BTLDB_ACTIVE_NONE > activeApp)
     {
         uint8 CYDATA idx;    
+    #if(!CY_PSOC4)      
+        if (CYRET_SUCCESS != CySetTemp())
+        {
+            CyHalt(0x00u);
+        }
+    #endif  /* (!CY_PSOC4) */    
         for(idx = 0u; idx < Bootloader_MAX_NUM_OF_BTLDB; idx++)
         {
             (void)Bootloader_SetFlashByte((uint32) Bootloader_MD_BTLDB_ACTIVE_OFFSET(idx),
@@ -545,7 +551,7 @@ uint8 Bootloader_Calc8BitSum(uint32 baseAddr, uint32 start, uint32 size) \
     while (size > 0u)
     {
         size--;
-        sum += (*((uint8  *)(baseAddr + start + size)));
+        sum += CY_GET_XTND_REG8((uint8 CYFAR *)(baseAddr + start + size));
     }
 
     return(sum);
@@ -2535,6 +2541,7 @@ void Bootloader_HostLink(uint8 timeOut) CYLARGE
                            (btldrData <= Bootloader_LAST_EE_ARRAYID))
                         {
                             /* EEPROM */
+                            CyEEPROM_Start();
                             /* Both PSoC 3 and PSoC 5LP architecture have one EEPROM array. */
                             rowAddr = (uint32)rowNum * CYDEV_EEPROM_ROW_SIZE;
                             
@@ -2809,23 +2816,27 @@ void Bootloader_SetFlashByte(uint32 address, uint8 runType)
         rowData[idx] = Bootloader_GET_CODE_BYTE(baseAddr + idx);
     }
 
-    rowData[address % CYDEV_FLS_ROW_SIZE] = runType;
+    /* Check flash content to avoid unnecessary write to flash */
+    if (rowData[address % CYDEV_FLS_ROW_SIZE] != runType)
+    {
+        rowData[address % CYDEV_FLS_ROW_SIZE] = runType;
 
-    #if(CY_PSOC4)
-        (void) CySysFlashWriteRow((uint32) rowNum, rowData);
-    #else
-        (void) CyWriteRowData(arrayId, rowNum, rowData);
-    #endif  /* (CY_PSOC4) */
+        #if(CY_PSOC4)
+            (void) CySysFlashWriteRow((uint32) rowNum, rowData);
+        #else
+            (void) CyWriteRowData(arrayId, rowNum, rowData);
+        #endif  /* (CY_PSOC4) */
 
-    #if(CY_PSOC5)
-        /***************************************************************************
-        * When writing to flash, data in the instruction cache can become stale.
-        * Therefore, the cache data does not correlate to the data just written to
-        * flash. A call to CyFlushCache() is required to invalidate the data in the
-        * cache and force fresh information to be loaded from flash.
-        ***************************************************************************/
-        CyFlushCache();
-    #endif /* (CY_PSOC5) */
+        #if(CY_PSOC5)
+            /***************************************************************************
+            * When writing to flash, data in the instruction cache can become stale.
+            * Therefore, the cache data does not correlate to the data just written to
+            * flash. A call to CyFlushCache() is required to invalidate the data in the
+            * cache and force fresh information to be loaded from flash.
+            ***************************************************************************/
+            CyFlushCache();
+        #endif /* (CY_PSOC5) */
+    }
 }
 
 

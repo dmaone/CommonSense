@@ -60,8 +60,6 @@
 #define USB_ENABLE_HID_CLASS                   
 #define USB_HID_RPT_1_SIZE_LSB                 (0x24u)
 #define USB_HID_RPT_1_SIZE_MSB                 (0x00u)
-#define USB_HID_RPT_2_SIZE_LSB                 (0x24u)
-#define USB_HID_RPT_2_SIZE_MSB                 (0x00u)
 #define USB_MAX_REPORTID_NUMBER                (0u)
 
 #define USB_MON_VBUS               (0u)

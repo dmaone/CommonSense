@@ -1,6 +1,6 @@
 /****************************************************************************//**
 * \file Bootloader.c
-* \version 1.50
+* \version 1.60
 *
 * \brief
 *   Provides an API for the Bootloader. The API includes functions for starting
@@ -30,11 +30,11 @@
 #define Bootloader_BOOTLOADER_APP_VALIDATION  (1u)
 
 #define Bootloader_CMD_GET_FLASH_SIZE_AVAIL   (1u)
-#define Bootloader_CMD_ERASE_ROW_AVAIL        (1u)
-#define Bootloader_CMD_GET_ROW_CHKSUM_AVAIL   (1u)
-#define Bootloader_CMD_SYNC_BOOTLOADER_AVAIL  (1u)
+#define Bootloader_CMD_ERASE_ROW_AVAIL        (0u)
+#define Bootloader_CMD_GET_ROW_CHKSUM_AVAIL   (0u)
+#define Bootloader_CMD_SYNC_BOOTLOADER_AVAIL  (0u)
 #define Bootloader_CMD_SEND_DATA_AVAIL        (1u)
-#define Bootloader_CMD_VERIFY_APP_CHKSUM_AVAIL (1u)
+#define Bootloader_CMD_VERIFY_APP_CHKSUM_AVAIL (0u)
 #define Bootloader_CMD_GET_METADATA           (0u)
 #define Bootloader_CMD_VERIFY_FLS_ROW_AVAIL   (0u)
 #define Bootloader_GOLDEN_IMAGE_AVAIL         (0u)

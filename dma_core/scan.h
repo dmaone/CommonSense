@@ -18,7 +18,7 @@
 
 // 0 - none, 1 - 1/2, 2 - 3/4, etc.
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
-#define COMMONSENSE_IIR_ORDER 2
+#define COMMONSENSE_IIR_ORDER 1
 
 #define ADC_RESOLUTION 10
 
