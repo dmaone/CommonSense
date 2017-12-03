@@ -41,6 +41,12 @@ So.
 Whew. Hopefully you're done with soldering now.
 
 # Building
+You'll need Windows machine. Mac with VirtualBox will do - but a couple of notes there.
+You'll need to download [Virtualbox](https://www.virtualbox.org/wiki/Downloads) (v5.2.2 was used) - don't forget the extension pack - and a [windows image](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/) - I used "MSEdge on Win10". Download, unpack, click the .ovf, wait for import to complete. Then open settings (right-click, "Settings"), click "Ports", select "USB" tab, enable USB 2.0 controller, click the plug with blue dot. THIS WILL CONNECT ALL NEW USB DEVICES TO YOUR VM. Run the VM now. You have your windows development environment now. Download PSoC creator into VM, install (typical works just fine), and continue.
+Linux with Virtualbox will probably work too - but not tested as I don't have any hardware running Linux and running virtualbox inside virtualbox is not something I plan to do anytime soon.
+
+Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator-integrated-design-environment-ide] - you actually can download without suffering akamai download manager. Typical install works just fine. v4.1 was used, though newer should work too.
+
 ## Bootloader
 * Open PSoC Creator
 * Open "CY8CKIT-059 Bootloader.cywrk" workspace
@@ -48,8 +54,8 @@ Whew. Hopefully you're done with soldering now.
 * Press Shift-F6 ("Build"), wait for it to finish.
 * Copy bootloader files **one level above** CommonSense directory. Yes. Above.
 ```
-cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_493\Release\Bootloader.hex .
-cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_493\Release\Bootloader.elf .
+cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_541\Release\Bootloader.hex .
+cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_541\Release\Bootloader.elf .
 ```
 If there's no files at the location - in the left pane, right-click on "Workspace blah blah", select "Properties" and change "Active build configuration" to "Release".
 
