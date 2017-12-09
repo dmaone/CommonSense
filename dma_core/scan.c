@@ -167,20 +167,20 @@ CY_ISR(Result_ISR)
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    PIN_DEBUG(1, 1)
     //8-10us, occasionally 6
+    PIN_DEBUG(1, 2)
     uint32_t row_status = matrix_status[reading_row];
-    register uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
-    register uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
-    register uint8_t key_index = reading_row * MATRIX_COLS;
+    uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
+    uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
+    uint8_t key_index = reading_row * MATRIX_COLS;
     while (current_col > 0)
     {
         --current_col;
         adc_buffer_pos -= 2;
 
-        register uint8_t hi = config.deadBandHi[--key_index];
-        register uint8_t lo = config.deadBandLo[key_index];
-        register int16_t readout = Results[adc_buffer_pos];
+        uint8_t hi = config.deadBandHi[--key_index];
+        uint8_t lo = config.deadBandLo[key_index];
+        int16_t readout = Results[adc_buffer_pos];
         if (status_register.matrix_output)
         {
             // When monitoring matrix we're interested in raw feed.
@@ -202,7 +202,7 @@ CY_ISR(Result_ISR)
         }
 #if COMMONSENSE_IIR_ORDER == 0
         // Degenerate version. But very fast! Can be used in noiseless environments.
-        matrix_ptr[key_index] = readout;
+        matrix[key_index] = readout;
 #else
         // IIR filter - readable version minimizing array lookups.
         readout -= (matrix[key_index] >> COMMONSENSE_IIR_ORDER);
@@ -228,7 +228,7 @@ CY_ISR(Result_ISR)
         }
         else
         {
-            if ((row_status & (1 << current_col)) > 0)
+            if ((row_status & (1 << current_col)) != 0)
             {
         // new key release
                 append_scancode(KEY_UP_MASK|key_index);
@@ -239,12 +239,12 @@ CY_ISR(Result_ISR)
                 row_status &= ~(1 << current_col);
             }
         }
+    PIN_DEBUG(1, 1)
     }
     matrix_status[reading_row] = row_status;
     if (reading_row == 0)
     {
         // End of matrix reading cycle.
-        // key_index = COMMONSENSE_MATRIX_SIZE;
         row_status = 0;
         for (uint8_t i = 0; i < MATRIX_ROWS; i++)
         {
@@ -257,7 +257,6 @@ CY_ISR(Result_ISR)
         }
         matrix_was_active = row_status > 0 ? true : false;
     }
-    PIN_DEBUG(1, 2)
 }
 
 void scan_start(void)
