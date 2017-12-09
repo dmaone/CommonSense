@@ -27,8 +27,8 @@ static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static bool matrix_was_active;
 
-static uint16 matrix[MATRIX_ROWS][MATRIX_COLS];
-static uint16 *matrix_ptr = (uint16 *)&matrix;
+static uint16 matrix[COMMONSENSE_MATRIX_SIZE];
+// static uint8_t key_index = COMMONSENSE_MATRIX_SIZE;
 
 static void InitSensor(void)
 {
@@ -168,24 +168,23 @@ CY_ISR(Result_ISR)
     // The rest of the code is dead in 100kHz mode.
 #endif
     PIN_DEBUG(1, 1)
-    //9-11us
+    //8-10us, occasionally 6
     uint32_t row_status = matrix_status[reading_row];
     register uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     register uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
+    register uint8_t key_index = reading_row * MATRIX_COLS;
     while (current_col > 0)
     {
-        current_col--;
+        --current_col;
         adc_buffer_pos -= 2;
 
-        // Here you need matrix-sized array of uint8!! matrix[][] won't do!!
-        register uint8_t key_index = ((uint32)&matrix[reading_row][current_col] - (uint32)matrix_ptr) >> 1;
-        register uint8_t hi = config.deadBandHi[key_index];
+        register uint8_t hi = config.deadBandHi[--key_index];
         register uint8_t lo = config.deadBandLo[key_index];
         register int16_t readout = Results[adc_buffer_pos];
         if (status_register.matrix_output)
         {
             // When monitoring matrix we're interested in raw feed.
-            matrix_ptr[key_index] = readout;
+            matrix[key_index] = readout;
             continue;
         }
         else if (hi == 0)
@@ -206,14 +205,14 @@ CY_ISR(Result_ISR)
         matrix_ptr[key_index] = readout;
 #else
         // IIR filter - readable version minimizing array lookups.
-        readout -= (matrix_ptr[key_index] >> COMMONSENSE_IIR_ORDER);
-        matrix_ptr[key_index] += readout;
+        readout -= (matrix[key_index] >> COMMONSENSE_IIR_ORDER);
+        matrix[key_index] += readout;
 #endif
 //Key pressed?
 #if NORMALLY_LOW == 1
-        if (matrix_ptr[key_index] >= (hi << COMMONSENSE_IIR_ORDER))
+        if (matrix[key_index] >= (hi << COMMONSENSE_IIR_ORDER))
 #else
-        if (matrix_ptr[key_index] <= (lo << COMMONSENSE_IIR_ORDER))
+        if (matrix[key_index] <= (lo << COMMONSENSE_IIR_ORDER))
 #endif
         {
             if ((row_status & (1 << current_col)) == 0)
@@ -245,6 +244,7 @@ CY_ISR(Result_ISR)
     if (reading_row == 0)
     {
         // End of matrix reading cycle.
+        // key_index = COMMONSENSE_MATRIX_SIZE;
         row_status = 0;
         for (uint8_t i = 0; i < MATRIX_ROWS; i++)
         {
@@ -273,11 +273,10 @@ void scan_start(void)
 void scan_reset(void)
 {
     uint8_t enableInterrupts = CyEnterCriticalSection();
-    uint16_t idx = 0;
-    for (uint16_t i=0; i<sizeof(matrix_ptr); i++)
+    for (uint8_t i=0; i<COMMONSENSE_MATRIX_SIZE; i++)
     {
         // Away from thresholds! Account for IIR.
-        matrix_ptr[i] = (config.deadBandHi[i] + config.deadBandLo[i]) << (COMMONSENSE_IIR_ORDER - 1);
+        matrix[i] = (config.deadBandHi[i] + config.deadBandLo[i]) << (COMMONSENSE_IIR_ORDER - 1);
     }
     memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
     memset(matrix_status, 0, sizeof(matrix_status));
@@ -294,6 +293,7 @@ void scan_init(void)
 
 void report_matrix_readouts(void)
 {
+    uint8_t idx = 0;
     for(uint8 i = 0; i<MATRIX_ROWS; i++)
     {
         outbox.response_type = C2RESPONSE_MATRIX_ROW;
@@ -301,7 +301,7 @@ void report_matrix_readouts(void)
         outbox.payload[1] = MATRIX_COLS;
         for(uint8_t j=0; j<MATRIX_COLS; j++)
         {
-            outbox.payload[2 + j] = matrix[i][j] & 0xff;
+            outbox.payload[2 + j] = matrix[idx++] & 0xff;
         }
         usb_send_c2();
     }
