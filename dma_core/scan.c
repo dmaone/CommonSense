@@ -168,7 +168,7 @@ CY_ISR(Result_ISR)
     // The rest of the code is dead in 100kHz mode.
 #endif
     PIN_DEBUG(1, 1)
-    //10-12us
+    //9-11us
     uint32_t row_status = matrix_status[reading_row];
     register uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     register uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
@@ -178,9 +178,9 @@ CY_ISR(Result_ISR)
         adc_buffer_pos -= 2;
 
         // Here you need matrix-sized array of uint8!! matrix[][] won't do!!
-        register uint8_t key_index = (uint32)&config.deadBandHi[reading_row][current_col] - (uint32)&config.deadBandHi;
-        register uint8_t hi = config.deadBandHi[reading_row][current_col];
-        register uint8_t lo = config.deadBandLo[reading_row][current_col];
+        register uint8_t key_index = ((uint32)&matrix[reading_row][current_col] - (uint32)matrix_ptr) >> 1;
+        register uint8_t hi = config.deadBandHi[key_index];
+        register uint8_t lo = config.deadBandLo[key_index];
         register int16_t readout = Results[adc_buffer_pos];
         if (status_register.matrix_output)
         {
@@ -273,13 +273,11 @@ void scan_start(void)
 void scan_reset(void)
 {
     uint8_t enableInterrupts = CyEnterCriticalSection();
-    for (uint8_t i=0; i<MATRIX_ROWS; i++)
+    uint16_t idx = 0;
+    for (uint16_t i=0; i<sizeof(matrix_ptr); i++)
     {
-        for (uint8_t j=0; j<MATRIX_COLS; j++)
-        {
-            // Away from thresholds! Account for IIR.
-            matrix[i][j] = (config.deadBandHi[i][j] + config.deadBandLo[i][j]) << (COMMONSENSE_IIR_ORDER - 1);
-        }
+        // Away from thresholds! Account for IIR.
+        matrix_ptr[i] = (config.deadBandHi[i] + config.deadBandLo[i]) << (COMMONSENSE_IIR_ORDER - 1);
     }
     memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
     memset(matrix_status, 0, sizeof(matrix_status));

@@ -45,8 +45,9 @@ typedef union {
         // Storage is for layout-size-specifics and MUST NOT be sized here
         // because firmware can know sizes in advance, while FlightController can't.
 #ifdef MATRIX_ROWS
-        uint8_t deadBandLo[MATRIX_ROWS][MATRIX_COLS];
-        uint8_t deadBandHi[MATRIX_ROWS][MATRIX_COLS];
+        // Firmware.
+        uint8_t deadBandLo[COMMONSENSE_MATRIX_SIZE];
+        uint8_t deadBandHi[COMMONSENSE_MATRIX_SIZE];
         uint8_t layers[MATRIX_LAYERS][COMMONSENSE_MATRIX_SIZE];
         uint8_t macros[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE - (MATRIX_LAYERS * COMMONSENSE_MATRIX_SIZE)];
 #else
