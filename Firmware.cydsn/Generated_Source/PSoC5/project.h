@@ -47,6 +47,7 @@
 #include "USBSuspendIRQ.h"
 #include "FinalBuf_dma.h"
 #include "ResultIRQ.h"
+#include "DischargeDelay.h"
 #include "USB_Dm_aliases.h"
 #include "USB_Dm.h"
 #include "USB_Dp_aliases.h"

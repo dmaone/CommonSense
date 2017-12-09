@@ -20,7 +20,7 @@
 // WARNING - uses matrix as accumulator, so order++ = 2*output level!
 #define COMMONSENSE_IIR_ORDER 1
 
-#define ADC_RESOLUTION 10
+#define ADC_RESOLUTION 12
 
 // This is to ease calculations, there are things hardcoded in buffer management!!
 // For 1 and 2 ADCs, that is.

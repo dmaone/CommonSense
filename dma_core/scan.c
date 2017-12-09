@@ -50,6 +50,7 @@ static void InitSensor(void)
     ADC1_SetResolution(ADC_RESOLUTION);
 #endif
     ChargeDelay_Start();
+    DischargeDelay_Start();
     scan_reset();
 }
 
@@ -114,6 +115,11 @@ inline void append_scancode(uint8_t scancode)
 {
     if (status_register.emergency_stop)
         return;
+    if(!(scancode & KEY_UP_MASK)) {
+        PIN_DEBUG(1, 1);
+    } else {
+        PIN_DEBUG(1, 5);
+    }
     scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
@@ -161,6 +167,8 @@ CY_ISR(Result_ISR)
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
+    PIN_DEBUG(1, 1)
+    //10-12us
     uint32_t row_status = matrix_status[reading_row];
     register uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     register uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
@@ -249,6 +257,7 @@ CY_ISR(Result_ISR)
         }
         matrix_was_active = row_status > 0 ? true : false;
     }
+    PIN_DEBUG(1, 2)
 }
 
 void scan_start(void)
