@@ -327,14 +327,14 @@ void update_consumer_report(queuedScancode *key)
 
 void update_system_report(queuedScancode *key)
 {
-    uint8_t key_index = key->keycode - 0xa5;
+    uint8_t keyIndex = key->keycode - 0xa5;
     if ((key->flags & USBQUEUE_RELEASED_MASK) == 0)
     {
-        system_report[0] |= (1 << key_index);
+        system_report[0] |= (1 << keyIndex);
     }
     else
     {
-        system_report[0] &= ~(1 << key_index);
+        system_report[0] &= ~(1 << keyIndex);
     }
     memcpy(SYSTEM_OUTBOX, system_report, OUTBOX_SIZE(SYSTEM_OUTBOX));    
     //xprintf("System: %d", SYSTEM_OUTBOX[0]);

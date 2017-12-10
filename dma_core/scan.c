@@ -168,39 +168,38 @@ CY_ISR(Result_ISR) {
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    //6us
+    //5.4-6us
     uint32_t row_status = matrix_status[reading_row];
-    uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 4;
-    // key_index - same speed as static global on -O3, faster in -Os
-    uint8_t key_index = (reading_row + 1) * MATRIX_COLS;
+    // keyIndex - same speed as static global on -O3, faster in -Os
+    uint8_t keyIndex = (reading_row + 1) * MATRIX_COLS;
     PIN_DEBUG(1, 2)
-    while (current_col > 0) {
-        --current_col;
+    for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
         adc_buffer_pos -= 4;
 
         if (status_register.matrix_output) {
             // When monitoring matrix we're interested in raw feed.
-            matrix[--key_index] = Results[adc_buffer_pos];
+            matrix[--keyIndex] = Results[adc_buffer_pos];
             continue;
 #if NORMALLY_LOW == 1
-        } else if ( Results[adc_buffer_pos] > config.deadBandLo[--key_index] ) {
+        } else if ( Results[adc_buffer_pos] > config.deadBandLo[--keyIndex] ) {
 #else
-        } else if ( readout < lo ) {
+        } else if ( Results[adc_buffer_pos] < config.deadBandLo[--keyIndex] ) {
 #endif
             // Key pressed
-            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK) + 1;
+            matrix[keyIndex] = ((matrix[keyIndex] << 1) | DEBOUNCING_MASK) + 1;
         } else {
-            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK);
+            matrix[keyIndex] = ((matrix[keyIndex] << 1) | DEBOUNCING_MASK);
         }
-        if (matrix[key_index] == DEBOUNCING_POSEDGE 
-            && (row_status & (1 << current_col)) == 0) {
-            row_status |= (1 << current_col);
-            append_scancode(key_index);
-        } else if (matrix[key_index] == DEBOUNCING_NEGEDGE
-               && (row_status & (1 << current_col))) {
-            row_status &= ~(1 << current_col);
-            append_scancode(KEY_UP_MASK|key_index);
+
+        if (matrix[keyIndex] == DEBOUNCING_POSEDGE 
+            && (row_status & (1 << curCol)) == 0) {
+            row_status |= (1 << curCol);
+            append_scancode(keyIndex);
+        } else if (matrix[keyIndex] == DEBOUNCING_NEGEDGE
+               && (row_status & (1 << curCol))) {
+            row_status &= ~(1 << curCol);
+            append_scancode(KEY_UP_MASK|keyIndex);
         }
     }
     matrix_status[reading_row] = row_status;
@@ -210,11 +209,13 @@ CY_ISR(Result_ISR) {
         for (uint8_t i = 1; i < MATRIX_ROWS; i++) {
             row_status |= matrix_status[i];
         }
-        if (row_status == 0 && matrix_was_active) {
+        if (row_status) {
+            matrix_was_active = true;
+        } else if (matrix_was_active) {
             // Signal that last key was released
             append_scancode(KEY_UP_MASK|COMMONSENSE_NOKEY);
+            matrix_was_active = false;
         }
-        matrix_was_active = row_status > 0 ? true : false;
    }
 }
 
