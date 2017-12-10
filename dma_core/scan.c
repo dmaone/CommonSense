@@ -21,7 +21,7 @@ static uint8_t FinalBufTD[2];
 // signedness intentional! Simplifies comparison logic
 // high byte from ADC must be zero, so should be safe.
 static int16_t BufMem[PTK_CHANNELS * NUM_ADCs];
-static int16_t Results[ADC_CHANNELS * 2 * NUM_ADCs];
+static uint8_t Results[ADC_CHANNELS * 4 * NUM_ADCs];
 static uint8_t reading_row, driving_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
@@ -168,25 +168,23 @@ CY_ISR(Result_ISR) {
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    //6.5us
+    //6us
     uint32_t row_status = matrix_status[reading_row];
     uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
-    uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
+    uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 4;
     // key_index - same speed as static global on -O3, faster in -Os
     uint8_t key_index = (reading_row + 1) * MATRIX_COLS;
     PIN_DEBUG(1, 2)
     while (current_col > 0) {
         --current_col;
-        adc_buffer_pos -= 2;
+        adc_buffer_pos -= 4;
 
-        uint8_t lo = config.deadBandLo[--key_index];
-        int16_t readout = Results[adc_buffer_pos];
         if (status_register.matrix_output) {
             // When monitoring matrix we're interested in raw feed.
-            matrix[key_index] = readout;
+            matrix[--key_index] = Results[adc_buffer_pos];
             continue;
 #if NORMALLY_LOW == 1
-        } else if ( readout > lo ) {
+        } else if ( Results[adc_buffer_pos] > config.deadBandLo[--key_index] ) {
 #else
         } else if ( readout < lo ) {
 #endif
