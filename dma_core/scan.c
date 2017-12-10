@@ -116,6 +116,7 @@ static inline void append_scancode(uint8_t scancode)
     if (status_register.emergency_stop)
         return;
     if((scancode & KEY_UP_MASK)) {
+        // FIXME last key sticks!
         if (scancode != (KEY_UP_MASK & COMMONSENSE_NOKEY)) {
             --keys_down;
             PIN_DEBUG(1, 5)
@@ -167,7 +168,8 @@ CY_ISR(Result_ISR) {
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    //6-8us - 4-7 w/hardcoded 0xff debouncing mask
+    //6.5us
+    uint32_t row_status = matrix_status[reading_row];
     uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
     // key_index - same speed as static global on -O3, faster in -Os
@@ -177,49 +179,45 @@ CY_ISR(Result_ISR) {
         --current_col;
         adc_buffer_pos -= 2;
 
-        uint8_t hi = config.deadBandHi[--key_index];
-        uint8_t lo = config.deadBandLo[key_index];
+        uint8_t lo = config.deadBandLo[--key_index];
         int16_t readout = Results[adc_buffer_pos];
         if (status_register.matrix_output) {
             // When monitoring matrix we're interested in raw feed.
             matrix[key_index] = readout;
             continue;
-        } else if (hi == 0) {
-            continue;
-        } else if (lo - config.guardLo < readout && readout <= lo ) {
-            // Lower band
-            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK);
-        } else if(hi <= readout && readout < hi + config.guardHi) {
-            // Upper band
+#if NORMALLY_LOW == 1
+        } else if ( readout > lo ) {
+#else
+        } else if ( readout < lo ) {
+#endif
+            // Key pressed
             matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK) + 1;
         } else {
-            continue;
+            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK);
         }
-//Key pressed?
-#if NORMALLY_LOW == 1
-#define SCAN_C_KEY_LO_MASK KEY_UP_MASK
-#define SCAN_C_KEY_HI_MASK KEY_DOWN_MASK
-#else
-#define SCAN_C_KEY_LO_MASK KEY_DOWN_MASK
-#define SCAN_C_KEY_HI_MASK KEY_UP_MASK
-#endif
-        if (matrix[key_index] == DEBOUNCING_POSEDGE) {
-            append_scancode(SCAN_C_KEY_LO_MASK|key_index);
-        } else if (matrix[key_index] == DEBOUNCING_NEGEDGE) {
-            append_scancode(SCAN_C_KEY_HI_MASK|key_index);
+        if (matrix[key_index] == DEBOUNCING_POSEDGE 
+            && (row_status & (1 << current_col)) == 0) {
+            row_status |= (1 << current_col);
+            append_scancode(key_index);
+        } else if (matrix[key_index] == DEBOUNCING_NEGEDGE
+               && (row_status & (1 << current_col))) {
+            row_status &= ~(1 << current_col);
+            append_scancode(KEY_UP_MASK|key_index);
         }
     }
+    matrix_status[reading_row] = row_status;
     PIN_DEBUG(1, 1)
     if (reading_row == 0) {
         // End of matrix reading cycle.
-        if (keys_down > 0) {
-            matrix_was_active = true;
-        } else if (matrix_was_active) {
+        for (uint8_t i = 1; i < MATRIX_ROWS; i++) {
+            row_status |= matrix_status[i];
+        }
+        if (row_status == 0 && matrix_was_active) {
             // Signal that last key was released
             append_scancode(KEY_UP_MASK|COMMONSENSE_NOKEY);
-            matrix_was_active = false;
         }
-    }
+        matrix_was_active = row_status > 0 ? true : false;
+   }
 }
 
 void scan_start(void) {

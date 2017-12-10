@@ -18,11 +18,11 @@
 #define SCANCODE_MASK 0x7f
 
 // mask N high bits (N < 8!)
-#define DEBOUNCING_MASK     0b11110000
+#define DEBOUNCING_MASK     0b00000000
 // Positive edge: zero, followed by ones. Mind the mask!
-#define DEBOUNCING_POSEDGE (0b00000111 | DEBOUNCING_MASK)
+#define DEBOUNCING_POSEDGE (0b01111111 | DEBOUNCING_MASK)
 // Negative edge: one, followed b zeroes. Mind the mask!
-#define DEBOUNCING_NEGEDGE (0b00001000 | DEBOUNCING_MASK)
+#define DEBOUNCING_NEGEDGE (0b10000000 | DEBOUNCING_MASK)
 
 #define ADC_RESOLUTION 12
 
