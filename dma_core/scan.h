@@ -13,12 +13,16 @@
 //IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122 with it's 8x16 matrix.
 #define COMMONSENSE_NOKEY 0x7f
 
+#define KEY_DOWN_MASK 0x00
 #define KEY_UP_MASK 0x80
 #define SCANCODE_MASK 0x7f
 
-// 0 - none, 1 - 1/2, 2 - 3/4, etc.
-// WARNING - uses matrix as accumulator, so order++ = 2*output level!
-#define COMMONSENSE_IIR_ORDER 1
+// mask N high bits (N < 8!)
+#define DEBOUNCING_MASK     0b11110000
+// Positive edge: zero, followed by ones. Mind the mask!
+#define DEBOUNCING_POSEDGE (0b00000111 | DEBOUNCING_MASK)
+// Negative edge: one, followed b zeroes. Mind the mask!
+#define DEBOUNCING_NEGEDGE (0b00001000 | DEBOUNCING_MASK)
 
 #define ADC_RESOLUTION 12
 

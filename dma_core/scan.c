@@ -26,9 +26,9 @@ static uint8_t reading_row, driving_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static bool matrix_was_active;
+static uint8_t keys_down;
 
-static uint16 matrix[COMMONSENSE_MATRIX_SIZE];
-// static uint8_t key_index = COMMONSENSE_MATRIX_SIZE;
+static uint8_t matrix[COMMONSENSE_MATRIX_SIZE];
 
 static void InitSensor(void)
 {
@@ -111,21 +111,24 @@ static inline void Drive(uint8 drv)
     DriveReg0_Write(1 << drv);
 }
 
-inline void append_scancode(uint8_t scancode)
+static inline void append_scancode(uint8_t scancode)
 {
     if (status_register.emergency_stop)
         return;
-    if(!(scancode & KEY_UP_MASK)) {
-        PIN_DEBUG(1, 1);
+    if((scancode & KEY_UP_MASK)) {
+        if (scancode != (KEY_UP_MASK & COMMONSENSE_NOKEY)) {
+            --keys_down;
+            PIN_DEBUG(1, 5)
+        }
     } else {
-        PIN_DEBUG(1, 5);
+        ++keys_down;
+        PIN_DEBUG(1, 1)
     }
     scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
 
-CY_ISR(EoC_ISR)
-{
+CY_ISR(EoC_ISR) {
 #ifdef DEBUG_INTERRUPTS
     PIN_DEBUG(1, 1)
 #endif
@@ -139,11 +142,9 @@ CY_ISR(EoC_ISR)
     CyDmaChSetRequest(FinalBuf_DmaHandle, CY_DMA_CPU_REQ);
     uint8_t enableInterrupts = CyEnterCriticalSection();
     reading_row = driving_row;
-    if (driving_row == 0)
-    {
+    if (driving_row == 0) {
         // End of the scan pass. Loop if full throttle, otherwise stop.
-        if (power_state != DEVSTATE_FULL_THROTTLE)
-        {
+        if (power_state != DEVSTATE_FULL_THROTTLE) {
             scan_in_progress = false;
             goto EoC_final; // Important - otherwise interrupts are left disabled!
         }
@@ -158,8 +159,7 @@ EoC_final:
     CyExitCriticalSection(enableInterrupts);
 }
 
-CY_ISR(Result_ISR)
-{
+CY_ISR(Result_ISR) {
 #ifdef DEBUG_INTERRUPTS
     PIN_DEBUG(1, 2)
 #endif
@@ -167,115 +167,77 @@ CY_ISR(Result_ISR)
     return;
     // The rest of the code is dead in 100kHz mode.
 #endif
-    //8-10us, occasionally 6
-    PIN_DEBUG(1, 2)
-    uint32_t row_status = matrix_status[reading_row];
+    //6-8us - 4-7 w/hardcoded 0xff debouncing mask
     uint8_t current_col = ADC_CHANNELS * NUM_ADCs;
     uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 2;
-    uint8_t key_index = reading_row * MATRIX_COLS;
-    while (current_col > 0)
-    {
+    // key_index - same speed as static global on -O3, faster in -Os
+    uint8_t key_index = (reading_row + 1) * MATRIX_COLS;
+    PIN_DEBUG(1, 2)
+    while (current_col > 0) {
         --current_col;
         adc_buffer_pos -= 2;
 
         uint8_t hi = config.deadBandHi[--key_index];
         uint8_t lo = config.deadBandLo[key_index];
         int16_t readout = Results[adc_buffer_pos];
-        if (status_register.matrix_output)
-        {
+        if (status_register.matrix_output) {
             // When monitoring matrix we're interested in raw feed.
             matrix[key_index] = readout;
             continue;
-        }
-        else if (hi == 0)
-        {
+        } else if (hi == 0) {
             continue;
-        } else if (
-            !(
-                (readout <= lo && readout + config.guardLo >= lo) // Lower band
-                || 
-                (readout >= hi && readout - config.guardHi <= hi) // Upper band
-            )
-        )
-        {
+        } else if (lo - config.guardLo < readout && readout <= lo ) {
+            // Lower band
+            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK);
+        } else if(hi <= readout && readout < hi + config.guardHi) {
+            // Upper band
+            matrix[key_index] = ((matrix[key_index] << 1) | DEBOUNCING_MASK) + 1;
+        } else {
             continue;
         }
-#if COMMONSENSE_IIR_ORDER == 0
-        // Degenerate version. But very fast! Can be used in noiseless environments.
-        matrix[key_index] = readout;
-#else
-        // IIR filter - readable version minimizing array lookups.
-        readout -= (matrix[key_index] >> COMMONSENSE_IIR_ORDER);
-        matrix[key_index] += readout;
-#endif
 //Key pressed?
 #if NORMALLY_LOW == 1
-        if (matrix[key_index] >= (hi << COMMONSENSE_IIR_ORDER))
+#define SCAN_C_KEY_LO_MASK KEY_UP_MASK
+#define SCAN_C_KEY_HI_MASK KEY_DOWN_MASK
 #else
-        if (matrix[key_index] <= (lo << COMMONSENSE_IIR_ORDER))
+#define SCAN_C_KEY_LO_MASK KEY_DOWN_MASK
+#define SCAN_C_KEY_HI_MASK KEY_UP_MASK
 #endif
-        {
-            if ((row_status & (1 << current_col)) == 0)
-            {
-        // new keypress
-                append_scancode(key_index);
-#ifdef MATRIX_LEVELS_DEBUG
-                level_buffer[scancode_buffer_writepos] = matrix_ptr[key_index] & 0xff;
-                level_buffer_inst[scancode_buffer_writepos] = readout & 0xff;
-#endif
-                row_status |= (1 << current_col);
-            }
+        if (matrix[key_index] == DEBOUNCING_POSEDGE) {
+            append_scancode(SCAN_C_KEY_LO_MASK|key_index);
+        } else if (matrix[key_index] == DEBOUNCING_NEGEDGE) {
+            append_scancode(SCAN_C_KEY_HI_MASK|key_index);
         }
-        else
-        {
-            if ((row_status & (1 << current_col)) != 0)
-            {
-        // new key release
-                append_scancode(KEY_UP_MASK|key_index);
-#ifdef MATRIX_LEVELS_DEBUG
-                level_buffer[scancode_buffer_writepos] = matrix_ptr[key_index] & 0xff;
-                level_buffer_inst[scancode_buffer_writepos] = readout & 0xff;
-#endif
-                row_status &= ~(1 << current_col);
-            }
-        }
-    PIN_DEBUG(1, 1)
     }
-    matrix_status[reading_row] = row_status;
-    if (reading_row == 0)
-    {
+    PIN_DEBUG(1, 1)
+    if (reading_row == 0) {
         // End of matrix reading cycle.
-        row_status = 0;
-        for (uint8_t i = 0; i < MATRIX_ROWS; i++)
-        {
-            row_status |= matrix_status[i];
-        }
-        if (row_status == 0 && matrix_was_active)
-        {
+        if (keys_down > 0) {
+            matrix_was_active = true;
+        } else if (matrix_was_active) {
             // Signal that last key was released
             append_scancode(KEY_UP_MASK|COMMONSENSE_NOKEY);
+            matrix_was_active = false;
         }
-        matrix_was_active = row_status > 0 ? true : false;
     }
 }
 
-void scan_start(void)
-{
-    if (!scan_in_progress)
-    {
+void scan_start(void) {
+    if (!scan_in_progress) {
         driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
         Drive(driving_row);
         scan_in_progress = true;
     }
 }
 
-void scan_reset(void)
-{
+void scan_reset(void) {
     uint8_t enableInterrupts = CyEnterCriticalSection();
-    for (uint8_t i=0; i<COMMONSENSE_MATRIX_SIZE; i++)
-    {
-        // Away from thresholds! Account for IIR.
-        matrix[i] = (config.deadBandHi[i] + config.deadBandLo[i]) << (COMMONSENSE_IIR_ORDER - 1);
+    for (uint8_t i=0; i<COMMONSENSE_MATRIX_SIZE; i++) {
+#if NORMALLY_LOW == 1
+        matrix[i] = 0;
+#else
+        matrix[i] = 0xff;
+#endif
     }
     memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
     memset(matrix_status, 0, sizeof(matrix_status));
