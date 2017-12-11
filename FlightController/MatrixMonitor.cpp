@@ -184,7 +184,7 @@ void MatrixMonitor::on_runButton_clicked()
     }
 }
 
-void MatrixMonitor::on_loButton_clicked()
+void MatrixMonitor::on_setThresholdsButton_clicked()
 {
     if (!deviceConfig->bValid) return;
     for (uint8_t i = 0; i<deviceConfig->numRows; i++)

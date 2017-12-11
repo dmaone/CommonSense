@@ -179,7 +179,7 @@ void DeviceConfig::_assemble(void)
             }
         }
     }
-    uint16_t macros_start = tableSize * (numLayers + 1);
+    // uint8_t macros_start = tableSize * (numLayers + 1);
     /*
     // Crude memcpy of a test macro F24 -> Shift-A
     static const uint8_t filler[] = {

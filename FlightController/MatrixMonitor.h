@@ -64,7 +64,7 @@ private:
 private slots:
     void on_runButton_clicked(void);
     void on_closeButton_clicked(void);
-    void on_loButton_clicked(void);
+    void on_setThresholdsButton_clicked(void);
     void on_modeBox_currentTextChanged(QString newValue);
     void on_resetButton_clicked(void);
     void on_filterBox_currentTextChanged(QString newValue);

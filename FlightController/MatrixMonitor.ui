@@ -26,7 +26,7 @@
    <enum>QFrame::Raised</enum>
   </property>
   <layout class="QGridLayout" name="gridLayout_2">
-   <item row="1" column="13">
+   <item row="1" column="11">
     <widget class="QPushButton" name="closeButton">
      <property name="text">
       <string>Close</string>
@@ -43,7 +43,7 @@
      </property>
     </widget>
    </item>
-   <item row="1" column="11">
+   <item row="1" column="9">
     <spacer name="horizontalSpacer">
      <property name="orientation">
       <enum>Qt::Horizontal</enum>
@@ -115,56 +115,14 @@
      </item>
     </widget>
    </item>
-   <item row="1" column="8">
-    <spacer name="horizontalSpacer_3">
-     <property name="orientation">
-      <enum>Qt::Horizontal</enum>
-     </property>
-     <property name="sizeType">
-      <enum>QSizePolicy::Fixed</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>20</width>
-       <height>20</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="1" column="5">
-    <widget class="QComboBox" name="filterBox">
-     <item>
-      <property name="text">
-       <string>No filter</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Upper band</string>
-      </property>
-     </item>
-     <item>
-      <property name="text">
-       <string>Lower band</string>
-      </property>
-     </item>
-    </widget>
-   </item>
-   <item row="1" column="9">
-    <widget class="QPushButton" name="loButton">
-     <property name="text">
-      <string>Set LoThr.</string>
-     </property>
-    </widget>
-   </item>
-   <item row="1" column="12">
+   <item row="1" column="10">
     <widget class="QPushButton" name="exportButton">
      <property name="text">
       <string>Export</string>
      </property>
     </widget>
    </item>
-   <item row="0" column="1" colspan="13">
+   <item row="0" column="1" colspan="11">
     <widget class="QFrame" name="Dashboard">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Minimum" vsizetype="Minimum">
@@ -177,6 +135,13 @@
      </property>
      <property name="frameShadow">
       <enum>QFrame::Raised</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="7" colspan="2">
+    <widget class="QPushButton" name="setThresholdButton">
+     <property name="text">
+      <string>  Set thresholds  </string>
      </property>
     </widget>
    </item>
