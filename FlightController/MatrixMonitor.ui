@@ -139,7 +139,7 @@
     </widget>
    </item>
    <item row="1" column="7" colspan="2">
-    <widget class="QPushButton" name="setThresholdButton">
+    <widget class="QPushButton" name="setThresholdsButton">
      <property name="text">
       <string>  Set thresholds  </string>
      </property>

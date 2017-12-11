@@ -28,8 +28,6 @@ public:
   explicit MatrixMonitor(QWidget *parent = 0);
   ~MatrixMonitor();
   void show(void);
-  enum Filter { FilterNone, FilterLowPass, FilterHighPass };
-  Q_ENUM(Filter);
   enum DisplayMode { DisplayNow, DisplayMin, DisplayMax, DisplayAvg };
   Q_ENUM(DisplayMode);
 
@@ -44,7 +42,6 @@ private:
   Ui::MatrixMonitor *ui;
   uint8_t debug;
   DisplayMode displayMode;
-  Filter filter;
   QGridLayout *grid;
   QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   MonitoredCell cells[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
@@ -65,6 +62,5 @@ private slots:
   void on_setThresholdsButton_clicked(void);
   void on_modeBox_currentTextChanged(QString newValue);
   void on_resetButton_clicked(void);
-  void on_filterBox_currentTextChanged(QString newValue);
   void on_exportButton_clicked(void);
 };

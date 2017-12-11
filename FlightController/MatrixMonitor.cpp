@@ -18,7 +18,7 @@
 
 MatrixMonitor::MatrixMonitor(QWidget *parent)
     : QFrame(parent), ui(new Ui::MatrixMonitor), debug(0),
-      displayMode(DisplayNow), filter(FilterNone), grid(new QGridLayout()),
+      displayMode(DisplayNow), grid(new QGridLayout()),
       _warmupRows(ABSOLUTE_MAX_ROWS) {
   ui->setupUi(this);
 
@@ -115,19 +115,6 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
         cell->setStyleSheet("background-color: #ffffff;");
       } else {
         cell->setStyleSheet("background-color: #ffff33;");
-      }
-      switch (filter) {
-      case FilterLowPass:
-        if (level > deviceConfig->thresholds[row][i])
-          continue;
-        break;
-      case FilterHighPass:
-        if (level < deviceConfig->thresholds[row][i])
-          continue;
-        break;
-      default:
-        // No error to have no filter selected.
-        break;
       }
       _updateStatCell(row, i, level);
       switch (displayMode) {
@@ -232,17 +219,6 @@ void MatrixMonitor::_updateStatCellDisplay(uint8_t row, uint8_t col) {
 void MatrixMonitor::on_resetButton_clicked(void) {
   enableTelemetry(0);
   _resetCells();
-}
-
-void MatrixMonitor::on_filterBox_currentTextChanged(QString newValue) {
-  if (newValue == "No filter")
-    filter = FilterNone;
-  else if (newValue == "Lower band")
-    filter = FilterLowPass;
-  else if (newValue == "Upper band")
-    filter = FilterHighPass;
-  else
-    qCritical() << "Unknown filter type selected!!";
 }
 
 void MatrixMonitor::on_exportButton_clicked(void) {
