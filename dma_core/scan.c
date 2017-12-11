@@ -173,7 +173,6 @@ CY_ISR(Result_ISR) {
     uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 4;
     // keyIndex - same speed as static global on -O3, faster in -Os
     uint8_t keyIndex = (reading_row + 1) * MATRIX_COLS;
-    PIN_DEBUG(1, 2)
     for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
         adc_buffer_pos -= 4;
 
@@ -182,9 +181,9 @@ CY_ISR(Result_ISR) {
             matrix[--keyIndex] = Results[adc_buffer_pos];
             continue;
 #if NORMALLY_LOW == 1
-        } else if ( Results[adc_buffer_pos] > config.deadBandLo[--keyIndex] ) {
+        } else if ( Results[adc_buffer_pos] > config.thresholds[--keyIndex] ) {
 #else
-        } else if ( Results[adc_buffer_pos] < config.deadBandLo[--keyIndex] ) {
+        } else if ( Results[adc_buffer_pos] < config.thresholds[--keyIndex] ) {
 #endif
             // Key pressed
             matrix[keyIndex] = ((matrix[keyIndex] << 1) | DEBOUNCING_MASK) + 1;
@@ -203,7 +202,6 @@ CY_ISR(Result_ISR) {
         }
     }
     matrix_status[reading_row] = row_status;
-    PIN_DEBUG(1, 1)
     if (reading_row == 0) {
         // End of matrix reading cycle.
         for (uint8_t i = 1; i < MATRIX_ROWS; i++) {

@@ -387,7 +387,7 @@
         <Data key="check_tolerance" value="True" />
         <Data key="clock_version" value="v1" />
         <Data key="derive_type" value="BUILTIN" />
-        <Data key="desired_freq" value="72" />
+        <Data key="desired_freq" value="36" />
         <Data key="desired_unit" value="6" />
         <Data key="divider" value="0" />
         <Data key="domain" value="0" />

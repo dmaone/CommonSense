@@ -24,17 +24,13 @@ public:
 public slots:
     void applyThresholds(void);
     void resetThresholds(void);
-    void updateLows(void);
-    void updateHighs(void);
+    void adjustThresholds(void);
     void receiveScancode(uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
 
 private:
     Ui::ThresholdEditor *ui;
     QGridLayout *grid;
-    QWidget *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    QCheckBox *skip[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    QSpinBox *lo[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-    QSpinBox *hi[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+    QSpinBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
     DeviceConfig *deviceConfig;
     void initDisplay();
     void updateDisplaySize(uint8_t, uint8_t);

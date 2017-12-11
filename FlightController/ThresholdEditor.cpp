@@ -18,8 +18,7 @@ ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent) :
     initDisplay();
     connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyThresholds()));
     connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
-    connect(ui->loPlusButton, SIGNAL(clicked()), this, SLOT(updateLows()));
-    connect(ui->hiPlusButton, SIGNAL(clicked()), this, SLOT(updateHighs()));
+    connect(ui->adjustButton, SIGNAL(clicked()), this, SLOT(adjustThresholds()));
 }
 
 void ThresholdEditor::show(void)
@@ -55,22 +54,10 @@ void ThresholdEditor::initDisplay()
     {
         for (uint8_t j = 0; j<ABSOLUTE_MAX_COLS; j++)
         {
-            QWidget *l = new QWidget();
-            l->setStyleSheet("background-color: #cccccc;");
-            QBoxLayout *ll = new QBoxLayout(QBoxLayout::BottomToTop);
-            l->setLayout(ll);
+            QSpinBox *l = new QSpinBox();
+            l->setAlignment(Qt::AlignRight);
+            l->setStyleSheet("background-color: #ffffff;");
             display[i][j] = l;
-            lo[i][j] = new QSpinBox();
-            lo[i][j]->setStyleSheet("background-color: #ffffff;");
-            lo[i][j]->setToolTip("Low deadband boundary");
-            ll->addWidget(lo[i][j]);
-            skip[i][j] = new QCheckBox();
-            skip[i][j]->setToolTip("Skip update");
-            ll->addWidget(skip[i][j]);
-            hi[i][j] = new QSpinBox();
-            hi[i][j]->setStyleSheet("background-color: #ffffff;");
-            hi[i][j]->setToolTip("High deadband boundary");
-            ll->addWidget(hi[i][j]);
             grid->addWidget(l, i+1, j+1, 1, 1);
         }
     }
@@ -95,59 +82,36 @@ void ThresholdEditor::updateDisplaySize(uint8_t rows, uint8_t cols)
     adjustSize();
 }
 
-void ThresholdEditor::updateLows()
+void ThresholdEditor::adjustThresholds()
 {
     for (uint8_t i = 0; i < deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j < deviceConfig->numCols; j++)
         {
-            if (!skip[i][j]->isChecked())
-            {
-                lo[i][j]->setValue(lo[i][j]->value() + ui->loStepSpinbox->value());
-            }
+            display[i][j]->setValue(display[i][j]->value() + ui->adjustSpinbox->value());
         }
     }
 }
 
-void ThresholdEditor::updateHighs()
-{
-    for (uint8_t i = 0; i < deviceConfig->numRows; i++)
-    {
-        for (uint8_t j = 0; j < deviceConfig->numCols; j++)
-        {
-            if (!skip[i][j]->isChecked())
-            {
-                hi[i][j]->setValue(hi[i][j]->value() + ui->hiStepSpinbox->value());
-            }
-        }
-    }
-}
 
 void ThresholdEditor::applyThresholds()
 {
-    deviceConfig->guardLo = ui->loGuardSpinbox->value();
-    deviceConfig->guardHi = ui->hiGuardSpinbox->value();
     for (uint8_t i = 0; i < deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j < deviceConfig->numCols; j++)
         {
-            deviceConfig->deadBandLo[i][j] = lo[i][j]->value();
-            deviceConfig->deadBandHi[i][j] = hi[i][j]->value();
+            deviceConfig->thresholds[i][j] = display[i][j]->value();
         }
     }
 }
 
 void ThresholdEditor::resetThresholds()
 {
-    ui->loGuardSpinbox->setValue(deviceConfig->guardLo);
-    ui->hiGuardSpinbox->setValue(deviceConfig->guardHi);
     for (uint8_t i = 0; i < deviceConfig->numRows; i++)
     {
         for (uint8_t j = 0; j < deviceConfig->numCols; j++)
         {
-            lo[i][j]->setValue(deviceConfig->deadBandLo[i][j]);
-            hi[i][j]->setValue(deviceConfig->deadBandHi[i][j]);
-            skip[i][j]->setChecked(deviceConfig->deadBandLo[i][j] > deviceConfig->deadBandHi[i][j]);
+            display[i][j]->setValue(deviceConfig->thresholds[i][j]);
         }
     }
     qInfo() << "Loaded threshold map";
@@ -157,11 +121,11 @@ void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface:
 {
     if (status == DeviceInterface::KeyPressed)
     {
-        display[row][col]->setStyleSheet("background-color: #ffffff;");
+        display[row][col]->setStyleSheet("background-color: #ffff33;");
     }
     else
     {
-        display[row][col]->setStyleSheet("background-color: #cccccc;");
+        display[row][col]->setStyleSheet("background-color: #ffffff;");
     }
 }
 

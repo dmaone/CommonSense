@@ -48,8 +48,8 @@ Whew. Hopefully you're done with soldering now.
 * Press Shift-F6 ("Build"), wait for it to finish.
 * Copy bootloader files **one level above** CommonSense directory. Yes. Above.
 ```
-cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_493\Release\Bootloader.hex .
-cp CommonSense\Bootloader.cydsn\CortexM3\ARM_GCC_493\Release\Bootloader.elf .
+cp CommonSense\Bootloader.cydsn\Compiled\Bootloader.hex .
+cp CommonSense\Bootloader.cydsn\Compiled\Bootloader.elf .
 ```
 If there's no files at the location - in the left pane, right-click on "Workspace blah blah", select "Properties" and change "Active build configuration" to "Release".
 

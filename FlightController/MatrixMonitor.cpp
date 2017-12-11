@@ -120,26 +120,24 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)), QEvent *ev
         for (uint8_t i = 0; i<max_cols; i++) {
             QLCDNumber *cell = display[row][i];
             uint8_t level = pl->constData()[3+i];
-            if (deviceConfig->deadBandHi[row][i] == 0) {
-                cell->setStyleSheet("background-color: #eeeeee;");
-            } else if ((!deviceConfig->bNormallyLow && level > deviceConfig->deadBandLo[row][i])
-                || (deviceConfig->bNormallyLow && level < deviceConfig->deadBandHi[row][i])
+            if ((!deviceConfig->bNormallyLow && level > deviceConfig->thresholds[row][i])
+                || (deviceConfig->bNormallyLow && level < deviceConfig->thresholds[row][i])
             )
             {
                 cell->setStyleSheet("background-color: #ffffff;");
             }
             else
             {
-                cell->setStyleSheet("background-color: #00ff00;");
+                cell->setStyleSheet("background-color: #ffff33;");
             }
             switch (filter)
             {
                 case FilterLowPass:
-                    if (level > deviceConfig->deadBandLo[row][i])
+                    if (level > deviceConfig->thresholds[row][i])
                         continue;
                     break;
                 case FilterHighPass:
-                    if (level < deviceConfig->deadBandHi[row][i])
+                    if (level < deviceConfig->thresholds[row][i])
                         continue;
                     break;
                 default:
@@ -193,22 +191,11 @@ void MatrixMonitor::on_loButton_clicked()
     {
         for (uint8_t j = 0; j<deviceConfig->numCols; j++)
         {
-            deviceConfig->deadBandLo[i][j] = display[i][j]->intValue();
+            deviceConfig->thresholds[i][j] = display[i][j]->intValue();
         }
     }
 }
 
-void MatrixMonitor::on_hiButton_clicked()
-{
-    if (!deviceConfig->bValid) return;
-    for (uint8_t i = 0; i<deviceConfig->numRows; i++)
-    {
-        for (uint8_t j = 0; j<deviceConfig->numCols; j++)
-        {
-            deviceConfig->deadBandHi[i][j] = display[i][j]->intValue();
-        }
-    }
-}
 
 void MatrixMonitor::on_closeButton_clicked()
 {

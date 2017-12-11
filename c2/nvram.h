@@ -35,9 +35,7 @@ typedef union {
         uint8_t expMode;
         uint8_t expParam1;
         uint8_t expParam2;
-        uint8_t _RESERVED0[6];
-        uint8_t guardLo;
-        uint8_t guardHi;
+        uint8_t _RESERVED0[8];
         uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
         uint8_t layerConditions[NUM_LAYER_CONDITIONS];
         uint8_t _RESERVED1[8];
@@ -46,8 +44,7 @@ typedef union {
         // because firmware can know sizes in advance, while FlightController can't.
 #ifdef MATRIX_ROWS
         // Firmware.
-        uint8_t deadBandLo[COMMONSENSE_MATRIX_SIZE];
-        uint8_t deadBandHi[COMMONSENSE_MATRIX_SIZE];
+        uint8_t thresholds[COMMONSENSE_MATRIX_SIZE];
         uint8_t layers[MATRIX_LAYERS][COMMONSENSE_MATRIX_SIZE];
         uint8_t macros[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE - (MATRIX_LAYERS * COMMONSENSE_MATRIX_SIZE)];
 #else

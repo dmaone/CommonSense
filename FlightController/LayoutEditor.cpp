@@ -87,7 +87,7 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols)
             {
                 QComboBox *l = new QComboBox();
                 l->addItems(scancodes.list);
-                l->setStyleSheet("background-color: #dddddd;");
+                l->setStyleSheet("background-color: #ffffff;");
                 display[i][j] = l;
                 grid->addWidget(l, i+1, j+1, 1, 1);
                 if (j == 0)
@@ -216,11 +216,11 @@ void LayoutEditor::receiveScancode(uint8_t row, uint8_t col, DeviceInterface::Ke
         return;
     if (status == DeviceInterface::KeyPressed)
     {
-        display[row][col]->setStyleSheet("background-color: #ffffff;");
+        display[row][col]->setStyleSheet("background-color: #ffff33;");
     }
     else
     {
-        display[row][col]->setStyleSheet("background-color: #dddddd;");
+        display[row][col]->setStyleSheet("background-color: #ffffff;");
     }
 }
 

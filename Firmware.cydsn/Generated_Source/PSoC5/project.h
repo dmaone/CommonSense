@@ -35,7 +35,6 @@
 #include "DriveReg1.h"
 #include "DriveReg2.h"
 #include "EEPROM.h"
-#include "DirveReg3.h"
 #include "DriveReg0.h"
 #include "ADC0.h"
 #include "Buf0_dma.h"

@@ -140,23 +140,18 @@ void DeviceConfig::_unpack(void)
     numCols   = _eeprom.matrixCols;
     numLayers = _eeprom.matrixLayers;
     bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
-    guardLo   = _eeprom.guardLo;
-    guardHi   = _eeprom.guardHi;
-    memset(deadBandLo, EMPTY_FLASH_BYTE, sizeof(deadBandLo));
-    memset(deadBandHi, EMPTY_FLASH_BYTE, sizeof(deadBandHi));
+    memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
     memset(layouts, 0x00, sizeof(layouts));
-    uint8_t table_size = numRows * numCols;
+    uint8_t tableSize = numRows * numCols;
     for (uint8_t i = 0; i < numRows; i++)
     {
         for (uint8_t j = 0; j < numCols; j++)
         {
             uint16_t offset = i*numCols + j;
-            this->deadBandLo[i][j] = _eeprom.stash[offset];
-            this->deadBandHi[i][j] = _eeprom.stash[table_size + offset];
-            this->skipSensing[i][j] = (deadBandLo[i][j] > deadBandHi[i][j]);
+            this->thresholds[i][j] = _eeprom.stash[offset];
             for (uint8_t k = 0; k < numLayers; k++)
             {
-                layouts[k][i][j] = _eeprom.stash[table_size*(k+2) + offset];
+                layouts[k][i][j] = _eeprom.stash[tableSize*(k + 1) + offset];
             }
         }
     }
@@ -168,32 +163,23 @@ void DeviceConfig::_unpack(void)
 void DeviceConfig::_assemble(void)
 {
     _eeprom.configVersion = 2;
-    _eeprom.guardLo = guardLo;
-    _eeprom.guardHi = guardHi;
     memset(_eeprom.stash, EMPTY_FLASH_BYTE, sizeof(_eeprom.stash));
     memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
     memset(_eeprom._RESERVED1, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED1));
-    uint8_t table_size = numRows * numCols;
+    uint8_t tableSize = numRows * numCols;
     for (uint8_t i = 0; i < this->numRows; i++)
     {
         for (uint8_t j = 0; j < numCols; j++)
         {
             uint16_t offset = i*numCols + j;
-// TODO make it easier on the script|more visible on UI.
-            if (deadBandHi[i][j] < deadBandLo[i][j])
-            {
-                deadBandLo[i][j] = 255;
-                deadBandHi[i][j] = 0;
-            }
-            _eeprom.stash[offset] = deadBandLo[i][j];
-            _eeprom.stash[table_size + offset] = deadBandHi[i][j];
+            _eeprom.stash[offset] = thresholds[i][j];
             for (uint8_t k = 0; k < numLayers; k++)
             {
-                this->_eeprom.stash[table_size*(k+2) + offset] = this->layouts[k][i][j];
+                this->_eeprom.stash[tableSize*(k+1) + offset] = this->layouts[k][i][j];
             }
         }
     }
-    uint16_t macros_start = table_size * (numLayers + 2);
+    uint16_t macros_start = tableSize * (numLayers + 1);
     /*
     // Crude memcpy of a test macro F24 -> Shift-A
     static const uint8_t filler[] = {

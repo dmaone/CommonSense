@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = FlightController
 TEMPLATE = app
 
-CONFIG += static
+CONFIG += static c++14
 
 # Not needed for linux, but doesn't hurt.
 INCLUDEPATH += ../../hidapi
