@@ -4,40 +4,42 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
-*/
+ * published by the Free Software Foundation.
+ */
 
 #pragma once
-#include "scan.h"
 #include "pipeline.h"
+#include "scan.h"
 
 #define SUSPEND_SYSTIMER_DIVISOR 10
 
 enum devicePowerStates {
-    DEVSTATE_FULL_THROTTLE = 0,
-    DEVSTATE_SLEEP,
-    DEVSTATE_WATCH,
-    DEVSTATE_SUSPENDING,
-    DEVSTATE_RESUMING,
+  DEVSTATE_FULL_THROTTLE = 0,
+  DEVSTATE_SLEEP,
+  DEVSTATE_WATCH,
+  DEVSTATE_SUSPENDING,
+  DEVSTATE_RESUMING,
 };
 
-//Modified by ISR!
+// Modified by ISR!
 volatile uint8_t power_state;
 
 /*
- * Internal state storage. Must be longer than conceivable number of simultaneously pressed keys.
- * USB HID spec requires whole report to say "Keyboard Rollover Error" when it happens.
- * OS (Windows at least) will maintain last known state before KRO.
- * Currently there's a semi-bug - if you set KRO lower than OUTBOX_SIZE, you'll see keycodes beyond KRO limit.
- * It's a semi-bug because you're supposed to set KRO limit to match your packet size - hence match OUTBOX_SIZE.
+ * Internal state storage. Must be longer than conceivable number of
+ * simultaneously pressed keys. USB HID spec requires whole report to say
+ * "Keyboard Rollover Error" when it happens. OS (Windows at least) will
+ * maintain last known state before KRO. Currently there's a semi-bug - if you
+ * set KRO lower than OUTBOX_SIZE, you'll see keycodes beyond KRO limit. It's a
+ * semi-bug because you're supposed to set KRO limit to match your packet size -
+ * hence match OUTBOX_SIZE.
  */
 union {
-    struct {
-        uint8_t mods;
-        uint8_t reserved;
-        uint8_t keys[MAX_KEYS];
-    } __attribute__ ((packed));
-    uint8_t raw[MAX_KEYS + 2];
+  struct {
+    uint8_t mods;
+    uint8_t reserved;
+    uint8_t keys[MAX_KEYS];
+  } __attribute__((packed));
+  uint8_t raw[MAX_KEYS + 2];
 } keyboard_report;
 uint8_t keyboard_report_usage;
 
@@ -69,6 +71,13 @@ void update_system_report(queuedScancode *key);
 #endif
 
 // Wait for EP - stop waiting if suspend looms.
-#define USB_WAIT_FOR_IN_EP(EP) while (USB_GetEPState(EP) != USB_IN_BUFFER_EMPTY) { if (power_state != DEVSTATE_FULL_THROTTLE) return; }
+#define USB_WAIT_FOR_IN_EP(EP)                                                 \
+  while (USB_GetEPState(EP) != USB_IN_BUFFER_EMPTY) {                          \
+    if (power_state != DEVSTATE_FULL_THROTTLE)                                 \
+      return;                                                                  \
+  }
 
-#define USB_SEND_REPORT(TYPE) USB_WAIT_FOR_IN_EP(TYPE##_EP); _WIPE_OUTBOX(TYPE##_OUTBOX); USB_LoadInEP(TYPE##_EP, TYPE##_OUTBOX, OUTBOX_SIZE(TYPE##_OUTBOX));
+#define USB_SEND_REPORT(TYPE)                                                  \
+  USB_WAIT_FOR_IN_EP(TYPE##_EP);                                               \
+  _WIPE_OUTBOX(TYPE##_OUTBOX);                                                 \
+  USB_LoadInEP(TYPE##_EP, TYPE##_OUTBOX, OUTBOX_SIZE(TYPE##_OUTBOX));

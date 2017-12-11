@@ -4,23 +4,21 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
-*/
+ * published by the Free Software Foundation.
+ */
 #pragma once
 
 #include <QPlainTextEdit>
 
-class LogViewer: public QPlainTextEdit
-{
-    Q_OBJECT
+class LogViewer : public QPlainTextEdit {
+  Q_OBJECT
 
-    public:
-        LogViewer(QWidget *parent = NULL);
+public:
+  LogViewer(QWidget *parent = NULL);
 
-    public slots:
-        void clearButtonClick(void);
-        void copyAllButtonClick(void);
-        void logMessage(QString msg);
-        void continueMessage(QString msg);
-
+public slots:
+  void clearButtonClick(void);
+  void copyAllButtonClick(void);
+  void logMessage(QString msg);
+  void continueMessage(QString msg);
 };

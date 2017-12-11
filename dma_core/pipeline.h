@@ -4,20 +4,20 @@
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
- * published by the Free Software Foundation. 
-*/
+ * published by the Free Software Foundation.
+ */
 
 #pragma once
 #include "globals.h"
 #include <project.h>
 
 typedef union {
-    struct {
-        uint32_t sysTime;
-        uint8_t flags;
-        uint8_t keycode;
-    } __attribute__ ((packed));
-    uint8_t raw[6];
+  struct {
+    uint32_t sysTime;
+    uint8_t flags;
+    uint8_t keycode;
+  } __attribute__((packed));
+  uint8_t raw[6];
 } queuedScancode;
 
 #define USBCODE_TRANSPARENT 0
@@ -40,13 +40,14 @@ typedef union {
 queuedScancode USBQueue[KEYCODE_BUFFER_END + 1];
 uint8_t USBQueue_readpos;
 uint8_t USBQueue_writepos;
-#define USBQUEUE_IS_EMPTY (USBQueue_readpos == USBQueue_writepos && USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
+#define USBQUEUE_IS_EMPTY                                                      \
+  (USBQueue_readpos == USBQueue_writepos &&                                    \
+   USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
 
 uint8_t mods;
 uint8_t layerMods;
 #define LAYER_MODS_SHIFT 4
 uint8_t currentLayer;
-
 
 uint16_t cooldown_timer;
 
