@@ -41,6 +41,12 @@ So.
 Whew. Hopefully you're done with soldering now.
 
 # Building
+You'll need Windows machine. Mac with VirtualBox will do - but a couple of notes there.
+You'll need to download [Virtualbox](https://www.virtualbox.org/wiki/Downloads) (v5.2.2 was used) - don't forget the extension pack - and a [windows image](https://developer.microsoft.com/en-us/microsoft-edge/tools/vms/) - I used "MSEdge on Win10". Download, unpack, click the .ovf, wait for import to complete. Then open settings (right-click, "Settings"), click "Ports", select "USB" tab, enable USB 2.0 controller, click the plug with blue dot. THIS WILL CONNECT ALL NEW USB DEVICES TO YOUR VM. Run the VM now. You have your windows development environment now. Download PSoC creator into VM, install (typical works just fine), and continue.
+Linux with Virtualbox will probably work too - but not tested as I don't have any hardware running Linux and running virtualbox inside virtualbox is not something I plan to do anytime soon.
+
+Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator-integrated-design-environment-ide] - you actually can download without suffering akamai download manager. Typical install works just fine. v4.1 was used, though newer should work too.
+
 ## Bootloader
 * Open PSoC Creator
 * Open "CY8CKIT-059 Bootloader.cywrk" workspace
@@ -85,21 +91,18 @@ To load it into device, run FlightController, Config->Open, Config->Upload. BEWA
 
 ## Configuring thresholds
 
-Short version: 
+Short version (for beamspring, invert direction, so max->min and negative adjustments): 
 * Click "Key Monitor" button. 
 * Click "Start!". Get the idea of levels that should be there - press keys, observe readings going up and down. Small numbers below 7-segment indicators are min/avg/max.
 * Click "Stop!". Select "Max" into dropdown near the "reset" button, click "Reset", "Start!". 
-* Wait 15 seconds
-* click "Stop!". Click "Set LoThr.". Click "Set HiThr.". Close window.
-* Click "Thresholds" in the main window. Set LoGuard to 5, HiGuard to 10, put 5 into "Adjust Hi" spinbox, click "Adjust Hi", click "Apply". NOTE: if Low Threshold is higher than High Threshold - key is considered dead and will be ignored.
-* Close threshold editor using "X" (I'll add the "Close" button later). Select "Config -> Upload" in menu, "Command -> Commit".
+* Wait 15 seconds or longer, while readings stabilize.
+* click "Stop!". Click "Set thresholds". Close window.
+* Click "Thresholds" in the main window. put 5 into adjuster spinbox, click "Adjust", click "Apply".
+* Close threshold editor. Select "Config -> Upload" in menu. Test. Once you're satisfied with results, "Command -> Commit".
 
-
-Longer version: Threshold menu matrix cell is, top to bottom, "high threshold", "ignore key", "low threshold". 
-The idea is that only readings of [(LowThreshold-LoGuard) - LowThreshold] and [HiThreshold - (HiThreshold+HiGuard)] are accepted. Everything else is considered noise and filtered out.
-So set thresholds so that the band is reasonably centered on the average readout for the key.
-For the beamspring thresholds stay the same, but activation is when signal goes LOW, not high.
+Thresholds should be set ~2x higher than most of the matrix settles on. For beamspring - probably 75% of the highest reading.
+TEST SETTINGS BEFORE COMMITTING. It can be quite hard to get the keyboard back from the constantly spamming with keypresses! ("EMERGENCY STOP" button right after keyboard is connected helps)
 
 ## Configuring layouts
-pretty straightforward. If thresholds are configured, pressed keys will be highlighted white.
+pretty straightforward. If thresholds are configured, pressed keys will be highlighted by "yellow highlighter" color.
 Import and export will load and save to file. Structure is compatible with xwhatsit layout files.
