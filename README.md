@@ -90,6 +90,7 @@ With empty EEPROM, keyboard won't work. You need to initialize it. There are con
 To load it into device, run FlightController, Config->Open, Config->Upload. BEWARE, thresholds may be set absolutely wrong!
 
 ## Configuring thresholds
+!!!NOTE!!! If you see double presses on some keys - set threshold higher - just under the steady pressed state. Some keys have physical bounce and there are two peaks. Controller is too fast and sees this as 2 keypresses. Yes, there is debouncing - currently it's 4 readouts for the state transition to happen, which adds about 1.5ms lag. Could be made longer - look for DEBOUNCING in the scan.h
 
 Short version (for beamspring, invert direction, so max->min and negative adjustments): 
 * Click "Key Monitor" button. 

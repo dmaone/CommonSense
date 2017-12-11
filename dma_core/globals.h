@@ -35,7 +35,12 @@
 
 
 #undef DEBUG_STATE_MACHINE
+
+// ExpHdr0 used to signal interrupt start and end
 #undef DEBUG_INTERRUPTS
+
+// ExpHdr0 is set for 1us for keypress, 2us for release
+#undef DEBUG_SHOW_KEYPRESSES
 
 #define DEVICE_VER_MAJOR      0x00
 #define DEVICE_VER_MINOR      0x01

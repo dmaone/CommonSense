@@ -26,7 +26,6 @@ static uint8_t reading_row, driving_row;
 static bool scan_in_progress;
 static uint32_t matrix_status[MATRIX_ROWS];
 static bool matrix_was_active;
-static uint8_t keys_down;
 
 static uint8_t matrix[COMMONSENSE_MATRIX_SIZE];
 
@@ -115,16 +114,13 @@ static inline void append_scancode(uint8_t scancode)
 {
     if (status_register.emergency_stop)
         return;
+#ifdef DEBUG_SHOW_KEYPRESSES
     if((scancode & KEY_UP_MASK)) {
-        // FIXME last key sticks!
-        if (scancode != (KEY_UP_MASK & COMMONSENSE_NOKEY)) {
-            --keys_down;
-            PIN_DEBUG(1, 5)
-        }
-    } else {
-        ++keys_down;
         PIN_DEBUG(1, 1)
+    } else {
+        PIN_DEBUG(1, 2)
     }
+#endif
     scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
     scancode_buffer[scancode_buffer_writepos] = scancode;
 }
