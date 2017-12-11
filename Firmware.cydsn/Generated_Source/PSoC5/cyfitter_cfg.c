@@ -365,7 +365,7 @@ void cyfitter_cfg(void)
 
 	/* IOPINS0_2 Address: CYREG_PRT2_DR Size (bytes): 10 */
 	static const uint8 CYCODE BS_IOPINS0_2_VAL[] = {
-		0x04u, 0x00u, 0xF8u, 0xFCu, 0xF8u, 0x00u, 0x00u, 0xF8u, 0x00u, 0x00u};
+		0x04u, 0x00u, 0xF8u, 0xFEu, 0xFAu, 0x02u, 0x00u, 0xF8u, 0x00u, 0x00u};
 
 	/* IOPINS0_3 Address: CYREG_PRT3_DM0 Size (bytes): 8 */
 	static const uint8 CYCODE BS_IOPINS0_3_VAL[] = {

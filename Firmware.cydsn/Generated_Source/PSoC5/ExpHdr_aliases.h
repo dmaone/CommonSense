@@ -37,7 +37,10 @@
 #define ExpHdr_3			(ExpHdr__3__PC)
 #define ExpHdr_3_INTR	((uint16)((uint16)0x0001u << ExpHdr__3__SHIFT))
 
-#define ExpHdr_INTR_ALL	 ((uint16)(ExpHdr_0_INTR| ExpHdr_1_INTR| ExpHdr_2_INTR| ExpHdr_3_INTR))
+#define ExpHdr_4			(ExpHdr__4__PC)
+#define ExpHdr_4_INTR	((uint16)((uint16)0x0001u << ExpHdr__4__SHIFT))
+
+#define ExpHdr_INTR_ALL	 ((uint16)(ExpHdr_0_INTR| ExpHdr_1_INTR| ExpHdr_2_INTR| ExpHdr_3_INTR| ExpHdr_4_INTR))
 
 #endif /* End Pins ExpHdr_ALIASES_H */
 
