@@ -226,8 +226,8 @@ void ChargeDelay_RestoreConfig(void) ;
 /***************************************
 *         Initialization Values
 **************************************/
-#define ChargeDelay_INIT_PERIOD_VALUE          (45u)
-#define ChargeDelay_INIT_COMPARE_VALUE1        (18u)
+#define ChargeDelay_INIT_PERIOD_VALUE          (28u)
+#define ChargeDelay_INIT_COMPARE_VALUE1        (1u)
 #define ChargeDelay_INIT_COMPARE_VALUE2        (63u)
 #define ChargeDelay_INIT_INTERRUPTS_MODE       (uint8)(((uint8)(0u <<   \
                                                     ChargeDelay_STATUS_TC_INT_EN_MASK_SHIFT)) | \

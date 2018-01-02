@@ -226,8 +226,8 @@ void DischargeDelay_RestoreConfig(void) ;
 /***************************************
 *         Initialization Values
 **************************************/
-#define DischargeDelay_INIT_PERIOD_VALUE          (179u)
-#define DischargeDelay_INIT_COMPARE_VALUE1        (0u)
+#define DischargeDelay_INIT_PERIOD_VALUE          (180u)
+#define DischargeDelay_INIT_COMPARE_VALUE1        (1u)
 #define DischargeDelay_INIT_COMPARE_VALUE2        (63u)
 #define DischargeDelay_INIT_INTERRUPTS_MODE       (uint8)(((uint8)(0u <<   \
                                                     DischargeDelay_STATUS_TC_INT_EN_MASK_SHIFT)) | \
