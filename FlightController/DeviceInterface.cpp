@@ -37,14 +37,16 @@ bool DeviceInterface::event(QEvent *e) {
                         << (uint8_t)payload->at(3) << ", die temp "
                         << (payload->at(4) == 1 ? '+' : '-')
                         << (uint8_t)payload->at(5) << "C";
-      qInfo().nospace() << "Quenched: "
-                        << (bool)(payload->at(1) & (1 << C2DEVSTATUS_EMERGENCY))
-                        << ", Matrix monitoring: "
-                        << (bool)(payload->at(1) &
-                                  (1 << C2DEVSTATUS_MATRIX_OUTPUT))
-                        << ", setup mode: "
-                        << (bool)(payload->at(1) &
-                                  (1 << C2DEVSTATUS_SETUP_MODE));
+      qInfo().nospace() << "Scan: "
+          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED))
+          << ", Output: "
+          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED))
+          << ", Monitor: "
+          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR))
+          << ", setup mode: "
+          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE))
+          << ", insane? "
+          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_INSANE));
       return true;
     case C2RESPONSE_SCANCODE:
       if (!config->bValid) {

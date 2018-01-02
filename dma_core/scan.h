@@ -18,13 +18,16 @@
 #define SCANCODE_MASK 0x7f
 
 // mask N high bits (N < 8!)
-#define DEBOUNCING_MASK 0b11100000
+#define DEBOUNCING_MASK     0b00000000
 // Positive edge: zero, followed by ones. Mind the mask!
-#define DEBOUNCING_POSEDGE (0b00001111 | DEBOUNCING_MASK)
+#define DEBOUNCING_POSEDGE (0b01111111 | DEBOUNCING_MASK)
 // Negative edge: one, followed by zeroes. Mind the mask!
-#define DEBOUNCING_NEGEDGE (0b00010000 | DEBOUNCING_MASK)
+#define DEBOUNCING_NEGEDGE (0b10000000 | DEBOUNCING_MASK)
 
 #define ADC_RESOLUTION 12
+// number of ticks to check for spam after scan starts
+#define SANITY_CHECK_DURATION 1000
+#define SCANNER_INSANITY_THRESHOLD 3
 
 // This is to ease calculations, there are things hardcoded in buffer
 // management!! For 1 and 2 ADCs, that is.
@@ -68,4 +71,5 @@ uint8_t scancode_buffer_readpos;
 void scan_init(void);
 void scan_start(void);
 void scan_reset(void);
+void scan_sanity_check(void);
 void report_matrix_readouts(void);

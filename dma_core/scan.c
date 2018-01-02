@@ -28,8 +28,9 @@ static uint32_t matrix_status[MATRIX_ROWS];
 static bool matrix_was_active;
 
 static uint8_t matrix[COMMONSENSE_MATRIX_SIZE];
+uint8_t scancodes_while_output_disabled = 0;
 
-static void InitSensor(void) {
+static void init_sensor(void) {
   // Init DMA, each burst requires a request
   Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
                      (uint16)(HI16(CYDEV_SRAM_BASE)));
@@ -106,7 +107,7 @@ static void ResultBufferSetup(void) {
   CyDmaChEnable(FinalBuf_DmaHandle, 1);
 }
 
-static void EnableSensor(void) {
+static void enable_sensor(void) {
   BufferSetup(Buf0_DmaHandle, &Buf0TD, Buf0__TD_TERMOUT_EN,
               (uint32)ADC0_ADC_SAR__WRK0, (uint32)BufMem);
 #if NUM_ADCs > 1
@@ -135,8 +136,13 @@ static inline void Drive(uint8 drv) {
 }
 
 static inline void append_scancode(uint8_t scancode) {
-  if (status_register.emergency_stop)
+  if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
+    if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
+      // Avoid overflowing counter! Things can get ugly FAST!
+      ++scancodes_while_output_disabled;
+    }
     return;
+  }
 #ifdef DEBUG_SHOW_KEYPRESSES
   if ((scancode & KEY_UP_MASK)) {
     PIN_DEBUG(1, 1)
@@ -162,9 +168,10 @@ CY_ISR(EoC_ISR) {
   CyDmaChSetRequest(FinalBuf_DmaHandle, CY_DMA_CPU_REQ);
   uint8_t enableInterrupts = CyEnterCriticalSection();
   reading_row = driving_row;
-  if (driving_row == 0) {
+  if (0 == driving_row) {
     // End of the scan pass. Loop if full throttle, otherwise stop.
-    if (power_state != DEVSTATE_FULL_THROTTLE) {
+    if (power_state != DEVSTATE_FULL_THROTTLE
+        || 0 == TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
       scan_in_progress = false;
       goto EoC_final; // Important - otherwise interrupts are left disabled!
     }
@@ -196,7 +203,7 @@ CY_ISR(Result_ISR) {
   for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
     adc_buffer_pos -= 4;
 
-    if (status_register.matrix_output) {
+    if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
       // When monitoring matrix we're interested in raw feed.
       matrix[--keyIndex] = Results[adc_buffer_pos];
       continue;
@@ -238,6 +245,10 @@ CY_ISR(Result_ISR) {
 }
 
 void scan_start(void) {
+  sanity_check_timer = SANITY_CHECK_DURATION;
+  scancodes_while_output_disabled = 0;
+  SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
+  CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   if (!scan_in_progress) {
     driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
     Drive(driving_row);
@@ -262,9 +273,35 @@ void scan_reset(void) {
 }
 
 void scan_init(void) {
-  InitSensor();
-  EnableSensor();
+  /* What I'm doing here:
+   * All status values are invalid when scan is reinitialized.
+   * BUT
+   * I don't want to fuck up the setup mode if we're in setup mode. SO.
+   */
+  status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
+  uint8_t enableInterrupts = CyEnterCriticalSection();
+  // cause "end of scan loop" condition.
+  // We don't care about ResultISR - it doesn't trigger any events.
+  driving_row = 0;
+  CyExitCriticalSection(enableInterrupts);
+  while (scan_in_progress) {}; // Make sure scan is stopped.
+  init_sensor();
+  enable_sensor();
 }
+
+void scan_sanity_check(void) {
+  --sanity_check_timer;
+  if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
+    // Keyboard is insane. Disable it.
+    status_register &= (1 << C2DEVSTATUS_SETUP_MODE); // Keep setup mode.
+    SET_BIT(status_register, C2DEVSTATUS_INSANE);
+    xprintf("Scan module has gone insane and had to be shot!");
+    sanity_check_timer = 0;
+  } else if (0 == sanity_check_timer) {
+    SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
+  }
+}
+
 
 void report_matrix_readouts(void) {
   uint8_t idx = 0;

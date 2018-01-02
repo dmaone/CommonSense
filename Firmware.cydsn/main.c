@@ -29,9 +29,8 @@ int main() {
 
   load_config();
 
-  status_register.matrix_output = 0;
-  status_register.emergency_stop = 0;
-  status_register.setup_mode = NOT_A_KEYBOARD;
+  status_register = 0;
+  FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, NOT_A_KEYBOARD);
   usb_init();
   scan_init();
   apply_config();
@@ -45,6 +44,14 @@ int main() {
       if (tick) {
         exp_tick(tick);
         tick = 0;
+        if (sanity_check_timer > 0) {
+          scan_sanity_check();
+          if (0 == sanity_check_timer) {
+            OUT_c2packet_t inbox;
+            inbox.command = C2CMD_GET_STATUS;
+            process_msg(&inbox);
+          }
+        }
         if (0u != USB_IsConfigurationChanged()) {
           usb_configure();
         }
@@ -64,9 +71,11 @@ int main() {
           exp_setLEDs(led_status);
         }
         CyExitCriticalSection(enableInterrupts);
-        if (status_register.matrix_output > 0)
+        if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
           report_matrix_readouts();
-        pipeline_process();
+        } else if (TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
+          pipeline_process();
+        }
       }
       // Timer ISR will wake us up.
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);

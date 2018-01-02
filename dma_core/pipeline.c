@@ -159,7 +159,7 @@ inline void process_real_key(void) {
     }
     return;
   }
-  if (status_register.setup_mode) {
+  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
     outbox.response_type = C2RESPONSE_SCANCODE;
     outbox.payload[0] = sc;
     usb_send_c2();

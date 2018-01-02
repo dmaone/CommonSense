@@ -6,10 +6,10 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "exp.h"
-#include "globals.h"
 #include <project.h>
 #include <stdio.h>
+#include "exp.h"
+#include "globals.h"
 
 #include "PSoC_USB.h"
 
@@ -21,10 +21,7 @@ CY_ISR_PROTO(Suspend_ISR);
 void report_status(void) {
   memset(outbox.raw, 0, sizeof(outbox));
   outbox.response_type = C2RESPONSE_STATUS;
-  outbox.payload[0] =
-      (status_register.emergency_stop << C2DEVSTATUS_EMERGENCY) |
-      (status_register.matrix_output << C2DEVSTATUS_MATRIX_OUTPUT) |
-      (status_register.setup_mode << C2DEVSTATUS_SETUP_MODE);
+  outbox.payload[0] = status_register;
   outbox.payload[1] = DEVICE_VER_MAJOR;
   outbox.payload[2] = DEVICE_VER_MINOR;
   EEPROM_UpdateTemperature();
@@ -34,6 +31,16 @@ void report_status(void) {
   xprintf("time: %d", systime);
   // xprintf("LED status: %d %d %d %d %d", led_status&0x01, led_status&0x02,
   // led_status&0x04, led_status&0x08, led_status&0x10);
+}
+
+void process_ewo(OUT_c2packet_t *inbox) {
+  status_register = inbox->payload[0];
+  xprintf("EWO signal received: %d", inbox->payload[0]);
+  bool run = TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
+  scan_init();
+  if (run) {
+    scan_start();
+  }
 }
 
 void receive_config_block(OUT_c2packet_t *inbox) {
@@ -57,7 +64,7 @@ void send_config_block(OUT_c2packet_t *inbox) {
 }
 
 void set_hardware_parameters(void) {
-  config.capsenseFlags = FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
+  FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
   config.matrixRows = MATRIX_ROWS;
   config.matrixCols = MATRIX_COLS;
   config.matrixLayers = MATRIX_LAYERS;
@@ -80,14 +87,16 @@ void load_config(void) {
   set_hardware_parameters();
   if (config.configVersion != CS_CONFIG_VERSION) {
     // Unexpected config version - not sure calibration data are there!
-    config.capsenseFlags = FORCE_BIT(config.capsenseFlags, CSF_OE, 0);
-    status_register.emergency_stop = true;
+    CLEAR_BIT(config.capsenseFlags, CSF_OE);
+    CLEAR_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
   }
 }
 
 void apply_config(void) {
   exp_init();
   pipeline_init(); // calls scan_reset
+  scan_init();
+  scan_start();
 }
 
 void save_config(void) {
@@ -110,15 +119,13 @@ void process_msg(OUT_c2packet_t *inbox) {
   memset(outbox.raw, 0x00, sizeof(outbox));
   switch (inbox->command) {
   case C2CMD_EWO:
-    status_register.emergency_stop = inbox->payload[0];
-    xprintf("EWO signal received: %d", inbox->payload[0]);
-    scan_reset();
+    process_ewo(inbox);
     break;
   case C2CMD_GET_STATUS:
     report_status();
     break;
   case C2CMD_SET_MODE:
-    status_register.setup_mode = inbox->payload[0];
+    FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, inbox->payload[0]);
     report_status();
     break;
   case C2CMD_ENTER_BOOTLOADER:
@@ -142,7 +149,7 @@ void process_msg(OUT_c2packet_t *inbox) {
     xprintf("Resetting..");
     CySoftwareReset(); // Does not return, no need for break.
   case C2CMD_GET_MATRIX_STATE:
-    status_register.matrix_output = inbox->payload[0];
+    FORCE_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR, inbox->payload[0]);
     scan_reset();
     break;
   default:
