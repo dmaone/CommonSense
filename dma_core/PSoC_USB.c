@@ -28,7 +28,7 @@ void report_status(void) {
   outbox.payload[3] = dieTemperature[0];
   outbox.payload[4] = dieTemperature[1];
   usb_send_c2();
-  xprintf("time: %d", systime);
+  // xprintf("time: %d", systime);
   // xprintf("LED status: %d %d %d %d %d", led_status&0x01, led_status&0x02,
   // led_status&0x04, led_status&0x08, led_status&0x10);
 }

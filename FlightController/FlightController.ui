@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>606</width>
-    <height>436</height>
+    <height>460</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -184,7 +184,6 @@ STOP</string>
     <bool>false</bool>
    </attribute>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <widget class="QMenuBar" name="menuBar">
    <property name="geometry">
     <rect>
@@ -236,6 +235,7 @@ STOP</string>
    <addaction name="menu_Window"/>
    <addaction name="menuCommands"/>
   </widget>
+  <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Open">
    <property name="text">
     <string>&amp;Open</string>

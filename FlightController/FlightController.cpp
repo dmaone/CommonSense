@@ -113,7 +113,74 @@ void FlightController::setup(void) {
   connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)),
           this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
   lockUI(true);
+  _statusDisplay[StatusPosition::Version] = new QLabel(" v-.- ");
+  _statusDisplay[StatusPosition::Scan] = new QLabel(" scan ");
+  _statusDisplay[StatusPosition::Output] = new QLabel(" kbd ");
+  _statusDisplay[StatusPosition::Setup] = new QLabel(" setup ");
+  _statusDisplay[StatusPosition::Monitor] = new QLabel(" mon ");
+  _statusDisplay[StatusPosition::Insane] = new QLabel(" !!! ");
+  for (size_t i=0; i < StatusPositionMax; i++) {
+    ui->statusBar->addPermanentWidget(_statusDisplay[i]);
+  }
   di.start();
+  di.installEventFilter(this);
+  startTimer(1000);
+}
+
+void FlightController::timerEvent(QTimerEvent *) {
+  if (!_uiLocked) {
+    emit sendCommand(C2CMD_GET_STATUS, 1);
+  }
+}
+
+bool FlightController::eventFilter(QObject *obj __attribute__((unused)),
+                                QEvent *event) {
+  if (event->type() == DeviceMessage::ET) {
+    QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
+    if (pl->at(0) != C2RESPONSE_STATUS) {
+      return false;
+    }
+    _statusDisplay[StatusPosition::Version]
+        ->setText(
+          QString("v%1.%2").arg((uint8_t)pl->at(2)).arg((uint8_t)pl->at(3)));
+    if (pl->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED)) {
+      _statusDisplay[StatusPosition::Scan]
+          ->setStyleSheet("color: #000000; background-color: #00ff00");
+    } else {
+      _statusDisplay[StatusPosition::Scan]
+          ->setStyleSheet("color: #999999; background-color: #cccccc");
+    }
+    if (pl->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED)) {
+      _statusDisplay[StatusPosition::Output]
+          ->setStyleSheet("color: #000000; background-color: #00ff00");
+    } else {
+      _statusDisplay[StatusPosition::Output]
+          ->setStyleSheet("color: #999999; background-color: #cccccc");
+    }
+    if (pl->at(1) & (1 << C2DEVSTATUS_SETUP_MODE)) {
+      _statusDisplay[StatusPosition::Setup]
+          ->setStyleSheet("color: #000000; background-color: #ffff00");
+    } else {
+      _statusDisplay[StatusPosition::Setup]
+          ->setStyleSheet("color: #999999; background-color: #cccccc");
+    }
+    if (pl->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR)) {
+      _statusDisplay[StatusPosition::Monitor]
+          ->setStyleSheet("color: #000000; background-color: #ffff00");
+    } else {
+      _statusDisplay[StatusPosition::Monitor]
+          ->setStyleSheet("color: #999999; background-color: #cccccc");
+    }
+    if (pl->at(1) & (1 << C2DEVSTATUS_INSANE)) {
+      _statusDisplay[StatusPosition::Insane]
+          ->setStyleSheet("color: #000000; background-color: #ff0000");
+    } else {
+      _statusDisplay[StatusPosition::Insane]
+          ->setStyleSheet("color: #999999; background-color: #cccccc");
+    }
+    return true;
+  }
+  return false;
 }
 
 void FlightController::show(void) { QMainWindow::show(); }
@@ -180,6 +247,7 @@ void FlightController::deviceStatusNotification(
 }
 
 void FlightController::lockUI(bool lock) {
+  _uiLocked = lock;
   ui->statusRequestButton->setDisabled(lock);
   ui->MatrixMonitorButton->setDisabled(lock);
   ui->thresholdsButton->setDisabled(lock);

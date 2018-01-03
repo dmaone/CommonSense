@@ -27,7 +27,7 @@ class FlightController;
 
 class FlightController : public QMainWindow {
   Q_OBJECT
-  Q_ENUMS(CowValidationStatus)
+  Q_ENUMS(StatusPosition)
 
 public:
   explicit FlightController(QWidget *parent = 0);
@@ -35,8 +35,18 @@ public:
   void setup(void);
   void show(void);
   LogViewer *getLogViewport(void);
+  enum StatusPosition {
+    Version,
+    Scan,
+    Output,
+    Setup,
+    Monitor,
+    Insane,
+    StatusPositionMax
+  };
   void setOldLogger(QtMessageHandler *logger);
   void logToViewport(const QString &);
+  bool eventFilter(QObject *obj __attribute__((unused)), QEvent *event);
 
 signals:
   void sendCommand(c2command cmd, uint8_t msg);
@@ -54,6 +64,7 @@ public slots:
 
 protected:
   void closeEvent(QCloseEvent *);
+  virtual void timerEvent(QTimerEvent *);
 
 private:
   Ui::FlightController *ui;
@@ -65,7 +76,10 @@ private:
   ExpansionHeader *_expHeader;
   FirmwareLoader *loader;
   QtMessageHandler *_oldLogger;
+  std::array<QLabel*, StatusPositionMax> _statusDisplay;
+  bool _uiLocked = false;
   void lockUI(bool lock);
+  void resetTimer(int interval);
 
 private slots:
   void on_action_Setup_mode_triggered(bool bMode);
