@@ -279,11 +279,6 @@ void scan_init(void) {
    * I don't want to fuck up the setup mode if we're in setup mode. SO.
    */
   status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
-  uint8_t enableInterrupts = CyEnterCriticalSection();
-  // cause "end of scan loop" condition.
-  // We don't care about ResultISR - it doesn't trigger any events.
-  driving_row = 0;
-  CyExitCriticalSection(enableInterrupts);
   while (scan_in_progress) {}; // Make sure scan is stopped.
   init_sensor();
   enable_sensor();

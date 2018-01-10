@@ -19,9 +19,37 @@ DeviceInterface::DeviceInterface(QObject *parent)
 
   connect(config, SIGNAL(sendCommand(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
+  _resetStatusTimer(500);
 }
 
 DeviceInterface::~DeviceInterface(void) { _releaseDevice(); }
+
+void DeviceInterface::processStatusReply(QByteArray* payload) {
+  receivedStatus_ = payload->at(1);
+  scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
+  outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
+  setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
+  matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR);
+  controllerInsane = payload->at(1) & (1 << C2DEVSTATUS_INSANE);
+  firmwareVersion = QString("v%1.%2")
+      .arg((uint8_t)payload->at(2)).arg((uint8_t)payload->at(3));
+  if (matrixMonitor) {
+    setupMode = false;
+  }
+  emit deviceStatusNotification(StatusUpdated);
+  if (!printableStatus) {
+    return;
+  }
+  printableStatus = false;
+  qInfo().nospace().noquote() << "CommonSense " << firmwareVersion
+                    << ", die temp " << (payload->at(4) == 1 ? '+' : '-')
+                    << (uint8_t)payload->at(5) << "C";
+  qInfo().nospace() << "Scan: " << scanEnabled
+      << ", Output: " << outputEnabled
+      << ", Monitor: " << matrixMonitor
+      << ", setup mode: " << setupMode
+      << ", insane? " << controllerInsane;
+}
 
 /**
  * This is the handler of last resort for messages from device.
@@ -33,20 +61,7 @@ bool DeviceInterface::event(QEvent *e) {
     QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
     switch (payload->at(0)) {
     case C2RESPONSE_STATUS:
-      qInfo().nospace() << "CommonSense v" << (uint8_t)payload->at(2) << "."
-                        << (uint8_t)payload->at(3) << ", die temp "
-                        << (payload->at(4) == 1 ? '+' : '-')
-                        << (uint8_t)payload->at(5) << "C";
-      qInfo().nospace() << "Scan: "
-          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED))
-          << ", Output: "
-          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED))
-          << ", Monitor: "
-          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR))
-          << ", setup mode: "
-          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE))
-          << ", insane? "
-          << (bool)(payload->at(1) & (1 << C2DEVSTATUS_INSANE));
+      processStatusReply(payload);
       return true;
     case C2RESPONSE_SCANCODE:
       if (!config->bValid) {
@@ -140,13 +155,36 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
   _releaseDevice();
 }
 
+void DeviceInterface::flipStatusBit(deviceStatus bit) {
+  auto newStatus = receivedStatus_;
+  auto old_value = newStatus & (1 << bit);
+  newStatus &= ~(1 << bit);
+  if (!old_value) {
+    newStatus += (1 << bit);
+  }
+  sendCommand(C2CMD_EWO, newStatus);
+}
+
 void DeviceInterface::_resetTimer(int interval) {
   if (pollTimerId)
     killTimer(pollTimerId);
   pollTimerId = startTimer(interval);
 }
 
-void DeviceInterface::timerEvent(QTimerEvent *) {
+void DeviceInterface::_resetStatusTimer(int interval) {
+  if (statusTimerId)
+    killTimer(statusTimerId);
+  statusTimerId = startTimer(interval);
+}
+
+
+void DeviceInterface::timerEvent(QTimerEvent * timer) {
+  if (timer->timerId() == statusTimerId) {
+    if (currentStatus == DeviceConnected) {
+        emit sendCommand(C2CMD_GET_STATUS, 1);
+    }
+    return;
+  }
   if (!device)
     return _initDevice();
 

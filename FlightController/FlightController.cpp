@@ -110,77 +110,52 @@ void FlightController::setup(void) {
           SLOT(rollback()));
   connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
           SLOT(sendCommand(c2command, uint8_t)));
+  connect(this, SIGNAL(flipStatusBit(deviceStatus)), &di,
+          SLOT(flipStatusBit(deviceStatus)));
   connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)),
           this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
   lockUI(true);
-  _statusDisplay[StatusPosition::Version] = new QLabel(" v-.- ");
-  _statusDisplay[StatusPosition::Scan] = new QLabel(" scan ");
-  _statusDisplay[StatusPosition::Output] = new QLabel(" kbd ");
-  _statusDisplay[StatusPosition::Setup] = new QLabel(" setup ");
-  _statusDisplay[StatusPosition::Monitor] = new QLabel(" mon ");
-  _statusDisplay[StatusPosition::Insane] = new QLabel(" !!! ");
-  for (size_t i=0; i < StatusPositionMax; i++) {
-    ui->statusBar->addPermanentWidget(_statusDisplay[i]);
-  }
   di.start();
-  di.installEventFilter(this);
-  startTimer(1000);
 }
 
-void FlightController::timerEvent(QTimerEvent *) {
-  if (!_uiLocked) {
-    emit sendCommand(C2CMD_GET_STATUS, 1);
+void FlightController::updateStatus(void) {
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  ui->versionLabel->setText(di.firmwareVersion);
+  if (di.scanEnabled) {
+    ui->scanButton
+        ->setStyleSheet("color: #000000; background-color: #00ff00");
+  } else {
+    ui->scanButton
+        ->setStyleSheet("color: #999999; background-color: #cccccc");
   }
-}
-
-bool FlightController::eventFilter(QObject *obj __attribute__((unused)),
-                                QEvent *event) {
-  if (event->type() == DeviceMessage::ET) {
-    QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-    if (pl->at(0) != C2RESPONSE_STATUS) {
-      return false;
-    }
-    _statusDisplay[StatusPosition::Version]
-        ->setText(
-          QString("v%1.%2").arg((uint8_t)pl->at(2)).arg((uint8_t)pl->at(3)));
-    if (pl->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED)) {
-      _statusDisplay[StatusPosition::Scan]
-          ->setStyleSheet("color: #000000; background-color: #00ff00");
-    } else {
-      _statusDisplay[StatusPosition::Scan]
-          ->setStyleSheet("color: #999999; background-color: #cccccc");
-    }
-    if (pl->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED)) {
-      _statusDisplay[StatusPosition::Output]
-          ->setStyleSheet("color: #000000; background-color: #00ff00");
-    } else {
-      _statusDisplay[StatusPosition::Output]
-          ->setStyleSheet("color: #999999; background-color: #cccccc");
-    }
-    if (pl->at(1) & (1 << C2DEVSTATUS_SETUP_MODE)) {
-      _statusDisplay[StatusPosition::Setup]
-          ->setStyleSheet("color: #000000; background-color: #ffff00");
-    } else {
-      _statusDisplay[StatusPosition::Setup]
-          ->setStyleSheet("color: #999999; background-color: #cccccc");
-    }
-    if (pl->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR)) {
-      _statusDisplay[StatusPosition::Monitor]
-          ->setStyleSheet("color: #000000; background-color: #ffff00");
-    } else {
-      _statusDisplay[StatusPosition::Monitor]
-          ->setStyleSheet("color: #999999; background-color: #cccccc");
-    }
-    if (pl->at(1) & (1 << C2DEVSTATUS_INSANE)) {
-      _statusDisplay[StatusPosition::Insane]
-          ->setStyleSheet("color: #000000; background-color: #ff0000");
-    } else {
-      _statusDisplay[StatusPosition::Insane]
-          ->setStyleSheet("color: #999999; background-color: #cccccc");
-    }
-    return true;
+  if (di.outputEnabled) {
+    ui->outputButton
+        ->setStyleSheet("color: #000000; background-color: #00ff00");
+  } else {
+    ui->outputButton
+        ->setStyleSheet("color: #999999; background-color: #cccccc");
   }
-  return false;
+  if (di.setupMode) {
+    ui->setupButton
+        ->setStyleSheet("color: #000000; background-color: #ffff00");
+  } else {
+      ui->setupButton
+        ->setStyleSheet("color: #999999; background-color: #cccccc");
+  }
+  if (di.matrixMonitor) {
+    ui->monitorLabel
+        ->setStyleSheet("color: #000000; background-color: #ffff00");
+  } else {
+      ui->monitorLabel
+        ->setStyleSheet("color: #999999; background-color: #cccccc");
+  }
+  if (di.controllerInsane) {
+    ui->insaneLabel
+        ->setStyleSheet("color: #000000; background-color: #ff0000");
+  } else {
+      ui->insaneLabel
+        ->setStyleSheet("color: #999999; background-color: #cccccc");
+  }
 }
 
 void FlightController::show(void) { QMainWindow::show(); }
@@ -218,17 +193,19 @@ void FlightController::redButtonToggle(bool state) {
 }
 
 void FlightController::statusRequestButtonClick(void) {
-  emit sendCommand(C2CMD_GET_STATUS, 0);
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  di.printableStatus = true;
 }
 
 void FlightController::deviceStatusNotification(
     DeviceInterface::DeviceStatus s) {
-  lockUI(true);
   switch (s) {
   case DeviceInterface::DeviceConnected:
+    lockUI(true);
     emit ui->action_Download->triggered();
     break;
   case DeviceInterface::DeviceDisconnected:
+    lockUI(true);
     break;
   case DeviceInterface::DeviceConfigChanged:
     emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
@@ -239,7 +216,11 @@ void FlightController::deviceStatusNotification(
     lockUI(false);
     break;
   case DeviceInterface::BootloaderConnected:
+    lockUI(true);
     loader->load();
+    break;
+  case DeviceInterface::StatusUpdated:
+    updateStatus();
     break;
   default:
     qCritical() << "Unknown device status" << s << "!";
@@ -274,3 +255,15 @@ void FlightController::on_action_Setup_mode_triggered(bool bMode) {
 void FlightController::editDelays() { _delays->show(); }
 
 void FlightController::editExpHeader() { _expHeader->show(); }
+
+void FlightController::on_scanButton_clicked() {
+  emit flipStatusBit(C2DEVSTATUS_SCAN_ENABLED);
+}
+
+void FlightController::on_outputButton_clicked() {
+  emit flipStatusBit(C2DEVSTATUS_OUTPUT_ENABLED);
+}
+
+void FlightController::on_setupButton_clicked() {
+  emit flipStatusBit(C2DEVSTATUS_SETUP_MODE);
+}

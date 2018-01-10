@@ -165,14 +165,97 @@ STOP</string>
      </layout>
     </item>
     <item>
-     <widget class="LogViewer" name="LogViewport">
-      <property name="lineWrapMode">
-       <enum>QPlainTextEdit::NoWrap</enum>
+     <layout class="QGridLayout" name="gridLayout_5">
+      <property name="spacing">
+       <number>0</number>
       </property>
-      <property name="readOnly">
-       <bool>true</bool>
-      </property>
-     </widget>
+      <item row="0" column="1">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+      <item row="0" column="0">
+       <widget class="QLabel" name="versionLabel">
+        <property name="text">
+         <string>v-.-</string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="6">
+       <widget class="QLabel" name="insaneLabel">
+        <property name="text">
+         <string> UNSAFE </string>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="2">
+       <widget class="QToolButton" name="scanButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Scan</string>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="4">
+       <widget class="QToolButton" name="setupButton">
+        <property name="text">
+         <string>Setup</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="5">
+       <widget class="QLabel" name="monitorLabel">
+        <property name="text">
+         <string>  Monitor  </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="0" colspan="7">
+       <widget class="LogViewer" name="LogViewport">
+        <property name="lineWrapMode">
+         <enum>QPlainTextEdit::NoWrap</enum>
+        </property>
+        <property name="readOnly">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="3">
+       <widget class="QToolButton" name="outputButton">
+        <property name="text">
+         <string>Output</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+     </layout>
     </item>
    </layout>
   </widget>
@@ -235,7 +318,6 @@ STOP</string>
    <addaction name="menu_Window"/>
    <addaction name="menuCommands"/>
   </widget>
-  <widget class="QStatusBar" name="statusBar"/>
   <action name="action_Open">
    <property name="text">
     <string>&amp;Open</string>

@@ -32,16 +32,25 @@ public:
     DeviceConnected,
     DeviceDisconnected,
     DeviceConfigChanged,
-    BootloaderConnected
+    BootloaderConnected,
+    StatusUpdated
   };
   enum KeyStatus { KeyPressed, KeyReleased };
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
+  bool scanEnabled;
+  bool outputEnabled;
+  bool setupMode;
+  bool matrixMonitor;
+  bool controllerInsane;
+  bool printableStatus;
+  QString firmwareVersion;
 
 public slots:
   void sendCommand(c2command, uint8_t *);
   void sendCommand(c2command, uint8_t);
   void sendCommand(OUT_c2packet_t);
   void sendCommand(Bootloader_packet_t *);
+  void flipStatusBit(deviceStatus bit);
   void configChanged(void);
   void bootloaderMode(bool bEnable);
 
@@ -56,16 +65,20 @@ protected:
 private:
   hid_device *device;
   int pollTimerId;
+  int statusTimerId;
   unsigned char outbox[65];
   unsigned char bytesFromDevice[65];
   device_status_t status;
   uint8_t mode;
   DeviceStatus currentStatus;
+  uint8_t receivedStatus_;
 
+  void processStatusReply(QByteArray* payload);
   hid_device *acquireDevice(void);
   void _releaseDevice(void);
   void _initDevice(void);
   void _resetTimer(int interval);
+  void _resetStatusTimer(int interval);
   void _sendPacket(void);
   void _updateDeviceStatus(DeviceStatus);
 

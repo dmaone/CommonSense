@@ -35,10 +35,8 @@ void report_status(void) {
 
 void process_ewo(OUT_c2packet_t *inbox) {
   status_register = inbox->payload[0];
-  xprintf("EWO signal received: %d", inbox->payload[0]);
-  bool run = TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  scan_init();
-  if (run) {
+  //xprintf("EWO signal received: %d", inbox->payload[0]);
+  if (TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
     scan_start();
   }
 }

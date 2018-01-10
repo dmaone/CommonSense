@@ -35,21 +35,12 @@ public:
   void setup(void);
   void show(void);
   LogViewer *getLogViewport(void);
-  enum StatusPosition {
-    Version,
-    Scan,
-    Output,
-    Setup,
-    Monitor,
-    Insane,
-    StatusPositionMax
-  };
   void setOldLogger(QtMessageHandler *logger);
   void logToViewport(const QString &);
-  bool eventFilter(QObject *obj __attribute__((unused)), QEvent *event);
 
 signals:
   void sendCommand(c2command cmd, uint8_t msg);
+  void flipStatusBit(deviceStatus bit);
 
 public slots:
   void redButtonToggle(bool);
@@ -64,7 +55,6 @@ public slots:
 
 protected:
   void closeEvent(QCloseEvent *);
-  virtual void timerEvent(QTimerEvent *);
 
 private:
   Ui::FlightController *ui;
@@ -76,13 +66,15 @@ private:
   ExpansionHeader *_expHeader;
   FirmwareLoader *loader;
   QtMessageHandler *_oldLogger;
-  std::array<QLabel*, StatusPositionMax> _statusDisplay;
   bool _uiLocked = false;
   void lockUI(bool lock);
-  void resetTimer(int interval);
+  void updateStatus(void);
 
 private slots:
   void on_action_Setup_mode_triggered(bool bMode);
+  void on_scanButton_clicked(void);
+  void on_outputButton_clicked(void);
+  void on_setupButton_clicked(void);
   void editDelays(void);
   void editExpHeader(void);
 };
