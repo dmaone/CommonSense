@@ -137,7 +137,7 @@ STOP</string>
       <item row="16" column="0">
        <widget class="QPushButton" name="expButton">
         <property name="text">
-         <string>Exp. Header</string>
+         <string>Hardware</string>
         </property>
        </widget>
       </item>

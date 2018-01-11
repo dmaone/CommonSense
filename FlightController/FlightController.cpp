@@ -41,7 +41,7 @@ FlightController::FlightController(QWidget *parent)
 
   _delays = new Delays(di.config);
 
-  _expHeader = new ExpansionHeader(di.config);
+  _hardware = new Hardware(di.config);
 
   // Must be last in chain to intercept all packets!
   loader = new FirmwareLoader();
@@ -212,7 +212,7 @@ void FlightController::deviceStatusNotification(
     ui->action_Setup_mode->setChecked(true);
     layerConditions->init();
     _delays->init();
-    _expHeader->init();
+    _hardware->init();
     lockUI(false);
     break;
   case DeviceInterface::BootloaderConnected:
@@ -254,7 +254,7 @@ void FlightController::on_action_Setup_mode_triggered(bool bMode) {
 
 void FlightController::editDelays() { _delays->show(); }
 
-void FlightController::editExpHeader() { _expHeader->show(); }
+void FlightController::editExpHeader() { _hardware->show(); }
 
 void FlightController::on_scanButton_clicked() {
   emit flipStatusBit(C2DEVSTATUS_SCAN_ENABLED);

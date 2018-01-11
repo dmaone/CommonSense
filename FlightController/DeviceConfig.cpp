@@ -273,17 +273,22 @@ void DeviceConfig::setDelay(int delayIdx, uint16_t delay_ms) {
   _eeprom.delayLib[delayIdx] = delay_ms;
 }
 
-std::vector<uint8_t> DeviceConfig::expHeaderParams(void) {
-  std::vector<uint8_t> retval;
-  retval.push_back(_eeprom.expMode);
-  retval.push_back(_eeprom.expParam1);
-  retval.push_back(_eeprom.expParam2);
+HardwareConfig DeviceConfig::getHardwareConfig(void) {
+  HardwareConfig retval;
+  retval.adcBits = _eeprom.adcBits;
+  retval.chargeDelay = _eeprom.chargeDelay;
+  retval.dischargeDelay = _eeprom.dischargeDelay;
+  retval.expHdrMode = _eeprom.expMode;
+  retval.expHdrParam1 = _eeprom.expParam1;
+  retval.expHdrParam2 = _eeprom.expParam2;
   return retval;
 }
 
-void DeviceConfig::setExpHeaderParams(uint8_t mode, uint8_t param1,
-                                      uint8_t param2) {
-  _eeprom.expMode = mode;
-  _eeprom.expParam1 = param1;
-  _eeprom.expParam2 = param2;
+void DeviceConfig::setHardwareConfig(HardwareConfig config) {
+  _eeprom.adcBits = config.adcBits;
+  _eeprom.chargeDelay = config.chargeDelay;
+  _eeprom.dischargeDelay = config.dischargeDelay;
+  _eeprom.expMode = config.expHdrMode;
+  _eeprom.expParam1 = config.expHdrParam1;
+  _eeprom.expParam2 = config.expHdrParam2;
 }

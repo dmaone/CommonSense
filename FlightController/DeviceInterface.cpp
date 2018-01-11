@@ -6,7 +6,7 @@
 #include <string>
 
 DeviceInterface::DeviceInterface(QObject *parent)
-    : QObject(parent), device(NULL), pollTimerId(0),
+    : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
       mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected) {
   config = new DeviceConfig();
   installEventFilter(config);

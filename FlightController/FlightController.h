@@ -14,7 +14,7 @@
 
 #include "Delays.h"
 #include "DeviceInterface.h"
-#include "ExpansionHeader.h"
+#include "Hardware.h"
 #include "FirmwareLoader.h"
 #include "LayerConditions.h"
 #include "LayoutEditor.h"
@@ -63,7 +63,7 @@ private:
   ThresholdEditor *thresholdEditor;
   LayerConditions *layerConditions;
   Delays *_delays;
-  ExpansionHeader *_expHeader;
+  Hardware *_hardware;
   FirmwareLoader *loader;
   QtMessageHandler *_oldLogger;
   bool _uiLocked = false;

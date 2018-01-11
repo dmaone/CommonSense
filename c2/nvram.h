@@ -37,7 +37,10 @@ typedef union {
     uint8_t expMode;
     uint8_t expParam1;
     uint8_t expParam2;
-    uint8_t _RESERVED0[8];
+    uint8_t adcBits;
+    uint8_t chargeDelay;
+    uint16_t dischargeDelay;
+    uint8_t _RESERVED0[4];
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
     uint8_t layerConditions[NUM_LAYER_CONDITIONS];
     uint8_t _RESERVED1[8];

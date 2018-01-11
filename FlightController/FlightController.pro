@@ -41,7 +41,7 @@ SOURCES += main.cpp \
     CyACD.cpp \
     LayerCondition.cpp \
     Delays.cpp \
-    ExpansionHeader.cpp
+    Hardware.cpp
 
 HEADERS  += \
     ../c2/c2_protocol.h \
@@ -63,13 +63,13 @@ HEADERS  += \
     CyACD.h \
     LayerCondition.h \
     Delays.h \
-    ExpansionHeader.h
+    Hardware.h
 
 FORMS    += \
     FlightController.ui \
     MatrixMonitor.ui \
     LayoutEditor.ui \
     ThresholdEditor.ui \
-    ExpansionHeader.ui
+    Hardware.ui
 
 DISTFILES +=

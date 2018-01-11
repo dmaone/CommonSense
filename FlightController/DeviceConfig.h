@@ -6,6 +6,15 @@
 #include "LayerCondition.h"
 #include <QObject>
 
+struct HardwareConfig {
+  uint8_t adcBits;
+  uint8_t chargeDelay;
+  uint16_t dischargeDelay;
+  uint8_t expHdrMode;
+  uint8_t expHdrParam1;
+  uint8_t expHdrParam2;
+};
+
 class DeviceConfig : public QObject {
   Q_OBJECT
   Q_ENUMS(TransferDirection)
@@ -29,8 +38,8 @@ public:
   void setLayerConditions(std::vector<LayerCondition> lcs);
   std::vector<uint16_t> delays(void);
   void setDelay(int delayIdx, uint16_t delay_ms);
-  std::vector<uint8_t> expHeaderParams(void);
-  void setExpHeaderParams(uint8_t mode, uint8_t param1, uint8_t param2);
+  HardwareConfig getHardwareConfig(void);
+  void setHardwareConfig(HardwareConfig config);
 
 signals:
   void changed(void);
