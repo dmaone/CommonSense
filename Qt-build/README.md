@@ -52,16 +52,15 @@ Because windows app can be a single file - static version is better.
 ### Abridged version
 http://download.qt.io/official_releases/qt/
 
-Get qt-opensource-windows-x86-mingw?????.exe
-Install EVERYTHING to C:\Qt.
+Get qt-opensource-windows-x86-???.exe from a version subdir. Latest is 5.10.0 as of now.
+Install "Sources", "MinGW5.3.0 32bit" and everything from "Tools" to C:\Qt.
 Perl msi didn't run on me - installed with defaults to c:\Strawberry.
-
+copy windows-build-qt-static.ps1 to c:\qt
 ```
 
 cd \qt
 mkdir static
-mv Src static
-mkdir static\5.8\mkspecs\win32-g++
+mv 5.10.0\Src static
 
 ```
 
@@ -71,11 +70,17 @@ Run powershell as administrator. Run windows-build-qt-static.ps1 - you'll need t
 
 This will take a while.
 
-Then do "Qt Creator setup" - add _static_ version, not the on that's there.
+Then in Qt Creator go Tools->options, select "Build & Run", add new Qt version from c:\Qt\Static\5.10\, 
+then clone autodetected kit, name "static", select newly added Qt version for it.
 
 Don't forget to click "Apply".
 
-"Unnamed" kit is automatically added, rename, select static version for qt version.
+Now it's time to open the project. Select "static" kit in setup dialog. In bottom-left corner, select static kit, release config.
+
+Click the green "Run" icon. Find FlightController.exe in the build directory - you can copy it and use to control your keyboard.
+
+program crashes, debug run says "During startup program exited with code 0x00000135"? You haven't selected the static kit.
+
 
 # OS X build
 Since OS X application is a folder anyway - no point in making static version. One can use qt from brew.

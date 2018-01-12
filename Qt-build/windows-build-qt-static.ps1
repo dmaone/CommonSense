@@ -77,7 +77,7 @@
 param(
     $QtSrcUrl = "http://download.qt.io/official_releases/qt/5.8/5.8.0/single/qt-everywhere-opensource-src-5.8.0.7z",
     $QtStaticDir = "C:\Qt\Static",
-    $QtVersion = "5.8",
+    $QtVersion = "5.10",
     $MingwDir = "C:\Qt\Tools\mingw530_32",
     [switch]$NoPause = $false
 )
