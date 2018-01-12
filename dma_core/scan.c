@@ -51,13 +51,15 @@ static void init_sensor(void) {
       (uint8)0x20u; // Init count7
   CyExitCriticalSection(enableInterrupts);
   ADC0_Start();
-  ADC0_SetResolution(ADC_RESOLUTION);
+  ADC0_SetResolution(config.adcBits);
 #if NUM_ADCs > 1
   ADC1_Start();
-  ADC1_SetResolution(ADC_RESOLUTION);
+  ADC1_SetResolution(config.adcBits);
 #endif
   ChargeDelay_Start();
+  ChargeDelay_WritePeriod(config.chargeDelay);
   DischargeDelay_Start();
+  DischargeDelay_WritePeriod(config.dischargeDelay);
   scan_reset();
 }
 

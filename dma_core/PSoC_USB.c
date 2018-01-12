@@ -66,6 +66,20 @@ void set_hardware_parameters(void) {
   config.matrixRows = MATRIX_ROWS;
   config.matrixCols = MATRIX_COLS;
   config.matrixLayers = MATRIX_LAYERS;
+  switch (config.adcBits) {
+    case 8:
+    case 10:
+    case 12:
+      break;
+    default:
+      config.adcBits = 8;
+  };
+  if (config.chargeDelay < 2) {
+    config.chargeDelay = 2;
+  };
+  if (config.dischargeDelay < 2) {
+    config.dischargeDelay = 2;
+  }
 }
 
 void load_config(void) {
