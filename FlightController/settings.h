@@ -1,5 +1,4 @@
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#pragma once
 
 #include <QSettings>
 
@@ -8,5 +7,3 @@
 #define LAYOUTS_DIR_KEY SETTINGS_DIR_KEY
 
 #define FIRMWARE_FILE_KEY "firmware_file"
-
-#endif // SETTINGS_H

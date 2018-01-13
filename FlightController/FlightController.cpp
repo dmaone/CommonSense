@@ -16,6 +16,8 @@
 #include "DeviceInterface.h"
 #include "singleton.h"
 
+constexpr size_t kBlinkTimerTick = 50;
+
 FlightController::FlightController(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::FlightController) {
   ui->setupUi(this);
@@ -48,6 +50,7 @@ FlightController::FlightController(QWidget *parent)
   connect(loader, SIGNAL(switchMode(bool)), &di, SLOT(bootloaderMode(bool)));
   connect(loader, SIGNAL(sendPacket(Bootloader_packet_t *)), &di,
           SLOT(sendCommand(Bootloader_packet_t *)));
+  blinkTimerId = startTimer(kBlinkTimerTick);
 }
 
 void FlightController::setup(void) {
@@ -118,6 +121,32 @@ void FlightController::setup(void) {
   di.start();
 }
 
+void FlightController::blinkLights() {
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  if (di.tx) {
+    ui->txLabel
+        ->setStyleSheet("color: #000000; background-color: #00ff00");
+  } else {
+    ui->txLabel
+        ->setStyleSheet("color: #000000; background-color: #dddddd");
+  }
+  di.tx = false;
+  if (di.rx) {
+    ui->rxLabel
+        ->setStyleSheet("color: #000000; background-color: #00ff00");
+  } else {
+    ui->rxLabel
+        ->setStyleSheet("color: #000000; background-color: #dddddd");
+  }
+  di.rx = false;
+}
+
+void FlightController::timerEvent(QTimerEvent * timer) {
+  if (timer->timerId() == blinkTimerId) {
+    blinkLights();
+  }
+}
+
 void FlightController::updateStatus(void) {
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
   ui->versionLabel->setText(di.firmwareVersion);
@@ -164,11 +193,6 @@ void FlightController::closeEvent(QCloseEvent *event) {
   emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
   QApplication::quit();
   event->accept();
-}
-
-void FlightController::mainTabChanged(int idx) {
-  if (idx == 1) {
-  }
 }
 
 FlightController::~FlightController() {

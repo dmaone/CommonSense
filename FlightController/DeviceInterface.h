@@ -14,6 +14,7 @@
 #include "LogViewer.h"
 #include "hidapi/hidapi.h"
 #include <QObject>
+#include <QQueue>
 
 class DeviceInterface : public QObject {
   Q_OBJECT
@@ -37,12 +38,14 @@ public:
   };
   enum KeyStatus { KeyPressed, KeyReleased };
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
-  bool scanEnabled;
-  bool outputEnabled;
-  bool setupMode;
-  bool matrixMonitor;
-  bool controllerInsane;
-  bool printableStatus;
+  bool scanEnabled {false};
+  bool outputEnabled {false};
+  bool setupMode {false};
+  bool matrixMonitor {false};
+  bool controllerInsane {false};
+  bool printableStatus {false};
+  bool rx {false};
+  bool tx {false};
   QString firmwareVersion;
 
 public slots:
@@ -66,12 +69,15 @@ private:
   hid_device *device;
   int pollTimerId;
   int statusTimerId;
-  unsigned char outbox[65];
   unsigned char bytesFromDevice[65];
   device_status_t status;
   uint8_t mode;
   DeviceStatus currentStatus;
   uint8_t receivedStatus_;
+  QQueue<OUT_c2packet_t> commandQueue_;
+  std::atomic<bool> cts_ {true};
+  size_t noCtsDelay_;
+  std::atomic<bool> releaseDevice_ {false};
 
   void processStatusReply(QByteArray* payload);
   hid_device *acquireDevice(void);
@@ -80,6 +86,7 @@ private:
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);
   void _sendPacket(void);
+  void _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
 
 private slots:

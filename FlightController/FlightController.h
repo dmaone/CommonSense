@@ -50,7 +50,6 @@ public slots:
   void editMacrosClick(void);
   void editThresholdsClick(void);
   void showLayerConditions(void);
-  void mainTabChanged(int);
   void deviceStatusNotification(DeviceInterface::DeviceStatus);
 
 protected:
@@ -67,8 +66,12 @@ private:
   FirmwareLoader *loader;
   QtMessageHandler *_oldLogger;
   bool _uiLocked = false;
+  int blinkTimerId;
+
   void lockUI(bool lock);
   void updateStatus(void);
+  void timerEvent(QTimerEvent * timer);
+  void blinkLights(void);
 
 private slots:
   void on_action_Setup_mode_triggered(bool bMode);

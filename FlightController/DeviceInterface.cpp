@@ -5,6 +5,11 @@
 #include <algorithm>
 #include <string>
 
+constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
+constexpr size_t kNormalOperationTick = 1;
+constexpr size_t kDeviceScanTick = 1000;
+constexpr size_t kStatusTimerTick = 100;
+
 DeviceInterface::DeviceInterface(QObject *parent)
     : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
       mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected) {
@@ -19,12 +24,15 @@ DeviceInterface::DeviceInterface(QObject *parent)
 
   connect(config, SIGNAL(sendCommand(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
-  _resetStatusTimer(500);
+  statusTimerId = startTimer(kStatusTimerTick);
 }
 
 DeviceInterface::~DeviceInterface(void) { _releaseDevice(); }
 
 void DeviceInterface::processStatusReply(QByteArray* payload) {
+  if (receivedStatus_ != payload->at(1)) {
+    rx = true;
+  }
   receivedStatus_ = payload->at(1);
   scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
   outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
@@ -89,48 +97,31 @@ void DeviceInterface::deviceMessageReceiver(void) {
   qInfo() << "Message received";
 }
 
-void DeviceInterface::_sendPacket() {
-  // qInfo() << "Sending packet" << (uint8_t)outbox[1] << (uint8_t)outbox[2];
-  if (!device)
-    return;         // TODO we should be more vocal
-  outbox[0] = 0x00; // ReportID is not used.
-  if (hid_write(device, outbox, sizeof outbox) == -1) {
-    qWarning() << "Error sending to the device, will reconnect..";
-    _releaseDevice();
-  }
-}
-
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
-  memset(outbox, 0, sizeof(outbox));
-  outbox[1] = cmd;
-  memcpy(outbox + 2, msg, 63);
-  _sendPacket();
+  auto outbox = OUT_c2packet_t();
+  outbox.command = cmd;
+  memcpy(outbox.payload, msg, 63);
+  commandQueue_.enqueue(outbox);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t msg) {
-  memset(outbox, 0, sizeof(outbox));
-  outbox[1] = cmd;
-  outbox[2] = msg;
-  _sendPacket();
+  auto outbox = OUT_c2packet_t();
+  outbox.command = cmd;
+  outbox.payload[0] = msg;
+  commandQueue_.enqueue(outbox);
 }
 
 void DeviceInterface::sendCommand(OUT_c2packet_t cmd) {
-  memset(outbox, 0, sizeof(outbox));
-  memcpy(outbox + 1, cmd.raw, sizeof(cmd));
-  _sendPacket();
+  commandQueue_.enqueue(cmd);
 }
 
 void DeviceInterface::sendCommand(Bootloader_packet_t *packet) {
-  memset(outbox, 0, sizeof(outbox));
+  auto outbox = OUT_c2packet_t();
   uint8_t wire_length =
-      packet->length + 7; // marker+cmd+len(2)+checksum(2)+marker
-  memcpy(outbox + 1, packet->raw, wire_length);
-  // qInfo() << (uint8_t)packet->raw[0] << (uint8_t)packet->raw[1] <<
-  // (uint8_t)packet->raw[2] << (uint8_t)packet->raw[3]
-  //        << (uint8_t)packet->raw[4] << (uint8_t)packet->raw[5] <<
-  //        (uint8_t)packet->raw[6] << (uint8_t)packet->raw[7]
-  //        << (uint8_t)packet->raw[8];
-  _sendPacket();
+      packet->length + 7; // marker+cmd+len16+checksum16+marker
+  memcpy(outbox.raw, packet->raw, wire_length);
+  commandQueue_.enqueue(outbox);
+
 }
 
 void DeviceInterface::configChanged(void) {
@@ -151,7 +142,7 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
     qInfo() << "Resuming normal operations.";
     mode = DeviceInterfaceNormal;
   }
-  _resetTimer(1000);
+  _resetTimer(kDeviceScanTick);
   _releaseDevice();
 }
 
@@ -171,23 +162,58 @@ void DeviceInterface::_resetTimer(int interval) {
   pollTimerId = startTimer(interval);
 }
 
-void DeviceInterface::_resetStatusTimer(int interval) {
-  if (statusTimerId)
-    killTimer(statusTimerId);
-  statusTimerId = startTimer(interval);
-}
-
-
 void DeviceInterface::timerEvent(QTimerEvent * timer) {
   if (timer->timerId() == statusTimerId) {
     if (currentStatus == DeviceConnected) {
         emit sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
+  } else if (timer->timerId() != pollTimerId) {
+    return;
   }
   if (!device)
     return _initDevice();
+  _sendPacket();
+  _receivePacket();
+  if (releaseDevice_.exchange(false)) {
+    if (device)
+      qInfo("Releasing device.");
+    _updateDeviceStatus(DeviceDisconnected);
+    hid_close(device);
+    device = NULL;
+    if (hid_exit())
+      qWarning("warning: error during hid_exit");
+  }
+}
 
+void DeviceInterface::_sendPacket() {
+  if (!device && !commandQueue_.empty()) {
+    commandQueue_.clear();
+    qInfo() << "Device went away on send";
+  }
+  if (commandQueue_.empty()) {
+    return;
+  }
+  if (!cts_.exchange(false) && noCtsDelay_) {
+    --noCtsDelay_;
+    return;
+  }
+  noCtsDelay_ = kNoCtsDelay; // reset timer
+  unsigned char outbox[65];
+  auto cmd = commandQueue_.dequeue();
+  outbox[0] = 0x00; // ReportID is not used.
+  if (cmd.command != C2CMD_GET_STATUS) {
+    tx = true;
+    emit deviceStatusNotification(StatusUpdated);
+  }
+  memcpy(outbox+1, cmd.raw, sizeof(cmd));
+  if (hid_write(device, outbox, sizeof outbox) == -1) {
+    qWarning() << "Error sending to the device, will reconnect..";
+    _releaseDevice();
+  }
+}
+
+void DeviceInterface::_receivePacket(void) {
   memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
   int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
   if (bytesRead < 0) {
@@ -197,7 +223,10 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
   }
   if (bytesRead == 0)
     return;
-
+  cts_ = true;
+  if (bytesFromDevice[0] != C2RESPONSE_STATUS) {
+    rx = true;
+  }
   QCoreApplication::postEvent(this, new DeviceMessage(bytesFromDevice));
 }
 
@@ -205,13 +234,14 @@ void DeviceInterface::_initDevice(void) {
   device = acquireDevice();
   if (!device) {
     qInfo() << ".";
-    _resetTimer(1000);
+    _resetTimer(kDeviceScanTick);
     return;
   }
+  cts_ = true;
   hid_set_nonblocking(device, 1);
   _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
-  _resetTimer(0);
+  _resetTimer(kNormalOperationTick);
   return;
 }
 
@@ -272,16 +302,10 @@ hid_device *DeviceInterface::acquireDevice(void) {
 }
 
 void DeviceInterface::_releaseDevice(void) {
-  if (device)
-    qInfo("Releasing device.");
-  _updateDeviceStatus(DeviceDisconnected);
-  hid_close(device);
-  device = NULL;
-  if (hid_exit())
-    qWarning("warning: error during hid_exit");
+  releaseDevice_ = true;
 }
 
 void DeviceInterface::start(void) {
   qInfo() << "Acquiring device..";
-  _resetTimer(0);
+  _resetTimer(kNormalOperationTick);
 }
