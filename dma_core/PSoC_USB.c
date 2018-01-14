@@ -42,6 +42,10 @@ void process_ewo(OUT_c2packet_t *inbox) {
 }
 
 void receive_config_block(OUT_c2packet_t *inbox) {
+  if (status_register != (1 << C2DEVSTATUS_SETUP_MODE)) {
+    xprintf("Invalid status register for config upload");
+    return;
+  }
   // TODO define offset via transfer block size and packet size
   memcpy(config.raw + (inbox->payload[0] * CONFIG_TRANSFER_BLOCK_SIZE),
          inbox->payload + CONFIG_BLOCK_DATA_OFFSET, CONFIG_TRANSFER_BLOCK_SIZE);
@@ -105,6 +109,7 @@ void load_config(void) {
 }
 
 void apply_config(void) {
+  SET_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
   exp_init();
   pipeline_init(); // calls scan_reset
   scan_init();
