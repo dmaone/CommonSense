@@ -16,7 +16,7 @@
 #include "DeviceInterface.h"
 #include "singleton.h"
 
-constexpr size_t kBlinkTimerTick = 50;
+constexpr size_t kBlinkTimerTick = 100;
 
 FlightController::FlightController(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::FlightController) {
@@ -60,14 +60,9 @@ void FlightController::setup(void) {
           SLOT(clearButtonClick()));
   connect(ui->CopyAllButton, SIGNAL(clicked()), ui->LogViewport,
           SLOT(copyAllButtonClick()));
-  connect(ui->RedButton, SIGNAL(toggled(bool)), this,
-          SLOT(redButtonToggle(bool)));
 
   connect(ui->actionFirmware_File, SIGNAL(triggered()), loader,
           SLOT(selectFile()));
-
-  connect(ui->statusRequestButton, SIGNAL(clicked()), this,
-          SLOT(statusRequestButtonClick()));
 
   connect(ui->MatrixMonitorButton, SIGNAL(clicked()), this,
           SLOT(showKeyMonitor()));
@@ -212,15 +207,6 @@ void FlightController::logToViewport(const QString &msg) {
 
 void FlightController::showKeyMonitor(void) { matrixMonitor->show(); }
 
-void FlightController::redButtonToggle(bool state) {
-  emit sendCommand(C2CMD_EWO, state);
-}
-
-void FlightController::statusRequestButtonClick(void) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
-  di.printableStatus = true;
-}
-
 void FlightController::deviceStatusNotification(
     DeviceInterface::DeviceStatus s) {
   switch (s) {
@@ -291,3 +277,14 @@ void FlightController::on_outputButton_clicked() {
 void FlightController::on_setupButton_clicked() {
   emit flipStatusBit(C2DEVSTATUS_SETUP_MODE);
 }
+
+void FlightController::on_redButton_clicked() {
+  ui->redButton->setStyleSheet("color: #ff0000; background-color: #990000");
+  emit sendCommand(C2CMD_EWO, 0);
+}
+
+void FlightController::on_statusRequestButton_clicked(void) {
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  di.printableStatus = true;
+}
+

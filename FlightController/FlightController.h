@@ -43,9 +43,7 @@ signals:
   void flipStatusBit(deviceStatus bit);
 
 public slots:
-  void redButtonToggle(bool);
   void showKeyMonitor(void);
-  void statusRequestButtonClick(void);
   void editLayoutClick(void);
   void editMacrosClick(void);
   void editThresholdsClick(void);
@@ -78,6 +76,8 @@ private slots:
   void on_scanButton_clicked(void);
   void on_outputButton_clicked(void);
   void on_setupButton_clicked(void);
+  void on_redButton_clicked(void);
+  void on_statusRequestButton_clicked(void);
   void editDelays(void);
   void editExpHeader(void);
 };

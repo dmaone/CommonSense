@@ -8,7 +8,7 @@
 constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
 constexpr size_t kNormalOperationTick = 1;
 constexpr size_t kDeviceScanTick = 1000;
-constexpr size_t kStatusTimerTick = 100;
+constexpr size_t kStatusTimerTick = 200;
 
 DeviceInterface::DeviceInterface(QObject *parent)
     : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
@@ -164,7 +164,7 @@ void DeviceInterface::_resetTimer(int interval) {
 
 void DeviceInterface::timerEvent(QTimerEvent * timer) {
   if (timer->timerId() == statusTimerId) {
-    if (currentStatus == DeviceConnected) {
+    if (mode == DeviceInterfaceNormal && currentStatus == DeviceConnected) {
         emit sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
@@ -241,6 +241,8 @@ void DeviceInterface::_initDevice(void) {
   hid_set_nonblocking(device, 1);
   _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
+  QByteArray tmp(5, (char)0);
+  processStatusReply(&tmp);
   _resetTimer(kNormalOperationTick);
   return;
 }

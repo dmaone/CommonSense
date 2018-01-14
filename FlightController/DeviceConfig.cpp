@@ -47,6 +47,7 @@ void DeviceConfig::toDevice(void) {
     return;
   }
   this->_assemble();
+  emit sendCommand(C2CMD_EWO, (1 << C2DEVSTATUS_SETUP_MODE));
   this->transferDirection = TransferUpload;
   this->currentBlock = 0;
   qInfo() << "Uploading config..";
