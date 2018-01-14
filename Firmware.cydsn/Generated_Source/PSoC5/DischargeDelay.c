@@ -400,10 +400,10 @@ void DischargeDelay_Stop(void)
     *  The PWM Period will be reloaded when a counter value will be a zero
     *
     *******************************************************************************/
-    void DischargeDelay_WriteCounter(uint8 counter) \
+    void DischargeDelay_WriteCounter(uint16 counter) \
                                        
     {
-        CY_SET_REG8(DischargeDelay_COUNTER_LSB_PTR, counter);
+        CY_SET_REG16(DischargeDelay_COUNTER_LSB_PTR, counter);
     }
 
 
@@ -422,7 +422,7 @@ void DischargeDelay_Stop(void)
     *  The current value of the counter.
     *
     *******************************************************************************/
-    uint8 DischargeDelay_ReadCounter(void) 
+    uint16 DischargeDelay_ReadCounter(void) 
     {
         /* Force capture by reading Accumulator */
         /* Must first do a software capture to be able to read the counter */
@@ -430,7 +430,7 @@ void DischargeDelay_Stop(void)
           (void)CY_GET_REG8(DischargeDelay_COUNTERCAP_LSB_PTR_8BIT);
 
         /* Read the data from the FIFO */
-        return (CY_GET_REG8(DischargeDelay_CAPTURE_LSB_PTR));
+        return (CY_GET_REG16(DischargeDelay_CAPTURE_LSB_PTR));
     }
 
     #if (DischargeDelay_UseStatus)
@@ -479,12 +479,12 @@ void DischargeDelay_Stop(void)
 *  None
 *
 *******************************************************************************/
-void DischargeDelay_WritePeriod(uint8 period) 
+void DischargeDelay_WritePeriod(uint16 period) 
 {
     #if(DischargeDelay_UsingFixedFunction)
         CY_SET_REG16(DischargeDelay_PERIOD_LSB_PTR, (uint16)period);
     #else
-        CY_SET_REG8(DischargeDelay_PERIOD_LSB_PTR, period);
+        CY_SET_REG16(DischargeDelay_PERIOD_LSB_PTR, period);
     #endif /* (DischargeDelay_UsingFixedFunction) */
 }
 
@@ -513,20 +513,20 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  Dither Mode, Center Aligned Mode or One Output Mode
     *
     *******************************************************************************/
-    void DischargeDelay_WriteCompare(uint8 compare) \
+    void DischargeDelay_WriteCompare(uint16 compare) \
                                        
     {
         #if(DischargeDelay_UsingFixedFunction)
             CY_SET_REG16(DischargeDelay_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG8(DischargeDelay_COMPARE1_LSB_PTR, compare);
+            CY_SET_REG16(DischargeDelay_COMPARE1_LSB_PTR, compare);
         #endif /* (DischargeDelay_UsingFixedFunction) */
 
         #if (DischargeDelay_PWMMode == DischargeDelay__B_PWM__DITHER)
             #if(DischargeDelay_UsingFixedFunction)
                 CY_SET_REG16(DischargeDelay_COMPARE2_LSB_PTR, (uint16)(compare + 1u));
             #else
-                CY_SET_REG8(DischargeDelay_COMPARE2_LSB_PTR, (compare + 1u));
+                CY_SET_REG16(DischargeDelay_COMPARE2_LSB_PTR, (compare + 1u));
             #endif /* (DischargeDelay_UsingFixedFunction) */
         #endif /* (DischargeDelay_PWMMode == DischargeDelay__B_PWM__DITHER) */
     }
@@ -552,13 +552,13 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void DischargeDelay_WriteCompare1(uint8 compare) \
+    void DischargeDelay_WriteCompare1(uint16 compare) \
                                         
     {
         #if(DischargeDelay_UsingFixedFunction)
             CY_SET_REG16(DischargeDelay_COMPARE1_LSB_PTR, (uint16)compare);
         #else
-            CY_SET_REG8(DischargeDelay_COMPARE1_LSB_PTR, compare);
+            CY_SET_REG16(DischargeDelay_COMPARE1_LSB_PTR, compare);
         #endif /* (DischargeDelay_UsingFixedFunction) */
     }
 
@@ -581,13 +581,13 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  None
     *
     *******************************************************************************/
-    void DischargeDelay_WriteCompare2(uint8 compare) \
+    void DischargeDelay_WriteCompare2(uint16 compare) \
                                         
     {
         #if(DischargeDelay_UsingFixedFunction)
             CY_SET_REG16(DischargeDelay_COMPARE2_LSB_PTR, compare);
         #else
-            CY_SET_REG8(DischargeDelay_COMPARE2_LSB_PTR, compare);
+            CY_SET_REG16(DischargeDelay_COMPARE2_LSB_PTR, compare);
         #endif /* (DischargeDelay_UsingFixedFunction) */
     }
 #endif /* UseOneCompareMode */
@@ -787,9 +787,9 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  uint8/uint16: The current capture value
     *
     *******************************************************************************/
-    uint8 DischargeDelay_ReadCapture(void) 
+    uint16 DischargeDelay_ReadCapture(void) 
     {
-        return (CY_GET_REG8(DischargeDelay_CAPTURE_LSB_PTR));
+        return (CY_GET_REG16(DischargeDelay_CAPTURE_LSB_PTR));
     }
 
 #endif /* (!DischargeDelay_UsingFixedFunction) */
@@ -813,12 +813,12 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value
     *
     *******************************************************************************/
-    uint8 DischargeDelay_ReadCompare(void) 
+    uint16 DischargeDelay_ReadCompare(void) 
     {
         #if(DischargeDelay_UsingFixedFunction)
-            return ((uint8)CY_GET_REG16(DischargeDelay_COMPARE1_LSB_PTR));
+            return ((uint16)CY_GET_REG16(DischargeDelay_COMPARE1_LSB_PTR));
         #else
-            return (CY_GET_REG8(DischargeDelay_COMPARE1_LSB_PTR));
+            return (CY_GET_REG16(DischargeDelay_COMPARE1_LSB_PTR));
         #endif /* (DischargeDelay_UsingFixedFunction) */
     }
 
@@ -839,9 +839,9 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint8 DischargeDelay_ReadCompare1(void) 
+    uint16 DischargeDelay_ReadCompare1(void) 
     {
-        return (CY_GET_REG8(DischargeDelay_COMPARE1_LSB_PTR));
+        return (CY_GET_REG16(DischargeDelay_COMPARE1_LSB_PTR));
     }
 
 
@@ -859,9 +859,9 @@ void DischargeDelay_WritePeriod(uint8 period)
     *  uint8/uint16: Current compare value.
     *
     *******************************************************************************/
-    uint8 DischargeDelay_ReadCompare2(void) 
+    uint16 DischargeDelay_ReadCompare2(void) 
     {
-        return (CY_GET_REG8(DischargeDelay_COMPARE2_LSB_PTR));
+        return (CY_GET_REG16(DischargeDelay_COMPARE2_LSB_PTR));
     }
 
 #endif /* (DischargeDelay_UseOneCompareMode) */
@@ -881,12 +881,12 @@ void DischargeDelay_WritePeriod(uint8 period)
 *  uint8/16: Period value
 *
 *******************************************************************************/
-uint8 DischargeDelay_ReadPeriod(void) 
+uint16 DischargeDelay_ReadPeriod(void) 
 {
     #if(DischargeDelay_UsingFixedFunction)
-        return ((uint8)CY_GET_REG16(DischargeDelay_PERIOD_LSB_PTR));
+        return ((uint16)CY_GET_REG16(DischargeDelay_PERIOD_LSB_PTR));
     #else
-        return (CY_GET_REG8(DischargeDelay_PERIOD_LSB_PTR));
+        return (CY_GET_REG16(DischargeDelay_PERIOD_LSB_PTR));
     #endif /* (DischargeDelay_UsingFixedFunction) */
 }
 

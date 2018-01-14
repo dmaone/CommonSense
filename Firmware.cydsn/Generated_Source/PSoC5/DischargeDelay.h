@@ -28,7 +28,7 @@ extern uint8 DischargeDelay_initVar;
 /***************************************
 * Conditional Compilation Parameters
 ***************************************/
-#define DischargeDelay_Resolution                     (8u)
+#define DischargeDelay_Resolution                     (16u)
 #define DischargeDelay_UsingFixedFunction             (0u)
 #define DischargeDelay_DeadBandMode                   (0u)
 #define DischargeDelay_KillModeMinTime                (0u)
@@ -110,9 +110,9 @@ typedef struct
     uint8 PWMEnableState;
 
     #if(!DischargeDelay_UsingFixedFunction)
-        uint8 PWMUdb;               /* PWM Current Counter value  */
+        uint16 PWMUdb;               /* PWM Current Counter value  */
         #if(!DischargeDelay_PWMModeIsCenterAligned)
-            uint8 PWMPeriod;
+            uint16 PWMPeriod;
         #endif /* (!DischargeDelay_PWMModeIsCenterAligned) */
         #if (DischargeDelay_UseStatus)
             uint8 InterruptMaskValue;   /* PWM Current Interrupt Mask */
@@ -176,32 +176,32 @@ void    DischargeDelay_Stop(void) ;
 #endif /* (DischargeDelay_UseOneCompareMode) */
 
 #if (!DischargeDelay_UsingFixedFunction)
-    uint8   DischargeDelay_ReadCounter(void) ;
-    uint8 DischargeDelay_ReadCapture(void) ;
+    uint16   DischargeDelay_ReadCounter(void) ;
+    uint16 DischargeDelay_ReadCapture(void) ;
 
     #if (DischargeDelay_UseStatus)
             void DischargeDelay_ClearFIFO(void) ;
     #endif /* (DischargeDelay_UseStatus) */
 
-    void    DischargeDelay_WriteCounter(uint8 counter)
+    void    DischargeDelay_WriteCounter(uint16 counter)
             ;
 #endif /* (!DischargeDelay_UsingFixedFunction) */
 
-void    DischargeDelay_WritePeriod(uint8 period)
+void    DischargeDelay_WritePeriod(uint16 period)
         ;
-uint8 DischargeDelay_ReadPeriod(void) ;
+uint16 DischargeDelay_ReadPeriod(void) ;
 
 #if (DischargeDelay_UseOneCompareMode)
-    void    DischargeDelay_WriteCompare(uint8 compare)
+    void    DischargeDelay_WriteCompare(uint16 compare)
             ;
-    uint8 DischargeDelay_ReadCompare(void) ;
+    uint16 DischargeDelay_ReadCompare(void) ;
 #else
-    void    DischargeDelay_WriteCompare1(uint8 compare)
+    void    DischargeDelay_WriteCompare1(uint16 compare)
             ;
-    uint8 DischargeDelay_ReadCompare1(void) ;
-    void    DischargeDelay_WriteCompare2(uint8 compare)
+    uint16 DischargeDelay_ReadCompare1(void) ;
+    void    DischargeDelay_WriteCompare2(uint16 compare)
             ;
-    uint8 DischargeDelay_ReadCompare2(void) ;
+    uint16 DischargeDelay_ReadCompare2(void) ;
 #endif /* (DischargeDelay_UseOneCompareMode) */
 
 
@@ -264,73 +264,73 @@ void DischargeDelay_RestoreConfig(void) ;
    #if (DischargeDelay_Resolution == 8u) /* 8bit - PWM */
 
        #if(DischargeDelay_PWMModeIsCenterAligned)
-           #define DischargeDelay_PERIOD_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-           #define DischargeDelay_PERIOD_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
+           #define DischargeDelay_PERIOD_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+           #define DischargeDelay_PERIOD_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
        #else
-           #define DischargeDelay_PERIOD_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__F0_REG)
-           #define DischargeDelay_PERIOD_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__F0_REG)
+           #define DischargeDelay_PERIOD_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__F0_REG)
+           #define DischargeDelay_PERIOD_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__F0_REG)
        #endif /* (DischargeDelay_PWMModeIsCenterAligned) */
 
-       #define DischargeDelay_COMPARE1_LSB        (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D0_REG)
-       #define DischargeDelay_COMPARE1_LSB_PTR    ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__D0_REG)
-       #define DischargeDelay_COMPARE2_LSB        (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-       #define DischargeDelay_COMPARE2_LSB_PTR    ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-       #define DischargeDelay_COUNTERCAP_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__A1_REG)
-       #define DischargeDelay_COUNTERCAP_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__A1_REG)
-       #define DischargeDelay_COUNTER_LSB         (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__A0_REG)
-       #define DischargeDelay_COUNTER_LSB_PTR     ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__A0_REG)
-       #define DischargeDelay_CAPTURE_LSB         (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__F1_REG)
-       #define DischargeDelay_CAPTURE_LSB_PTR     ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__F1_REG)
+       #define DischargeDelay_COMPARE1_LSB        (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D0_REG)
+       #define DischargeDelay_COMPARE1_LSB_PTR    ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__D0_REG)
+       #define DischargeDelay_COMPARE2_LSB        (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+       #define DischargeDelay_COMPARE2_LSB_PTR    ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+       #define DischargeDelay_COUNTERCAP_LSB      (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__A1_REG)
+       #define DischargeDelay_COUNTERCAP_LSB_PTR  ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__A1_REG)
+       #define DischargeDelay_COUNTER_LSB         (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__A0_REG)
+       #define DischargeDelay_COUNTER_LSB_PTR     ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__A0_REG)
+       #define DischargeDelay_CAPTURE_LSB         (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__F1_REG)
+       #define DischargeDelay_CAPTURE_LSB_PTR     ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__F1_REG)
 
    #else
         #if(CY_PSOC3) /* 8-bit address space */
             #if(DischargeDelay_PWMModeIsCenterAligned)
-               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
+               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
             #else
-               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__F0_REG)
-               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__F0_REG)
+               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__F0_REG)
+               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__F0_REG)
             #endif /* (DischargeDelay_PWMModeIsCenterAligned) */
 
-            #define DischargeDelay_COMPARE1_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__D0_REG)
-            #define DischargeDelay_COMPARE1_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D0_REG)
-            #define DischargeDelay_COMPARE2_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-            #define DischargeDelay_COMPARE2_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__D1_REG)
-            #define DischargeDelay_COUNTERCAP_LSB     (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__A1_REG)
-            #define DischargeDelay_COUNTERCAP_LSB_PTR ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__A1_REG)
-            #define DischargeDelay_COUNTER_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__A0_REG)
-            #define DischargeDelay_COUNTER_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__A0_REG)
-            #define DischargeDelay_CAPTURE_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__F1_REG)
-            #define DischargeDelay_CAPTURE_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__F1_REG)
+            #define DischargeDelay_COMPARE1_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__D0_REG)
+            #define DischargeDelay_COMPARE1_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D0_REG)
+            #define DischargeDelay_COMPARE2_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+            #define DischargeDelay_COMPARE2_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__D1_REG)
+            #define DischargeDelay_COUNTERCAP_LSB     (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__A1_REG)
+            #define DischargeDelay_COUNTERCAP_LSB_PTR ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__A1_REG)
+            #define DischargeDelay_COUNTER_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__A0_REG)
+            #define DischargeDelay_COUNTER_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__A0_REG)
+            #define DischargeDelay_CAPTURE_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__F1_REG)
+            #define DischargeDelay_CAPTURE_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__F1_REG)
         #else
             #if(DischargeDelay_PWMModeIsCenterAligned)
-               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
+               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
             #else
-               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
-               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_F0_REG)
+               #define DischargeDelay_PERIOD_LSB      (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
+               #define DischargeDelay_PERIOD_LSB_PTR  ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_F0_REG)
             #endif /* (DischargeDelay_PWMModeIsCenterAligned) */
 
-            #define DischargeDelay_COMPARE1_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
-            #define DischargeDelay_COMPARE1_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D0_REG)
-            #define DischargeDelay_COMPARE2_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-            #define DischargeDelay_COMPARE2_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_D1_REG)
-            #define DischargeDelay_COUNTERCAP_LSB     (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
-            #define DischargeDelay_COUNTERCAP_LSB_PTR ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_A1_REG)
-            #define DischargeDelay_COUNTER_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
-            #define DischargeDelay_COUNTER_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_A0_REG)
-            #define DischargeDelay_CAPTURE_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
-            #define DischargeDelay_CAPTURE_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__16BIT_F1_REG)
+            #define DischargeDelay_COMPARE1_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
+            #define DischargeDelay_COMPARE1_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D0_REG)
+            #define DischargeDelay_COMPARE2_LSB       (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+            #define DischargeDelay_COMPARE2_LSB_PTR   ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_D1_REG)
+            #define DischargeDelay_COUNTERCAP_LSB     (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
+            #define DischargeDelay_COUNTERCAP_LSB_PTR ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_A1_REG)
+            #define DischargeDelay_COUNTER_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
+            #define DischargeDelay_COUNTER_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_A0_REG)
+            #define DischargeDelay_CAPTURE_LSB        (*(reg16 *) DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
+            #define DischargeDelay_CAPTURE_LSB_PTR    ((reg16 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__16BIT_F1_REG)
         #endif /* (CY_PSOC3) */
 
-       #define DischargeDelay_AUX_CONTROLDP1          (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
-       #define DischargeDelay_AUX_CONTROLDP1_PTR      ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u1__DP_AUX_CTL_REG)
+       #define DischargeDelay_AUX_CONTROLDP1          (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
+       #define DischargeDelay_AUX_CONTROLDP1_PTR      ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u1__DP_AUX_CTL_REG)
 
    #endif /* (DischargeDelay_Resolution == 8) */
 
-   #define DischargeDelay_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__A1_REG)
-   #define DischargeDelay_AUX_CONTROLDP0          (*(reg8 *)  DischargeDelay_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
-   #define DischargeDelay_AUX_CONTROLDP0_PTR      ((reg8 *)   DischargeDelay_PWMUDB_sP8_pwmdp_u0__DP_AUX_CTL_REG)
+   #define DischargeDelay_COUNTERCAP_LSB_PTR_8BIT ( (reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__A1_REG)
+   #define DischargeDelay_AUX_CONTROLDP0          (*(reg8 *)  DischargeDelay_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
+   #define DischargeDelay_AUX_CONTROLDP0_PTR      ((reg8 *)   DischargeDelay_PWMUDB_sP16_pwmdp_u0__DP_AUX_CTL_REG)
 
 #endif /* (DischargeDelay_UsingFixedFunction) */
 
