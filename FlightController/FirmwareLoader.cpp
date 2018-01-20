@@ -73,7 +73,8 @@ bool FirmwareLoader::_upload_row(void) {
     firmware = NULL;
     emit switchMode(bootloaderMode);
   } else if (lastRow->data.size() <= BOOTLOADER_MAX_PACKET_LENGTH) {
-    qInfo() << "Programming array" << lastRow->array << "row" << lastRow->row;
+    //qInfo() << "Programming array" << lastRow->array << "row" << lastRow->row;
+    qInfo() << ".";
     lastRow->data.push_front((uint8_t)(lastRow->row >> 8));
     lastRow->data.push_front((uint8_t)(lastRow->row & 0xff));
     lastRow->data.push_front(lastRow->array);

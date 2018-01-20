@@ -159,6 +159,7 @@ void FlightController::updateStatus(void) {
     ui->outputButton
         ->setStyleSheet("color: #999999; background-color: #cccccc");
   }
+  ui->action_Setup_mode->setChecked(di.setupMode);
   if (di.setupMode) {
     ui->setupButton
         ->setStyleSheet("color: #000000; background-color: #ffff00");
@@ -182,10 +183,13 @@ void FlightController::updateStatus(void) {
   }
 }
 
-void FlightController::show(void) { QMainWindow::show(); }
+void FlightController::show(void) {
+  QMainWindow::show();
+}
 
 void FlightController::closeEvent(QCloseEvent *event) {
-  emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  di.sendCommandNow(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
   QApplication::quit();
   event->accept();
 }
@@ -212,14 +216,13 @@ void FlightController::deviceStatusNotification(
   switch (s) {
   case DeviceInterface::DeviceConnected:
     lockUI(true);
+    emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
     emit ui->action_Download->triggered();
     break;
   case DeviceInterface::DeviceDisconnected:
     lockUI(true);
     break;
   case DeviceInterface::DeviceConfigChanged:
-    emit sendCommand(C2CMD_SET_MODE, C2DEVMODE_SETUP);
-    ui->action_Setup_mode->setChecked(true);
     layerConditions->init();
     _delays->init();
     _hardware->init();

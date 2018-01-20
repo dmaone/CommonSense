@@ -6,7 +6,7 @@
 #include <string>
 
 constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
-constexpr size_t kNormalOperationTick = 1;
+constexpr size_t kNormalOperationTick = 0;
 constexpr size_t kDeviceScanTick = 1000;
 constexpr size_t kStatusTimerTick = 200;
 
@@ -97,6 +97,17 @@ void DeviceInterface::deviceMessageReceiver(void) {
   qInfo() << "Message received";
 }
 
+// NEVER use this function - it's only for sending packet in close event
+// because timers don't work in close event!
+void DeviceInterface::sendCommandNow(c2command cmd, uint8_t msg) {
+  auto outbox = OUT_c2packet_t();
+  outbox.command = cmd;
+  outbox.payload[0] = msg;
+  commandQueue_.enqueue(outbox);
+  cts_.store(true); // Force it
+  _sendPacket();
+}
+
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
   auto outbox = OUT_c2packet_t();
   outbox.command = cmd;
@@ -121,7 +132,6 @@ void DeviceInterface::sendCommand(Bootloader_packet_t *packet) {
       packet->length + 7; // marker+cmd+len16+checksum16+marker
   memcpy(outbox.raw, packet->raw, wire_length);
   commandQueue_.enqueue(outbox);
-
 }
 
 void DeviceInterface::configChanged(void) {
@@ -204,7 +214,7 @@ void DeviceInterface::_sendPacket() {
   outbox[0] = 0x00; // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
-    emit deviceStatusNotification(StatusUpdated);
+    emit deviceStatusNotification(StatusUpdated); // Blink the TX light
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   if (hid_write(device, outbox, sizeof outbox) == -1) {

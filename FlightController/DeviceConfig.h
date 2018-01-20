@@ -1,5 +1,4 @@
-#ifndef DEVICECONFIG_H
-#define DEVICECONFIG_H
+#pragma once
 
 #include "../c2/nvram.h"
 #include "Events.h"
@@ -68,4 +67,3 @@ private:
   void _assemble(void);
 };
 
-#endif // DEVICECONFIG_H

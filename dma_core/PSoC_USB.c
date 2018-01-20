@@ -102,14 +102,11 @@ void load_config(void) {
   EEPROM_Stop();
   set_hardware_parameters();
   if (config.configVersion != CS_CONFIG_VERSION) {
-    // Unexpected config version - not sure calibration data are there!
-    CLEAR_BIT(config.capsenseFlags, CSF_OE);
-    CLEAR_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
+    xprintf("Old version of EEPROM - possibly unpredictable results.");
   }
 }
 
 void apply_config(void) {
-  SET_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
   exp_init();
   pipeline_init(); // calls scan_reset
   scan_init();
@@ -156,6 +153,7 @@ void process_msg(OUT_c2packet_t *inbox) {
     break;
   case C2CMD_APPLY_CONFIG:
     xprintf("Applying config..");
+    SET_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
     apply_config();
     report_status();
     break;

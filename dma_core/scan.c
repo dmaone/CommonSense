@@ -247,15 +247,16 @@ CY_ISR(Result_ISR) {
 }
 
 void scan_start(void) {
+  if (scan_in_progress) {
+    return;
+  }
   sanity_check_timer = SANITY_CHECK_DURATION;
   scancodes_while_output_disabled = 0;
   SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
   CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
-  if (!scan_in_progress) {
-    driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
-    Drive(driving_row);
-    scan_in_progress = true;
-  }
+  driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
+  Drive(driving_row);
+  scan_in_progress = true;
 }
 
 void scan_reset(void) {
@@ -298,7 +299,6 @@ void scan_sanity_check(void) {
     SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   }
 }
-
 
 void report_matrix_readouts(void) {
   uint8_t idx = 0;
