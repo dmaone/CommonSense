@@ -9,6 +9,7 @@ struct HardwareConfig {
   uint8_t adcBits;
   uint8_t chargeDelay;
   uint16_t dischargeDelay;
+  uint8_t debouncingTicks;
   uint8_t expHdrMode;
   uint8_t expHdrParam1;
   uint8_t expHdrParam2;

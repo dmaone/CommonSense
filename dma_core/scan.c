@@ -15,22 +15,27 @@
 CY_ISR_PROTO(EoC_ISR);
 CY_ISR_PROTO(Result_ISR);
 
-static uint8_t Buf0TD = CY_DMA_INVALID_TD;
-static uint8_t Buf1TD = CY_DMA_INVALID_TD;
-static uint8_t FinalBufTD[2];
-// signedness intentional! Simplifies comparison logic
-// high byte from ADC must be zero, so should be safe.
-static int16_t BufMem[PTK_CHANNELS * NUM_ADCs];
-static uint8_t Results[ADC_CHANNELS * 4 * NUM_ADCs];
-static uint8_t reading_row, driving_row;
-static bool scan_in_progress;
-static uint32_t matrix_status[MATRIX_ROWS];
-static bool matrix_was_active;
+uint8_t Buf0TD = CY_DMA_INVALID_TD;
+uint8_t Buf1TD = CY_DMA_INVALID_TD;
+uint8_t FinalBufTD[2];
+uint16_t BufMem[PTK_CHANNELS * NUM_ADCs];
 
-static uint8_t matrix[COMMONSENSE_MATRIX_SIZE];
+// We're only using low 8 bit of ADC output, but ADC gets us 16 and then 
+uint8_t Results[ADC_CHANNELS * 4 * NUM_ADCs];
+
+uint8_t reading_row, driving_row;
+bool scan_in_progress;
+uint32_t matrix_status[MATRIX_ROWS];
+bool matrix_was_active;
+
+#define MAX_MATRIX_VALUE 0xffff
+uint16_t matrix[COMMONSENSE_MATRIX_SIZE];
+uint16_t debouncing_mask;
+uint16_t debouncing_posedge;
+uint16_t debouncing_negedge;
 uint8_t scancodes_while_output_disabled = 0;
 
-static void init_sensor(void) {
+void init_sensor(uint8_t debouncing_period) {
   // Init DMA, each burst requires a request
   Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
                      (uint16)(HI16(CYDEV_SRAM_BASE)));
@@ -60,10 +65,14 @@ static void init_sensor(void) {
   ChargeDelay_WritePeriod(config.chargeDelay);
   DischargeDelay_Start();
   DischargeDelay_WritePeriod(config.dischargeDelay);
+  debouncing_mask = MAX_MATRIX_VALUE << debouncing_period;
+  debouncing_negedge = 1 << (debouncing_period - 1);
+  debouncing_posedge = ~debouncing_negedge | debouncing_mask;
+  debouncing_negedge |= debouncing_mask;
   scan_reset();
 }
 
-static void BufferSetup(uint8 chan, uint8 *td, uint8 channel_config,
+void BufferSetup(uint8 chan, uint8 *td, uint8 channel_config,
                         uint32 src_addr, uint32 dst_addr) {
   (void)CyDmaClearPendingDrq(chan);
   if (*td == CY_DMA_INVALID_TD)
@@ -76,7 +85,7 @@ static void BufferSetup(uint8 chan, uint8 *td, uint8 channel_config,
   (void)CyDmaChEnable(chan, 1);
 }
 
-static void ResultBufferSetup(void) {
+void ResultBufferSetup(void) {
   CyDmaClearPendingDrq(FinalBuf_DmaHandle);
   FinalBufTD[0] = CyDmaTdAllocate();
 #if NUM_ADCs == 1
@@ -109,7 +118,7 @@ static void ResultBufferSetup(void) {
   CyDmaChEnable(FinalBuf_DmaHandle, 1);
 }
 
-static void enable_sensor(void) {
+void enable_sensor(void) {
   BufferSetup(Buf0_DmaHandle, &Buf0TD, Buf0__TD_TERMOUT_EN,
               (uint32)ADC0_ADC_SAR__WRK0, (uint32)BufMem);
 #if NUM_ADCs > 1
@@ -145,7 +154,7 @@ static inline void append_scancode(uint8_t scancode) {
     }
     return;
   }
-#ifdef DEBUG_SHOW_KEYPRESSES
+#if DEBUG_SHOW_KEYPRESSES == 1
   if ((scancode & KEY_UP_MASK)) {
     PIN_DEBUG(1, 1)
   } else {
@@ -197,14 +206,18 @@ CY_ISR(Result_ISR) {
   return;
 // The rest of the code is dead in 100kHz mode.
 #endif
-  // 5.4-6us
-  uint32_t row_status = matrix_status[reading_row];
   uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 4;
   // keyIndex - same speed as static global on -O3, faster in -Os
+  // having uint16_t* for cell is slower than directly using matrix[keyIndex].
   uint8_t keyIndex = (reading_row + 1) * MATRIX_COLS;
+  // caching row status is faster than direct array access
+  uint32_t row_status = matrix_status[reading_row];
+#if PROFILE_SCAN_PROCESSING == 1
+  CyPins_SetPin(ExpHdr_1);
+#endif
   for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
     adc_buffer_pos -= 4;
-
+    // TEST_BIT is faster than bool inited outside of the loop.
     if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
       // When monitoring matrix we're interested in raw feed.
       matrix[--keyIndex] = Results[adc_buffer_pos];
@@ -215,25 +228,31 @@ CY_ISR(Result_ISR) {
     } else if (Results[adc_buffer_pos] < config.thresholds[--keyIndex]) {
 #endif
       // Key pressed
-      matrix[keyIndex] = ((matrix[keyIndex] << 1) | DEBOUNCING_MASK) + 1;
+      matrix[keyIndex] = ((matrix[keyIndex] << 1) | debouncing_mask) + 1;
+#if DEBUG_SHOW_MATRIX_EVENTS == 1
+      PIN_DEBUG(4, 1);
+#endif
     } else {
-      matrix[keyIndex] = ((matrix[keyIndex] << 1) | DEBOUNCING_MASK);
+      matrix[keyIndex] = ((matrix[keyIndex] << 1) | debouncing_mask);
     }
 
-    if (matrix[keyIndex] == DEBOUNCING_POSEDGE &&
+    if (matrix[keyIndex] == debouncing_posedge &&
         (row_status & (1 << curCol)) == 0) {
       row_status |= (1 << curCol);
       append_scancode(keyIndex);
-    } else if (matrix[keyIndex] == DEBOUNCING_NEGEDGE &&
-               (row_status & (1 << curCol))) {
+    } else if (matrix[keyIndex] == debouncing_negedge &&
+        (row_status & (1 << curCol))) {
       row_status &= ~(1 << curCol);
       append_scancode(KEY_UP_MASK | keyIndex);
     }
   }
+#if PROFILE_SCAN_PROCESSING == 1
+  CyPins_ClearPin(ExpHdr_1);
+#endif
   matrix_status[reading_row] = row_status;
   if (reading_row == 0) {
     // End of matrix reading cycle.
-    for (uint8_t i = 1; i < MATRIX_ROWS; i++) {
+    for (uint8_t i = MATRIX_ROWS - 1; i > 0; --i) {
       row_status |= matrix_status[i];
     }
     if (row_status) {
@@ -265,7 +284,7 @@ void scan_reset(void) {
 #if NORMALLY_LOW == 1
     matrix[i] = 0;
 #else
-    matrix[i] = 0xff;
+    matrix[i] = MAX_MATRIX_VALUE;
 #endif
   }
   memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
@@ -275,7 +294,7 @@ void scan_reset(void) {
   CyExitCriticalSection(enableInterrupts);
 }
 
-void scan_init(void) {
+void scan_init(uint8_t debouncing_period) {
   /* What I'm doing here:
    * All status values are invalid when scan is reinitialized.
    * BUT
@@ -283,7 +302,7 @@ void scan_init(void) {
    */
   status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
   while (scan_in_progress) {}; // Make sure scan is stopped.
-  init_sensor();
+  init_sensor(debouncing_period);
   enable_sensor();
 }
 

@@ -29,6 +29,7 @@ void Hardware::init() {
 
   ui->chargeDelay->setValue(config.chargeDelay);
   ui->dischargeDelay->setValue(config.dischargeDelay);
+  ui->debouncingTicks->setValue(config.debouncingTicks);
   ui->modeBox->setCurrentIndex(config.expHdrMode);
   ui->Param1->setValue(config.expHdrParam1);
   ui->Param2->setValue(config.expHdrParam2);
@@ -63,6 +64,7 @@ void Hardware::on_applyButton_clicked(void) {
   config.adcBits = adcBitMap[ui->adcBits->currentIndex()];
   config.chargeDelay = ui->chargeDelay->value();
   config.dischargeDelay = ui->dischargeDelay->value();
+  config.debouncingTicks = ui->debouncingTicks->value();
   config.expHdrMode = ui->modeBox->currentIndex();
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();

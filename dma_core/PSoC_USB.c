@@ -84,6 +84,11 @@ void set_hardware_parameters(void) {
   if (config.dischargeDelay < 2) {
     config.dischargeDelay = 2;
   }
+  if (config.debouncingTicks < 1) {
+    config.debouncingTicks = 1;
+  } else if (config.debouncingTicks > MAX_DEBOUNCING_BUFFER_SIZE) {
+    config.debouncingTicks = MAX_DEBOUNCING_BUFFER_SIZE;
+  }
 }
 
 void load_config(void) {
@@ -109,7 +114,7 @@ void load_config(void) {
 void apply_config(void) {
   exp_init();
   pipeline_init(); // calls scan_reset
-  scan_init();
+  scan_init(config.debouncingTicks);
   scan_start();
 }
 

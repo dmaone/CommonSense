@@ -279,6 +279,7 @@ HardwareConfig DeviceConfig::getHardwareConfig(void) {
   retval.adcBits = _eeprom.adcBits;
   retval.chargeDelay = _eeprom.chargeDelay;
   retval.dischargeDelay = _eeprom.dischargeDelay;
+  retval.debouncingTicks = _eeprom.debouncingTicks;
   retval.expHdrMode = _eeprom.expMode;
   retval.expHdrParam1 = _eeprom.expParam1;
   retval.expHdrParam2 = _eeprom.expParam2;
@@ -289,6 +290,7 @@ void DeviceConfig::setHardwareConfig(HardwareConfig config) {
   _eeprom.adcBits = config.adcBits;
   _eeprom.chargeDelay = config.chargeDelay;
   _eeprom.dischargeDelay = config.dischargeDelay;
+  _eeprom.debouncingTicks = config.debouncingTicks;
   _eeprom.expMode = config.expHdrMode;
   _eeprom.expParam1 = config.expHdrParam1;
   _eeprom.expParam2 = config.expHdrParam2;

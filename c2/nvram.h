@@ -27,6 +27,8 @@
   (COMMONSENSE_BASE_SIZE + 2 * COMMONSENSE_MATRIX_SIZE)
 #endif
 
+#define MAX_DEBOUNCING_BUFFER_SIZE 16
+
 typedef union {
   struct {
     uint8_t configVersion;
@@ -40,7 +42,8 @@ typedef union {
     uint8_t adcBits;
     uint8_t chargeDelay;
     uint16_t dischargeDelay;
-    uint8_t _RESERVED0[4];
+    uint8_t debouncingTicks;
+    uint8_t _RESERVED0[3];
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
     uint8_t layerConditions[NUM_LAYER_CONDITIONS];
     uint8_t _RESERVED1[8];

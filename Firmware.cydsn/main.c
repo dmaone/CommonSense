@@ -32,7 +32,6 @@ int main() {
   status_register = 0;
   FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, NOT_A_KEYBOARD);
   usb_init();
-  scan_init();
   apply_config();
   scan_start(); // We are starting in full power - must do that initial kick
   for (;;) {
