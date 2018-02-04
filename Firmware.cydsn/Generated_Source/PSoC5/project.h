@@ -48,7 +48,6 @@
 #include "ResultIRQ.h"
 #include "DischargeDelay.h"
 #include "SupervisoryUART.h"
-#include "SupervisoryIRQ.h"
 #include "USB_VBUS_aliases.h"
 #include "USB_VBUS.h"
 #include "USB_Dm_aliases.h"
