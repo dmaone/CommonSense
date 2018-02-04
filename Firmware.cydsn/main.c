@@ -50,6 +50,7 @@ int main() {
           scan_sanity_check();
         }
         usb_tick();
+        serial_tick();
         if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
           report_matrix_readouts();
         } else if (TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {

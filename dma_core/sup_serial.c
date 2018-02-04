@@ -21,10 +21,17 @@ bool serial_receive(Sup_Pdu_t* data) {
   if (SupervisoryUART_ReadRxStatus() != SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
     return false;
   }
-  for (uint8_t i=0; i < 3; i++) {
+  for (uint8_t i=0; i < 2; i++) {
     while (SupervisoryUART_ReadRxStatus()
         != SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {};
     data->raw[i] = SupervisoryUART_ReadRxData();
   }
   return true;
+}
+
+void serial_tick(void) {
+  Sup_Pdu_t data;
+  if (serial_receive(&data)) {
+    serial_send(&data);
+  }
 }
