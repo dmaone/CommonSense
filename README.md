@@ -51,7 +51,7 @@ Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator
 ## Firmware
 * Open PSoC Creator
 * File -> Open -> Project/Workspace "CommonSense.cywrk".
-* Check that the rightmost combo box on the top toolbar says "Release" (not "Debug").
+* IMPORTANT: Select "Release" in the  rightmost combo box on the top toolbar that says "Debug".
 * Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097" It's likely selected already.
 * Press F6 to build everything.
 
