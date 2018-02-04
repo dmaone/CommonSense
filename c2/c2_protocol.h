@@ -148,3 +148,18 @@ typedef union {
 
 #define DELAYS_EVENT 0
 #define DELAYS_TAP 1
+
+// serial stuff
+enum supervisory_command {
+  SUP_CMD_SENDCHAR = 'c',
+  SUP_CMD_SUSPEND = 's',
+  SUP_CMD_WAKEUP = 'w',
+};
+
+typedef union {
+  struct {
+    char command;
+    uint8_t data;
+  } __attribute__((packed));
+  uint8_t raw[2];
+} Sup_Pdu_t;

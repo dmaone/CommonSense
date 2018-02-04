@@ -16,6 +16,16 @@
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
 
+#define USB_STATUS_CONNECTED 0
+#define USB_STATUS_DISCONNECTED 1
+uint8_t status = USB_STATUS_DISCONNECTED;
+uint8_t wakeup_enabled = 0;
+
+// How long (in system ticks) to wait for power to be disconnected
+// Used to tell apart cable disconnect from USB suspend.
+#define POWER_CHECK_DELAY 5000
+uint16_t power_check_timer = 0;
+
 CY_ISR_PROTO(Suspend_ISR);
 
 void report_status(void) {
@@ -105,10 +115,10 @@ void load_config(void) {
   CyEEPROM_ReadRelease();
   CyExitCriticalSection(interruptState);
   EEPROM_Stop();
-  set_hardware_parameters();
   if (config.configVersion != CS_CONFIG_VERSION) {
     xprintf("Old version of EEPROM - possibly unpredictable results.");
   }
+  set_hardware_parameters();
 }
 
 void apply_config(void) {
@@ -134,7 +144,7 @@ void save_config(void) {
   xprintf("Written %d bytes!", bytes_modified);
 }
 
-void process_msg(OUT_c2packet_t *inbox) {
+void usb_receive(OUT_c2packet_t *inbox) {
   memset(outbox.raw, 0x00, sizeof(outbox));
   switch (inbox->command) {
   case C2CMD_EWO:
@@ -178,6 +188,9 @@ void process_msg(OUT_c2packet_t *inbox) {
 }
 
 void usb_send_c2(void) {
+  if (status != USB_STATUS_CONNECTED) {
+    return;
+  }
   USB_WAIT_FOR_IN_EP(OUTBOX_EP);
   USB_LoadInEP(OUTBOX_EP, outbox.raw, sizeof(outbox.raw));
 }
@@ -334,22 +347,69 @@ void usb_suspend_monitor_stop(void) {
   USBSuspendIRQ_Stop();
 }
 
+uint8_t usb_powered() {
+#ifdef SELF_POWERED
+  return USB_VBusPresent();
+#else
+  return 1;
+#endif
+}
+
 void usb_init(void) {
-  USB_Start(0u, USB_5V_OPERATION);
-  power_state = DEVSTATE_FULL_THROTTLE;
   memset(keyboard_report.raw, 0, sizeof keyboard_report.raw);
   keyboard_report_usage = 0;
   memset(consumer_report, 0, sizeof consumer_report);
+#ifndef SELF_POWERED
+  USB_Start(0u, USB_5V_OPERATION);
+#endif
 }
 
 void usb_configure(void) {
   memset(KBD_OUTBOX, 0, sizeof(KBD_OUTBOX));
   memset(CONSUMER_OUTBOX, 0, sizeof(CONSUMER_OUTBOX));
   memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
-  /* Wait for device to enumerate */
-  while (0u == USB_GetConfiguration()) {
-  };
-  usb_suspend_monitor_start();
+  if (0u == USB_GetConfiguration()) {
+    // This never happens. But let's handle it just in case.
+    status = USB_STATUS_DISCONNECTED;
+  } else {
+    status = USB_STATUS_CONNECTED;
+    usb_suspend_monitor_start();
+  }
+}
+
+void usb_tick(void) {
+#ifdef SELF_POWERED
+  if (usb_powered()) {
+    if (USB_initVar == 0) {
+      USB_Start(0u, USB_POWER_MODE);
+    }
+  } else {
+    if (status == USB_STATUS_CONNECTED) {
+      USB_Stop();
+      status = USB_STATUS_DISCONNECTED;
+    }
+    return;
+  }
+#endif
+  if (0u != USB_IsConfigurationChanged()) {
+    usb_configure();
+  }
+  uint8_t enableInterrupts = CyEnterCriticalSection();
+  if (CTRLR_SCB.status == USB_XFER_STATUS_ACK) {
+    static OUT_c2packet_t inbox;
+    memcpy(&inbox, (void *)CTRLR_INBOX, sizeof(inbox));
+    CTRLR_SCB.status = USB_XFER_IDLE;
+    // processing message sends USB packets, interrupts are vital.
+    CyExitCriticalSection(enableInterrupts);
+    usb_receive(&inbox);
+    enableInterrupts = CyEnterCriticalSection();
+  }
+  if (KBD_SCB.status == USB_XFER_STATUS_ACK) {
+    led_status = KBD_INBOX[0];
+    KBD_SCB.status = USB_XFER_IDLE;
+    exp_setLEDs(led_status);
+  }
+  CyExitCriticalSection(enableInterrupts);
 }
 
 #define RESET_SINGLE(R, O)                                                     \
@@ -371,13 +431,32 @@ void reset_reports(void) {
   // xprintf("reports reset");
 }
 
-void nap(void) {
+void usb_nap(void) {
   // TODO reconfigure monitor period to provide periodic wakeups for
   // monitor-in-suspend
   usb_suspend_monitor_stop();
-  uint8_t rwu = USB_RWUEnabled();
+  power_check_timer = POWER_CHECK_DELAY;
+  wakeup_enabled = USB_RWUEnabled();
   USB_Suspend();
-  if (rwu == 0) {
+  power_state = DEVSTATE_PREPARING_TO_SLEEP;
+}
+
+void usb_check_power(void) {
+#ifndef SELF_POWERED
+  if (0) { //Skip the first option.
+#else
+  if (power_check_timer-- > 0) {
+    if (usb_powered() != 0) {
+      return;
+    }
+    // power disconnected. No point waiting further.
+    power_check_timer = 0;
+  }
+  if (usb_powered() == 0) {
+#endif
+    // USB disconnected, not a suspend. Return to full power.
+    power_state = DEVSTATE_FULL_THROTTLE;
+  } else if (wakeup_enabled == 0) {
     power_state = DEVSTATE_SLEEP;
     CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
   } else {
@@ -389,7 +468,7 @@ void nap(void) {
   }
 }
 
-void wake(void) {
+void usb_wake(void) {
   USB_Resume();
   power_state = DEVSTATE_FULL_THROTTLE;
   scan_start();
@@ -399,7 +478,7 @@ void wake(void) {
 
 void usb_send_wakeup(void) {
   CyDelay(5); // Just in case, not to violate spec by waking immediately.
-  wake();
+  usb_wake();
   usb_suspend_monitor_stop();
   USB_Force(USB_FORCE_K);
   CyDelay(5);

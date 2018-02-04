@@ -81,8 +81,8 @@
 #define USB_HID_RPT_4_SIZE_MSB                 (0x00u)
 #define USB_MAX_REPORTID_NUMBER                (0u)
 
-#define USB_MON_VBUS               (0u)
-#define USB_EXTERN_VBUS            (1u)
+#define USB_MON_VBUS               (1u)
+#define USB_EXTERN_VBUS            (0u)
 #define USB_POWER_PAD_VBUS         (0u)
 #define USB_EXTERN_VND             (0u)
 #define USB_EXTERN_CLS             (0u)

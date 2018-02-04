@@ -13,16 +13,6 @@
 
 #define SUSPEND_SYSTIMER_DIVISOR 10
 
-enum devicePowerStates {
-  DEVSTATE_FULL_THROTTLE = 0,
-  DEVSTATE_SLEEP,
-  DEVSTATE_WATCH,
-  DEVSTATE_SUSPENDING,
-  DEVSTATE_RESUMING,
-};
-
-// Modified by ISR!
-volatile uint8_t power_state;
 
 /*
  * Internal state storage. Must be longer than conceivable number of
@@ -49,12 +39,14 @@ uint8_t system_report[OUTBOX_SIZE(SYSTEM_OUTBOX)];
 
 void usb_init(void);
 void usb_configure(void);
-void nap(void);
-void wake(void);
+void usb_tick(void);
+void usb_nap(void);
+void usb_check_power(void);
+void usb_wake(void);
 
 void usb_send_c2();
 void usb_send_wakeup(void);
-void process_msg(OUT_c2packet_t *);
+void usb_receive(OUT_c2packet_t *);
 void load_config(void);
 void apply_config(void);
 

@@ -37,6 +37,7 @@ So.
 * Cols: P1[0-7], P2[0, 2-7], P3[0, 1, 3-7], P15[0, 1, 2].
 * P0[2], P0[4] to +5V, P0[3], P3[2] to the ground.
 
+NOTE: D1 only exists in dual-ADC configuration - so may not always exist in the project.
 
 Whew. Hopefully you're done with soldering now.
 
