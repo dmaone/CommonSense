@@ -11,7 +11,7 @@
 
 #include <stdbool.h>
 
-#include "c2/c2_protocol.h"
+#include "../c2/c2_protocol.h"
 
 void serial_init(void);
 void serial_send(Sup_Pdu_t* data);

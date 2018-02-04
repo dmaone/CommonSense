@@ -56,8 +56,8 @@
 #define MATRIX_ROWS 8
 #define MATRIX_LAYERS 4
 
-#include "c2/c2_protocol.h"
-#include "c2/nvram.h"
+#include "../c2/c2_protocol.h"
+#include "../c2/nvram.h"
 
 #undef DEBUG_STATE_MACHINE
 

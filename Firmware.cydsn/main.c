@@ -6,12 +6,12 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "PSoC_USB.h"
-#include "sup_serial.h"
-#include "exp.h"
-#include "globals.h"
-#include "pipeline.h"
-#include "scan.h"
+#include "../dma_core/exp.h"
+#include "../dma_core/globals.h"
+#include "../dma_core/PSoC_USB.h"
+#include "../dma_core/pipeline.h"
+#include "../dma_core/scan.h"
+#include "../dma_core/sup_serial.h"
 #include <project.h>
 
 CY_ISR(BootIRQ_ISR) { Boot_Load(); }

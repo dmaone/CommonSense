@@ -7,7 +7,7 @@
  * published by the Free Software Foundation.
  */
 #pragma once
-#include "globals.h"
+#include "../dma_core/globals.h"
 
 /*
  * It is VERY important to include all files that define *_CALLBACK's to this
