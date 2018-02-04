@@ -1,10 +1,9 @@
 This is a work in progress.
 It's licensed under GPL, errrhm, v2?
 
-You can also fry the chip using it. If you break it - you own all the parts.
+You can fry the chip using it. If you break it - you own all the parts.
 
-It is currently configured to use CY8C5667LTI-LP009, but you can change the chip in Project->Device Selector menu.
-So it should work with CY8CKIT-059. Here's how.
+!!!CAUTION!!! Make sure your build environment works - build the firmware first, without any modifications!
 
 # Soldering
 
@@ -22,22 +21,23 @@ You'll need 35 pins. That's not much more than the kit has - so choose the layou
 * P12(all pins of it) cannot be used for analog connections. That means you can only assign Rows to those pins.
 * D0 and D1 MUST be electrically connected to the ground. Use P0[3] for D0 and P3[2] for D1 (you can't use those pins for anything else anyway - they have 1uF capacitors connected to them). Can be any pins except P12[x] though.
 * It is better to separate Rows and Cols by a pin electrically connected to the ground, but not necessary. If you use adjacent pins - one matrix cell will have higher readings, that's all.
-* Columns. This is where things start to get complicated. Internally, there are 2 ADC blocks, connected to Cols[0-11] and Cols[12-23]. They're counted DOWN. Which means
+* Rows. Simplest part. No restrictions.
+* Columns. Columns must be assigned so that last column is Cols[23]. If you have a 16-column matrix, physical leftmost column is Cols[8]. Extra columns can be left auto-assigned.
+
+If you have dual-ADC version - things start to get complicated. ADC blocks are connected to Cols[0-11] and Cols[12-23]. They're counted DOWN. Which means
   1. Columns must be balanced. So those 16 columns become 8 + 8. and
   2. FIRST n columns will not be read if there's less than 24 columns.
 So, for 16-column keyboard, real columns will be Cols[4] - Cols[11] and Cols[16] - Cols[23]. To make things more interesting, column order is NOT reversed. Seriously, I need to consider making this part easier :)
-* Rows. Simplest part. No restrictions.
 
 So.
 
 ## Recommended pinout
 * D0: P0[3]
-* D1: P3[2]
+* D1 (if exists): P3[2]
 * Rows: P0[0, 1, 5, 6, 7], P15[3, 4, 5]. Alternatively, P12 can be used to free more analog-capable pins, but watch for ExpHdr pins.
 * Cols: P1[0-7], P2[0, 2-7], P3[0, 1, 3-7], P15[0, 1, 2].
 * P0[2], P0[4] to +5V, P0[3], P3[2] to the ground.
-
-NOTE: D1 only exists in dual-ADC configuration - so may not always exist in the project.
+* ExpHdr (solenoid/LED connector) is configured to blink the kit's LED. Leave it assigned as is, unless you really know what you're doing.
 
 Whew. Hopefully you're done with soldering now.
 
@@ -48,38 +48,25 @@ Linux with Virtualbox will probably work too - but not tested as I don't have an
 
 Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator-integrated-design-environment-ide] - you actually can download without suffering akamai download manager. Typical install works just fine. v4.1 was used, though newer should work too.
 
-## Bootloader
-* Open PSoC Creator
-* Open "CY8CKIT-059 Bootloader.cywrk" workspace
-* Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097".
-* Press Shift-F6 ("Build"), wait for it to finish.
-* Copy bootloader files **one level above** CommonSense directory. Yes. Above.
-```
-cp CommonSense\Bootloader.cydsn\Compiled\Bootloader.hex .
-cp CommonSense\Bootloader.cydsn\Compiled\Bootloader.elf .
-```
-If there's no files at the location - in the left pane, right-click on "Workspace blah blah", select "Properties" and change "Active build configuration" to "Release".
-
-Congratulations. Now for the main course!
-
 ## Firmware
+* Open PSoC Creator
+* File -> Open -> Project/Workspace "CommonSense.cywrk".
+* Check that the rightmost combo box on the top toolbar says "Release" (not "Debug").
+* Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097" It's likely selected already.
+* Press F6 to build everything.
 
-Firmware is in model F mode - "normally low". Look into dma_core/globals.h to switch to beamspring mode - #define SWITCH_TYPE
+Now it's a good time to make your firmware customizations.
+Firmware is in model F mode - "normally low". To switch to beamspring mode - #define SWITCH_TYPE BEAMSPRING in dma_core/globals.h
+But, again: build without any changes first!
 
-* Open PSoC Creator, open CommonSense.cywrk workspace.
-* Select Project -> Device Selector. Find and select "CY8C5888LTI-LP097".
 * Open "Project "Firmware"" in the left pane, click "Pins" in "Design Wide Resources". You will see chip model and a table on the right. Assign pins according to plan.
 * Press "Ctrl-F5" (Debug -> Program). The kit should be plugged in, of course. PSoC Programmer will demand to update KitProg - it explains how.
-
-NOTE: Columns must be assigned so that last column is Cols[23]. If you have a 16-column matrix, physical leftmost column is Cols[8]. Extra columns can be left auto-assigned.
-
-NOTE2: For dual-ADC left half must end with Cols[11], right half - with Cols[23].
 
 --- it's time now to disconnect the board, peel that polyimide film off the micro USB socket and plug the host into it.
 
 ..I was able to plug both ends into the same USB hub (thinkpad docking station) without frying anything - but your mileage may vary. I DO NOT RECOMMEND IT, IT'S A STUPID DWARF TRICK.
 
-You may optionally break the kitprog away in a symbolic gesture, but a) if I were you, I wouldn't and b) if you would - cut the laminate at the break line first. Not all the way (though you may if you have a dremel or a saw around), but enough so the board doesn't buckle so horribly. Oh, and soldering probably have to wait until this moment at least.
+You may optionally break the kitprog away in a symbolic gesture, but a) if I were you, I wouldn't and b) cut the laminate at the break line first. Not all the way (though you may if you have a dremel or a saw around), but enough so the board doesn't buckle so horribly. Oh, and soldering probably have to wait until this moment at least.
 
 ## FlightController
 
@@ -90,8 +77,15 @@ You may optionally break the kitprog away in a symbolic gesture, but a) if I wer
 With empty EEPROM, keyboard won't work. You need to initialize it. There are config files in misc/ directory which should be a good starting point.
 To load it into device, run FlightController, Config->Open, Config->Upload. BEWARE, thresholds may be set absolutely wrong!
 
+## Hardware configuration hints
+* If key monitor only shows zeroes, no matter which keys you press - set ADC resolution higher.
+* If even at 12 bits it still doesn't work - increase charge delay. Recommended setting is 18.
+* If you see double actuations on keypress - set debouncing higher.
+* If several keys fire at once - set longer discharge delay. I found that 180 (10us) works pretty well.
+* If you haven't touched ExpHdr pins - settings mode to "Solenoid" and drive time to 100 will make a LED on the kit blink with every keypress (not in setup mode).
+
 ## Configuring thresholds
-!!!NOTE!!! If you see double presses on some keys - set threshold higher - just under the steady pressed state. Some keys have physical bounce and there are two peaks. Controller is too fast and sees this as 2 keypresses. Yes, there is debouncing - currently it's 4 readouts for the state transition to happen, which adds about 1.5ms lag. Could be made longer - look for DEBOUNCING in the scan.h
+!!!NOTE!!! If you see double presses on some keys, set threshold higher - just under the steady pressed state. Some keys have physical bounce and there are two peaks. Controller is too fast and sees this as 2 keypresses.
 
 Short version (for beamspring, invert direction, so max->min and negative adjustments): 
 * Click "Key Monitor" button. 
@@ -99,12 +93,13 @@ Short version (for beamspring, invert direction, so max->min and negative adjust
 * Click "Stop!". Select "Max" into dropdown near the "reset" button, click "Reset", "Start!". 
 * Wait 15 seconds or longer, while readings stabilize.
 * click "Stop!". Click "Set thresholds". Close window.
-* Click "Thresholds" in the main window. put 5 into adjuster spinbox, click "Adjust", click "Apply".
+* Click "Thresholds" in the main window. put a small positive value (see below) into adjuster spinbox, click "Adjust".
+* Click "Apply".
 * Close threshold editor. Select "Config -> Upload" in menu. Test. Once you're satisfied with results, "Command -> Commit".
 
 Thresholds should be set ~2x higher than most of the matrix settles on. For beamspring - probably 75% of the highest reading.
-TEST SETTINGS BEFORE COMMITTING. It can be quite hard to get the keyboard back from the constantly spamming with keypresses! ("EMERGENCY STOP" button right after keyboard is connected helps)
+TEST SETTINGS BEFORE COMMITTING. If you get thresholds wrong - there will be a red light in the status bar and keyboard refuse to produce output.
 
 ## Configuring layouts
-pretty straightforward. If thresholds are configured, pressed keys will be highlighted by "yellow highlighter" color.
+Pretty straightforward. If thresholds are configured, pressed keys will be highlighted by "yellow highlighter" color.
 Import and export will load and save to file. Structure is compatible with xwhatsit layout files.
