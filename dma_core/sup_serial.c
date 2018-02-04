@@ -9,6 +9,9 @@
 #include <project.h>
 #include "sup_serial.h"
 
+Sup_Pdu_t inbox;
+uint8_t current_inbox_position = 0;
+
 void serial_init(void) {
   SupervisoryUART_Start();
 }
@@ -18,15 +21,16 @@ void serial_send(Sup_Pdu_t* packet) {
 }
 
 bool serial_receive(Sup_Pdu_t* data) {
-  if (SupervisoryUART_ReadRxStatus() != SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
-    return false;
+  while
+      (SupervisoryUART_ReadRxStatus() == SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
+    inbox.raw[current_inbox_position++] = SupervisoryUART_ReadRxData();
+    if (current_inbox_position >= sizeof(inbox)) {
+      memcpy(data, &inbox, sizeof(inbox));
+      current_inbox_position = 0;
+      return true;
+    }
   }
-  for (uint8_t i=0; i < 2; i++) {
-    while (SupervisoryUART_ReadRxStatus()
-        != SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {};
-    data->raw[i] = SupervisoryUART_ReadRxData();
-  }
-  return true;
+  return false;
 }
 
 void serial_tick(void) {
