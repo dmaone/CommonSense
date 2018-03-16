@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CySpc.c
-* \version 5.60
+* \version 5.70
 *
 * \brief Provides an API for the System Performance Component.
 * The SPC functions are not meant to be called directly by the user
@@ -8,7 +8,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -505,6 +505,66 @@ cystatus CySpcEraseSector(uint8 array, uint8 sectorNumber)
         {
             CY_SPC_CPU_DATA_REG = array;
             CY_SPC_CPU_DATA_REG = sectorNumber;
+        }
+        else
+        {
+            status = CYRET_CANCELED;
+        }
+    }
+    else
+    {
+        status = CYRET_LOCKED;
+    }
+
+    return(status);
+}
+
+
+/*******************************************************************************
+* Function Name: CySpcEraseRow
+****************************************************************************//**
+*  Erases a row in Flash.
+*
+*  \param uint8 array:
+*   Id of the array.
+*
+*  \param uint16 address:
+*   Flash address
+*
+*  \param uint8 tempPolarity:
+*   temperature polarity.
+*   \param 1: the Temp Magnitude is interpreted as a positive value
+*   \param 0: the Temp Magnitude is interpreted as a negative value
+*
+*  \param uint8 tempMagnitude:
+*   temperature magnitude.
+*
+* \return
+*  CYRET_STARTED
+*  CYRET_CANCELED
+*  CYRET_LOCKED
+*
+*******************************************************************************/
+cystatus CySpcEraseRow(uint8 array, uint16 address, uint8 tempPolarity, uint8 tempMagnitude)\
+
+{
+    cystatus status = CYRET_STARTED;
+
+    /* Make sure the SPC is ready to accept command */
+    if(CY_SPC_IDLE)
+    {
+        CY_SPC_CPU_DATA_REG = CY_SPC_KEY_ONE;
+        CY_SPC_CPU_DATA_REG = CY_SPC_KEY_TWO(CY_SPC_CMD_ER_ROW);
+        CY_SPC_CPU_DATA_REG = CY_SPC_CMD_ER_ROW;
+
+        /* Make sure the command was accepted */
+        if(CY_SPC_BUSY)
+        {
+            CY_SPC_CPU_DATA_REG = array;
+            CY_SPC_CPU_DATA_REG = HI8(address);
+            CY_SPC_CPU_DATA_REG = LO8(address);
+            CY_SPC_CPU_DATA_REG = tempPolarity;
+            CY_SPC_CPU_DATA_REG = tempMagnitude;
         }
         else
         {

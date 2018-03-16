@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyDmac.h
-* \version 5.60
+* \version 5.70
 *
 * \brief Provides the function definitions for the DMA Controller.
 *
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.

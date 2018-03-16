@@ -1,6 +1,6 @@
 ;-------------------------------------------------------------------------------
 ; FILENAME: CyBootAsmRv.s
-; Version 5.60
+; Version 5.70
 ;
 ;  DESCRIPTION:
 ;    Assembly routines for RealView.

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyFlash.c
-* \version 5.60
+* \version 5.70
 *
 * \brief Provides an API for the FLASH/EEPROM.
 *
@@ -11,7 +11,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2017, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -36,7 +36,6 @@ uint8 dieTemperature[CY_FLASH_DIE_TEMP_DATA_SIZE];
 
 
 static cystatus CySetTempInt(void);
-static cystatus CyFlashGetSpcAlgorithm(void);
 
 
 /*******************************************************************************
@@ -118,6 +117,80 @@ void CyFlash_Stop(void)
 
 
 /*******************************************************************************
+* Function Name: CyFlash_EraseRow
+****************************************************************************//**
+*
+*  Erases a single row of flash. Reports success or reason for failure. 
+*  The API does not return until the erase operation is complete.
+*
+*  \param arrayID:    ID of the array to erase.
+*   The arrays in the part are sequential starting at the first ID for the
+*   Flash memory type. 
+*  \param rowAddress: Row address within the specified arrayId.
+*
+*  \return
+*  status:
+*   CYRET_SUCCESS if successful.
+*   CYRET_LOCKED if the SPC is already in use.
+*   CYRET_CANCELED if command not accepted
+*   CYRET_UNKNOWN if there was an SPC error.
+*   CYRET_BAD_PARAM if one or more invalid parameters
+*
+*******************************************************************************/
+cystatus CyFlash_EraseRow(uint8 arrayId, uint16 rowAddress)
+{
+    cystatus status = CYRET_SUCCESS;
+
+    if (arrayId > CY_SPC_LAST_FLASH_ARRAYID)
+    {
+        status = CYRET_BAD_PARAM;
+    }
+    else if(rowAddress > (CY_FLASH_NUMBER_ROWS/CY_FLASH_NUMBER_ARRAYS))
+    {
+        status = CYRET_BAD_PARAM;
+    }        
+    else
+    {
+        if(CySpcLock() == CYRET_SUCCESS)
+        {
+            /* Erase flash row */
+            status = CySpcEraseRow(arrayId, rowAddress, dieTemperature[0u], dieTemperature[1u]);
+            
+            if(CYRET_STARTED == status)
+            {
+                while(CY_SPC_BUSY)
+                {
+                    /* Wait for SPC to finish and get SPC status */
+                    CyDelayUs(1u);
+                }
+                
+                /* Hide SPC status */
+                if(CY_SPC_STATUS_SUCCESS == CY_SPC_READ_STATUS)
+                {
+                    status = CYRET_SUCCESS;
+                }
+                else
+                {
+                    status = CYRET_UNKNOWN;
+                }
+            }
+	        else
+            {
+                status = CYRET_CANCELED;
+            }
+            CySpcUnlock();
+        }
+        else 
+        {
+            status = CYRET_LOCKED;
+        }
+    }
+    
+    return(status);
+}
+
+
+/*******************************************************************************
 * Function Name: CySetTempInt
 ****************************************************************************//**
 *
@@ -188,7 +261,7 @@ static cystatus CySetTempInt(void)
 *   CYRET_UNKNOWN - if there was an SPC error
 *
 *******************************************************************************/
-static cystatus CyFlashGetSpcAlgorithm(void) 
+cystatus CyFlashGetSpcAlgorithm(void) 
 {
     cystatus status;
 

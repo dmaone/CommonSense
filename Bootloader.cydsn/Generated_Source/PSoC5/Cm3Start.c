@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file Cm3Start.c
-* \version 5.60
+* \version 5.70
 *
 *  \brief
 *  Startup code for the ARM CM3.
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2017, Cypress Semiconductor Corporation. All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation. All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -46,7 +46,6 @@
 
 #if defined(__GNUC__)
     #include <errno.h>
-    extern int  errno;
     extern int  end;
 #endif  /* defined(__GNUC__) */
 

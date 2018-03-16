@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyFlash.h
-* \version 5.60
+* \version 5.70
 *
 * \brief Provides the function definitions for the FLASH/EEPROM.
 *
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2017, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -66,8 +66,10 @@ extern uint8 dieTemperature[CY_FLASH_DIE_TEMP_DATA_SIZE];
 /* Flash Functions */
 void     CyFlash_Start(void);
 void     CyFlash_Stop(void);
+cystatus CyFlash_EraseRow(uint8 arrayId, uint16 rowAddress);
 cystatus CySetTemp(void);
 cystatus CySetFlashEEBuffer(uint8 * buffer);
+cystatus CyFlashGetSpcAlgorithm(void);
 cystatus CyWriteRowFull(uint8 arrayId, uint16 rowNumber, const uint8 * rowData, uint16 rowSize) \
             ;
 cystatus CyWriteRowData(uint8 arrayId, uint16 rowAddress, const uint8 * rowData);
