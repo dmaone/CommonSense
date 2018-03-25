@@ -22,9 +22,10 @@ CY_ISR(Timer_ISR) {
 }
 
 int main() {
+  ILO_Trim_Start();
+  ILO_Trim_BeginTrimming();
   CyGlobalIntEnable; /* Enable global interrupts. */
   BootIRQ_StartEx(BootIRQ_ISR);
-  SysTimer_WritePeriod(BCLK__BUS_CLK__KHZ); // Need 1kHz
   SysTimer_Start();
   TimerIRQ_StartEx(Timer_ISR);
 
