@@ -20,6 +20,7 @@
 #include "LayoutEditor.h"
 #include "MatrixMonitor.h"
 #include "ThresholdEditor.h"
+#include "MacroEditor.h"
 
 namespace Ui {
 class FlightController;
@@ -58,6 +59,7 @@ private:
   MatrixMonitor *matrixMonitor;
   LayoutEditor *layoutEditor;
   ThresholdEditor *thresholdEditor;
+  MacroEditor *macroEditor;
   LayerConditions *layerConditions;
   Delays *_delays;
   Hardware *_hardware;

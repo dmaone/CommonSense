@@ -1,9 +1,11 @@
 #pragma once
 
+#include <QObject>
 #include "../c2/nvram.h"
+
 #include "Events.h"
 #include "LayerCondition.h"
-#include <QObject>
+#include "Macro.h"
 
 struct HardwareConfig {
   uint8_t adcBits;
@@ -33,7 +35,8 @@ public:
   uint8_t guardLo;
   uint8_t thresholds[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-  std::vector<LayerCondition> layerConditions(void);
+  std::vector<Macro> macros;
+  std::vector<LayerCondition> loadLayerConditions();
   void setLayerCondition(int conditionIdx, LayerCondition cnd);
   void setLayerConditions(std::vector<LayerCondition> lcs);
   std::vector<uint16_t> delays(void);

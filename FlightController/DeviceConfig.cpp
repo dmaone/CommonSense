@@ -140,6 +140,16 @@ void DeviceConfig::_unpack(void) {
       }
     }
   }
+  int macro_start = tableSize * (numLayers + 1);
+  macros.clear();
+  while(_eeprom.stash[macro_start] != 0xff) {
+    size_t len = _eeprom.stash[macro_start + 2];
+    macros.emplace_back(_eeprom.stash[macro_start],
+                        _eeprom.stash[macro_start+1],
+                        QByteArray(reinterpret_cast<const char *>(
+                            _eeprom.stash+macro_start+3), len));
+    macro_start += len + 3;
+  }
   this->bValid = true;
   emit(changed());
   return;
@@ -161,25 +171,14 @@ void DeviceConfig::_assemble(void) {
       }
     }
   }
-  // uint8_t macros_start = tableSize * (numLayers + 1);
-  /*
-  // Crude memcpy of a test macro F24 -> Shift-A
-  static const uint8_t filler[] = {
-      115, 0, 6, // F24, default flags, 6 bytes
-      0x40, 0xe1, // Press, LShift
-      0x00, 4, // Type, A
-      0x60, 0xe1, // Release, LShift
-      229, 0xc0, 6, // RShift, release|tap, 6 bytes
-      0x40, 0xe1, // Press, LShift
-      00, 5, // Type, B
-      0x60, 0xe1, // Release, LShift
-      0xff // last byte, so that I can put comma at the end of the block
-  };
-  for (uint8_t i = 0; i < sizeof filler; i++)
-  {
-      this->_eeprom.stash[macros_start + i] = filler[i];
+  size_t macros_cursor = tableSize * (numLayers + 1);
+  for (auto& m : macros) {
+    auto bin = m.toBin();
+    for (uint8_t i=0; i<bin.length(); i++) {
+      _eeprom.stash[macros_cursor++] = bin[i];
+    }
+    qInfo() << m.keyCode;
   }
-  */
 }
 
 void DeviceConfig::fromFile() {
@@ -244,7 +243,7 @@ void DeviceConfig::rollback(void) {
     emit sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
-std::vector<LayerCondition> DeviceConfig::layerConditions(void) {
+std::vector<LayerCondition> DeviceConfig::loadLayerConditions(void) {
   std::vector<LayerCondition> cnds(numLayerConditions);
   for (uint8_t i = 0; i < numLayerConditions; i++) {
     cnds[i] = LayerCondition(_eeprom.layerConditions[i]);

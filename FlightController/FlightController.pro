@@ -35,13 +35,15 @@ SOURCES += main.cpp \
     LayoutEditor.cpp \
     ScancodeList.cpp \
     ThresholdEditor.cpp \
+    MacroEditor.cpp \
     DeviceConfig.cpp \
     LayerConditions.cpp \
     FirmwareLoader.cpp \
     CyACD.cpp \
     LayerCondition.cpp \
     Delays.cpp \
-    Hardware.cpp
+    Hardware.cpp \
+    Macro.cpp
 
 HEADERS  += \
     ../c2/c2_protocol.h \
@@ -57,19 +59,22 @@ HEADERS  += \
     LayoutEditor.h \
     ScancodeList.h \
     ThresholdEditor.h \
+    MacroEditor.h \
     DeviceConfig.h \
     LayerConditions.h \
     FirmwareLoader.h \
     CyACD.h \
     LayerCondition.h \
     Delays.h \
-    Hardware.h
+    Hardware.h \
+    Macro.h
 
 FORMS    += \
     FlightController.ui \
     MatrixMonitor.ui \
     LayoutEditor.ui \
     ThresholdEditor.ui \
+    MacroEditor.ui \
     Hardware.ui
 
 DISTFILES +=

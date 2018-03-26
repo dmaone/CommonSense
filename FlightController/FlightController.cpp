@@ -39,6 +39,8 @@ FlightController::FlightController(QWidget *parent)
       thresholdEditor,
       SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
 
+  macroEditor = new MacroEditor(di.config);
+
   layerConditions = new LayerConditions(di.config);
 
   _delays = new Delays(di.config);
@@ -245,6 +247,7 @@ void FlightController::lockUI(bool lock) {
   ui->statusRequestButton->setDisabled(lock);
   ui->MatrixMonitorButton->setDisabled(lock);
   ui->thresholdsButton->setDisabled(lock);
+  ui->macrosButton->setDisabled(lock);
   ui->layoutButton->setDisabled(lock);
   ui->layerModsButton->setDisabled(lock);
   ui->delaysButton->setDisabled(lock);
@@ -253,9 +256,7 @@ void FlightController::lockUI(bool lock) {
 
 void FlightController::editLayoutClick(void) { layoutEditor->show(); }
 
-void FlightController::editMacrosClick(void) {
-  // macrosEditor->show();
-}
+void FlightController::editMacrosClick(void) { macroEditor->show(); }
 
 void FlightController::editThresholdsClick(void) { thresholdEditor->show(); }
 
@@ -290,4 +291,3 @@ void FlightController::on_statusRequestButton_clicked(void) {
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
   di.printableStatus = true;
 }
-

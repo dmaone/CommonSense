@@ -35,7 +35,7 @@ LayerConditions::LayerConditions(DeviceConfig *config, QWidget *parent)
 }
 
 void LayerConditions::init(void) {
-  std::vector<LayerCondition> cnds = config->layerConditions();
+  std::vector<LayerCondition> cnds = config->loadLayerConditions();
   // Destroy
   QLayoutItem *item;
   while ((item = grid->takeAt(0)) != NULL) {
