@@ -22,12 +22,18 @@ QByteArray Macro::toBin() {
 QString Macro::fullName() {
   ScancodeList scancodeList;
   QString fullName{scancodeList.list[keyCode]};
-  if (flags && MACRO_TYPE_TAP) {
-    fullName.append(" (release)");
-  } else if (flags && MACRO_TYPE_TAP) {
-    fullName.append(" (tap)");
-  } else {
-    fullName.append(" (press)");
-  }
+  fullName.append(" (");
+  fullName.append(getTriggerEventText());
+  fullName.append(")");
   return fullName;
+}
+
+QString Macro::getTriggerEventText() {
+  if (flags && MACRO_TYPE_TAP) {
+    return "release";
+  } else if (flags && MACRO_TYPE_TAP) {
+    return "tap";
+  } else {
+    return "press";
+  }
 }
