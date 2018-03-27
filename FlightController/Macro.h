@@ -4,11 +4,13 @@
 #include <QByteArray>
 
 
-
 class Macro
 {
 public:
   Macro(const uint8_t keyCode, const uint8_t flags, const QByteArray& body);
+  Macro(const uint8_t keyCode,
+        const QString& triggerEvent,
+        const QByteArray& body);
   QByteArray toBin();
   QString fullName();
   QString getTriggerEventText();

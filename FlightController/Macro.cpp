@@ -10,6 +10,21 @@ Macro::Macro(
     keyCode(keyCode), flags(flags), body(body) {
 }
 
+Macro::Macro(const uint8_t keyCode,
+             const QString &triggerEvent,
+             const QByteArray &body) : keyCode(keyCode), body(body) {
+  flags = 0;
+  if (triggerEvent == "release") {
+    flags |= MACRO_TYPE_ONKEYUP;
+  } else if (triggerEvent == "tap") {
+    flags |= MACRO_TYPE_TAP;
+  } else if (triggerEvent == "press") {
+    // Do nothing, it's default
+  } else {
+    qInfo() << "Unknown trigger event: " << triggerEvent;
+  }
+}
+
 QByteArray Macro::toBin() {
   QByteArray retval;
   retval.append(keyCode);
@@ -29,9 +44,9 @@ QString Macro::fullName() {
 }
 
 QString Macro::getTriggerEventText() {
-  if (flags && MACRO_TYPE_TAP) {
+  if (flags & MACRO_TYPE_ONKEYUP) {
     return "release";
-  } else if (flags && MACRO_TYPE_TAP) {
+  } else if (flags & MACRO_TYPE_TAP) {
     return "tap";
   } else {
     return "press";
