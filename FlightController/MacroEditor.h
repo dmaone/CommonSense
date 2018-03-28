@@ -22,6 +22,8 @@ public:
   void fillCommandParameters(int row, int command);
 
 private:
+  void populateSteps(QByteArray& bytes);
+  void addStep(int row);
   Ui::MacroEditor *ui;
   DeviceConfig *deviceConfig;
 
@@ -32,6 +34,6 @@ private slots:
   void on_addButton_clicked();
   void on_deleteButton_clicked();
   void on_macroListCombo_currentIndexChanged(int);
-  void on_addStepButton_clicked();
+  void addStepButtonClicked();
   void cmdIndexChanged(int idx);
 };

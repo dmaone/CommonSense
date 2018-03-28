@@ -40,6 +40,35 @@ void MacroEditor::on_revertButton_clicked() {
   qInfo() << "Loaded Macros";
 }
 
+void MacroEditor::populateSteps(QByteArray &bytes) {
+  int row = -1;
+  int mptr = 0;
+  while(mptr < bytes.size()) {
+    addStep(++row);
+    auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
+    auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
+    auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
+    switch(bytes[mptr] >> 6) {
+      case 0: // type
+        cmd->setCurrentIndex(3);
+        delay->setCurrentIndex(((uint8_t)bytes[mptr] >> 2) & 0x0f);
+        sc->setCurrentIndex((uint8_t)bytes[++mptr]);
+        break;
+      case 1: // press or release
+        if (bytes[mptr] & 0x20) {
+          // key up
+          cmd->setCurrentIndex(2);
+        } else {
+          // key down
+          cmd->setCurrentIndex(1);
+        }
+        sc->setCurrentIndex((uint8_t)bytes[++mptr]);
+        break;
+    }
+    ++mptr;
+  }
+}
+
 void MacroEditor::on_macroListCombo_currentIndexChanged(int index) {
   bool existingMacro = true;
   ui->bodyTable->clearContents();
@@ -48,7 +77,7 @@ void MacroEditor::on_macroListCombo_currentIndexChanged(int index) {
   ui->bodyTable->setHorizontalHeaderLabels(
       QStringList() << "Command" << "Delay" << "Key");
   QPushButton *addStepButton = new QPushButton("+");
-  connect(addStepButton, SIGNAL(clicked()), SLOT(on_addStepButton_clicked()));
+  connect(addStepButton, SIGNAL(clicked()), SLOT(addStepButtonClicked()));
   ui->bodyTable->setSpan(0, 0, 1, 3);
   ui->bodyTable->setCellWidget(0, 0, addStepButton);
   if (index + 1  == ui->macroListCombo->count()) {
@@ -59,6 +88,7 @@ void MacroEditor::on_macroListCombo_currentIndexChanged(int index) {
     auto& m = deviceConfig->macros[index];
     ui->scanCode->setCurrentIndex(m.keyCode);
     ui->triggerEvent->setCurrentText(m.getTriggerEventText());
+    populateSteps(m.body);
   }
   ui->addButton->setDisabled(existingMacro);
   ui->deleteButton->setEnabled(existingMacro);
@@ -72,7 +102,7 @@ void MacroEditor::on_addButton_clicked() {
   for (auto m : deviceConfig->macros) {
     if (newMacro.keyCode == m.keyCode && newMacro.flags == m.flags) {
       QMessageBox::warning(this, "Error",
-          "That activation sequence already exists!");
+          "That activation sequence already taken!");
       return;
     }
   }
@@ -91,8 +121,12 @@ void MacroEditor::on_deleteButton_clicked() {
   deviceConfig->macros.erase(deviceConfig->macros.begin() + pos);
 }
 
-void MacroEditor::on_addStepButton_clicked() {
+void MacroEditor::addStepButtonClicked() {
   auto row = ui->bodyTable->rowCount() - 1;
+  addStep(row);
+}
+
+void MacroEditor::addStep(int row) {
   ui->bodyTable->insertRow(row);
   QComboBox *cmd = new QComboBox();
   cmd->addItems(QStringList{"-select-", "Press", "Release", "Type", "Wait"});
