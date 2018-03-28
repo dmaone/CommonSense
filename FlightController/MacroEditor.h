@@ -22,10 +22,12 @@ public:
   void fillCommandParameters(int row, int command);
 
 private:
+  QByteArray encodeSteps(int row);
   void populateSteps(QByteArray& bytes);
   void addStep(int row);
   Ui::MacroEditor *ui;
   DeviceConfig *deviceConfig;
+  int currentMacro{0};
 
 private slots:
   void on_closeButton_clicked();
