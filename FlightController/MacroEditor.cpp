@@ -1,4 +1,5 @@
 #include <QLabel>
+#include <QMenu>
 #include <QMessageBox>
 #include <QSpinBox>
 
@@ -203,17 +204,66 @@ void MacroEditor::addStep(int row) {
   QComboBox *cmd = new QComboBox();
   cmd->addItems(QStringList{"-select-", "Press", "Release", "Type", "Wait"});
   connect(cmd, SIGNAL(currentIndexChanged(int)), SLOT(cmdIndexChanged(int)));
+  cmd->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(cmd, SIGNAL(customContextMenuRequested(QPoint)),
+    SLOT(showContextMenu(QPoint)));
   ui->bodyTable->setCellWidget(row, 0, cmd);
   QComboBox *delay = new QComboBox();
   for (auto& d : deviceConfig->delays()) {
     delay->addItem(QString("%1 ms").arg(d));
   }
   connect(delay, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  delay->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(delay, SIGNAL(customContextMenuRequested(QPoint)),
+    SLOT(showContextMenu(QPoint)));
   ui->bodyTable->setCellWidget(row, 1, delay);
   QComboBox *sc = new QComboBox();
   sc->addItems(ScancodeList().list);
   connect(sc, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  sc->setContextMenuPolicy(Qt::CustomContextMenu);
+  connect(sc, SIGNAL(customContextMenuRequested(QPoint)),
+    SLOT(showContextMenu(QPoint)));
   ui->bodyTable->setCellWidget(row, 2, sc);
+}
+
+void MacroEditor::showContextMenu(QPoint pt) {
+  QWidget *w = qobject_cast<QWidget *>(QObject::sender());
+  if (!w) {
+    return;
+  }
+  QAbstractScrollArea *sa = qobject_cast<QAbstractScrollArea *>(w);
+  /* map to global coords */
+  if (sa == NULL)
+    pt = ui->bodyTable->viewport()->mapFromGlobal(w->mapToGlobal(pt));
+  else
+    pt = ui->bodyTable->viewport()->mapFromGlobal(
+        sa->viewport()->mapToGlobal(pt));
+  /* correct point for LHS of table viewport, in case click was on vertical
+   * header
+   */
+  pt.setX(std::max(pt.x(), 0));
+
+  QModelIndex index = ui->bodyTable->indexAt(pt);
+  if (!index.isValid() || index.row() == ui->bodyTable->rowCount() - 1)
+      return;
+  contextMenuRow = index.row();
+  QMenu *menu = new QMenu(this);
+
+  menu->addAction("&Insert row", this, SLOT(contextMenuInsertTriggered()));
+  menu->addAction("&Delete row", this, SLOT(contextMenuDeleteTriggered()));
+
+  menu->popup(ui->bodyTable->viewport()->mapToGlobal(pt));
+}
+void MacroEditor::contextMenuInsertTriggered() {
+  if (contextMenuRow >= 0 && contextMenuRow < ui->bodyTable->rowCount() - 1) {
+    addStep(contextMenuRow);
+  }
+}
+
+void MacroEditor::contextMenuDeleteTriggered() {
+  if (contextMenuRow >= 0 && contextMenuRow < ui->bodyTable->rowCount() - 1) {
+    ui->bodyTable->removeRow(contextMenuRow);
+  }
 }
 
 int MacroEditor::findWidgetRow(QWidget *w) {

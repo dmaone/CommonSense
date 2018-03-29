@@ -30,6 +30,7 @@ private:
   int currentMacro{0};
   bool changed{false};
   bool ignoreOnce{false};
+  int contextMenuRow;
 
 private slots:
   void on_closeButton_clicked();
@@ -39,6 +40,9 @@ private slots:
   void on_deleteButton_clicked();
   void on_macroListCombo_currentIndexChanged(int);
   void addStepButtonClicked();
-  void cmdIndexChanged(int idx);
+  void cmdIndexChanged(int);
   void userChanged();
+  void showContextMenu(QPoint);
+  void contextMenuInsertTriggered();
+  void contextMenuDeleteTriggered();
 };
