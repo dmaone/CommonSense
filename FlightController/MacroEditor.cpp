@@ -17,18 +17,22 @@ MacroEditor::MacroEditor(DeviceConfig *config, QWidget *parent)
     : QFrame(parent), ui(new Ui::MacroEditor) {
   ui->setupUi(this);
   deviceConfig = config;
+  ScancodeList scanCodes;
+  ui->scanCode->addItems(scanCodes.list);
+  connect(ui->scanCode, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  connect(ui->triggerEvent,
+      SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
 }
 
 void MacroEditor::show(void) {
-  ScancodeList scanCodes;
-  ui->scanCode->addItems(scanCodes.list);
   ui->macroListCombo->clear();
   for (auto& m : deviceConfig->macros) {
     ui->macroListCombo->addItem(m.fullName());
   }
   ui->macroListCombo->addItem(kNew);
-  currentMacro = deviceConfig->macros.size();
-  ui->macroListCombo->setCurrentText(kNew);
+  currentMacro = deviceConfig->macros.size() - 1;
+  changed = false;
+  ui->macroListCombo->setCurrentIndex(std::max(currentMacro, 0));
   QWidget::show();
 }
 
@@ -38,7 +42,7 @@ void MacroEditor::on_applyButton_clicked() {
 }
 
 void MacroEditor::on_revertButton_clicked() {
-  qInfo() << "Loaded Macros";
+  on_macroListCombo_currentIndexChanged(ui->macroListCombo->currentIndex());
 }
 
 void MacroEditor::populateSteps(QByteArray &bytes) {
@@ -49,25 +53,33 @@ void MacroEditor::populateSteps(QByteArray &bytes) {
     auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
     auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
     auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
-    switch (bytes[mptr] >> 6) {
+    auto curByte = static_cast<uint8_t>(bytes[mptr]);
+    delay->setCurrentIndex((curByte >> 2) & 0x0f);
+    switch (curByte >> 6) {
       case 0: // type
         cmd->setCurrentIndex(3);
-        delay->setCurrentIndex(((uint8_t)bytes[mptr] >> 2) & 0x0f);
-        sc->setCurrentIndex((uint8_t)bytes[++mptr]);
+        sc->setCurrentIndex(static_cast<uint8_t>(bytes[++mptr]));
         break;
       case 1: // press or release
-        if (bytes[mptr] & 0x20) {
+        if (bytes[mptr] & 0x02) {
           // key up
           cmd->setCurrentIndex(2);
         } else {
           // key down
           cmd->setCurrentIndex(1);
         }
-        sc->setCurrentIndex((uint8_t)bytes[++mptr]);
+        sc->setCurrentIndex(static_cast<uint8_t>(bytes[++mptr]));
+        break;
+      case 2:
+        qInfo() << "WTF unsupported macro command";
+        break;
+      case 3: // wait
+        cmd->setCurrentIndex(4);
         break;
     }
     ++mptr;
   }
+  changed = false;
 }
 
 QByteArray MacroEditor::encodeSteps(int macro_row) {
@@ -76,40 +88,39 @@ QByteArray MacroEditor::encodeSteps(int macro_row) {
     auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
     auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
     auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
-    uint8_t command_byte = ((uint8_t)delay->currentIndex() >> 2);
+    bool shortCommand = false;
+    uint8_t commandByte = ((uint8_t)delay->currentIndex() << 2);
+    // See firmware sources for explanations on encoding.
     switch (cmd->currentIndex()) {
       case 0:
         continue;
       case 1: // press
-        command_byte |= 0x20 | (0x01 << 6);
-        retval.append(command_byte);
+        commandByte |= (0x01 << 6);
         break;
       case 2: // release
-        command_byte |= 0x20 | (0x01 << 6);
-        retval.append(command_byte);
+        commandByte |= (0x01 << 6) | 0x02;
         break;
       case 3: // tap
-        retval.append((char)command_byte);
         break;
       case 4: // wait
-        // Just ignore for now.
+         commandByte |= (0x03 << 6);
+         shortCommand = true;
         break;
     }
-    retval.append(((char)sc->currentIndex()));
+    retval.append(commandByte);
+    if (!shortCommand) {
+      retval.append(((char)sc->currentIndex()));
+    }
   }
   return retval;
 }
 
 void MacroEditor::on_macroListCombo_currentIndexChanged(int index) {
   bool existingMacro = (index + 1 != ui->macroListCombo->count());
-  if (currentMacro != index) {
-    auto result = QMessageBox::question(this, "Warning",
-        "All your base are belong to us and and changes will be lost",
-        QMessageBox::Ok | QMessageBox::No);
-    if (result != QMessageBox::Ok) {
-      ui->macroListCombo->setCurrentIndex(currentMacro);
-      return;
-    }
+  if (changed) {
+    QMessageBox::question(this, "Warning",
+        "All your base are belong to us - unsaved changes will be lost",
+        QMessageBox::Ok);
   }
   ui->bodyTable->clearContents();
   ui->bodyTable->setRowCount(1);
@@ -131,20 +142,26 @@ void MacroEditor::on_macroListCombo_currentIndexChanged(int index) {
     ui->triggerEvent->setCurrentText(m.getTriggerEventText());
     populateSteps(m.body);
   }
+  ui->addButton->setEnabled(false);
   ui->deleteButton->setEnabled(existingMacro);
+  changed=false;
 }
 
 void MacroEditor::on_addButton_clicked() {
+  ui->addButton->setEnabled(false);
+  if (!changed) {
+    return;
+  }
   auto newMacro = Macro(ui->scanCode->currentIndex(),
                         ui->triggerEvent->currentText(),
                         encodeSteps(currentMacro));
-  auto pos = ui->macroListCombo->currentIndex();
+  size_t pos = ui->macroListCombo->currentIndex();
   bool existingMacro = false;
   if (pos < deviceConfig->macros.size()) {
     deviceConfig->macros[pos] = newMacro;
     existingMacro = true;
   }
-  int cur_pos = 0;
+  size_t cur_pos = 0;
   for (auto m : deviceConfig->macros) {
     if (pos == cur_pos++) {
       continue;
@@ -155,6 +172,7 @@ void MacroEditor::on_addButton_clicked() {
       return;
     }
   }
+  changed = false;
   if (existingMacro) {
     ui->macroListCombo->setItemText(pos, newMacro.fullName());
   } else {
@@ -177,6 +195,7 @@ void MacroEditor::on_deleteButton_clicked() {
 void MacroEditor::addStepButtonClicked() {
   auto row = ui->bodyTable->rowCount() - 1;
   addStep(row);
+  changed = true;
 }
 
 void MacroEditor::addStep(int row) {
@@ -189,9 +208,11 @@ void MacroEditor::addStep(int row) {
   for (auto& d : deviceConfig->delays()) {
     delay->addItem(QString("%1 ms").arg(d));
   }
+  connect(delay, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
   ui->bodyTable->setCellWidget(row, 1, delay);
   QComboBox *sc = new QComboBox();
   sc->addItems(ScancodeList().list);
+  connect(sc, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
   ui->bodyTable->setCellWidget(row, 2, sc);
 }
 
@@ -205,23 +226,18 @@ int MacroEditor::findWidgetRow(QWidget *w) {
 }
 
 void MacroEditor::fillCommandParameters(int row, int command) {
-  switch(command) {
-    case 1:
-      ui->bodyTable->cellWidget(row, 1)->setEnabled(false);
-      ui->bodyTable->cellWidget(row, 2)->setEnabled(true);
-      break;
-    case 2:
-      ui->bodyTable->cellWidget(row, 1)->setEnabled(false);
-      ui->bodyTable->cellWidget(row, 2)->setEnabled(true);
-      break;
-    case 3:
-      ui->bodyTable->cellWidget(row, 1)->setEnabled(true);
-      ui->bodyTable->cellWidget(row, 2)->setEnabled(true);
-      break;
+  ui->bodyTable->cellWidget(row, 1)->setEnabled(true);
+  ui->bodyTable->cellWidget(row, 2)->setEnabled(true);
+  switch (command) {
     case 0:
-    case 4:
-      ui->bodyTable->cellWidget(row, 1)->setEnabled(true);
+      ui->bodyTable->cellWidget(row, 1)->setEnabled(false);
       ui->bodyTable->cellWidget(row, 2)->setEnabled(false);
+      break;
+    case 4:
+      ui->bodyTable->cellWidget(row, 2)->setEnabled(false);
+      break;
+    default:
+      break;
   }
 }
 
@@ -235,6 +251,13 @@ void MacroEditor::cmdIndexChanged(int idx) {
   if (row >= 0) {
     fillCommandParameters(row, command);
   }
+  changed = true;
+  ui->addButton->setEnabled(true);
+}
+
+void MacroEditor::userChanged() {
+  changed = true;
+  ui->addButton->setEnabled(true);
 }
 
 void MacroEditor::on_closeButton_clicked() { this->close(); }

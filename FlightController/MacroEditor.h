@@ -28,6 +28,8 @@ private:
   Ui::MacroEditor *ui;
   DeviceConfig *deviceConfig;
   int currentMacro{0};
+  bool changed{false};
+  bool ignoreOnce{false};
 
 private slots:
   void on_closeButton_clicked();
@@ -38,4 +40,5 @@ private slots:
   void on_macroListCombo_currentIndexChanged(int);
   void addStepButtonClicked();
   void cmdIndexChanged(int idx);
+  void userChanged();
 };

@@ -84,10 +84,11 @@ inline void play_macro(uint_fast16_t macro_start) {
   uint_fast16_t delay;
   uint8_t keyflags;
   while (mptr <= macro_end) {
+    delay = config.delayLib[(*mptr >> 2) & 0x0f];
     switch (*mptr >> 6) {
-    case 0:
+    // Check first 2 bits - macro command
+    case 0: // TypeOneKey
       // Press+release, timing from delayLib
-      delay = config.delayLib[(*mptr >> 2) & 0x0f];
       mptr++;
       // FIXME possible to queue USB_NOEVENT.
       // This will most likely trigger exp. header, but may be as bad as
@@ -96,12 +97,31 @@ inline void play_macro(uint_fast16_t macro_start) {
       now += delay;
       queue_usbcode(now, USBQUEUE_RELEASED_MASK, *mptr);
       break;
-    case 1:
-      // Press or release
+    case 1: // ChangeMods - currently PressKey and ReleaseKey
+      /*
+       * Initial plans for this were to be "change modifiers". Binary format - 
+       * 2 bits for (PressMod/ReleaseMod/ToggleMod/ForceMod)
+       * then 4 bits not used, then a byte of standard modflags.
+       * Now, though, it's 
+       * [4 bits delay, 1 bit direction, 1 bit reserved, 1 byte scancode]
+       */
       keyflags =
           (*mptr & MACRO_KEY_UPDOWN_RELEASE) ? USBQUEUE_RELEASED_MASK : 0;
       mptr++;
       queue_usbcode(now, keyflags, *mptr);
+      now += delay;
+      break;
+    case 2: // Mods stack manipulation
+      // 2 bits - PushMods, PopMods, RevertMods.
+      // Not used currently.
+      break;
+    case 3: // Wait
+      /* 4 bits for delay. Initially had special value of 
+       * 0 = "Wait for trigger key release", others from delayLib.
+       * But since now we have separate triggers on press and release - all
+       * values are from delayLib.
+       */
+      now += delay;
       break;
     default:
       return;
