@@ -51,7 +51,7 @@ void serial_tick(void) {
       Sup_I2C_SlaveClearWriteStatus();
       Sup_I2C_SlaveClearWriteBuf();
       CyExitCriticalSection(enableInterrupts);
-      xprintf("Rcvd %d %d", i2c_inbox.command, i2c_inbox.data);
+      //xprintf("Rcvd %d %d", i2c_inbox.command, i2c_inbox.data);
       if (i2c_inbox.command == SUP_CMD_SUSPEND 
           && power_state == DEVSTATE_FULL_THROTTLE) {
         power_state = DEVSTATE_SLEEP_REQUEST;
@@ -67,7 +67,7 @@ void serial_tick(void) {
         Sup_I2C_SlaveClearReadBuf();
         Sup_I2C_SlaveClearReadStatus();
         CyExitCriticalSection(enableInterrupts);
-        xprintf("Sent %d %d", i2c_outbox.command, i2c_outbox.data);
+        //xprintf("Sent %d %d", i2c_outbox.command, i2c_outbox.data);
       }
     }
   }

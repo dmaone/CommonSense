@@ -491,6 +491,7 @@ void usb_check_power(void) {
 #endif
     // USB disconnected, not a suspend. Return to full power.
     power_state = DEVSTATE_FULL_THROTTLE;
+    scan_start();
   } else if (wakeup_enabled == 0) {
     power_state = DEVSTATE_SLEEP;
     CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);

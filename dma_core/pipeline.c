@@ -286,14 +286,16 @@ inline void update_reports(void) {
       } else {
         switch (output_direction) {
           case OUTPUT_DIRECTION_USB:
-            //update_keyboard_report(&USBQueue[pos]);
-            //break;
+            update_keyboard_report(&USBQueue[pos]);
+            break;
           case OUTPUT_DIRECTION_SERIAL:
             update_serial_keyboard_report(&USBQueue[pos]);
             break;
           default:
             break;
         }
+        update_serial_keyboard_report(&USBQueue[pos]);
+
       }
       if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
         // We only throttle keypresses. Key release doesn't slow us down -

@@ -59,7 +59,7 @@
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 
-//#define DEBUG_STATE_MACHINE
+#define DEBUG_STATE_MACHINE
 
 // ExpHdr0 used to signal interrupt start and end
 #undef DEBUG_INTERRUPTS
@@ -140,7 +140,7 @@ uint8_t led_status;
 
 uint8_t output_direction;
 enum outputDirection {
-  OUTPUT_DIRECTION_NONE,
+  OUTPUT_DIRECTION_NONE = 0,
   OUTPUT_DIRECTION_USB,
   OUTPUT_DIRECTION_SERIAL,
   

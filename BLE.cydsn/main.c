@@ -385,7 +385,7 @@ void keyboard_release(uint8_t keycode) {
 
 
 void process_inbox(Sup_Pdu_t *inbox) {
-  DBG_PRINTF("Message for you in the lobby! %d %d\r\n", inbox->command, inbox->data);
+  //DBG_PRINTF("Message for you in the lobby! %d %d\r\n", inbox->command, inbox->data);
   switch (inbox->command) {
     case SUP_CMD_KEYDOWN:
       keyboard_press(inbox->data);
@@ -460,7 +460,7 @@ void process_i2c() {
         if (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_ERR_MASK)) {
           i2c_inbox.data = buf;
           process_inbox(&i2c_inbox);
-          DBG_PRINTF("%d %d", i2c_inbox.command, i2c_inbox.data);
+          //DBG_PRINTF("%d %d", i2c_inbox.command, i2c_inbox.data);
         }
       }
     }
