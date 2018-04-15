@@ -284,8 +284,16 @@ inline void update_reports(void) {
                  USBQueue[pos].keycode <= 0xa7) {
         update_system_report(&USBQueue[pos]);
       } else {
-        update_keyboard_report(&USBQueue[pos]);
-        update_serial_keyboard_report(&USBQueue[pos]);
+        switch (output_direction) {
+          case OUTPUT_DIRECTION_USB:
+            //update_keyboard_report(&USBQueue[pos]);
+            //break;
+          case OUTPUT_DIRECTION_SERIAL:
+            update_serial_keyboard_report(&USBQueue[pos]);
+            break;
+          default:
+            break;
+        }
       }
       if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
         // We only throttle keypresses. Key release doesn't slow us down -

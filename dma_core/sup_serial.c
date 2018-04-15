@@ -18,23 +18,12 @@ Sup_Pdu_t SCQueue[32];
 uint8_t SCQueueReadPos = 0;
 uint8_t SCQueueWritePos = 0;
 Sup_Pdu_t i2c_inbox;
-Sup_Pdu_t i2c_outbox;
+Sup_Pdu_t i2c_outbox = {255, 255};
 
 // None of this happens in ISR, so we can be sloppy
 inline void queue_ble_command(Sup_Pdu_t *cmd) {
   SCQueueWritePos = BLE_BUFFER_NEXT(SCQueueWritePos);
   SCQueue[SCQueueWritePos] = *cmd;
-}
-
-// None of this happens in ISR, so we can be sloppy
-inline void read_ble_command(Sup_Pdu_t *result) {
-  if (SCQueueReadPos == SCQueueWritePos) {
-    result->command = SUP_CMD_NOOP;
-    return;
-  } else {
-    *result = SCQueue[SCQueueReadPos];
-    SCQueueReadPos = BLE_BUFFER_NEXT(SCQueueReadPos);
-  }
 }
 
 void serial_init(void) {
@@ -58,22 +47,27 @@ void serial_send(Sup_Pdu_t* packet) {
 void serial_tick(void) {
   if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_WR_CMPLT) {
     if (Sup_I2C_SlaveGetWriteBufSize() == sizeof(i2c_inbox)) {
+      uint8_t enableInterrupts = CyEnterCriticalSection();
+      Sup_I2C_SlaveClearWriteStatus();
       Sup_I2C_SlaveClearWriteBuf();
-      xprintf("%d %d", i2c_inbox.command, i2c_inbox.data);
+      CyExitCriticalSection(enableInterrupts);
+      xprintf("Rcvd %d %d", i2c_inbox.command, i2c_inbox.data);
       if (i2c_inbox.command == SUP_CMD_SUSPEND 
           && power_state == DEVSTATE_FULL_THROTTLE) {
         power_state = DEVSTATE_SLEEP_REQUEST;
       }
     }
   }
-  if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_RD_CMPLT) {
-    if (SCQueueReadPos != SCQueueWritePos) {
+  if (SCQueueReadPos != SCQueueWritePos) {
+    if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_RD_CMPLT) {
       if (Sup_I2C_SlaveGetReadBufSize() == 2) {
         SCQueueReadPos = BLE_BUFFER_NEXT(SCQueueReadPos);
         i2c_outbox = SCQueue[SCQueueReadPos];
+        uint8_t enableInterrupts = CyEnterCriticalSection();
         Sup_I2C_SlaveClearReadBuf();
         Sup_I2C_SlaveClearReadStatus();
-        //xprintf("%d %d", i2c_outbox.command, i2c_outbox.data);
+        CyExitCriticalSection(enableInterrupts);
+        xprintf("Sent %d %d", i2c_outbox.command, i2c_outbox.data);
       }
     }
   }

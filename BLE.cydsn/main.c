@@ -424,10 +424,48 @@ void process_inbox(Sup_Pdu_t *inbox) {
           }
       }
   }
-
-
 }
 
+void process_i2c() {
+  Sup_Pdu_t i2c_inbox;
+  uint8_t buf;
+  uint32_t result = SCB_I2CMasterReadBuf(8, &buf, 1, SCB_I2C_MODE_COMPLETE_XFER);
+  LED_RED_Write(LED_ON);
+  if (0 == (result & SCB_I2C_MSTR_NOT_READY)) {
+    uint16 i2c_counter = 0;
+    while (--i2c_counter && 0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_RD_CMPLT)) {}
+    if (!i2c_counter) {
+      // The dreaded SDA low!
+      uint32_t tmp = SCB_I2CMasterStatus();
+      DBG_PRINTF("stuck in I2C RX: %d\r\n", tmp);
+      do {
+        SCB_SET_HSIOM_SEL(SCB_SCL_HSIOM_REG, SCB_SCL_HSIOM_MASK,
+            SCB_SCL_HSIOM_POS, SCB_HSIOM_GPIO_SEL); 
+        SCB_scl_Write(0);
+        CyDelay(1);
+        SCB_scl_Write(1);
+        CyDelay(1);
+        SCB_SET_HSIOM_SEL(SCB_SCL_HSIOM_REG, SCB_SCL_HSIOM_MASK,
+            SCB_SCL_HSIOM_POS, SCB_HSIOM_I2C_SEL);
+        SCB_I2CMasterSendStop(100);
+      } while(!SCB_sda_Read());
+    } else {
+      if (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_ERR_MASK) && buf != 0xff) {
+        i2c_inbox.command = buf;
+        result = SCB_I2C_MSTR_NOT_READY;
+        while (result & SCB_I2C_MSTR_NOT_READY) {
+          result = SCB_I2CMasterReadBuf(8, &buf, 1, SCB_I2C_MODE_COMPLETE_XFER);
+        }
+        while (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_RD_CMPLT)) {}
+        if (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_ERR_MASK)) {
+          i2c_inbox.data = buf;
+          process_inbox(&i2c_inbox);
+          DBG_PRINTF("%d %d", i2c_inbox.command, i2c_inbox.data);
+        }
+      }
+    }
+  }
+}
 
 int main()
 {
@@ -435,43 +473,20 @@ int main()
     SCB_Start();
 
     UART_DEB_Start();
-    DBG_PRINTF("BLE HID Keyboard Example Project \r\n");
+    DBG_PRINTF("CS BLE Project \r\n");
     LED_RED_Write(LED_OFF);
     LED_GRN_Write(LED_OFF);
     LED_BLU_Write(LED_OFF);
 
     /* Start CYBLE component and register generic event handler */
     CyBle_Start(AppCallBack);
-    Sup_Pdu_t i2c_inbox;
     while(1) 
     {           
       SCB_I2CMasterClearStatus();
         /* CyBle_ProcessEvents() allows BLE stack to process pending events */
-        CyBle_ProcessEvents();
-
-      uint8_t buf;
-      uint32_t result = SCB_I2CMasterReadBuf(8, &buf, 1, SCB_I2C_MODE_COMPLETE_XFER);
-      if (0 == (result & SCB_I2C_MSTR_NOT_READY)) {
-        uint32_t cnt = 100;
-        while (--cnt && 0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_RD_CMPLT)) {}
-        if (!cnt) {
-          uint32_t tmp = SCB_I2CMasterStatus();
-          DBG_PRINTF("stuck in I2C RX: %ld\r\n", tmp);
-        } else {
-          if (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_ERR_MASK) && buf != 0xff) {
-            i2c_inbox.command = buf;
-            result = SCB_I2C_MSTR_NOT_READY;
-            while (result & SCB_I2C_MSTR_NOT_READY) {
-              result = SCB_I2CMasterReadBuf(8, &buf, 1, SCB_I2C_MODE_COMPLETE_XFER);
-            }
-            while (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_RD_CMPLT)) {}
-            if (0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_ERR_MASK)) {
-              i2c_inbox.data = buf;
-              process_inbox(&i2c_inbox);
-            }
-          }
-        }
-      }
+      CyBle_ProcessEvents();
+      process_i2c();
+      LED_RED_Write(LED_OFF);
         /* To achieve low power in the device */
         LowPowerImplementation();
 

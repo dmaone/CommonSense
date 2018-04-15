@@ -44,7 +44,7 @@
  * If you do and power from 5V though - you'll most likely fry USB regulator.
  */
 #define SELF_POWERED
-#define USB_POWER_MODE USB_5V_OPERATION
+#define USB_POWER_MODE USB_3V_OPERATION
 
 /*
  * pin assignment: direct order, aligned to the right of ADC.
@@ -59,7 +59,7 @@
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 
-#undef DEBUG_STATE_MACHINE
+//#define DEBUG_STATE_MACHINE
 
 // ExpHdr0 used to signal interrupt start and end
 #undef DEBUG_INTERRUPTS
@@ -137,6 +137,15 @@ volatile uint8_t power_state;
 uint16_t sanity_check_timer;
 uint8_t status_register;
 uint8_t led_status;
+
+uint8_t output_direction;
+enum outputDirection {
+  OUTPUT_DIRECTION_NONE,
+  OUTPUT_DIRECTION_USB,
+  OUTPUT_DIRECTION_SERIAL,
+  
+  OUTPUT_DIRECTION_MAX
+};
 
 void xprintf(const char *format_p, ...);
 

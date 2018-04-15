@@ -56,10 +56,10 @@ int main() {
           pipeline_process();
         }
       }
-      usb_tick();
       serial_tick();
+      usb_tick();
       // Timer ISR will wake us up.
-      CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+      //CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
       break;
     case DEVSTATE_PREPARING_TO_SLEEP:
       if (tick) {

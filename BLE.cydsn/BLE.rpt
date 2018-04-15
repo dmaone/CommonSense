@@ -1,13 +1,13 @@
-Loading plugins phase: Elapsed time ==> 0s.129ms
+Loading plugins phase: Elapsed time ==> 0s.192ms
 <CYPRESSTAG name="CyDsfit arguments...">
 cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Projects\CommonSense\BLE.cydsn\BLE.cyprj -d CY8C4248LQI-BL583 -s C:\Projects\CommonSense\BLE.cydsn\Generated_Source\PSoC4 -- -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE
 </CYPRESSTAG>
 <CYPRESSTAG name="Design elaboration results...">
 </CYPRESSTAG>
-Elaboration phase: Elapsed time ==> 1s.741ms
+Elaboration phase: Elapsed time ==> 1s.840ms
 <CYPRESSTAG name="HDL generation results...">
 </CYPRESSTAG>
-HDL generation phase: Elapsed time ==> 0s.044ms
+HDL generation phase: Elapsed time ==> 0s.049ms
 <CYPRESSTAG name="Synthesis results...">
 
      | | | | | | |
@@ -41,7 +41,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\C
 ======================================================================
 
 vlogfe V6.3 IR 41:  Verilog parser
-Sat Apr 14 17:41:22 2018
+Sun Apr 15 12:30:27 2018
 
 
 ======================================================================
@@ -51,7 +51,7 @@ Options  :    -yv2 -q10 BLE.v
 ======================================================================
 
 vpp V6.3 IR 41:  Verilog Pre-Processor
-Sat Apr 14 17:41:22 2018
+Sun Apr 15 12:30:27 2018
 
 Flattening file 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\or_v1_0\or_v1_0.v'
 Flattening file 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\cy_constant_v1_0\cy_constant_v1_0.v'
@@ -84,7 +84,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\C
 ======================================================================
 
 tovif V6.3 IR 41:  High-level synthesis
-Sat Apr 14 17:41:22 2018
+Sun Apr 15 12:30:27 2018
 
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -112,7 +112,7 @@ Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\C
 ======================================================================
 
 topld V6.3 IR 41:  Synthesis and optimization
-Sat Apr 14 17:41:22 2018
+Sun Apr 15 12:30:27 2018
 
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -240,10 +240,10 @@ CYPRESS_DIR    : C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp
 Warp Program   : C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\bin\warp.exe
 Warp Arguments : -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\BLE.cydsn\BLE.cyprj -dcpsoc3 BLE.v -verilog
 </CYPRESSTAG>
-Warp synthesis phase: Elapsed time ==> 0s.321ms
+Warp synthesis phase: Elapsed time ==> 0s.360ms
 <CYPRESSTAG name="Fitter results...">
 <CYPRESSTAG name="Fitter startup details...">
-cyp3fit: V4.2.0.641, Family: PSoC3, Started at: Saturday, 14 April 2018 17:41:22
+cyp3fit: V4.2.0.641, Family: PSoC3, Started at: Sunday, 15 April 2018 12:30:27
 Options: -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\BLE.cydsn\BLE.cyprj -d CY8C4248LQI-BL583 BLE.v -verilog
 </CYPRESSTAG>
 <CYPRESSTAG name="Design parsing">
@@ -675,8 +675,8 @@ DAC                           :      :      :      :
   7-bit IDAC                  :    0 :    1 :    1 :  0.00 %
   8-bit IDAC                  :    0 :    1 :    1 :  0.00 %
 </CYPRESSTAG>
-Technology Mapping: Elapsed time ==> 0s.022ms
-Tech Mapping phase: Elapsed time ==> 0s.043ms
+Technology Mapping: Elapsed time ==> 0s.028ms
+Tech Mapping phase: Elapsed time ==> 0s.054ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Placement">
 <CYPRESSTAG name="FFB & IO Pre Placement">
@@ -700,15 +700,15 @@ ClockGenBlock                       : CLK_GEN_[FFB(CLK_GEN,0)]
 </CYPRESSTAG>
 </CYPRESSTAG>
 <CYPRESSTAG name="Real Analog Placement">
-Elapsed time ==> 0.1399082s
+Elapsed time ==> 0.1369541s
 </CYPRESSTAG>
-Analog Placement phase: Elapsed time ==> 0s.335ms
+Analog Placement phase: Elapsed time ==> 0s.353ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Routing">
 <CYPRESSTAG name="Analog Routing">
-Route success=True, Iterations=1 Elapsed=0.0007745 secs
+Route success=True, Iterations=1 Elapsed=0.0007281 secs
 </CYPRESSTAG>
-Analog Routing phase: Elapsed time ==> 0s.001ms
+Analog Routing phase: Elapsed time ==> 0s.000ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Code Generation">
 ============ Analog Final Answer Routes ============
@@ -719,7 +719,7 @@ Map of item to net {
 }
 Mux Info {
 }
-Analog Code Generation phase: Elapsed time ==> 0s.023ms
+Analog Code Generation phase: Elapsed time ==> 0s.025ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Placement">
 <CYPRESSTAG name="Detailed placement messages">
@@ -1308,33 +1308,33 @@ Port | Pin | Fixed |      Type |       Drive Mode |             Name | Connectio
 </CYPRESSTAG>
 </CYPRESSTAG>
 </CYPRESSTAG>
-Digital component placer commit/Report: Elapsed time ==> 0s.016ms
-Digital Placement phase: Elapsed time ==> 0s.387ms
+Digital component placer commit/Report: Elapsed time ==> 0s.018ms
+Digital Placement phase: Elapsed time ==> 0s.363ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Routing">
 "C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\bin/sjrouter.exe" --xml-path "C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\dev\psoc4/3/256dma/route_arch-rrg.cydata" --vh2-path "BLE_r.vh2" --pcf-path "BLE.pco" --des-name "BLE" --dsf-path "BLE.dsf" --sdc-path "BLE.sdc" --lib-path "BLE_r.lib"
 Routing successful.
-Digital Routing phase: Elapsed time ==> 0s.510ms
+Digital Routing phase: Elapsed time ==> 0s.537ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Generation">
-Bitstream Generation phase: Elapsed time ==> 0s.192ms
+Bitstream Generation phase: Elapsed time ==> 0s.224ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Verification">
-Bitstream Verification phase: Elapsed time ==> 0s.018ms
+Bitstream Verification phase: Elapsed time ==> 0s.021ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Static timing analysis">
 Timing report is in BLE_timing.html.
-Static timing analysis phase: Elapsed time ==> 0s.163ms
+Static timing analysis phase: Elapsed time ==> 0s.159ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Data reporting">
-Data reporting phase: Elapsed time ==> 0s.138ms
+Data reporting phase: Elapsed time ==> 0s.125ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Database update...">
-Design database save phase: Elapsed time ==> 0s.151ms
+Design database save phase: Elapsed time ==> 0s.155ms
 </CYPRESSTAG>
-cydsfit: Elapsed time ==> 1s.990ms
+cydsfit: Elapsed time ==> 2s.046ms
 </CYPRESSTAG>
-Fitter phase: Elapsed time ==> 1s.993ms
-API generation phase: Elapsed time ==> 1s.722ms
+Fitter phase: Elapsed time ==> 2s.049ms
+API generation phase: Elapsed time ==> 1s.808ms
 Dependency generation phase: Elapsed time ==> 0s.012ms
 Cleanup phase: Elapsed time ==> 0s.000ms

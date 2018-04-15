@@ -1,8 +1,0 @@
-C:/Projects/CommonSense/BLE.cydsn/Compiled/CyBootAsmGnu.o : C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/CyBootAsmGnu.s C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/cydevicegnu_trm.inc C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/cyfittergnu.inc 
-
-C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/CyBootAsmGnu.s : 
-
-C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/cydevicegnu_trm.inc : 
-
-C:/Projects/CommonSense/BLE.cydsn/Generated_Source/PSoC4/cyfittergnu.inc : 
-
