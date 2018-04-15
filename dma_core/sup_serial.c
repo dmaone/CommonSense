@@ -18,7 +18,7 @@ Sup_Pdu_t SCQueue[32];
 uint8_t SCQueueReadPos = 0;
 uint8_t SCQueueWritePos = 0;
 Sup_Pdu_t i2c_inbox;
-Sup_Pdu_t i2c_outbox = {255, 255};
+Sup_Pdu_t i2c_outbox = {{255, 255}};
 
 // None of this happens in ISR, so we can be sloppy
 inline void queue_ble_command(Sup_Pdu_t *cmd) {
@@ -78,7 +78,13 @@ void update_serial_keyboard_report(queuedScancode *key) {
   buffer.command =
       (key->flags & USBQUEUE_RELEASED_MASK) ? SUP_CMD_KEYUP : SUP_CMD_KEYDOWN;
   buffer.data = key->keycode;
-  SCQueueWritePos = BLE_BUFFER_NEXT(SCQueueWritePos);
-  SCQueue[SCQueueWritePos] = buffer;
+  queue_ble_command(&buffer);
   //xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
+}
+
+void serial_reset_reports() {
+  Sup_Pdu_t buffer;
+  buffer.command = SUP_CMD_CLEAR;
+  buffer.data = 0;
+  queue_ble_command(&buffer);
 }

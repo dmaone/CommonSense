@@ -344,6 +344,10 @@ static void LowPowerImplementation(void)
     }
 }
 
+void keyboard_clear() {
+  memset(keyboard_report.raw, 0, sizeof(keyboard_report));
+}
+
 void keyboard_press(uint8_t keycode) {
   if ((keycode & 0xf8) == 0xe0) {
     keyboard_report.mods |= (1 << (keycode & 0x07));
@@ -351,7 +355,7 @@ void keyboard_press(uint8_t keycode) {
   }
   for (uint8_t cur_pos = 0; cur_pos < sizeof keyboard_report.keys; cur_pos++) {
     if (keyboard_report.keys[cur_pos] == keycode) {
-      DBG_PRINTF("Existing %d pos %d", keycode, cur_pos);
+      DBG_PRINTF("Existing %d pos %d\r\n", keycode, cur_pos);
       return;
     } else if (keyboard_report.keys[cur_pos] == 0) {
       keyboard_report.keys[cur_pos] = keycode;
@@ -385,7 +389,7 @@ void keyboard_release(uint8_t keycode) {
 
 
 void process_inbox(Sup_Pdu_t *inbox) {
-  //DBG_PRINTF("Message for you in the lobby! %d %d\r\n", inbox->command, inbox->data);
+  DBG_PRINTF("Message for you in the lobby! %d %d\r\n", inbox->command, inbox->data);
   switch (inbox->command) {
     case SUP_CMD_KEYDOWN:
       keyboard_press(inbox->data);
@@ -396,9 +400,13 @@ void process_inbox(Sup_Pdu_t *inbox) {
     case SUP_CMD_NOOP:
       DBG_PRINTF("Received NOOP");
       break;
+    case SUP_CMD_CLEAR:
+      keyboard_clear();
+      break;
     default:
-      DBG_PRINTF("Unknown command: %d", inbox->command);
+      DBG_PRINTF("Unknown command: %d\r\n", inbox->command);
   }
+
   uint8_t apiResult;
   if (CyBle_GattGetBusyStatus() == CYBLE_STACK_STATE_FREE) {
       uint8_t protocol;

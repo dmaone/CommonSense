@@ -178,6 +178,7 @@ inline void process_real_key(void) {
       push_back_scancode(sc);
     } else {
       reset_reports();
+      serial_reset_reports();
     }
     return;
   }
@@ -294,7 +295,6 @@ inline void update_reports(void) {
           default:
             break;
         }
-        update_serial_keyboard_report(&USBQueue[pos]);
 
       }
       if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {

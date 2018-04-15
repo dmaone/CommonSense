@@ -426,6 +426,7 @@ void usb_tick(void) {
     if (usb_status == USB_STATUS_CONNECTED) {
       USB_Stop();
       usb_status = USB_STATUS_DISCONNECTED;
+      output_direction = OUTPUT_DIRECTION_SERIAL;
     }
     return;
   }

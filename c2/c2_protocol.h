@@ -156,6 +156,7 @@ enum supervisory_command {
   SUP_CMD_KEYUP = 'r',
   SUP_CMD_SUSPEND = 's',
   SUP_CMD_WAKEUP = 'w',
+  SUP_CMD_CLEAR = 'c',
 };
 
 typedef union {

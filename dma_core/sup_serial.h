@@ -21,3 +21,4 @@ void serial_wake(void);
 void serial_send(Sup_Pdu_t* data);
 void serial_tick(void);
 void update_serial_keyboard_report(queuedScancode *key);
+void serial_reset_reports();
