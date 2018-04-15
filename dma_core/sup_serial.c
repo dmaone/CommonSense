@@ -55,19 +55,6 @@ void serial_send(Sup_Pdu_t* packet) {
   queue_ble_command(packet);
 }
 
-bool serial_receive(Sup_Pdu_t* data) {
-//  while
-//      (SupervisoryUART_ReadRxStatus() == SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
-//    inbox.raw[current_inbox_position++] = SupervisoryUART_ReadRxData();
-//    if (current_inbox_position >= sizeof(inbox)) {
-//      memcpy(data, &inbox, sizeof(inbox));
-//      current_inbox_position = 0;
-//      return true;
-//    }
-//  }
-  return false;
-}
-
 void serial_tick(void) {
   if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_WR_CMPLT) {
     if (Sup_I2C_SlaveGetWriteBufSize() == sizeof(i2c_inbox)) {

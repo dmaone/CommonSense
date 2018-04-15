@@ -45,6 +45,7 @@ void usb_check_power(void);
 void usb_wake(void);
 
 void usb_send_c2();
+void usb_send_c2_blocking();
 void usb_send_wakeup(void);
 void usb_receive(OUT_c2packet_t *);
 void load_config(void);
@@ -52,7 +53,6 @@ void apply_config(void);
 
 void reset_reports();
 void update_keyboard_report(queuedScancode *key);
-void update_keyboard_mods(uint8_t);
 void update_consumer_report(queuedScancode *key);
 void update_system_report(queuedScancode *key);
 
@@ -62,14 +62,6 @@ void update_system_report(queuedScancode *key);
 #define _WIPE_OUTBOX(OUTBOX)
 #endif
 
-// Wait for EP - stop waiting if suspend looms.
-#define USB_WAIT_FOR_IN_EP(EP)                                                 \
-  while (USB_GetEPState(EP) != USB_IN_BUFFER_EMPTY) {                          \
-    if (power_state != DEVSTATE_FULL_THROTTLE)                                 \
-      return;                                                                  \
-  }
-
 #define USB_SEND_REPORT(TYPE)                                                  \
-  USB_WAIT_FOR_IN_EP(TYPE##_EP);                                               \
   _WIPE_OUTBOX(TYPE##_OUTBOX);                                                 \
-  USB_LoadInEP(TYPE##_EP, TYPE##_OUTBOX, OUTBOX_SIZE(TYPE##_OUTBOX));
+  usbEnqueue(TYPE##_EP, OUTBOX_SIZE(TYPE##_OUTBOX), TYPE##_OUTBOX);

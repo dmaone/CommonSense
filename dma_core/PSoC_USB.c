@@ -21,6 +21,21 @@
 uint8_t usb_status = USB_STATUS_DISCONNECTED;
 uint8_t wakeup_enabled = 0;
 
+typedef struct {
+  uint8_t EP;
+  uint8_t len;
+  uint8_t data[64];
+} UsbPdu_t;
+
+#define USB_BUFFER_END 3
+#define USB_BUFFER_NEXT(X) ((X + 1) & USB_BUFFER_END)
+#define USB_BUFFER_PREV(X) ((X + USB_BUFFER_END) & USB_BUFFER_END)
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
+
+UsbPdu_t usbSendingQueue[4];
+uint8_t usbSendingReadPos = 0;
+uint8_t usbSendingWritePos = 0;
+
 // How long (in system ticks) to wait for power to be disconnected
 // Used to tell apart cable disconnect from USB suspend.
 #define POWER_CHECK_DELAY 5000
@@ -187,25 +202,38 @@ void usb_receive(OUT_c2packet_t *inbox) {
   }
 }
 
-uint8_t waitForEp(uint8_t ep) {
-  while (USB_GetEPState(ep) != USB_IN_BUFFER_EMPTY) {
-    if (power_state != DEVSTATE_FULL_THROTTLE)
-      return 0;
-  }
-  return 1;
+void usbEnqueue(uint8_t EP, uint8_t len, uint8_t *data) {
+  usbSendingWritePos = USB_BUFFER_NEXT(usbSendingWritePos);
+  usbSendingQueue[usbSendingWritePos].EP = EP;
+  usbSendingQueue[usbSendingWritePos].len = len;
+  memcpy(usbSendingQueue[usbSendingWritePos].data, data, len);
 }
 
-void usb_send_c2(void) {
+void usbSend() {
   if (usb_status != USB_STATUS_CONNECTED) {
     return;
   }
-  USB_WAIT_FOR_IN_EP(OUTBOX_EP);
-  USB_LoadInEP(OUTBOX_EP, outbox.raw, sizeof(outbox.raw));
+  while (usbSendingWritePos != usbSendingReadPos) {
+    uint8_t pos = USB_BUFFER_NEXT(usbSendingReadPos);
+    if (USB_GetEPState(usbSendingQueue[pos].EP) == USB_IN_BUFFER_EMPTY) {
+      USB_LoadInEP(usbSendingQueue[pos].EP,
+          usbSendingQueue[pos].data, usbSendingQueue[pos].len);
+      usbSendingReadPos = pos;
+    } else {
+      break;
+    }
+  }
 }
 
-void update_keyboard_mods(uint8_t mods) {
-  KBD_OUTBOX[0] = mods;
-  USB_SEND_REPORT(KBD);
+void usb_send_c2(void) {
+  usbEnqueue(OUTBOX_EP, sizeof(outbox.raw), outbox.raw);
+}
+
+void usb_send_c2_blocking(void) {
+  usb_send_c2();
+  while (usbSendingReadPos != usbSendingWritePos) {
+    usbSend();
+  }
 }
 
 // Very similar to consumer_press, but keycode there is uint16_t :(
@@ -404,13 +432,8 @@ void usb_tick(void) {
   }
   uint8_t enableInterrupts = CyEnterCriticalSection();
   if (CTRLR_SCB.status == USB_XFER_STATUS_ACK) {
-    static OUT_c2packet_t inbox;
-    memcpy(&inbox, (void *)CTRLR_INBOX, sizeof(inbox));
     CTRLR_SCB.status = USB_XFER_IDLE;
-    // processing message sends USB packets, interrupts are vital.
-    CyExitCriticalSection(enableInterrupts);
-    usb_receive(&inbox);
-    enableInterrupts = CyEnterCriticalSection();
+    usb_receive((OUT_c2packet_t*)CTRLR_INBOX);
   }
   if (KBD_SCB.status == USB_XFER_STATUS_ACK) {
     led_status = KBD_INBOX[0];
@@ -418,6 +441,7 @@ void usb_tick(void) {
     exp_setLEDs(led_status);
   }
   CyExitCriticalSection(enableInterrupts);
+  usbSend();
 }
 
 #define RESET_SINGLE(R, O)                                                     \

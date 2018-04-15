@@ -349,6 +349,6 @@ void report_matrix_readouts(void) {
     for (uint8_t j = 0; j < MATRIX_COLS; j++) {
       outbox.payload[2 + j] = matrix[idx++] & 0xff;
     }
-    usb_send_c2();
+    usb_send_c2_blocking();
   }
 }

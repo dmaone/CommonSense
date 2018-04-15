@@ -20,5 +20,4 @@ void serial_nap(void);
 void serial_wake(void);
 void serial_send(Sup_Pdu_t* data);
 void serial_tick(void);
-bool serial_receive(Sup_Pdu_t* data);
 void update_serial_keyboard_report(queuedScancode *key);
