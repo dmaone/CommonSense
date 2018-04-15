@@ -1,0 +1,349 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"CyFlash.c"
+  16              		.section	.text.CySysFlashWriteRow,"ax",%progbits
+  17              		.align	2
+  18              		.global	CySysFlashWriteRow
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CySysFlashWriteRow, %function
+  22              	CySysFlashWriteRow:
+  23              		@ args = 0, pretend = 0, frame = 272
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 0023     		movs	r3, #0
+  26 0002 30B5     		push	{r4, r5, lr}
+  27 0004 C5B0     		sub	sp, sp, #276
+  28 0006 0093     		str	r3, [sp]
+  29 0008 0193     		str	r3, [sp, #4]
+  30 000a 2D4B     		ldr	r3, .L24
+  31 000c 0400     		movs	r4, r0
+  32 000e 9842     		cmp	r0, r3
+  33 0010 4DD8     		bhi	.L2
+  34 0012 0029     		cmp	r1, #0
+  35 0014 4BD0     		beq	.L2
+  36 0016 8022     		movs	r2, #128
+  37 0018 04A8     		add	r0, sp, #16
+  38 001a 5200     		lsls	r2, r2, #1
+  39 001c FFF7FEFF 		bl	memcpy
+  40 0020 284B     		ldr	r3, .L24+4
+  41 0022 9C42     		cmp	r4, r3
+  42 0024 48D8     		bhi	.L13
+  43 0026 284B     		ldr	r3, .L24+8
+  44              	.L3:
+  45 0028 0293     		str	r3, [sp, #8]
+  46 002a FF23     		movs	r3, #255
+  47 002c 274A     		ldr	r2, .L24+12
+  48 002e 02A9     		add	r1, sp, #8
+  49 0030 0393     		str	r3, [sp, #12]
+  50 0032 2748     		ldr	r0, .L24+16
+  51 0034 1160     		str	r1, [r2]
+  52 0036 2749     		ldr	r1, .L24+20
+  53 0038 0860     		str	r0, [r1]
+  54              		.syntax divided
+  55              	@ 132 "Generated_Source\PSoC4\CyFlash.c" 1
+  56 003a C046     		NOP
+  57              	
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 2
+
+
+  58              	@ 0 "" 2
+  59              		.thumb
+  60              		.syntax unified
+  61 003c 1168     		ldr	r1, [r2]
+  62 003e 090F     		lsrs	r1, r1, #28
+  63 0040 0F29     		cmp	r1, #15
+  64 0042 03D0     		beq	.L21
+  65 0044 1168     		ldr	r1, [r2]
+  66 0046 090F     		lsrs	r1, r1, #28
+  67 0048 0A29     		cmp	r1, #10
+  68 004a 37D0     		beq	.L14
+  69              	.L21:
+  70 004c 1268     		ldr	r2, [r2]
+  71 004e 1340     		ands	r3, r2
+  72              	.L5:
+  73 0050 0093     		str	r3, [sp]
+  74 0052 009D     		ldr	r5, [sp]
+  75 0054 002D     		cmp	r5, #0
+  76 0056 2CD1     		bne	.L6
+  77 0058 FFF7FEFF 		bl	CyEnterCriticalSection
+  78 005c 0195     		str	r5, [sp, #4]
+  79 005e 009B     		ldr	r3, [sp]
+  80 0060 002B     		cmp	r3, #0
+  81 0062 18D1     		bne	.L7
+  82 0064 1C4A     		ldr	r2, .L24+24
+  83 0066 2404     		lsls	r4, r4, #16
+  84 0068 0292     		str	r2, [sp, #8]
+  85 006a 029A     		ldr	r2, [sp, #8]
+  86 006c 02A9     		add	r1, sp, #8
+  87 006e 1443     		orrs	r4, r2
+  88 0070 164A     		ldr	r2, .L24+12
+  89 0072 0294     		str	r4, [sp, #8]
+  90 0074 1160     		str	r1, [r2]
+  91 0076 194C     		ldr	r4, .L24+28
+  92 0078 1649     		ldr	r1, .L24+20
+  93 007a 0C60     		str	r4, [r1]
+  94              		.syntax divided
+  95              	@ 162 "Generated_Source\PSoC4\CyFlash.c" 1
+  96 007c C046     		NOP
+  97              	
+  98              	@ 0 "" 2
+  99              		.thumb
+ 100              		.syntax unified
+ 101 007e 1168     		ldr	r1, [r2]
+ 102 0080 090F     		lsrs	r1, r1, #28
+ 103 0082 0F29     		cmp	r1, #15
+ 104 0084 03D0     		beq	.L22
+ 105 0086 1168     		ldr	r1, [r2]
+ 106 0088 090F     		lsrs	r1, r1, #28
+ 107 008a 0A29     		cmp	r1, #10
+ 108 008c 02D0     		beq	.L9
+ 109              	.L22:
+ 110 008e 1368     		ldr	r3, [r2]
+ 111 0090 FF22     		movs	r2, #255
+ 112 0092 1340     		ands	r3, r2
+ 113              	.L9:
+ 114 0094 0093     		str	r3, [sp]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 3
+
+
+ 115              	.L7:
+ 116 0096 019B     		ldr	r3, [sp, #4]
+ 117 0098 002B     		cmp	r3, #0
+ 118 009a 05D1     		bne	.L11
+ 119 009c 0193     		str	r3, [sp, #4]
+ 120 009e 019B     		ldr	r3, [sp, #4]
+ 121 00a0 002B     		cmp	r3, #0
+ 122 00a2 01D0     		beq	.L11
+ 123 00a4 019B     		ldr	r3, [sp, #4]
+ 124 00a6 0093     		str	r3, [sp]
+ 125              	.L11:
+ 126 00a8 FFF7FEFF 		bl	CyExitCriticalSection
+ 127 00ac 01E0     		b	.L6
+ 128              	.L2:
+ 129 00ae 0423     		movs	r3, #4
+ 130 00b0 0093     		str	r3, [sp]
+ 131              	.L6:
+ 132 00b2 0098     		ldr	r0, [sp]
+ 133 00b4 45B0     		add	sp, sp, #276
+ 134              		@ sp needed
+ 135 00b6 30BD     		pop	{r4, r5, pc}
+ 136              	.L13:
+ 137 00b8 094B     		ldr	r3, .L24+32
+ 138 00ba B5E7     		b	.L3
+ 139              	.L14:
+ 140 00bc 0023     		movs	r3, #0
+ 141 00be C7E7     		b	.L5
+ 142              	.L25:
+ 143              		.align	2
+ 144              	.L24:
+ 145 00c0 FF030000 		.word	1023
+ 146 00c4 FF010000 		.word	511
+ 147 00c8 B6D70000 		.word	55222
+ 148 00cc 08001040 		.word	1074790408
+ 149 00d0 04000080 		.word	-2147483644
+ 150 00d4 04001040 		.word	1074790404
+ 151 00d8 B6D80000 		.word	55478
+ 152 00dc 05000080 		.word	-2147483643
+ 153 00e0 B6D70001 		.word	16832438
+ 154              		.size	CySysFlashWriteRow, .-CySysFlashWriteRow
+ 155              		.section	.text.CySysFlashSetWaitCycles,"ax",%progbits
+ 156              		.align	2
+ 157              		.global	CySysFlashSetWaitCycles
+ 158              		.code	16
+ 159              		.thumb_func
+ 160              		.type	CySysFlashSetWaitCycles, %function
+ 161              	CySysFlashSetWaitCycles:
+ 162              		@ args = 0, pretend = 0, frame = 0
+ 163              		@ frame_needed = 0, uses_anonymous_args = 0
+ 164 0000 70B5     		push	{r4, r5, r6, lr}
+ 165 0002 0400     		movs	r4, r0
+ 166 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 167 0008 0500     		movs	r5, r0
+ 168 000a 102C     		cmp	r4, #16
+ 169 000c 16D9     		bls	.L31
+ 170 000e 202C     		cmp	r4, #32
+ 171 0010 0CD9     		bls	.L32
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 4
+
+
+ 172 0012 302C     		cmp	r4, #48
+ 173 0014 18D8     		bhi	.L30
+ 174 0016 0322     		movs	r2, #3
+ 175 0018 0D49     		ldr	r1, .L33
+ 176 001a 0B68     		ldr	r3, [r1]
+ 177 001c 9343     		bics	r3, r2
+ 178 001e 013A     		subs	r2, r2, #1
+ 179 0020 1343     		orrs	r3, r2
+ 180 0022 0B60     		str	r3, [r1]
+ 181              	.L28:
+ 182 0024 2800     		movs	r0, r5
+ 183 0026 FFF7FEFF 		bl	CyExitCriticalSection
+ 184              		@ sp needed
+ 185 002a 70BD     		pop	{r4, r5, r6, pc}
+ 186              	.L32:
+ 187 002c 0322     		movs	r2, #3
+ 188 002e 0849     		ldr	r1, .L33
+ 189 0030 0B68     		ldr	r3, [r1]
+ 190 0032 9343     		bics	r3, r2
+ 191 0034 023A     		subs	r2, r2, #2
+ 192 0036 1343     		orrs	r3, r2
+ 193 0038 0B60     		str	r3, [r1]
+ 194 003a F3E7     		b	.L28
+ 195              	.L31:
+ 196 003c 0321     		movs	r1, #3
+ 197 003e 044A     		ldr	r2, .L33
+ 198 0040 1368     		ldr	r3, [r2]
+ 199 0042 8B43     		bics	r3, r1
+ 200 0044 1360     		str	r3, [r2]
+ 201 0046 EDE7     		b	.L28
+ 202              	.L30:
+ 203 0048 0020     		movs	r0, #0
+ 204 004a FFF7FEFF 		bl	CyHalt
+ 205 004e E9E7     		b	.L28
+ 206              	.L34:
+ 207              		.align	2
+ 208              	.L33:
+ 209 0050 30001040 		.word	1074790448
+ 210              		.size	CySysFlashSetWaitCycles, .-CySysFlashSetWaitCycles
+ 211              		.section	.text.CySysSFlashWriteUserRow,"ax",%progbits
+ 212              		.align	2
+ 213              		.global	CySysSFlashWriteUserRow
+ 214              		.code	16
+ 215              		.thumb_func
+ 216              		.type	CySysSFlashWriteUserRow, %function
+ 217              	CySysSFlashWriteUserRow:
+ 218              		@ args = 0, pretend = 0, frame = 272
+ 219              		@ frame_needed = 0, uses_anonymous_args = 0
+ 220 0000 0023     		movs	r3, #0
+ 221 0002 30B5     		push	{r4, r5, lr}
+ 222 0004 C5B0     		sub	sp, sp, #276
+ 223 0006 0093     		str	r3, [sp]
+ 224 0008 0400     		movs	r4, r0
+ 225 000a 0193     		str	r3, [sp, #4]
+ 226 000c 0328     		cmp	r0, #3
+ 227 000e 42D8     		bhi	.L36
+ 228 0010 0029     		cmp	r1, #0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 5
+
+
+ 229 0012 40D0     		beq	.L36
+ 230 0014 8022     		movs	r2, #128
+ 231 0016 FF25     		movs	r5, #255
+ 232 0018 224B     		ldr	r3, .L50
+ 233 001a 5200     		lsls	r2, r2, #1
+ 234 001c 04A8     		add	r0, sp, #16
+ 235 001e 0293     		str	r3, [sp, #8]
+ 236 0020 0395     		str	r5, [sp, #12]
+ 237 0022 FFF7FEFF 		bl	memcpy
+ 238 0026 204B     		ldr	r3, .L50+4
+ 239 0028 02AA     		add	r2, sp, #8
+ 240 002a 1A60     		str	r2, [r3]
+ 241 002c 1F49     		ldr	r1, .L50+8
+ 242 002e 204A     		ldr	r2, .L50+12
+ 243 0030 1160     		str	r1, [r2]
+ 244              		.syntax divided
+ 245              	@ 510 "Generated_Source\PSoC4\CyFlash.c" 1
+ 246 0032 C046     		NOP
+ 247              	
+ 248              	@ 0 "" 2
+ 249              		.thumb
+ 250              		.syntax unified
+ 251 0034 1A68     		ldr	r2, [r3]
+ 252 0036 120F     		lsrs	r2, r2, #28
+ 253 0038 0F2A     		cmp	r2, #15
+ 254 003a 03D0     		beq	.L48
+ 255 003c 1A68     		ldr	r2, [r3]
+ 256 003e 120F     		lsrs	r2, r2, #28
+ 257 0040 0A2A     		cmp	r2, #10
+ 258 0042 2DD0     		beq	.L44
+ 259              	.L48:
+ 260 0044 1B68     		ldr	r3, [r3]
+ 261 0046 1D40     		ands	r5, r3
+ 262              	.L38:
+ 263 0048 0095     		str	r5, [sp]
+ 264 004a 009D     		ldr	r5, [sp]
+ 265 004c 002D     		cmp	r5, #0
+ 266 004e 24D1     		bne	.L39
+ 267 0050 FFF7FEFF 		bl	CyEnterCriticalSection
+ 268 0054 0195     		str	r5, [sp, #4]
+ 269 0056 009B     		ldr	r3, [sp]
+ 270 0058 002B     		cmp	r3, #0
+ 271 005a 15D1     		bne	.L40
+ 272 005c 154A     		ldr	r2, .L50+16
+ 273 005e 02A9     		add	r1, sp, #8
+ 274 0060 0292     		str	r2, [sp, #8]
+ 275 0062 114A     		ldr	r2, .L50+4
+ 276 0064 0394     		str	r4, [sp, #12]
+ 277 0066 1160     		str	r1, [r2]
+ 278 0068 134C     		ldr	r4, .L50+20
+ 279 006a 1149     		ldr	r1, .L50+12
+ 280 006c 0C60     		str	r4, [r1]
+ 281              		.syntax divided
+ 282              	@ 540 "Generated_Source\PSoC4\CyFlash.c" 1
+ 283 006e C046     		NOP
+ 284              	
+ 285              	@ 0 "" 2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccNSQn1A.s 			page 6
+
+
+ 286              		.thumb
+ 287              		.syntax unified
+ 288 0070 1168     		ldr	r1, [r2]
+ 289 0072 090F     		lsrs	r1, r1, #28
+ 290 0074 0F29     		cmp	r1, #15
+ 291 0076 03D0     		beq	.L49
+ 292 0078 1168     		ldr	r1, [r2]
+ 293 007a 090F     		lsrs	r1, r1, #28
+ 294 007c 0A29     		cmp	r1, #10
+ 295 007e 02D0     		beq	.L42
+ 296              	.L49:
+ 297 0080 1368     		ldr	r3, [r2]
+ 298 0082 FF22     		movs	r2, #255
+ 299 0084 1340     		ands	r3, r2
+ 300              	.L42:
+ 301 0086 0093     		str	r3, [sp]
+ 302              	.L40:
+ 303 0088 019B     		ldr	r3, [sp, #4]
+ 304 008a 002B     		cmp	r3, #0
+ 305 008c 00D1     		bne	.L43
+ 306 008e 0193     		str	r3, [sp, #4]
+ 307              	.L43:
+ 308 0090 FFF7FEFF 		bl	CyExitCriticalSection
+ 309 0094 01E0     		b	.L39
+ 310              	.L36:
+ 311 0096 0423     		movs	r3, #4
+ 312 0098 0093     		str	r3, [sp]
+ 313              	.L39:
+ 314 009a 0098     		ldr	r0, [sp]
+ 315 009c 45B0     		add	sp, sp, #276
+ 316              		@ sp needed
+ 317 009e 30BD     		pop	{r4, r5, pc}
+ 318              	.L44:
+ 319 00a0 0025     		movs	r5, #0
+ 320 00a2 D1E7     		b	.L38
+ 321              	.L51:
+ 322              		.align	2
+ 323              	.L50:
+ 324 00a4 B6D70000 		.word	55222
+ 325 00a8 08001040 		.word	1074790408
+ 326 00ac 04000080 		.word	-2147483644
+ 327 00b0 04001040 		.word	1074790404
+ 328 00b4 B6EB0000 		.word	60342
+ 329 00b8 18000080 		.word	-2147483624
+ 330              		.size	CySysSFlashWriteUserRow, .-CySysSFlashWriteUserRow
+ 331              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

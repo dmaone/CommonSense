@@ -1,0 +1,33 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccY6Rewf.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"BLE_HAL_INT.c"
+  16              		.section	.text.CyBLE_Bless_Interrupt,"ax",%progbits
+  17              		.align	2
+  18              		.global	CyBLE_Bless_Interrupt
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CyBLE_Bless_Interrupt, %function
+  22              	CyBLE_Bless_Interrupt:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 10B5     		push	{r4, lr}
+  26 0002 FFF7FEFF 		bl	CyBle_BleSSInterruptHandler
+  27              		@ sp needed
+  28 0006 10BD     		pop	{r4, pc}
+  29              		.size	CyBLE_Bless_Interrupt, .-CyBLE_Bless_Interrupt
+  30              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

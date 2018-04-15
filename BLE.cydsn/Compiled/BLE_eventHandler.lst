@@ -1,0 +1,581 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"BLE_eventHandler.c"
+  16              		.section	.text.CyBle_IsDeviceAddressValid,"ax",%progbits
+  17              		.align	2
+  18              		.global	CyBle_IsDeviceAddressValid
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CyBle_IsDeviceAddressValid, %function
+  22              	CyBle_IsDeviceAddressValid:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25              		@ link register save eliminated.
+  26 0000 8279     		ldrb	r2, [r0, #6]
+  27 0002 0300     		movs	r3, r0
+  28 0004 0020     		movs	r0, #0
+  29 0006 002A     		cmp	r2, #0
+  30 0008 12D1     		bne	.L2
+  31 000a 1A78     		ldrb	r2, [r3]
+  32 000c 002A     		cmp	r2, #0
+  33 000e 10D1     		bne	.L8
+  34 0010 5A78     		ldrb	r2, [r3, #1]
+  35 0012 002A     		cmp	r2, #0
+  36 0014 0DD1     		bne	.L8
+  37 0016 9A78     		ldrb	r2, [r3, #2]
+  38 0018 002A     		cmp	r2, #0
+  39 001a 0AD1     		bne	.L8
+  40 001c DA78     		ldrb	r2, [r3, #3]
+  41 001e 002A     		cmp	r2, #0
+  42 0020 07D1     		bne	.L8
+  43 0022 1A79     		ldrb	r2, [r3, #4]
+  44 0024 002A     		cmp	r2, #0
+  45 0026 04D1     		bne	.L8
+  46 0028 5879     		ldrb	r0, [r3, #5]
+  47 002a 431E     		subs	r3, r0, #1
+  48 002c 9841     		sbcs	r0, r0, r3
+  49 002e C0B2     		uxtb	r0, r0
+  50              	.L2:
+  51              		@ sp needed
+  52 0030 7047     		bx	lr
+  53              	.L8:
+  54 0032 0120     		movs	r0, #1
+  55 0034 FCE7     		b	.L2
+  56              		.size	CyBle_IsDeviceAddressValid, .-CyBle_IsDeviceAddressValid
+  57 0036 C046     		.section	.text.CyBle_EventHandler,"ax",%progbits
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 2
+
+
+  58              		.align	2
+  59              		.global	CyBle_EventHandler
+  60              		.code	16
+  61              		.thumb_func
+  62              		.type	CyBle_EventHandler, %function
+  63              	CyBle_EventHandler:
+  64              		@ args = 0, pretend = 0, frame = 8
+  65              		@ frame_needed = 0, uses_anonymous_args = 0
+  66 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  67 0002 4746     		mov	r7, r8
+  68 0004 0122     		movs	r2, #1
+  69 0006 80B4     		push	{r7}
+  70 0008 B44D     		ldr	r5, .L101
+  71 000a 82B0     		sub	sp, sp, #8
+  72 000c 2B78     		ldrb	r3, [r5]
+  73 000e 0400     		movs	r4, r0
+  74 0010 1343     		orrs	r3, r2
+  75 0012 DBB2     		uxtb	r3, r3
+  76 0014 0E00     		movs	r6, r1
+  77 0016 2B70     		strb	r3, [r5]
+  78 0018 2728     		cmp	r0, #39
+  79 001a 00D1     		bne	.LCB59
+  80 001c 1FE1     		b	.L12	@long jump
+  81              	.LCB59:
+  82 001e 1DD9     		bls	.L92
+  83 0020 4328     		cmp	r0, #67
+  84 0022 00D1     		bne	.LCB63
+  85 0024 85E0     		b	.L21	@long jump
+  86              	.LCB63:
+  87 0026 3AD8     		bhi	.L22
+  88 0028 4128     		cmp	r0, #65
+  89 002a 60D0     		beq	.L23
+  90 002c 00D9     		bls	.LCB69
+  91 002e 11E1     		b	.L24	@long jump
+  92              	.LCB69:
+  93 0030 2828     		cmp	r0, #40
+  94 0032 02D1     		bne	.L11
+  95 0034 0422     		movs	r2, #4
+  96 0036 AA4B     		ldr	r3, .L101+4
+  97 0038 1A70     		strb	r2, [r3]
+  98              	.L11:
+  99 003a 1122     		movs	r2, #17
+ 100 003c 2B78     		ldrb	r3, [r5]
+ 101 003e 1A42     		tst	r2, r3
+ 102 0040 08D0     		beq	.L10
+ 103 0042 2B78     		ldrb	r3, [r5]
+ 104 0044 103A     		subs	r2, r2, #16
+ 105 0046 9343     		bics	r3, r2
+ 106 0048 2B70     		strb	r3, [r5]
+ 107 004a A64B     		ldr	r3, .L101+8
+ 108 004c 3100     		movs	r1, r6
+ 109 004e 1B68     		ldr	r3, [r3]
+ 110 0050 2000     		movs	r0, r4
+ 111 0052 9847     		blx	r3
+ 112              	.L10:
+ 113 0054 02B0     		add	sp, sp, #8
+ 114              		@ sp needed
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 3
+
+
+ 115 0056 04BC     		pop	{r2}
+ 116 0058 9046     		mov	r8, r2
+ 117 005a F0BD     		pop	{r4, r5, r6, r7, pc}
+ 118              	.L92:
+ 119 005c 0628     		cmp	r0, #6
+ 120 005e 00D1     		bne	.LCB111
+ 121 0060 7CE0     		b	.L14	@long jump
+ 122              	.LCB111:
+ 123 0062 72D9     		bls	.L93
+ 124 0064 2428     		cmp	r0, #36
+ 125 0066 6CD0     		beq	.L18
+ 126 0068 2628     		cmp	r0, #38
+ 127 006a 00D1     		bne	.LCB117
+ 128 006c DEE0     		b	.L19	@long jump
+ 129              	.LCB117:
+ 130 006e 2128     		cmp	r0, #33
+ 131 0070 E3D1     		bne	.L11
+ 132 0072 2B78     		ldrb	r3, [r5]
+ 133 0074 9B06     		lsls	r3, r3, #26
+ 134 0076 E0D4     		bmi	.L11
+ 135 0078 9B49     		ldr	r1, .L101+12
+ 136 007a 0B78     		ldrb	r3, [r1]
+ 137 007c 102B     		cmp	r3, #16
+ 138 007e 00D1     		bne	.LCB130
+ 139 0080 29E1     		b	.L94	@long jump
+ 140              	.LCB130:
+ 141              	.L34:
+ 142 0082 9A4B     		ldr	r3, .L101+16
+ 143 0084 1878     		ldrb	r0, [r3]
+ 144 0086 FFF7FEFF 		bl	CyBle_GappAuthReqReply
+ 145 008a 01A9     		add	r1, sp, #4
+ 146 008c 0880     		strh	r0, [r1]
+ 147 008e 0028     		cmp	r0, #0
+ 148 0090 00D0     		beq	.LCB138
+ 149 0092 17E1     		b	.L95	@long jump
+ 150              	.LCB138:
+ 151              	.L35:
+ 152 0094 0123     		movs	r3, #1
+ 153 0096 2A78     		ldrb	r2, [r5]
+ 154 0098 1343     		orrs	r3, r2
+ 155 009a 2B70     		strb	r3, [r5]
+ 156 009c CDE7     		b	.L11
+ 157              	.L22:
+ 158 009e 4E28     		cmp	r0, #78
+ 159 00a0 3BD0     		beq	.L26
+ 160 00a2 FA28     		cmp	r0, #250
+ 161 00a4 00D1     		bne	.LCB153
+ 162 00a6 BCE0     		b	.L27	@long jump
+ 163              	.LCB153:
+ 164 00a8 4C28     		cmp	r0, #76
+ 165 00aa C6D1     		bne	.L11
+ 166 00ac 0800     		movs	r0, r1
+ 167 00ae FFF7FEFF 		bl	CyBle_GattsWriteEventHandler
+ 168 00b2 0123     		movs	r3, #1
+ 169 00b4 2A78     		ldrb	r2, [r5]
+ 170 00b6 1342     		tst	r3, r2
+ 171 00b8 00D0     		beq	.LCB164
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 4
+
+
+ 172 00ba D6E0     		b	.L96	@long jump
+ 173              	.LCB164:
+ 174              	.L39:
+ 175 00bc 2B78     		ldrb	r3, [r5]
+ 176 00be DB07     		lsls	r3, r3, #31
+ 177 00c0 00D4     		bmi	.LCB172
+ 178 00c2 DDE0     		b	.L41	@long jump
+ 179              	.LCB172:
+ 180 00c4 0028     		cmp	r0, #0
+ 181 00c6 00D1     		bne	.LCB174
+ 182 00c8 D7E0     		b	.L97	@long jump
+ 183              	.LCB174:
+ 184              	.L42:
+ 185 00ca 0123     		movs	r3, #1
+ 186 00cc 2A78     		ldrb	r2, [r5]
+ 187 00ce 1342     		tst	r3, r2
+ 188 00d0 00D0     		beq	.LCB182
+ 189 00d2 E8E0     		b	.L44	@long jump
+ 190              	.LCB182:
+ 191 00d4 2A78     		ldrb	r2, [r5]
+ 192 00d6 1342     		tst	r3, r2
+ 193 00d8 AFD1     		bne	.L11
+ 194              	.L51:
+ 195 00da 1223     		movs	r3, #18
+ 196 00dc 01A9     		add	r1, sp, #4
+ 197 00de 8B70     		strb	r3, [r1, #2]
+ 198 00e0 B389     		ldrh	r3, [r6, #12]
+ 199 00e2 C870     		strb	r0, [r1, #3]
+ 200 00e4 3068     		ldr	r0, [r6]
+ 201 00e6 0B80     		strh	r3, [r1]
+ 202 00e8 FFF7FEFF 		bl	CyBle_GattsErrorRsp
+ 203 00ec A5E7     		b	.L11
+ 204              	.L23:
+ 205 00ee 7F4F     		ldr	r7, .L101+16
+ 206 00f0 0222     		movs	r2, #2
+ 207 00f2 3800     		movs	r0, r7
+ 208 00f4 FFF7FEFF 		bl	memcpy
+ 209 00f8 0022     		movs	r2, #0
+ 210 00fa 7D4B     		ldr	r3, .L101+20
+ 211 00fc 3978     		ldrb	r1, [r7]
+ 212 00fe 1A70     		strb	r2, [r3]
+ 213 0100 7C4B     		ldr	r3, .L101+24
+ 214 0102 0901     		lsls	r1, r1, #4
+ 215 0104 5918     		adds	r1, r3, r1
+ 216 0106 7C4B     		ldr	r3, .L101+28
+ 217 0108 1032     		adds	r2, r2, #16
+ 218 010a 9C46     		mov	ip, r3
+ 219 010c 7B48     		ldr	r0, .L101+32
+ 220 010e 6144     		add	r1, r1, ip
+ 221 0110 FFF7FEFF 		bl	memcpy
+ 222 0114 FFF7FEFF 		bl	CyBle_HidssOnDeviceConnected
+ 223 0118 8FE7     		b	.L11
+ 224              	.L26:
+ 225 011a 2B78     		ldrb	r3, [r5]
+ 226 011c DB07     		lsls	r3, r3, #31
+ 227 011e 00D5     		bpl	.LCB230
+ 228 0120 A7E0     		b	.L98	@long jump
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 5
+
+
+ 229              	.LCB230:
+ 230              	.L46:
+ 231 0122 2B78     		ldrb	r3, [r5]
+ 232 0124 DB07     		lsls	r3, r3, #31
+ 233 0126 00D4     		bmi	.LCB238
+ 234 0128 87E7     		b	.L11	@long jump
+ 235              	.LCB238:
+ 236 012a 3000     		movs	r0, r6
+ 237 012c FFF7FEFF 		bl	CyBle_ScpssWriteEventHandler
+ 238 0130 83E7     		b	.L11
+ 239              	.L21:
+ 240 0132 4988     		ldrh	r1, [r1, #2]
+ 241 0134 1629     		cmp	r1, #22
+ 242 0136 00D9     		bls	.LCB247
+ 243 0138 95E0     		b	.L99	@long jump
+ 244              	.LCB247:
+ 245              	.L38:
+ 246 013a 3088     		ldrh	r0, [r6]
+ 247 013c FFF7FEFF 		bl	CyBle_GattsExchangeMtuRsp
+ 248 0140 7BE7     		b	.L11
+ 249              	.L18:
+ 250 0142 4A78     		ldrb	r2, [r1, #1]
+ 251 0144 6E4B     		ldr	r3, .L101+36
+ 252 0146 1A70     		strb	r2, [r3]
+ 253 0148 77E7     		b	.L11
+ 254              	.L93:
+ 255 014a 0128     		cmp	r0, #1
+ 256 014c 1AD0     		beq	.L16
+ 257 014e 0528     		cmp	r0, #5
+ 258 0150 00D0     		beq	.LCB267
+ 259 0152 72E7     		b	.L11	@long jump
+ 260              	.LCB267:
+ 261 0154 0A78     		ldrb	r2, [r1]
+ 262 0156 664B     		ldr	r3, .L101+20
+ 263 0158 1A70     		strb	r2, [r3]
+ 264 015a 6EE7     		b	.L11
+ 265              	.L14:
+ 266 015c 0B78     		ldrb	r3, [r1]
+ 267 015e 002B     		cmp	r3, #0
+ 268 0160 00D0     		beq	.LCB277
+ 269 0162 6AE7     		b	.L11	@long jump
+ 270              	.LCB277:
+ 271 0164 4B78     		ldrb	r3, [r1, #1]
+ 272 0166 002B     		cmp	r3, #0
+ 273 0168 07D1     		bne	.L32
+ 274 016a 0422     		movs	r2, #4
+ 275 016c 654B     		ldr	r3, .L101+40
+ 276 016e DA80     		strh	r2, [r3, #6]
+ 277 0170 3C32     		adds	r2, r2, #60
+ 278 0172 9A80     		strh	r2, [r3, #4]
+ 279 0174 644A     		ldr	r2, .L101+44
+ 280 0176 4B60     		str	r3, [r1, #4]
+ 281 0178 1A60     		str	r2, [r3]
+ 282              	.L32:
+ 283 017a 0122     		movs	r2, #1
+ 284 017c 2B78     		ldrb	r3, [r5]
+ 285 017e 9343     		bics	r3, r2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 6
+
+
+ 286 0180 2B70     		strb	r3, [r5]
+ 287 0182 5AE7     		b	.L11
+ 288              	.L16:
+ 289 0184 0723     		movs	r3, #7
+ 290 0186 01AF     		add	r7, sp, #4
+ 291 0188 9846     		mov	r8, r3
+ 292 018a 3B70     		strb	r3, [r7]
+ 293 018c 0023     		movs	r3, #0
+ 294 018e 3800     		movs	r0, r7
+ 295 0190 7B70     		strb	r3, [r7, #1]
+ 296 0192 FFF7FEFF 		bl	CyBle_SetTxPowerLevel
+ 297 0196 4346     		mov	r3, r8
+ 298 0198 3800     		movs	r0, r7
+ 299 019a 3B70     		strb	r3, [r7]
+ 300 019c 7C70     		strb	r4, [r7, #1]
+ 301 019e FFF7FEFF 		bl	CyBle_SetTxPowerLevel
+ 302 01a2 5A4B     		ldr	r3, .L101+48
+ 303 01a4 1868     		ldr	r0, [r3]
+ 304 01a6 9846     		mov	r8, r3
+ 305 01a8 8379     		ldrb	r3, [r0, #6]
+ 306 01aa 002B     		cmp	r3, #0
+ 307 01ac 1ED1     		bne	.L29
+ 308 01ae 0378     		ldrb	r3, [r0]
+ 309 01b0 002B     		cmp	r3, #0
+ 310 01b2 0ED1     		bne	.L30
+ 311 01b4 4378     		ldrb	r3, [r0, #1]
+ 312 01b6 002B     		cmp	r3, #0
+ 313 01b8 0BD1     		bne	.L30
+ 314 01ba 8378     		ldrb	r3, [r0, #2]
+ 315 01bc 002B     		cmp	r3, #0
+ 316 01be 08D1     		bne	.L30
+ 317 01c0 C378     		ldrb	r3, [r0, #3]
+ 318 01c2 002B     		cmp	r3, #0
+ 319 01c4 05D1     		bne	.L30
+ 320 01c6 0379     		ldrb	r3, [r0, #4]
+ 321 01c8 002B     		cmp	r3, #0
+ 322 01ca 02D1     		bne	.L30
+ 323 01cc 4379     		ldrb	r3, [r0, #5]
+ 324 01ce 002B     		cmp	r3, #0
+ 325 01d0 0CD0     		beq	.L29
+ 326              	.L30:
+ 327 01d2 FFF7FEFF 		bl	CyBle_SetDeviceAddress
+ 328 01d6 4346     		mov	r3, r8
+ 329 01d8 0021     		movs	r1, #0
+ 330 01da 1868     		ldr	r0, [r3]
+ 331 01dc FFF7FEFF 		bl	CyBle_ChangeAdDeviceAddress
+ 332 01e0 4346     		mov	r3, r8
+ 333 01e2 0121     		movs	r1, #1
+ 334 01e4 1868     		ldr	r0, [r3]
+ 335 01e6 FFF7FEFF 		bl	CyBle_ChangeAdDeviceAddress
+ 336 01ea 0CE0     		b	.L48
+ 337              	.L29:
+ 338 01ec 484B     		ldr	r3, .L101+52
+ 339 01ee 9846     		mov	r8, r3
+ 340 01f0 1800     		movs	r0, r3
+ 341 01f2 FFF7FEFF 		bl	CyBle_SetDeviceAddress
+ 342 01f6 0021     		movs	r1, #0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 7
+
+
+ 343 01f8 4046     		mov	r0, r8
+ 344 01fa FFF7FEFF 		bl	CyBle_ChangeAdDeviceAddress
+ 345 01fe 0121     		movs	r1, #1
+ 346 0200 4046     		mov	r0, r8
+ 347 0202 FFF7FEFF 		bl	CyBle_ChangeAdDeviceAddress
+ 348              	.L48:
+ 349 0206 0320     		movs	r0, #3
+ 350 0208 FFF7FEFF 		bl	CyBle_GapSetIoCap
+ 351 020c 3F23     		movs	r3, #63
+ 352 020e 3B70     		strb	r3, [r7]
+ 353 0210 0023     		movs	r3, #0
+ 354 0212 3800     		movs	r0, r7
+ 355 0214 7B70     		strb	r3, [r7, #1]
+ 356 0216 FFF7FEFF 		bl	CyBle_GapSetLeEventMask
+ 357 021a 0422     		movs	r2, #4
+ 358 021c 304B     		ldr	r3, .L101+4
+ 359 021e 1A70     		strb	r2, [r3]
+ 360 0220 0BE7     		b	.L11
+ 361              	.L27:
+ 362 0222 3C4B     		ldr	r3, .L101+56
+ 363 0224 1978     		ldrb	r1, [r3]
+ 364 0226 0A43     		orrs	r2, r1
+ 365 0228 1A70     		strb	r2, [r3]
+ 366 022a 06E7     		b	.L11
+ 367              	.L19:
+ 368 022c 2C4F     		ldr	r7, .L101+4
+ 369 022e 3B78     		ldrb	r3, [r7]
+ 370 0230 9846     		mov	r8, r3
+ 371 0232 022B     		cmp	r3, #2
+ 372 0234 00D1     		bne	.LCB392
+ 373 0236 00E7     		b	.L11	@long jump
+ 374              	.LCB392:
+ 375 0238 2B78     		ldrb	r3, [r5]
+ 376 023a DB07     		lsls	r3, r3, #31
+ 377 023c 00D4     		bmi	.LCB399
+ 378 023e FCE6     		b	.L11	@long jump
+ 379              	.LCB399:
+ 380 0240 0423     		movs	r3, #4
+ 381 0242 2A78     		ldrb	r2, [r5]
+ 382 0244 1342     		tst	r3, r2
+ 383 0246 33D0     		beq	.L36
+ 384 0248 0322     		movs	r2, #3
+ 385 024a 3A70     		strb	r2, [r7]
+ 386 024c 2A78     		ldrb	r2, [r5]
+ 387 024e 9A43     		bics	r2, r3
+ 388 0250 2A70     		strb	r2, [r5]
+ 389 0252 F2E6     		b	.L11
+ 390              	.L24:
+ 391 0254 0022     		movs	r2, #0
+ 392 0256 254B     		ldr	r3, .L101+16
+ 393 0258 5A70     		strb	r2, [r3, #1]
+ 394 025a 1A70     		strb	r2, [r3]
+ 395 025c EDE6     		b	.L11
+ 396              	.L12:
+ 397 025e 0222     		movs	r2, #2
+ 398 0260 1F4B     		ldr	r3, .L101+4
+ 399 0262 1A70     		strb	r2, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 8
+
+
+ 400 0264 E9E6     		b	.L11
+ 401              	.L99:
+ 402 0266 1721     		movs	r1, #23
+ 403 0268 67E7     		b	.L38
+ 404              	.L96:
+ 405 026a 0028     		cmp	r0, #0
+ 406 026c 2FD0     		beq	.L100
+ 407 026e 2A78     		ldrb	r2, [r5]
+ 408 0270 2BE7     		b	.L42
+ 409              	.L98:
+ 410 0272 0800     		movs	r0, r1
+ 411 0274 FFF7FEFF 		bl	CyBle_HidssWriteEventHandler
+ 412 0278 53E7     		b	.L46
+ 413              	.L97:
+ 414 027a 3000     		movs	r0, r6
+ 415 027c FFF7FEFF 		bl	CyBle_HidssWriteEventHandler
+ 416              	.L41:
+ 417 0280 2B78     		ldrb	r3, [r5]
+ 418 0282 DB07     		lsls	r3, r3, #31
+ 419 0284 04D5     		bpl	.L43
+ 420 0286 0028     		cmp	r0, #0
+ 421 0288 0DD1     		bne	.L44
+ 422 028a 3000     		movs	r0, r6
+ 423 028c FFF7FEFF 		bl	CyBle_ScpssWriteEventHandler
+ 424              	.L43:
+ 425 0290 2B78     		ldrb	r3, [r5]
+ 426 0292 DB07     		lsls	r3, r3, #31
+ 427 0294 00D5     		bpl	.LCB477
+ 428 0296 D0E6     		b	.L11	@long jump
+ 429              	.LCB477:
+ 430 0298 0028     		cmp	r0, #0
+ 431 029a 00D0     		beq	.LCB479
+ 432 029c 1DE7     		b	.L51	@long jump
+ 433              	.LCB479:
+ 434 029e 3068     		ldr	r0, [r6]
+ 435 02a0 FFF7FEFF 		bl	CyBle_GattsWriteRsp
+ 436 02a4 C9E6     		b	.L11
+ 437              	.L44:
+ 438 02a6 2B78     		ldrb	r3, [r5]
+ 439 02a8 DB07     		lsls	r3, r3, #31
+ 440 02aa 00D4     		bmi	.LCB492
+ 441 02ac 15E7     		b	.L51	@long jump
+ 442              	.LCB492:
+ 443 02ae C4E6     		b	.L11
+ 444              	.L36:
+ 445 02b0 2B78     		ldrb	r3, [r5]
+ 446 02b2 1B07     		lsls	r3, r3, #28
+ 447 02b4 30D5     		bpl	.L37
+ 448 02b6 0423     		movs	r3, #4
+ 449 02b8 0822     		movs	r2, #8
+ 450 02ba 3B70     		strb	r3, [r7]
+ 451 02bc 2B78     		ldrb	r3, [r5]
+ 452 02be 9343     		bics	r3, r2
+ 453 02c0 2B70     		strb	r3, [r5]
+ 454 02c2 BAE6     		b	.L11
+ 455              	.L95:
+ 456 02c4 074B     		ldr	r3, .L101+8
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 9
+
+
+ 457 02c6 3620     		movs	r0, #54
+ 458 02c8 1B68     		ldr	r3, [r3]
+ 459 02ca 9847     		blx	r3
+ 460 02cc E2E6     		b	.L35
+ 461              	.L100:
+ 462 02ce 3000     		movs	r0, r6
+ 463 02d0 FFF7FEFF 		bl	CyBle_BassWriteEventHandler
+ 464 02d4 F2E6     		b	.L39
+ 465              	.L94:
+ 466 02d6 0B3B     		subs	r3, r3, #11
+ 467 02d8 CB70     		strb	r3, [r1, #3]
+ 468 02da D2E6     		b	.L34
+ 469              	.L102:
+ 470              		.align	2
+ 471              	.L101:
+ 472 02dc 00000000 		.word	cyBle_eventHandlerFlag
+ 473 02e0 00000000 		.word	cyBle_state
+ 474 02e4 00000000 		.word	CyBle_ApplCallback
+ 475 02e8 00000000 		.word	.LANCHOR1
+ 476 02ec 00000000 		.word	cyBle_connHandle
+ 477 02f0 00000000 		.word	cyBle_busyStatus
+ 478 02f4 00000000 		.word	cyBle_flashStorage
+ 479 02f8 79020000 		.word	633
+ 480 02fc 00000000 		.word	cyBle_attValuesCCCD
+ 481 0300 00000000 		.word	cyBle_peerBonding
+ 482 0304 00000000 		.word	.LANCHOR0
+ 483 0308 E00A0000 		.word	cyBle_stackMemoryRam+2784
+ 484 030c 00000000 		.word	cyBle_sflashDeviceAddress
+ 485 0310 00000000 		.word	cyBle_deviceAddress
+ 486 0314 00000000 		.word	cyBle_pendingFlashWrite
+ 487              	.L37:
+ 488 0318 4346     		mov	r3, r8
+ 489 031a 032B     		cmp	r3, #3
+ 490 031c 00D0     		beq	.LCB558
+ 491 031e 8CE6     		b	.L11	@long jump
+ 492              	.LCB558:
+ 493 0320 0133     		adds	r3, r3, #1
+ 494 0322 3B70     		strb	r3, [r7]
+ 495 0324 064B     		ldr	r3, .L103
+ 496 0326 1B78     		ldrb	r3, [r3]
+ 497 0328 002B     		cmp	r3, #0
+ 498 032a 00D0     		beq	.LCB564
+ 499 032c 85E6     		b	.L11	@long jump
+ 500              	.LCB564:
+ 501 032e 0120     		movs	r0, #1
+ 502 0330 FFF7FEFF 		bl	CyBle_GappStartAdvertisement
+ 503 0334 0028     		cmp	r0, #0
+ 504 0336 00D0     		beq	.LCB568
+ 505 0338 7FE6     		b	.L11	@long jump
+ 506              	.LCB568:
+ 507 033a 4346     		mov	r3, r8
+ 508 033c 3B70     		strb	r3, [r7]
+ 509 033e 7CE6     		b	.L11
+ 510              	.L104:
+ 511              		.align	2
+ 512              	.L103:
+ 513 0340 00000000 		.word	cyBle_advertisingIntervalType
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccel1GEO.s 			page 10
+
+
+ 514              		.size	CyBle_EventHandler, .-CyBle_EventHandler
+ 515              		.global	cyBle_authInfo
+ 516              		.comm	cyBle_advertisingIntervalType,1,1
+ 517              		.global	cyBle_gaps
+ 518              		.comm	cyBle_busyStatus,1,1
+ 519              		.comm	cyBle_eventHandlerFlag,1,1
+ 520              		.comm	cyBle_connHandle,2,4
+ 521              		.section	.rodata
+ 522              		.align	2
+ 523              		.type	cyBle_gaps, %object
+ 524              		.size	cyBle_gaps, 12
+ 525              	cyBle_gaps:
+ 526 0000 0100     		.short	1
+ 527 0002 0300     		.short	3
+ 528 0004 0500     		.short	5
+ 529 0006 0700     		.short	7
+ 530 0008 0000     		.short	0
+ 531 000a 0000     		.short	0
+ 532              		.data
+ 533              		.align	2
+ 534              		.set	.LANCHOR1,. + 0
+ 535              		.type	cyBle_authInfo, %object
+ 536              		.size	cyBle_authInfo, 5
+ 537              	cyBle_authInfo:
+ 538 0000 11       		.byte	17
+ 539 0001 01       		.byte	1
+ 540 0002 10       		.byte	16
+ 541 0003 00       		.byte	0
+ 542 0004 00       		.byte	0
+ 543              		.bss
+ 544              		.align	2
+ 545              		.set	.LANCHOR0,. + 0
+ 546              		.type	gPrepWriteReqMem.6911, %object
+ 547              		.size	gPrepWriteReqMem.6911, 8
+ 548              	gPrepWriteReqMem.6911:
+ 549 0000 00000000 		.space	8
+ 549      00000000 
+ 550              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

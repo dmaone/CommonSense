@@ -1,0 +1,188 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccqENuuB.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"UART_DEB.c"
+  16              		.section	.text.UART_DEB_Init,"ax",%progbits
+  17              		.align	2
+  18              		.global	UART_DEB_Init
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	UART_DEB_Init, %function
+  22              	UART_DEB_Init:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 10B5     		push	{r4, lr}
+  26 0002 FFF7FEFF 		bl	UART_DEB_UartInit
+  27              		@ sp needed
+  28 0006 10BD     		pop	{r4, pc}
+  29              		.size	UART_DEB_Init, .-UART_DEB_Init
+  30              		.section	.text.UART_DEB_Enable,"ax",%progbits
+  31              		.align	2
+  32              		.global	UART_DEB_Enable
+  33              		.code	16
+  34              		.thumb_func
+  35              		.type	UART_DEB_Enable, %function
+  36              	UART_DEB_Enable:
+  37              		@ args = 0, pretend = 0, frame = 0
+  38              		@ frame_needed = 0, uses_anonymous_args = 0
+  39 0000 8021     		movs	r1, #128
+  40 0002 044A     		ldr	r2, .L3
+  41 0004 10B5     		push	{r4, lr}
+  42 0006 1368     		ldr	r3, [r2]
+  43 0008 0906     		lsls	r1, r1, #24
+  44 000a 0B43     		orrs	r3, r1
+  45 000c 1360     		str	r3, [r2]
+  46 000e FFF7FEFF 		bl	UART_DEB_UartPostEnable
+  47              		@ sp needed
+  48 0012 10BD     		pop	{r4, pc}
+  49              	.L4:
+  50              		.align	2
+  51              	.L3:
+  52 0014 00002440 		.word	1076101120
+  53              		.size	UART_DEB_Enable, .-UART_DEB_Enable
+  54              		.section	.text.UART_DEB_Start,"ax",%progbits
+  55              		.align	2
+  56              		.global	UART_DEB_Start
+  57              		.code	16
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccqENuuB.s 			page 2
+
+
+  58              		.thumb_func
+  59              		.type	UART_DEB_Start, %function
+  60              	UART_DEB_Start:
+  61              		@ args = 0, pretend = 0, frame = 0
+  62              		@ frame_needed = 0, uses_anonymous_args = 0
+  63 0000 10B5     		push	{r4, lr}
+  64 0002 084C     		ldr	r4, .L8
+  65 0004 2378     		ldrb	r3, [r4]
+  66 0006 002B     		cmp	r3, #0
+  67 0008 03D1     		bne	.L6
+  68 000a FFF7FEFF 		bl	UART_DEB_UartInit
+  69 000e 0123     		movs	r3, #1
+  70 0010 2370     		strb	r3, [r4]
+  71              	.L6:
+  72 0012 8021     		movs	r1, #128
+  73 0014 044A     		ldr	r2, .L8+4
+  74 0016 0906     		lsls	r1, r1, #24
+  75 0018 1368     		ldr	r3, [r2]
+  76              		@ sp needed
+  77 001a 0B43     		orrs	r3, r1
+  78 001c 1360     		str	r3, [r2]
+  79 001e FFF7FEFF 		bl	UART_DEB_UartPostEnable
+  80 0022 10BD     		pop	{r4, pc}
+  81              	.L9:
+  82              		.align	2
+  83              	.L8:
+  84 0024 00000000 		.word	.LANCHOR0
+  85 0028 00002440 		.word	1076101120
+  86              		.size	UART_DEB_Start, .-UART_DEB_Start
+  87              		.section	.text.UART_DEB_Stop,"ax",%progbits
+  88              		.align	2
+  89              		.global	UART_DEB_Stop
+  90              		.code	16
+  91              		.thumb_func
+  92              		.type	UART_DEB_Stop, %function
+  93              	UART_DEB_Stop:
+  94              		@ args = 0, pretend = 0, frame = 0
+  95              		@ frame_needed = 0, uses_anonymous_args = 0
+  96 0000 10B5     		push	{r4, lr}
+  97 0002 FFF7FEFF 		bl	UART_DEB_UartStop
+  98 0006 044A     		ldr	r2, .L11
+  99              		@ sp needed
+ 100 0008 1368     		ldr	r3, [r2]
+ 101 000a 5B00     		lsls	r3, r3, #1
+ 102 000c 5B08     		lsrs	r3, r3, #1
+ 103 000e 1360     		str	r3, [r2]
+ 104 0010 0022     		movs	r2, #0
+ 105 0012 024B     		ldr	r3, .L11+4
+ 106 0014 1A60     		str	r2, [r3]
+ 107 0016 10BD     		pop	{r4, pc}
+ 108              	.L12:
+ 109              		.align	2
+ 110              	.L11:
+ 111 0018 00002440 		.word	1076101120
+ 112 001c 880F2440 		.word	1076105096
+ 113              		.size	UART_DEB_Stop, .-UART_DEB_Stop
+ 114              		.section	.text.UART_DEB_SetRxFifoLevel,"ax",%progbits
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccqENuuB.s 			page 3
+
+
+ 115              		.align	2
+ 116              		.global	UART_DEB_SetRxFifoLevel
+ 117              		.code	16
+ 118              		.thumb_func
+ 119              		.type	UART_DEB_SetRxFifoLevel, %function
+ 120              	UART_DEB_SetRxFifoLevel:
+ 121              		@ args = 0, pretend = 0, frame = 0
+ 122              		@ frame_needed = 0, uses_anonymous_args = 0
+ 123              		@ link register save eliminated.
+ 124 0000 0F21     		movs	r1, #15
+ 125 0002 034A     		ldr	r2, .L14
+ 126 0004 0840     		ands	r0, r1
+ 127 0006 1368     		ldr	r3, [r2]
+ 128              		@ sp needed
+ 129 0008 8B43     		bics	r3, r1
+ 130 000a 1843     		orrs	r0, r3
+ 131 000c 1060     		str	r0, [r2]
+ 132 000e 7047     		bx	lr
+ 133              	.L15:
+ 134              		.align	2
+ 135              	.L14:
+ 136 0010 04032440 		.word	1076101892
+ 137              		.size	UART_DEB_SetRxFifoLevel, .-UART_DEB_SetRxFifoLevel
+ 138              		.section	.text.UART_DEB_SetTxFifoLevel,"ax",%progbits
+ 139              		.align	2
+ 140              		.global	UART_DEB_SetTxFifoLevel
+ 141              		.code	16
+ 142              		.thumb_func
+ 143              		.type	UART_DEB_SetTxFifoLevel, %function
+ 144              	UART_DEB_SetTxFifoLevel:
+ 145              		@ args = 0, pretend = 0, frame = 0
+ 146              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147              		@ link register save eliminated.
+ 148 0000 0F21     		movs	r1, #15
+ 149 0002 034A     		ldr	r2, .L17
+ 150 0004 0840     		ands	r0, r1
+ 151 0006 1368     		ldr	r3, [r2]
+ 152              		@ sp needed
+ 153 0008 8B43     		bics	r3, r1
+ 154 000a 1843     		orrs	r0, r3
+ 155 000c 1060     		str	r0, [r2]
+ 156 000e 7047     		bx	lr
+ 157              	.L18:
+ 158              		.align	2
+ 159              	.L17:
+ 160 0010 04022440 		.word	1076101636
+ 161              		.size	UART_DEB_SetTxFifoLevel, .-UART_DEB_SetTxFifoLevel
+ 162              		.global	UART_DEB_IntrTxMask
+ 163              		.global	UART_DEB_initVar
+ 164              		.bss
+ 165              		.align	1
+ 166              		.set	.LANCHOR0,. + 0
+ 167              		.type	UART_DEB_initVar, %object
+ 168              		.size	UART_DEB_initVar, 1
+ 169              	UART_DEB_initVar:
+ 170 0000 00       		.space	1
+ 171 0001 00       		.space	1
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccqENuuB.s 			page 4
+
+
+ 172              		.type	UART_DEB_IntrTxMask, %object
+ 173              		.size	UART_DEB_IntrTxMask, 2
+ 174              	UART_DEB_IntrTxMask:
+ 175 0002 0000     		.space	2
+ 176              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

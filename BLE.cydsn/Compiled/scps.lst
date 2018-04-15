@@ -1,0 +1,207 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccvqlMIJ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"scps.c"
+  16              		.section	.text.ScpsCallBack,"ax",%progbits
+  17              		.align	2
+  18              		.global	ScpsCallBack
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	ScpsCallBack, %function
+  22              	ScpsCallBack:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 70B5     		push	{r4, r5, r6, lr}
+  26 0002 0400     		movs	r4, r0
+  27 0004 F93C     		subs	r4, r4, #249
+  28 0006 0D00     		movs	r5, r1
+  29 0008 FF3C     		subs	r4, r4, #255
+  30 000a 0100     		movs	r1, r0
+  31 000c 1648     		ldr	r0, .L9
+  32 000e FFF7FEFF 		bl	printf
+  33 0012 052C     		cmp	r4, #5
+  34 0014 03D8     		bhi	.L2
+  35 0016 154B     		ldr	r3, .L9+4
+  36 0018 A400     		lsls	r4, r4, #2
+  37 001a 1B59     		ldr	r3, [r3, r4]
+  38 001c 9F46     		mov	pc, r3
+  39              		.section	.rodata
+  40              		.align	2
+  41              	.L4:
+  42 0000 58000000 		.word	.L3
+  43 0004 4A000000 		.word	.L5
+  44 0008 26000000 		.word	.L6
+  45 000c 24000000 		.word	.L1
+  46 0010 24000000 		.word	.L1
+  47 0014 24000000 		.word	.L1
+  48              		.section	.text.ScpsCallBack
+  49              	.L2:
+  50 001e 1448     		ldr	r0, .L9+8
+  51 0020 FFF7FEFF 		bl	puts
+  52              	.L1:
+  53              		@ sp needed
+  54 0024 70BD     		pop	{r4, r5, r6, pc}
+  55              	.L6:
+  56 0026 6B68     		ldr	r3, [r5, #4]
+  57 0028 1868     		ldr	r0, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccvqlMIJ.s 			page 2
+
+
+  58 002a FFF7FEFF 		bl	CyBle_Get16ByPtr
+  59 002e 114C     		ldr	r4, .L9+12
+  60 0030 6B68     		ldr	r3, [r5, #4]
+  61 0032 6080     		strh	r0, [r4, #2]
+  62 0034 1868     		ldr	r0, [r3]
+  63 0036 0230     		adds	r0, r0, #2
+  64 0038 FFF7FEFF 		bl	CyBle_Get16ByPtr
+  65 003c 6188     		ldrh	r1, [r4, #2]
+  66 003e 0200     		movs	r2, r0
+  67 0040 A080     		strh	r0, [r4, #4]
+  68 0042 0D48     		ldr	r0, .L9+16
+  69 0044 FFF7FEFF 		bl	printf
+  70 0048 ECE7     		b	.L1
+  71              	.L5:
+  72 004a 0C48     		ldr	r0, .L9+20
+  73 004c FFF7FEFF 		bl	puts
+  74 0050 0022     		movs	r2, #0
+  75 0052 084B     		ldr	r3, .L9+12
+  76 0054 1A80     		strh	r2, [r3]
+  77 0056 E5E7     		b	.L1
+  78              	.L3:
+  79 0058 0948     		ldr	r0, .L9+24
+  80 005a FFF7FEFF 		bl	puts
+  81 005e 0122     		movs	r2, #1
+  82 0060 044B     		ldr	r3, .L9+12
+  83 0062 1A80     		strh	r2, [r3]
+  84 0064 DEE7     		b	.L1
+  85              	.L10:
+  86 0066 C046     		.align	2
+  87              	.L9:
+  88 0068 00000000 		.word	.LC0
+  89 006c 00000000 		.word	.L4
+  90 0070 B0000000 		.word	.LC10
+  91 0074 00000000 		.word	.LANCHOR0
+  92 0078 64000000 		.word	.LC8
+  93 007c 3C000000 		.word	.LC6
+  94 0080 14000000 		.word	.LC3
+  95              		.size	ScpsCallBack, .-ScpsCallBack
+  96              		.section	.text.ScpsInit,"ax",%progbits
+  97              		.align	2
+  98              		.global	ScpsInit
+  99              		.code	16
+ 100              		.thumb_func
+ 101              		.type	ScpsInit, %function
+ 102              	ScpsInit:
+ 103              		@ args = 0, pretend = 0, frame = 8
+ 104              		@ frame_needed = 0, uses_anonymous_args = 0
+ 105 0000 00B5     		push	{lr}
+ 106 0002 0C48     		ldr	r0, .L16
+ 107 0004 83B0     		sub	sp, sp, #12
+ 108 0006 FFF7FEFF 		bl	CyBle_ScpsRegisterAttrCallback
+ 109 000a 6B46     		mov	r3, sp
+ 110 000c 0222     		movs	r2, #2
+ 111 000e 0633     		adds	r3, r3, #6
+ 112 0010 0021     		movs	r1, #0
+ 113 0012 0120     		movs	r0, #1
+ 114 0014 FFF7FEFF 		bl	CyBle_ScpssGetCharacteristicDescriptor
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccvqlMIJ.s 			page 3
+
+
+ 115 0018 0028     		cmp	r0, #0
+ 116 001a 08D1     		bne	.L11
+ 117 001c 6B46     		mov	r3, sp
+ 118 001e DB88     		ldrh	r3, [r3, #6]
+ 119 0020 002B     		cmp	r3, #0
+ 120 0022 04D0     		beq	.L11
+ 121 0024 0123     		movs	r3, #1
+ 122 0026 044A     		ldr	r2, .L16+4
+ 123 0028 1188     		ldrh	r1, [r2]
+ 124 002a 0B43     		orrs	r3, r1
+ 125 002c 1380     		strh	r3, [r2]
+ 126              	.L11:
+ 127 002e 03B0     		add	sp, sp, #12
+ 128              		@ sp needed
+ 129 0030 00BD     		pop	{pc}
+ 130              	.L17:
+ 131 0032 C046     		.align	2
+ 132              	.L16:
+ 133 0034 00000000 		.word	ScpsCallBack
+ 134 0038 00000000 		.word	.LANCHOR0
+ 135              		.size	ScpsInit, .-ScpsInit
+ 136              		.global	scanWindow
+ 137              		.global	scanInterval
+ 138              		.global	requestScanRefresh
+ 139              		.comm	keyboard_report_usage,1,1
+ 140              		.comm	keyboard_report,20,4
+ 141              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 142              		.align	2
+ 143              	.LC0:
+ 144 0000 53435053 		.ascii	"SCPS event: %lx, \000"
+ 144      20657665 
+ 144      6E743A20 
+ 144      256C782C 
+ 144      2000
+ 145 0012 0000     		.space	2
+ 146              	.LC3:
+ 147 0014 4359424C 		.ascii	"CYBLE_EVT_SCPSS_NOTIFICATION_ENABLED \015\000"
+ 147      455F4556 
+ 147      545F5343 
+ 147      5053535F 
+ 147      4E4F5449 
+ 148 003b 00       		.space	1
+ 149              	.LC6:
+ 150 003c 4359424C 		.ascii	"CYBLE_EVT_SCPSS_NOTIFICATION_DISABLED \015\000"
+ 150      455F4556 
+ 150      545F5343 
+ 150      5053535F 
+ 150      4E4F5449 
+ 151              	.LC8:
+ 152 0064 4359424C 		.ascii	"CYBLE_EVT_SCPSS_SCAN_INT_WIN_CHAR_WRITE scanInterva"
+ 152      455F4556 
+ 152      545F5343 
+ 152      5053535F 
+ 152      5343414E 
+ 153 0097 6C3A2025 		.ascii	"l: %x, scanWindow: %x \015\012\000"
+ 153      782C2073 
+ 153      63616E57 
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccvqlMIJ.s 			page 4
+
+
+ 153      696E646F 
+ 153      773A2025 
+ 154              	.LC10:
+ 155 00b0 4E6F7420 		.ascii	"Not supported event\015\000"
+ 155      73757070 
+ 155      6F727465 
+ 155      64206576 
+ 155      656E740D 
+ 156              		.bss
+ 157              		.align	1
+ 158              		.set	.LANCHOR0,. + 0
+ 159              		.type	requestScanRefresh, %object
+ 160              		.size	requestScanRefresh, 2
+ 161              	requestScanRefresh:
+ 162 0000 0000     		.space	2
+ 163              		.type	scanInterval, %object
+ 164              		.size	scanInterval, 2
+ 165              	scanInterval:
+ 166 0002 0000     		.space	2
+ 167              		.type	scanWindow, %object
+ 168              		.size	scanWindow, 2
+ 169              	scanWindow:
+ 170 0004 0000     		.space	2
+ 171              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

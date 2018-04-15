@@ -1,0 +1,80 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccC2Sh00.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"UART_DEB_PM.c"
+  16              		.section	.text.UART_DEB_Sleep,"ax",%progbits
+  17              		.align	2
+  18              		.global	UART_DEB_Sleep
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	UART_DEB_Sleep, %function
+  22              	UART_DEB_Sleep:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 054B     		ldr	r3, .L4
+  26 0002 064A     		ldr	r2, .L4+4
+  27 0004 1B68     		ldr	r3, [r3]
+  28 0006 10B5     		push	{r4, lr}
+  29 0008 D90F     		lsrs	r1, r3, #31
+  30 000a 1170     		strb	r1, [r2]
+  31 000c 002B     		cmp	r3, #0
+  32 000e 01DA     		bge	.L1
+  33 0010 FFF7FEFF 		bl	UART_DEB_Stop
+  34              	.L1:
+  35              		@ sp needed
+  36 0014 10BD     		pop	{r4, pc}
+  37              	.L5:
+  38 0016 C046     		.align	2
+  39              	.L4:
+  40 0018 00002440 		.word	1076101120
+  41 001c 00000000 		.word	.LANCHOR0
+  42              		.size	UART_DEB_Sleep, .-UART_DEB_Sleep
+  43              		.section	.text.UART_DEB_Wakeup,"ax",%progbits
+  44              		.align	2
+  45              		.global	UART_DEB_Wakeup
+  46              		.code	16
+  47              		.thumb_func
+  48              		.type	UART_DEB_Wakeup, %function
+  49              	UART_DEB_Wakeup:
+  50              		@ args = 0, pretend = 0, frame = 0
+  51              		@ frame_needed = 0, uses_anonymous_args = 0
+  52 0000 10B5     		push	{r4, lr}
+  53 0002 034B     		ldr	r3, .L11
+  54 0004 1B78     		ldrb	r3, [r3]
+  55 0006 002B     		cmp	r3, #0
+  56 0008 01D0     		beq	.L6
+  57 000a FFF7FEFF 		bl	UART_DEB_Enable
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccC2Sh00.s 			page 2
+
+
+  58              	.L6:
+  59              		@ sp needed
+  60 000e 10BD     		pop	{r4, pc}
+  61              	.L12:
+  62              		.align	2
+  63              	.L11:
+  64 0010 00000000 		.word	.LANCHOR0
+  65              		.size	UART_DEB_Wakeup, .-UART_DEB_Wakeup
+  66              		.global	UART_DEB_backup
+  67              		.bss
+  68              		.align	2
+  69              		.set	.LANCHOR0,. + 0
+  70              		.type	UART_DEB_backup, %object
+  71              		.size	UART_DEB_backup, 1
+  72              	UART_DEB_backup:
+  73 0000 00       		.space	1
+  74              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

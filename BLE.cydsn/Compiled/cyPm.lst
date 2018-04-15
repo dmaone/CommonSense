@@ -1,0 +1,426 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"cyPm.c"
+  16              		.section	.text.CySysPmSleep,"ax",%progbits
+  17              		.align	2
+  18              		.global	CySysPmSleep
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CySysPmSleep, %function
+  22              	CySysPmSleep:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 10B5     		push	{r4, lr}
+  26 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+  27 0006 0421     		movs	r1, #4
+  28 0008 034A     		ldr	r2, .L2
+  29 000a 1368     		ldr	r3, [r2]
+  30 000c 8B43     		bics	r3, r1
+  31 000e 1360     		str	r3, [r2]
+  32              		.syntax divided
+  33              	@ 43 "Generated_Source\PSoC4\cyPm.c" 1
+  34 0010 30BF     		WFI 
+  35              	
+  36              	@ 0 "" 2
+  37              		.thumb
+  38              		.syntax unified
+  39 0012 FFF7FEFF 		bl	CyExitCriticalSection
+  40              		@ sp needed
+  41 0016 10BD     		pop	{r4, pc}
+  42              	.L3:
+  43              		.align	2
+  44              	.L2:
+  45 0018 10ED00E0 		.word	-536810224
+  46              		.size	CySysPmSleep, .-CySysPmSleep
+  47              		.section	.text.CySysPmDeepSleep,"ax",%progbits
+  48              		.align	2
+  49              		.global	CySysPmDeepSleep
+  50              		.code	16
+  51              		.thumb_func
+  52              		.type	CySysPmDeepSleep, %function
+  53              	CySysPmDeepSleep:
+  54              		@ args = 0, pretend = 0, frame = 8
+  55              		@ frame_needed = 0, uses_anonymous_args = 0
+  56 0000 30B5     		push	{r4, r5, lr}
+  57 0002 83B0     		sub	sp, sp, #12
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 2
+
+
+  58 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+  59 0008 0E4A     		ldr	r2, .L5
+  60 000a 0F4D     		ldr	r5, .L5+4
+  61 000c 1368     		ldr	r3, [r2]
+  62 000e 0400     		movs	r4, r0
+  63 0010 5B00     		lsls	r3, r3, #1
+  64 0012 5B08     		lsrs	r3, r3, #1
+  65 0014 1360     		str	r3, [r2]
+  66 0016 0D4B     		ldr	r3, .L5+8
+  67 0018 0D4A     		ldr	r2, .L5+12
+  68 001a 1B88     		ldrh	r3, [r3]
+  69 001c 0220     		movs	r0, #2
+  70 001e 9BB2     		uxth	r3, r3
+  71 0020 1360     		str	r3, [r2]
+  72 0022 0423     		movs	r3, #4
+  73 0024 0B4A     		ldr	r2, .L5+16
+  74 0026 1168     		ldr	r1, [r2]
+  75 0028 0B43     		orrs	r3, r1
+  76 002a 1360     		str	r3, [r2]
+  77 002c 2B68     		ldr	r3, [r5]
+  78 002e 0193     		str	r3, [sp, #4]
+  79 0030 FFF7FEFF 		bl	CySysClkWriteSysclkDiv
+  80              		.syntax divided
+  81              	@ 111 "Generated_Source\PSoC4\cyPm.c" 1
+  82 0034 30BF     		WFI 
+  83              	
+  84              	@ 0 "" 2
+  85              		.thumb
+  86              		.syntax unified
+  87 0036 019B     		ldr	r3, [sp, #4]
+  88 0038 2000     		movs	r0, r4
+  89 003a 2B60     		str	r3, [r5]
+  90 003c FFF7FEFF 		bl	CyExitCriticalSection
+  91 0040 03B0     		add	sp, sp, #12
+  92              		@ sp needed
+  93 0042 30BD     		pop	{r4, r5, pc}
+  94              	.L6:
+  95              		.align	2
+  96              	.L5:
+  97 0044 00000B40 		.word	1074462720
+  98 0048 00010B40 		.word	1074462976
+  99 004c 52F2FF0F 		.word	268431954
+ 100 0050 0C000B40 		.word	1074462732
+ 101 0054 10ED00E0 		.word	-536810224
+ 102              		.size	CySysPmDeepSleep, .-CySysPmDeepSleep
+ 103              		.section	.text.CySysPmHibernate,"ax",%progbits
+ 104              		.align	2
+ 105              		.global	CySysPmHibernate
+ 106              		.code	16
+ 107              		.thumb_func
+ 108              		.type	CySysPmHibernate, %function
+ 109              	CySysPmHibernate:
+ 110              		@ args = 0, pretend = 0, frame = 0
+ 111              		@ frame_needed = 0, uses_anonymous_args = 0
+ 112 0000 10B5     		push	{r4, lr}
+ 113 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ 114 0006 1F4A     		ldr	r2, .L8
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 3
+
+
+ 115 0008 8021     		movs	r1, #128
+ 116 000a 1368     		ldr	r3, [r2]
+ 117 000c 0906     		lsls	r1, r1, #24
+ 118 000e 9B00     		lsls	r3, r3, #2
+ 119 0010 9B08     		lsrs	r3, r3, #2
+ 120 0012 1360     		str	r3, [r2]
+ 121 0014 1C4A     		ldr	r2, .L8+4
+ 122 0016 1368     		ldr	r3, [r2]
+ 123 0018 9B00     		lsls	r3, r3, #2
+ 124 001a 9B08     		lsrs	r3, r3, #2
+ 125 001c 1360     		str	r3, [r2]
+ 126 001e 1B4A     		ldr	r2, .L8+8
+ 127 0020 1368     		ldr	r3, [r2]
+ 128 0022 9B00     		lsls	r3, r3, #2
+ 129 0024 9B08     		lsrs	r3, r3, #2
+ 130 0026 1360     		str	r3, [r2]
+ 131 0028 194A     		ldr	r2, .L8+12
+ 132 002a 1368     		ldr	r3, [r2]
+ 133 002c 9B00     		lsls	r3, r3, #2
+ 134 002e 9B08     		lsrs	r3, r3, #2
+ 135 0030 1360     		str	r3, [r2]
+ 136 0032 184A     		ldr	r2, .L8+16
+ 137 0034 1368     		ldr	r3, [r2]
+ 138 0036 9B00     		lsls	r3, r3, #2
+ 139 0038 9B08     		lsrs	r3, r3, #2
+ 140 003a 1360     		str	r3, [r2]
+ 141 003c 164A     		ldr	r2, .L8+20
+ 142 003e 1368     		ldr	r3, [r2]
+ 143 0040 9B00     		lsls	r3, r3, #2
+ 144 0042 9B08     		lsrs	r3, r3, #2
+ 145 0044 1360     		str	r3, [r2]
+ 146 0046 154A     		ldr	r2, .L8+24
+ 147 0048 1368     		ldr	r3, [r2]
+ 148 004a 9B00     		lsls	r3, r3, #2
+ 149 004c 9B08     		lsrs	r3, r3, #2
+ 150 004e 1360     		str	r3, [r2]
+ 151 0050 134A     		ldr	r2, .L8+28
+ 152 0052 1368     		ldr	r3, [r2]
+ 153 0054 0B43     		orrs	r3, r1
+ 154 0056 1360     		str	r3, [r2]
+ 155 0058 124B     		ldr	r3, .L8+32
+ 156 005a 134A     		ldr	r2, .L8+36
+ 157 005c 1B88     		ldrh	r3, [r3]
+ 158 005e 9BB2     		uxth	r3, r3
+ 159 0060 1360     		str	r3, [r2]
+ 160 0062 0423     		movs	r3, #4
+ 161 0064 114A     		ldr	r2, .L8+40
+ 162 0066 1168     		ldr	r1, [r2]
+ 163 0068 0B43     		orrs	r3, r1
+ 164 006a 1360     		str	r3, [r2]
+ 165 006c FF22     		movs	r2, #255
+ 166 006e 1049     		ldr	r1, .L8+44
+ 167 0070 0B68     		ldr	r3, [r1]
+ 168 0072 9343     		bics	r3, r2
+ 169 0074 0E3A     		subs	r2, r2, #14
+ 170 0076 1343     		orrs	r3, r2
+ 171 0078 0B60     		str	r3, [r1]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 4
+
+
+ 172              		.syntax divided
+ 173              	@ 191 "Generated_Source\PSoC4\cyPm.c" 1
+ 174 007a 30BF     		WFI 
+ 175              	
+ 176              	@ 0 "" 2
+ 177              		.thumb
+ 178              		.syntax unified
+ 179 007c FFF7FEFF 		bl	CyExitCriticalSection
+ 180              		@ sp needed
+ 181 0080 10BD     		pop	{r4, pc}
+ 182              	.L9:
+ 183 0082 C046     		.align	2
+ 184              	.L8:
+ 185 0084 08000440 		.word	1074003976
+ 186 0088 08010440 		.word	1074004232
+ 187 008c 08020440 		.word	1074004488
+ 188 0090 08030440 		.word	1074004744
+ 189 0094 08040440 		.word	1074005000
+ 190 0098 08050440 		.word	1074005256
+ 191 009c 08060440 		.word	1074005512
+ 192 00a0 00000B40 		.word	1074462720
+ 193 00a4 50F2FF0F 		.word	268431952
+ 194 00a8 0C000B40 		.word	1074462732
+ 195 00ac 10ED00E0 		.word	-536810224
+ 196 00b0 2C000B40 		.word	1074462764
+ 197              		.size	CySysPmHibernate, .-CySysPmHibernate
+ 198              		.section	.text.CySysPmStop,"ax",%progbits
+ 199              		.align	2
+ 200              		.global	CySysPmStop
+ 201              		.code	16
+ 202              		.thumb_func
+ 203              		.type	CySysPmStop, %function
+ 204              	CySysPmStop:
+ 205              		@ args = 0, pretend = 0, frame = 0
+ 206              		@ frame_needed = 0, uses_anonymous_args = 0
+ 207 0000 10B5     		push	{r4, lr}
+ 208 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ 209 0006 8023     		movs	r3, #128
+ 210 0008 104C     		ldr	r4, .L13
+ 211 000a 5B02     		lsls	r3, r3, #9
+ 212 000c 2268     		ldr	r2, [r4]
+ 213 000e 1340     		ands	r3, r2
+ 214 0010 F222     		movs	r2, #242
+ 215 0012 1343     		orrs	r3, r2
+ 216 0014 2360     		str	r3, [r4]
+ 217 0016 FFF7FEFF 		bl	CyEnterCriticalSection
+ 218 001a 2368     		ldr	r3, [r4]
+ 219 001c 9B03     		lsls	r3, r3, #14
+ 220 001e 09D4     		bmi	.L11
+ 221 0020 2268     		ldr	r2, [r4]
+ 222 0022 0B4B     		ldr	r3, .L13+4
+ 223 0024 1340     		ands	r3, r2
+ 224 0026 0B4A     		ldr	r2, .L13+8
+ 225 0028 1343     		orrs	r3, r2
+ 226 002a 2360     		str	r3, [r4]
+ 227 002c 2368     		ldr	r3, [r4]
+ 228 002e 2368     		ldr	r3, [r4]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 5
+
+
+ 229 0030 2368     		ldr	r3, [r4]
+ 230 0032 2360     		str	r3, [r4]
+ 231              	.L11:
+ 232 0034 FFF7FEFF 		bl	CyExitCriticalSection
+ 233 0038 8021     		movs	r1, #128
+ 234 003a 044A     		ldr	r2, .L13
+ 235 003c 0906     		lsls	r1, r1, #24
+ 236 003e 1368     		ldr	r3, [r2]
+ 237 0040 0B43     		orrs	r3, r1
+ 238 0042 1360     		str	r3, [r2]
+ 239              		.syntax divided
+ 240              	@ 237 "Generated_Source\PSoC4\cyPm.c" 1
+ 241 0044 C046     		NOP
+ 242              	
+ 243              	@ 0 "" 2
+ 244              	@ 238 "Generated_Source\PSoC4\cyPm.c" 1
+ 245 0046 C046     		NOP
+ 246              	
+ 247              	@ 0 "" 2
+ 248              	@ 241 "Generated_Source\PSoC4\cyPm.c" 1
+ 249 0048 30BF     		WFI 
+ 250              	
+ 251              	@ 0 "" 2
+ 252              		.thumb
+ 253              		.syntax unified
+ 254              		@ sp needed
+ 255 004a 10BD     		pop	{r4, pc}
+ 256              	.L14:
+ 257              		.align	2
+ 258              	.L13:
+ 259 004c 2C000B40 		.word	1074462764
+ 260 0050 FF000100 		.word	65791
+ 261 0054 003A0280 		.word	-2147337728
+ 262              		.size	CySysPmStop, .-CySysPmStop
+ 263              		.section	.text.CySysPmSetWakeupPolarity,"ax",%progbits
+ 264              		.align	2
+ 265              		.global	CySysPmSetWakeupPolarity
+ 266              		.code	16
+ 267              		.thumb_func
+ 268              		.type	CySysPmSetWakeupPolarity, %function
+ 269              	CySysPmSetWakeupPolarity:
+ 270              		@ args = 0, pretend = 0, frame = 0
+ 271              		@ frame_needed = 0, uses_anonymous_args = 0
+ 272 0000 10B5     		push	{r4, lr}
+ 273 0002 0400     		movs	r4, r0
+ 274 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 275 0008 074B     		ldr	r3, .L19
+ 276 000a 002C     		cmp	r4, #0
+ 277 000c 07D1     		bne	.L18
+ 278 000e 1A68     		ldr	r2, [r3]
+ 279 0010 064B     		ldr	r3, .L19+4
+ 280 0012 1340     		ands	r3, r2
+ 281              	.L17:
+ 282 0014 044A     		ldr	r2, .L19
+ 283              		@ sp needed
+ 284 0016 1360     		str	r3, [r2]
+ 285 0018 FFF7FEFF 		bl	CyExitCriticalSection
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 6
+
+
+ 286 001c 10BD     		pop	{r4, pc}
+ 287              	.L18:
+ 288 001e 8022     		movs	r2, #128
+ 289 0020 1B68     		ldr	r3, [r3]
+ 290 0022 5202     		lsls	r2, r2, #9
+ 291 0024 1343     		orrs	r3, r2
+ 292 0026 F5E7     		b	.L17
+ 293              	.L20:
+ 294              		.align	2
+ 295              	.L19:
+ 296 0028 2C000B40 		.word	1074462764
+ 297 002c FFFFFEFF 		.word	-65537
+ 298              		.size	CySysPmSetWakeupPolarity, .-CySysPmSetWakeupPolarity
+ 299              		.section	.text.CySysPmGetResetReason,"ax",%progbits
+ 300              		.align	2
+ 301              		.global	CySysPmGetResetReason
+ 302              		.code	16
+ 303              		.thumb_func
+ 304              		.type	CySysPmGetResetReason, %function
+ 305              	CySysPmGetResetReason:
+ 306              		@ args = 0, pretend = 0, frame = 0
+ 307              		@ frame_needed = 0, uses_anonymous_args = 0
+ 308              		@ link register save eliminated.
+ 309 0000 FF20     		movs	r0, #255
+ 310 0002 074B     		ldr	r3, .L27
+ 311 0004 1B68     		ldr	r3, [r3]
+ 312 0006 1840     		ands	r0, r3
+ 313 0008 F128     		cmp	r0, #241
+ 314 000a 04D0     		beq	.L23
+ 315 000c F228     		cmp	r0, #242
+ 316 000e 04D0     		beq	.L24
+ 317 0010 4342     		rsbs	r3, r0, #0
+ 318 0012 5841     		adcs	r0, r0, r3
+ 319              	.L22:
+ 320              		@ sp needed
+ 321 0014 7047     		bx	lr
+ 322              	.L23:
+ 323 0016 0220     		movs	r0, #2
+ 324 0018 FCE7     		b	.L22
+ 325              	.L24:
+ 326 001a 0320     		movs	r0, #3
+ 327 001c FAE7     		b	.L22
+ 328              	.L28:
+ 329 001e C046     		.align	2
+ 330              	.L27:
+ 331 0020 2C000B40 		.word	1074462764
+ 332              		.size	CySysPmGetResetReason, .-CySysPmGetResetReason
+ 333              		.section	.text.CySysPmFreezeIo,"ax",%progbits
+ 334              		.align	2
+ 335              		.global	CySysPmFreezeIo
+ 336              		.code	16
+ 337              		.thumb_func
+ 338              		.type	CySysPmFreezeIo, %function
+ 339              	CySysPmFreezeIo:
+ 340              		@ args = 0, pretend = 0, frame = 0
+ 341              		@ frame_needed = 0, uses_anonymous_args = 0
+ 342 0000 10B5     		push	{r4, lr}
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 7
+
+
+ 343 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ 344 0006 084B     		ldr	r3, .L31
+ 345 0008 1A68     		ldr	r2, [r3]
+ 346 000a 9203     		lsls	r2, r2, #14
+ 347 000c 09D4     		bmi	.L30
+ 348 000e 1968     		ldr	r1, [r3]
+ 349 0010 064A     		ldr	r2, .L31+4
+ 350 0012 0A40     		ands	r2, r1
+ 351 0014 0649     		ldr	r1, .L31+8
+ 352 0016 0A43     		orrs	r2, r1
+ 353 0018 1A60     		str	r2, [r3]
+ 354 001a 1A68     		ldr	r2, [r3]
+ 355 001c 1A68     		ldr	r2, [r3]
+ 356 001e 1A68     		ldr	r2, [r3]
+ 357 0020 1A60     		str	r2, [r3]
+ 358              	.L30:
+ 359 0022 FFF7FEFF 		bl	CyExitCriticalSection
+ 360              		@ sp needed
+ 361 0026 10BD     		pop	{r4, pc}
+ 362              	.L32:
+ 363              		.align	2
+ 364              	.L31:
+ 365 0028 2C000B40 		.word	1074462764
+ 366 002c FF000100 		.word	65791
+ 367 0030 003A0280 		.word	-2147337728
+ 368              		.size	CySysPmFreezeIo, .-CySysPmFreezeIo
+ 369              		.section	.text.CySysPmUnfreezeIo,"ax",%progbits
+ 370              		.align	2
+ 371              		.global	CySysPmUnfreezeIo
+ 372              		.code	16
+ 373              		.thumb_func
+ 374              		.type	CySysPmUnfreezeIo, %function
+ 375              	CySysPmUnfreezeIo:
+ 376              		@ args = 0, pretend = 0, frame = 0
+ 377              		@ frame_needed = 0, uses_anonymous_args = 0
+ 378 0000 10B5     		push	{r4, lr}
+ 379 0002 E824     		movs	r4, #232
+ 380 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 381 0008 074B     		ldr	r3, .L34
+ 382 000a 0849     		ldr	r1, .L34+4
+ 383 000c 1A68     		ldr	r2, [r3]
+ 384 000e A401     		lsls	r4, r4, #6
+ 385 0010 0A40     		ands	r2, r1
+ 386 0012 2243     		orrs	r2, r4
+ 387 0014 1A60     		str	r2, [r3]
+ 388 0016 1A68     		ldr	r2, [r3]
+ 389 0018 1A68     		ldr	r2, [r3]
+ 390 001a 1A68     		ldr	r2, [r3]
+ 391              		@ sp needed
+ 392 001c 1140     		ands	r1, r2
+ 393 001e 1960     		str	r1, [r3]
+ 394 0020 FFF7FEFF 		bl	CyExitCriticalSection
+ 395 0024 10BD     		pop	{r4, pc}
+ 396              	.L35:
+ 397 0026 C046     		.align	2
+ 398              	.L34:
+ 399 0028 2C000B40 		.word	1074462764
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccP7VXF1.s 			page 8
+
+
+ 400 002c FF000100 		.word	65791
+ 401              		.size	CySysPmUnfreezeIo, .-CySysPmUnfreezeIo
+ 402              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

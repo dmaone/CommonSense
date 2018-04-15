@@ -1,0 +1,380 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"BLE_scps.c"
+  16              		.section	.text.CyBle_ScpsInit,"ax",%progbits
+  17              		.align	2
+  18              		.global	CyBle_ScpsInit
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CyBle_ScpsInit, %function
+  22              	CyBle_ScpsInit:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25              		@ link register save eliminated.
+  26              		@ sp needed
+  27 0000 7047     		bx	lr
+  28              		.size	CyBle_ScpsInit, .-CyBle_ScpsInit
+  29 0002 C046     		.section	.text.CyBle_ScpsRegisterAttrCallback,"ax",%progbits
+  30              		.align	2
+  31              		.global	CyBle_ScpsRegisterAttrCallback
+  32              		.code	16
+  33              		.thumb_func
+  34              		.type	CyBle_ScpsRegisterAttrCallback, %function
+  35              	CyBle_ScpsRegisterAttrCallback:
+  36              		@ args = 0, pretend = 0, frame = 0
+  37              		@ frame_needed = 0, uses_anonymous_args = 0
+  38              		@ link register save eliminated.
+  39 0000 014B     		ldr	r3, .L3
+  40              		@ sp needed
+  41 0002 1860     		str	r0, [r3]
+  42 0004 7047     		bx	lr
+  43              	.L4:
+  44 0006 C046     		.align	2
+  45              	.L3:
+  46 0008 00000000 		.word	.LANCHOR0
+  47              		.size	CyBle_ScpsRegisterAttrCallback, .-CyBle_ScpsRegisterAttrCallback
+  48              		.section	.text.CyBle_ScpssSetCharacteristicValue,"ax",%progbits
+  49              		.align	2
+  50              		.global	CyBle_ScpssSetCharacteristicValue
+  51              		.code	16
+  52              		.thumb_func
+  53              		.type	CyBle_ScpssSetCharacteristicValue, %function
+  54              	CyBle_ScpssSetCharacteristicValue:
+  55              		@ args = 0, pretend = 0, frame = 16
+  56              		@ frame_needed = 0, uses_anonymous_args = 0
+  57 0000 70B5     		push	{r4, r5, r6, lr}
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 2
+
+
+  58 0002 0C00     		movs	r4, r1
+  59 0004 84B0     		sub	sp, sp, #16
+  60 0006 1500     		movs	r5, r2
+  61 0008 0128     		cmp	r0, #1
+  62 000a 02D9     		bls	.L12
+  63              	.L6:
+  64 000c 0120     		movs	r0, #1
+  65              	.L10:
+  66 000e 04B0     		add	sp, sp, #16
+  67              		@ sp needed
+  68 0010 70BD     		pop	{r4, r5, r6, pc}
+  69              	.L12:
+  70 0012 0028     		cmp	r0, #0
+  71 0014 0FD0     		beq	.L13
+  72 0016 3223     		movs	r3, #50
+  73 0018 0129     		cmp	r1, #1
+  74 001a F7D8     		bhi	.L6
+  75              	.L8:
+  76 001c 01A8     		add	r0, sp, #4
+  77 001e 0381     		strh	r3, [r0, #8]
+  78 0020 0022     		movs	r2, #0
+  79 0022 0023     		movs	r3, #0
+  80 0024 0021     		movs	r1, #0
+  81 0026 8480     		strh	r4, [r0, #4]
+  82 0028 0195     		str	r5, [sp, #4]
+  83 002a FFF7FEFF 		bl	CyBle_GattsWriteAttributeValue
+  84 002e 431E     		subs	r3, r0, #1
+  85 0030 9841     		sbcs	r0, r0, r3
+  86 0032 80B2     		uxth	r0, r0
+  87 0034 EBE7     		b	.L10
+  88              	.L13:
+  89 0036 1000     		movs	r0, r2
+  90 0038 FFF7FEFF 		bl	CyBle_Get16ByPtr
+  91 003c 0600     		movs	r6, r0
+  92 003e A81C     		adds	r0, r5, #2
+  93 0040 FFF7FEFF 		bl	CyBle_Get16ByPtr
+  94 0044 331F     		subs	r3, r6, #4
+  95 0046 064A     		ldr	r2, .L14
+  96 0048 9BB2     		uxth	r3, r3
+  97 004a 9342     		cmp	r3, r2
+  98 004c DED8     		bhi	.L6
+  99 004e 0328     		cmp	r0, #3
+ 100 0050 DCD9     		bls	.L6
+ 101 0052 8642     		cmp	r6, r0
+ 102 0054 DAD3     		bcc	.L6
+ 103 0056 3023     		movs	r3, #48
+ 104 0058 042C     		cmp	r4, #4
+ 105 005a DFD9     		bls	.L8
+ 106 005c D6E7     		b	.L6
+ 107              	.L15:
+ 108 005e C046     		.align	2
+ 109              	.L14:
+ 110 0060 FC3F0000 		.word	16380
+ 111              		.size	CyBle_ScpssSetCharacteristicValue, .-CyBle_ScpssSetCharacteristicValue
+ 112              		.section	.text.CyBle_ScpssGetCharacteristicValue,"ax",%progbits
+ 113              		.align	2
+ 114              		.global	CyBle_ScpssGetCharacteristicValue
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 3
+
+
+ 115              		.code	16
+ 116              		.thumb_func
+ 117              		.type	CyBle_ScpssGetCharacteristicValue, %function
+ 118              	CyBle_ScpssGetCharacteristicValue:
+ 119              		@ args = 0, pretend = 0, frame = 16
+ 120              		@ frame_needed = 0, uses_anonymous_args = 0
+ 121 0000 00B5     		push	{lr}
+ 122 0002 0300     		movs	r3, r0
+ 123 0004 85B0     		sub	sp, sp, #20
+ 124 0006 0120     		movs	r0, #1
+ 125 0008 012B     		cmp	r3, #1
+ 126 000a 01D9     		bls	.L24
+ 127              	.L23:
+ 128 000c 05B0     		add	sp, sp, #20
+ 129              		@ sp needed
+ 130 000e 00BD     		pop	{pc}
+ 131              	.L24:
+ 132 0010 002B     		cmp	r3, #0
+ 133 0012 0ED1     		bne	.L18
+ 134 0014 3033     		adds	r3, r3, #48
+ 135 0016 0429     		cmp	r1, #4
+ 136 0018 F8D8     		bhi	.L23
+ 137              	.L19:
+ 138 001a 01A8     		add	r0, sp, #4
+ 139 001c 8180     		strh	r1, [r0, #4]
+ 140 001e 0192     		str	r2, [sp, #4]
+ 141 0020 0021     		movs	r1, #0
+ 142 0022 0022     		movs	r2, #0
+ 143 0024 0381     		strh	r3, [r0, #8]
+ 144 0026 FFF7FEFF 		bl	CyBle_GattsReadAttributeValue
+ 145 002a 431E     		subs	r3, r0, #1
+ 146 002c 9841     		sbcs	r0, r0, r3
+ 147 002e 80B2     		uxth	r0, r0
+ 148 0030 ECE7     		b	.L23
+ 149              	.L18:
+ 150 0032 0129     		cmp	r1, #1
+ 151 0034 EAD8     		bhi	.L23
+ 152 0036 3223     		movs	r3, #50
+ 153 0038 EFE7     		b	.L19
+ 154              		.size	CyBle_ScpssGetCharacteristicValue, .-CyBle_ScpssGetCharacteristicValue
+ 155 003a C046     		.section	.text.CyBle_ScpssGetCharacteristicDescriptor,"ax",%progbits
+ 156              		.align	2
+ 157              		.global	CyBle_ScpssGetCharacteristicDescriptor
+ 158              		.code	16
+ 159              		.thumb_func
+ 160              		.type	CyBle_ScpssGetCharacteristicDescriptor, %function
+ 161              	CyBle_ScpssGetCharacteristicDescriptor:
+ 162              		@ args = 0, pretend = 0, frame = 16
+ 163              		@ frame_needed = 0, uses_anonymous_args = 0
+ 164 0000 10B5     		push	{r4, lr}
+ 165 0002 0400     		movs	r4, r0
+ 166 0004 84B0     		sub	sp, sp, #16
+ 167 0006 0120     		movs	r0, #1
+ 168 0008 012C     		cmp	r4, #1
+ 169 000a 01D0     		beq	.L29
+ 170              	.L26:
+ 171 000c 04B0     		add	sp, sp, #16
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 4
+
+
+ 172              		@ sp needed
+ 173 000e 10BD     		pop	{r4, pc}
+ 174              	.L29:
+ 175 0010 0029     		cmp	r1, #0
+ 176 0012 FBD1     		bne	.L26
+ 177 0014 01A8     		add	r0, sp, #4
+ 178 0016 3331     		adds	r1, r1, #51
+ 179 0018 0181     		strh	r1, [r0, #8]
+ 180 001a 8280     		strh	r2, [r0, #4]
+ 181 001c 0021     		movs	r1, #0
+ 182 001e 0022     		movs	r2, #0
+ 183 0020 0193     		str	r3, [sp, #4]
+ 184 0022 FFF7FEFF 		bl	CyBle_GattsReadAttributeValue
+ 185 0026 431E     		subs	r3, r0, #1
+ 186 0028 9841     		sbcs	r0, r0, r3
+ 187 002a 80B2     		uxth	r0, r0
+ 188 002c EEE7     		b	.L26
+ 189              		.size	CyBle_ScpssGetCharacteristicDescriptor, .-CyBle_ScpssGetCharacteristicDescriptor
+ 190 002e C046     		.section	.text.CyBle_ScpssWriteEventHandler,"ax",%progbits
+ 191              		.align	2
+ 192              		.global	CyBle_ScpssWriteEventHandler
+ 193              		.code	16
+ 194              		.thumb_func
+ 195              		.type	CyBle_ScpssWriteEventHandler, %function
+ 196              	CyBle_ScpssWriteEventHandler:
+ 197              		@ args = 0, pretend = 0, frame = 8
+ 198              		@ frame_needed = 0, uses_anonymous_args = 0
+ 199 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 200 0002 234E     		ldr	r6, .L45
+ 201 0004 83B0     		sub	sp, sp, #12
+ 202 0006 3368     		ldr	r3, [r6]
+ 203 0008 0400     		movs	r4, r0
+ 204 000a 002B     		cmp	r3, #0
+ 205 000c 3DD0     		beq	.L38
+ 206 000e 8389     		ldrh	r3, [r0, #12]
+ 207 0010 332B     		cmp	r3, #51
+ 208 0012 05D0     		beq	.L32
+ 209 0014 0025     		movs	r5, #0
+ 210 0016 302B     		cmp	r3, #48
+ 211 0018 02D0     		beq	.L32
+ 212              	.L31:
+ 213 001a 2800     		movs	r0, r5
+ 214 001c 03B0     		add	sp, sp, #12
+ 215              		@ sp needed
+ 216 001e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 217              	.L32:
+ 218 0020 6A46     		mov	r2, sp
+ 219 0022 2388     		ldrh	r3, [r4]
+ 220 0024 271D     		adds	r7, r4, #4
+ 221 0026 1380     		strh	r3, [r2]
+ 222 0028 0021     		movs	r1, #0
+ 223 002a 4023     		movs	r3, #64
+ 224 002c 2200     		movs	r2, r4
+ 225 002e 3800     		movs	r0, r7
+ 226 0030 FFF7FEFF 		bl	CyBle_GattsWriteAttributeValue
+ 227 0034 051E     		subs	r5, r0, #0
+ 228 0036 0AD1     		bne	.L34
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 5
+
+
+ 229 0038 A389     		ldrh	r3, [r4, #12]
+ 230 003a 332B     		cmp	r3, #51
+ 231 003c 0DD0     		beq	.L44
+ 232 003e 6B46     		mov	r3, sp
+ 233 0040 9870     		strb	r0, [r3, #2]
+ 234 0042 FD20     		movs	r0, #253
+ 235 0044 0197     		str	r7, [sp, #4]
+ 236 0046 3368     		ldr	r3, [r6]
+ 237 0048 6946     		mov	r1, sp
+ 238 004a 4000     		lsls	r0, r0, #1
+ 239 004c 9847     		blx	r3
+ 240              	.L34:
+ 241 004e 0121     		movs	r1, #1
+ 242 0050 104A     		ldr	r2, .L45+4
+ 243 0052 1378     		ldrb	r3, [r2]
+ 244 0054 8B43     		bics	r3, r1
+ 245 0056 1370     		strb	r3, [r2]
+ 246 0058 DFE7     		b	.L31
+ 247              	.L44:
+ 248 005a 6B46     		mov	r3, sp
+ 249 005c 0127     		movs	r7, #1
+ 250 005e 0190     		str	r0, [sp, #4]
+ 251 0060 6068     		ldr	r0, [r4, #4]
+ 252 0062 9F70     		strb	r7, [r3, #2]
+ 253 0064 FFF7FEFF 		bl	CyBle_Get16ByPtr
+ 254 0068 FA23     		movs	r3, #250
+ 255 006a 3840     		ands	r0, r7
+ 256 006c FF33     		adds	r3, r3, #255
+ 257 006e 181A     		subs	r0, r3, r0
+ 258 0070 6946     		mov	r1, sp
+ 259 0072 3368     		ldr	r3, [r6]
+ 260 0074 9847     		blx	r3
+ 261 0076 084B     		ldr	r3, .L45+8
+ 262 0078 1B78     		ldrb	r3, [r3]
+ 263 007a 012B     		cmp	r3, #1
+ 264 007c E7D1     		bne	.L34
+ 265 007e 0223     		movs	r3, #2
+ 266 0080 064A     		ldr	r2, .L45+12
+ 267 0082 1178     		ldrb	r1, [r2]
+ 268 0084 0B43     		orrs	r3, r1
+ 269 0086 1370     		strb	r3, [r2]
+ 270 0088 E1E7     		b	.L34
+ 271              	.L38:
+ 272 008a 0025     		movs	r5, #0
+ 273 008c C5E7     		b	.L31
+ 274              	.L46:
+ 275 008e C046     		.align	2
+ 276              	.L45:
+ 277 0090 00000000 		.word	.LANCHOR0
+ 278 0094 00000000 		.word	cyBle_eventHandlerFlag
+ 279 0098 00000000 		.word	cyBle_peerBonding
+ 280 009c 00000000 		.word	cyBle_pendingFlashWrite
+ 281              		.size	CyBle_ScpssWriteEventHandler, .-CyBle_ScpssWriteEventHandler
+ 282              		.section	.text.CyBle_ScpssSendNotification,"ax",%progbits
+ 283              		.align	2
+ 284              		.global	CyBle_ScpssSendNotification
+ 285              		.code	16
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 6
+
+
+ 286              		.thumb_func
+ 287              		.type	CyBle_ScpssSendNotification, %function
+ 288              	CyBle_ScpssSendNotification:
+ 289              		@ args = 0, pretend = 0, frame = 24
+ 290              		@ frame_needed = 0, uses_anonymous_args = 0
+ 291 0000 70B5     		push	{r4, r5, r6, lr}
+ 292 0002 86B0     		sub	sp, sp, #24
+ 293 0004 01AD     		add	r5, sp, #4
+ 294 0006 2880     		strh	r0, [r5]
+ 295 0008 1E00     		movs	r6, r3
+ 296 000a 0124     		movs	r4, #1
+ 297 000c 0129     		cmp	r1, #1
+ 298 000e 02D0     		beq	.L53
+ 299              	.L48:
+ 300 0010 2000     		movs	r0, r4
+ 301 0012 06B0     		add	sp, sp, #24
+ 302              		@ sp needed
+ 303 0014 70BD     		pop	{r4, r5, r6, pc}
+ 304              	.L53:
+ 305 0016 012A     		cmp	r2, #1
+ 306 0018 FAD1     		bne	.L48
+ 307 001a FE23     		movs	r3, #254
+ 308 001c 0D4A     		ldr	r2, .L56
+ 309 001e 9B00     		lsls	r3, r3, #2
+ 310 0020 D358     		ldr	r3, [r2, r3]
+ 311 0022 5868     		ldr	r0, [r3, #4]
+ 312 0024 FFF7FEFF 		bl	CyBle_Get16ByPtr
+ 313 0028 0442     		tst	r4, r0
+ 314 002a 02D1     		bne	.L54
+ 315 002c 8024     		movs	r4, #128
+ 316 002e 6400     		lsls	r4, r4, #1
+ 317 0030 EEE7     		b	.L48
+ 318              	.L54:
+ 319 0032 094B     		ldr	r3, .L56+4
+ 320 0034 1B78     		ldrb	r3, [r3]
+ 321 0036 022B     		cmp	r3, #2
+ 322 0038 02D0     		beq	.L55
+ 323 003a 0424     		movs	r4, #4
+ 324 003c FF34     		adds	r4, r4, #255
+ 325 003e E7E7     		b	.L48
+ 326              	.L55:
+ 327 0040 03A9     		add	r1, sp, #12
+ 328 0042 3033     		adds	r3, r3, #48
+ 329 0044 2868     		ldr	r0, [r5]
+ 330 0046 8C80     		strh	r4, [r1, #4]
+ 331 0048 0B81     		strh	r3, [r1, #8]
+ 332 004a 0396     		str	r6, [sp, #12]
+ 333 004c FFF7FEFF 		bl	CyBle_GattsNotification
+ 334 0050 0400     		movs	r4, r0
+ 335 0052 DDE7     		b	.L48
+ 336              	.L57:
+ 337              		.align	2
+ 338              	.L56:
+ 339 0054 00000000 		.word	cyBle_gattDB
+ 340 0058 00000000 		.word	cyBle_state
+ 341              		.size	CyBle_ScpssSendNotification, .-CyBle_ScpssSendNotification
+ 342              		.global	cyBle_scpss
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccVecFSp.s 			page 7
+
+
+ 343              		.section	.rodata
+ 344              		.align	2
+ 345              		.type	cyBle_scpss, %object
+ 346              		.size	cyBle_scpss, 8
+ 347              	cyBle_scpss:
+ 348 0000 2E00     		.short	46
+ 349 0002 3000     		.short	48
+ 350 0004 3200     		.short	50
+ 351 0006 3300     		.short	51
+ 352              		.bss
+ 353              		.align	2
+ 354              		.set	.LANCHOR0,. + 0
+ 355              		.type	CyBle_ScpsApplCallback, %object
+ 356              		.size	CyBle_ScpsApplCallback, 4
+ 357              	CyBle_ScpsApplCallback:
+ 358 0000 00000000 		.space	4
+ 359              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

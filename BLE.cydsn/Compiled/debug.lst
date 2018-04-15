@@ -1,0 +1,143 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccnAUCk5.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"debug.c"
+  16              		.section	.text._write,"ax",%progbits
+  17              		.align	2
+  18              		.global	_write
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	_write, %function
+  22              	_write:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 70B5     		push	{r4, r5, r6, lr}
+  26 0002 0C00     		movs	r4, r1
+  27 0004 1600     		movs	r6, r2
+  28 0006 0020     		movs	r0, #0
+  29 0008 FFF7FEFF 		bl	LED_GRN_Write
+  30 000c A519     		adds	r5, r4, r6
+  31 000e 002E     		cmp	r6, #0
+  32 0010 05DD     		ble	.L4
+  33              	.L5:
+  34 0012 2078     		ldrb	r0, [r4]
+  35 0014 0134     		adds	r4, r4, #1
+  36 0016 FFF7FEFF 		bl	UART_DEB_SpiUartWriteTxData
+  37 001a AC42     		cmp	r4, r5
+  38 001c F9D1     		bne	.L5
+  39              	.L4:
+  40 001e 0120     		movs	r0, #1
+  41 0020 FFF7FEFF 		bl	LED_GRN_Write
+  42              		@ sp needed
+  43 0024 3000     		movs	r0, r6
+  44 0026 70BD     		pop	{r4, r5, r6, pc}
+  45              		.size	_write, .-_write
+  46              		.section	.text.ShowValue,"ax",%progbits
+  47              		.align	2
+  48              		.global	ShowValue
+  49              		.code	16
+  50              		.thumb_func
+  51              		.type	ShowValue, %function
+  52              	ShowValue:
+  53              		@ args = 0, pretend = 0, frame = 0
+  54              		@ frame_needed = 0, uses_anonymous_args = 0
+  55 0000 70B5     		push	{r4, r5, r6, lr}
+  56 0002 8388     		ldrh	r3, [r0, #4]
+  57 0004 0500     		movs	r5, r0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccnAUCk5.s 			page 2
+
+
+  58 0006 002B     		cmp	r3, #0
+  59 0008 0BD0     		beq	.L12
+  60 000a 0024     		movs	r4, #0
+  61 000c 074E     		ldr	r6, .L15
+  62              	.L11:
+  63 000e 2B68     		ldr	r3, [r5]
+  64 0010 3000     		movs	r0, r6
+  65 0012 195D     		ldrb	r1, [r3, r4]
+  66 0014 FFF7FEFF 		bl	printf
+  67 0018 0134     		adds	r4, r4, #1
+  68 001a AB88     		ldrh	r3, [r5, #4]
+  69 001c 24B2     		sxth	r4, r4
+  70 001e 9C42     		cmp	r4, r3
+  71 0020 F5DB     		blt	.L11
+  72              	.L12:
+  73 0022 0348     		ldr	r0, .L15+4
+  74 0024 FFF7FEFF 		bl	puts
+  75              		@ sp needed
+  76 0028 70BD     		pop	{r4, r5, r6, pc}
+  77              	.L16:
+  78 002a C046     		.align	2
+  79              	.L15:
+  80 002c 04000000 		.word	.LC4
+  81 0030 00000000 		.word	.LC2
+  82              		.size	ShowValue, .-ShowValue
+  83              		.section	.text.Set32ByPtr,"ax",%progbits
+  84              		.align	2
+  85              		.global	Set32ByPtr
+  86              		.code	16
+  87              		.thumb_func
+  88              		.type	Set32ByPtr, %function
+  89              	Set32ByPtr:
+  90              		@ args = 0, pretend = 0, frame = 0
+  91              		@ frame_needed = 0, uses_anonymous_args = 0
+  92              		@ link register save eliminated.
+  93 0000 0B0A     		lsrs	r3, r1, #8
+  94 0002 0170     		strb	r1, [r0]
+  95 0004 4370     		strb	r3, [r0, #1]
+  96 0006 0B0C     		lsrs	r3, r1, #16
+  97 0008 090E     		lsrs	r1, r1, #24
+  98 000a 8370     		strb	r3, [r0, #2]
+  99 000c C170     		strb	r1, [r0, #3]
+ 100              		@ sp needed
+ 101 000e 7047     		bx	lr
+ 102              		.size	Set32ByPtr, .-Set32ByPtr
+ 103              		.section	.text.ShowError,"ax",%progbits
+ 104              		.align	2
+ 105              		.global	ShowError
+ 106              		.code	16
+ 107              		.thumb_func
+ 108              		.type	ShowError, %function
+ 109              	ShowError:
+ 110              		@ args = 0, pretend = 0, frame = 0
+ 111              		@ frame_needed = 0, uses_anonymous_args = 0
+ 112 0000 10B5     		push	{r4, lr}
+ 113 0002 0020     		movs	r0, #0
+ 114 0004 FFF7FEFF 		bl	LED_RED_Write
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccnAUCk5.s 			page 3
+
+
+ 115 0008 0020     		movs	r0, #0
+ 116 000a FFF7FEFF 		bl	LED_GRN_Write
+ 117 000e 0020     		movs	r0, #0
+ 118 0010 FFF7FEFF 		bl	LED_BLU_Write
+ 119 0014 0020     		movs	r0, #0
+ 120 0016 FFF7FEFF 		bl	CyHalt
+ 121              		@ sp needed
+ 122 001a 10BD     		pop	{r4, pc}
+ 123              		.size	ShowError, .-ShowError
+ 124              		.comm	keyboard_report_usage,1,1
+ 125              		.comm	keyboard_report,20,4
+ 126              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 127              		.align	2
+ 128              	.LC2:
+ 129 0000 0D00     		.ascii	"\015\000"
+ 130 0002 0000     		.space	2
+ 131              	.LC4:
+ 132 0004 25322E32 		.ascii	"%2.2x \000"
+ 132      782000
+ 133              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

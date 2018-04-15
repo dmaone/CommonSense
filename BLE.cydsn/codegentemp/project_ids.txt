@@ -1,0 +1,8 @@
+C:\Projects\CommonSense\Firmware.cydsn\Firmware.cyprj|5929eb40-4a41-4a6e-b45e-24af9c528e79
+C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\default\CyAnnotationLibrary\CyAnnotationLibrary.cylib\CyAnnotationLibrary.cyprj|e7b62489-181c-461b-9963-f93dda2299ab
+C:\Users\DMA\Documents\PSoC Creator\4.2\Downloads ( 4.2).cylib\Downloads ( 4.2).cyprj|b8dafd7b-fd41-4cdd-8d9f-34039c8adc3b
+C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\cycomponentlibraryupdates\CyComponentLibraryUpdates.cylib\CyComponentLibraryUpdates.cyprj|9676f53f-e897-4fa0-aec1-c5065efb254d
+C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\cycomponentlibrary\CyComponentLibrary.cylib\CyComponentLibrary.cyprj|247661ac-f087-4956-8d33-be0a7763809b
+C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\cyprimitives\CyPrimitives.cylib\CyPrimitives.cyprj|328cb64e-b837-4d76-9d22-dde23c3ccfc0
+C:\Projects\CommonSense\Bootloader.cydsn\Bootloader.cyprj|868bebb3-7bf9-4068-8c2a-36dc5aa89b2d
+C:\Projects\CommonSense\BLE.cydsn\BLE.cyprj|505c4b3d-6c29-4fd2-8c87-28c259376c7f

@@ -151,7 +151,9 @@ typedef union {
 
 // serial stuff
 enum supervisory_command {
-  SUP_CMD_SENDCHAR = 'c',
+  SUP_CMD_NOOP = 0,
+  SUP_CMD_KEYDOWN = 'p',
+  SUP_CMD_KEYUP = 'r',
   SUP_CMD_SUSPEND = 's',
   SUP_CMD_WAKEUP = 'w',
 };

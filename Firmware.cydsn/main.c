@@ -28,7 +28,7 @@ int main() {
   BootIRQ_StartEx(BootIRQ_ISR);
   SysTimer_Start();
   TimerIRQ_StartEx(Timer_ISR);
-
+  
   load_config();
 
   power_state = DEVSTATE_FULL_THROTTLE;
@@ -44,6 +44,8 @@ int main() {
 #endif
     switch (power_state) {
     case DEVSTATE_FULL_THROTTLE:
+      //power_state = DEVSTATE_SHUTDOWN_REQUEST;
+//      CyPins_SetPin(ExpHdr_2);
       if (tick) {
         exp_tick(tick);
         tick = 0;
@@ -60,6 +62,7 @@ int main() {
       }
       // Timer ISR will wake us up.
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
+//      CyPins_ClearPin(ExpHdr_2);
       break;
     case DEVSTATE_PREPARING_TO_SLEEP:
       if (tick) {
@@ -90,6 +93,35 @@ int main() {
       // only from deep sleep - RWU goes straight to full throttle.
       tick = 0;
       usb_wake();
+      break;
+    case DEVSTATE_SHUTDOWN_REQUEST:
+      //xprintf("shutdown");
+      scan_nap();
+      serial_nap();
+      SysTimer_Sleep();
+      //usb_nap();
+      CyPins_SetPin(ExpHdr_2);
+      CyPmSaveClocks();
+      //CyPmAltAct(PM_SLEEP_TIME_NONE, PM_ALT_ACT_SRC_I2C|PM_ALT_ACT_SRC_PICU|PM_ALT_ACT_SRC_CTW);
+      CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_I2C|PM_SLEEP_SRC_PICU);
+      CyPmRestoreClocks();
+      CyDelay(50);
+      CyPins_ClearPin(ExpHdr_2);
+//      CyPins_SetPin(ExpHdr_2);
+//      CyDelay(50);
+//      CyPins_ClearPin(ExpHdr_2);
+//      CyDelay(50);
+      //CyGlobalIntEnable;
+      SysTimer_Wakeup();
+      serial_wake();
+      Sup_Pdu_t buf;
+      buf.command = 4;
+      buf.data = 5;
+      serial_send(&buf);
+      //usb_wake();
+      scan_wake();
+      //xprintf("restart");
+      power_state = DEVSTATE_FULL_THROTTLE;
       break;
     default:
 #ifdef DEBUG_STATE_MACHINE

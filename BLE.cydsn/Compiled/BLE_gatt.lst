@@ -1,0 +1,1964 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"BLE_gatt.c"
+  16              		.section	.text.CyBle_GattsReInitGattDb,"ax",%progbits
+  17              		.align	2
+  18              		.global	CyBle_GattsReInitGattDb
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	CyBle_GattsReInitGattDb, %function
+  22              	CyBle_GattsReInitGattDb:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 0420     		movs	r0, #4
+  26 0002 064B     		ldr	r3, .L6
+  27 0004 10B5     		push	{r4, lr}
+  28 0006 1B78     		ldrb	r3, [r3]
+  29 0008 FF30     		adds	r0, r0, #255
+  30 000a 042B     		cmp	r3, #4
+  31 000c 00D0     		beq	.L5
+  32              	.L2:
+  33              		@ sp needed
+  34 000e 10BD     		pop	{r4, pc}
+  35              	.L5:
+  36 0010 4022     		movs	r2, #64
+  37 0012 4F21     		movs	r1, #79
+  38 0014 0248     		ldr	r0, .L6+4
+  39 0016 FFF7FEFF 		bl	CyBle_GattsDbRegister
+  40 001a F8E7     		b	.L2
+  41              	.L7:
+  42              		.align	2
+  43              	.L6:
+  44 001c 00000000 		.word	cyBle_state
+  45 0020 00000000 		.word	.LANCHOR0
+  46              		.size	CyBle_GattsReInitGattDb, .-CyBle_GattsReInitGattDb
+  47              		.section	.text.CyBle_GattsWriteEventHandler,"ax",%progbits
+  48              		.align	2
+  49              		.global	CyBle_GattsWriteEventHandler
+  50              		.code	16
+  51              		.thumb_func
+  52              		.type	CyBle_GattsWriteEventHandler, %function
+  53              	CyBle_GattsWriteEventHandler:
+  54              		@ args = 0, pretend = 0, frame = 0
+  55              		@ frame_needed = 0, uses_anonymous_args = 0
+  56 0000 70B5     		push	{r4, r5, r6, lr}
+  57 0002 8389     		ldrh	r3, [r0, #12]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 2
+
+
+  58 0004 0400     		movs	r4, r0
+  59 0006 0025     		movs	r5, #0
+  60 0008 0B2B     		cmp	r3, #11
+  61 000a 01D0     		beq	.L13
+  62              	.L9:
+  63 000c 2800     		movs	r0, r5
+  64              		@ sp needed
+  65 000e 70BD     		pop	{r4, r5, r6, pc}
+  66              	.L13:
+  67 0010 0430     		adds	r0, r0, #4
+  68 0012 3533     		adds	r3, r3, #53
+  69 0014 2200     		movs	r2, r4
+  70 0016 0021     		movs	r1, #0
+  71 0018 FFF7FEFF 		bl	CyBle_GattsWriteAttributeValue
+  72 001c 051E     		subs	r5, r0, #0
+  73 001e 05D0     		beq	.L14
+  74              	.L10:
+  75 0020 0121     		movs	r1, #1
+  76 0022 0C4A     		ldr	r2, .L15
+  77 0024 1378     		ldrb	r3, [r2]
+  78 0026 8B43     		bics	r3, r1
+  79 0028 1370     		strb	r3, [r2]
+  80 002a EFE7     		b	.L9
+  81              	.L14:
+  82 002c 6068     		ldr	r0, [r4, #4]
+  83 002e FFF7FEFF 		bl	CyBle_Get16ByPtr
+  84 0032 8307     		lsls	r3, r0, #30
+  85 0034 06D5     		bpl	.L11
+  86 0036 8220     		movs	r0, #130
+  87 0038 074B     		ldr	r3, .L15+4
+  88 003a 2100     		movs	r1, r4
+  89 003c 1B68     		ldr	r3, [r3]
+  90 003e 4000     		lsls	r0, r0, #1
+  91 0040 9847     		blx	r3
+  92 0042 EDE7     		b	.L10
+  93              	.L11:
+  94 0044 0620     		movs	r0, #6
+  95 0046 044B     		ldr	r3, .L15+4
+  96 0048 2100     		movs	r1, r4
+  97 004a 1B68     		ldr	r3, [r3]
+  98 004c FF30     		adds	r0, r0, #255
+  99 004e 9847     		blx	r3
+ 100 0050 E6E7     		b	.L10
+ 101              	.L16:
+ 102 0052 C046     		.align	2
+ 103              	.L15:
+ 104 0054 00000000 		.word	cyBle_eventHandlerFlag
+ 105 0058 00000000 		.word	CyBle_ApplCallback
+ 106              		.size	CyBle_GattsWriteEventHandler, .-CyBle_GattsWriteEventHandler
+ 107              		.global	cyBle_gattDB
+ 108              		.global	cyBle_attValuesLen
+ 109              		.comm	cyBle_attValuesCCCD,16,4
+ 110              		.global	cyBle_gatts
+ 111              		.global	cyBle_flashStorage
+ 112              		.comm	cyBle_state,1,1
+ 113              		.section	.rodata
+ 114              		.align	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 3
+
+
+ 115              		.set	.LANCHOR0,. + 0
+ 116              		.type	cyBle_gattDB, %object
+ 117              		.size	cyBle_gattDB, 1580
+ 118              	cyBle_gattDB:
+ 119 0000 0100     		.short	1
+ 120 0002 0028     		.short	10240
+ 121 0004 01000000 		.word	1
+ 122 0008 0700     		.short	7
+ 123 000a 0000     		.space	2
+ 124 000c 0018     		.short	6144
+ 125 000e 0000     		.space	2
+ 126 0010 00000000 		.word	0
+ 127 0014 0200     		.short	2
+ 128 0016 0328     		.short	10243
+ 129 0018 01000200 		.word	131073
+ 130 001c 0300     		.short	3
+ 131 001e 0000     		.space	2
+ 132 0020 002A     		.short	10752
+ 133 0022 0000     		.space	2
+ 134 0024 00000000 		.word	0
+ 135 0028 0300     		.short	3
+ 136 002a 002A     		.short	10752
+ 137 002c 01000201 		.word	16908289
+ 138 0030 0300     		.short	3
+ 139 0032 0000     		.space	2
+ 140 0034 0B00     		.short	11
+ 141 0036 0000     		.space	2
+ 142 0038 00000000 		.word	cyBle_attValuesLen
+ 143 003c 0400     		.short	4
+ 144 003e 0328     		.short	10243
+ 145 0040 01000200 		.word	131073
+ 146 0044 0500     		.short	5
+ 147 0046 0000     		.space	2
+ 148 0048 012A     		.short	10753
+ 149 004a 0000     		.space	2
+ 150 004c 00000000 		.word	0
+ 151 0050 0500     		.short	5
+ 152 0052 012A     		.short	10753
+ 153 0054 01000201 		.word	16908289
+ 154 0058 0500     		.short	5
+ 155 005a 0000     		.space	2
+ 156 005c 0200     		.short	2
+ 157 005e 0000     		.space	2
+ 158 0060 08000000 		.word	cyBle_attValuesLen+8
+ 159 0064 0600     		.short	6
+ 160 0066 0328     		.short	10243
+ 161 0068 01000200 		.word	131073
+ 162 006c 0700     		.short	7
+ 163 006e 0000     		.space	2
+ 164 0070 042A     		.short	10756
+ 165 0072 0000     		.space	2
+ 166 0074 00000000 		.word	0
+ 167 0078 0700     		.short	7
+ 168 007a 042A     		.short	10756
+ 169 007c 01000201 		.word	16908289
+ 170 0080 0700     		.short	7
+ 171 0082 0000     		.space	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 4
+
+
+ 172 0084 0800     		.short	8
+ 173 0086 0000     		.space	2
+ 174 0088 10000000 		.word	cyBle_attValuesLen+16
+ 175 008c 0800     		.short	8
+ 176 008e 0028     		.short	10240
+ 177 0090 01000000 		.word	1
+ 178 0094 0B00     		.short	11
+ 179 0096 0000     		.space	2
+ 180 0098 0118     		.short	6145
+ 181 009a 0000     		.space	2
+ 182 009c 00000000 		.word	0
+ 183 00a0 0900     		.short	9
+ 184 00a2 0328     		.short	10243
+ 185 00a4 01002000 		.word	2097153
+ 186 00a8 0B00     		.short	11
+ 187 00aa 0000     		.space	2
+ 188 00ac 052A     		.short	10757
+ 189 00ae 0000     		.space	2
+ 190 00b0 00000000 		.word	0
+ 191 00b4 0A00     		.short	10
+ 192 00b6 052A     		.short	10757
+ 193 00b8 00002001 		.word	18874368
+ 194 00bc 0B00     		.short	11
+ 195 00be 0000     		.space	2
+ 196 00c0 0400     		.short	4
+ 197 00c2 0000     		.space	2
+ 198 00c4 18000000 		.word	cyBle_attValuesLen+24
+ 199 00c8 0B00     		.short	11
+ 200 00ca 0229     		.short	10498
+ 201 00cc 01030A01 		.word	17433345
+ 202 00d0 0B00     		.short	11
+ 203 00d2 0000     		.space	2
+ 204 00d4 0200     		.short	2
+ 205 00d6 0000     		.space	2
+ 206 00d8 20000000 		.word	cyBle_attValuesLen+32
+ 207 00dc 0C00     		.short	12
+ 208 00de 0028     		.short	10240
+ 209 00e0 01000000 		.word	1
+ 210 00e4 2100     		.short	33
+ 211 00e6 0000     		.space	2
+ 212 00e8 1218     		.short	6162
+ 213 00ea 0000     		.space	2
+ 214 00ec 00000000 		.word	0
+ 215 00f0 0D00     		.short	13
+ 216 00f2 0328     		.short	10243
+ 217 00f4 01001200 		.word	1179649
+ 218 00f8 1000     		.short	16
+ 219 00fa 0000     		.space	2
+ 220 00fc 4D2A     		.short	10829
+ 221 00fe 0000     		.space	2
+ 222 0100 00000000 		.word	0
+ 223 0104 0E00     		.short	14
+ 224 0106 4D2A     		.short	10829
+ 225 0108 03001201 		.word	17956867
+ 226 010c 1000     		.short	16
+ 227 010e 0000     		.space	2
+ 228 0110 1400     		.short	20
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 5
+
+
+ 229 0112 0000     		.space	2
+ 230 0114 28000000 		.word	cyBle_attValuesLen+40
+ 231 0118 0F00     		.short	15
+ 232 011a 0229     		.short	10498
+ 233 011c 01030A01 		.word	17433345
+ 234 0120 0F00     		.short	15
+ 235 0122 0000     		.space	2
+ 236 0124 0200     		.short	2
+ 237 0126 0000     		.space	2
+ 238 0128 30000000 		.word	cyBle_attValuesLen+48
+ 239 012c 1000     		.short	16
+ 240 012e 0829     		.short	10504
+ 241 0130 01000201 		.word	16908289
+ 242 0134 1000     		.short	16
+ 243 0136 0000     		.space	2
+ 244 0138 0200     		.short	2
+ 245 013a 0000     		.space	2
+ 246 013c 38000000 		.word	cyBle_attValuesLen+56
+ 247 0140 1100     		.short	17
+ 248 0142 0328     		.short	10243
+ 249 0144 01001200 		.word	1179649
+ 250 0148 1400     		.short	20
+ 251 014a 0000     		.space	2
+ 252 014c 4D2A     		.short	10829
+ 253 014e 0000     		.space	2
+ 254 0150 00000000 		.word	0
+ 255 0154 1200     		.short	18
+ 256 0156 4D2A     		.short	10829
+ 257 0158 03001201 		.word	17956867
+ 258 015c 1400     		.short	20
+ 259 015e 0000     		.space	2
+ 260 0160 0100     		.short	1
+ 261 0162 0000     		.space	2
+ 262 0164 40000000 		.word	cyBle_attValuesLen+64
+ 263 0168 1300     		.short	19
+ 264 016a 0229     		.short	10498
+ 265 016c 01030A01 		.word	17433345
+ 266 0170 1300     		.short	19
+ 267 0172 0000     		.space	2
+ 268 0174 0200     		.short	2
+ 269 0176 0000     		.space	2
+ 270 0178 48000000 		.word	cyBle_attValuesLen+72
+ 271 017c 1400     		.short	20
+ 272 017e 0829     		.short	10504
+ 273 0180 01000201 		.word	16908289
+ 274 0184 1400     		.short	20
+ 275 0186 0000     		.space	2
+ 276 0188 0200     		.short	2
+ 277 018a 0000     		.space	2
+ 278 018c 50000000 		.word	cyBle_attValuesLen+80
+ 279 0190 1500     		.short	21
+ 280 0192 0328     		.short	10243
+ 281 0194 01000200 		.word	131073
+ 282 0198 1600     		.short	22
+ 283 019a 0000     		.space	2
+ 284 019c 4B2A     		.short	10827
+ 285 019e 0000     		.space	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 6
+
+
+ 286 01a0 00000000 		.word	0
+ 287 01a4 1600     		.short	22
+ 288 01a6 4B2A     		.short	10827
+ 289 01a8 03000201 		.word	16908291
+ 290 01ac 1600     		.short	22
+ 291 01ae 0000     		.space	2
+ 292 01b0 4000     		.short	64
+ 293 01b2 0000     		.space	2
+ 294 01b4 58000000 		.word	cyBle_attValuesLen+88
+ 295 01b8 1700     		.short	23
+ 296 01ba 0328     		.short	10243
+ 297 01bc 01000200 		.word	131073
+ 298 01c0 1800     		.short	24
+ 299 01c2 0000     		.space	2
+ 300 01c4 4A2A     		.short	10826
+ 301 01c6 0000     		.space	2
+ 302 01c8 00000000 		.word	0
+ 303 01cc 1800     		.short	24
+ 304 01ce 4A2A     		.short	10826
+ 305 01d0 03000201 		.word	16908291
+ 306 01d4 1800     		.short	24
+ 307 01d6 0000     		.space	2
+ 308 01d8 0400     		.short	4
+ 309 01da 0000     		.space	2
+ 310 01dc 60000000 		.word	cyBle_attValuesLen+96
+ 311 01e0 1900     		.short	25
+ 312 01e2 0328     		.short	10243
+ 313 01e4 01000400 		.word	262145
+ 314 01e8 1A00     		.short	26
+ 315 01ea 0000     		.space	2
+ 316 01ec 4C2A     		.short	10828
+ 317 01ee 0000     		.space	2
+ 318 01f0 00000000 		.word	0
+ 319 01f4 1A00     		.short	26
+ 320 01f6 4C2A     		.short	10828
+ 321 01f8 00030401 		.word	17040128
+ 322 01fc 1A00     		.short	26
+ 323 01fe 0000     		.space	2
+ 324 0200 0100     		.short	1
+ 325 0202 0000     		.space	2
+ 326 0204 68000000 		.word	cyBle_attValuesLen+104
+ 327 0208 1B00     		.short	27
+ 328 020a 0328     		.short	10243
+ 329 020c 01000600 		.word	393217
+ 330 0210 1C00     		.short	28
+ 331 0212 0000     		.space	2
+ 332 0214 4E2A     		.short	10830
+ 333 0216 0000     		.space	2
+ 334 0218 00000000 		.word	0
+ 335 021c 1C00     		.short	28
+ 336 021e 4E2A     		.short	10830
+ 337 0220 03030601 		.word	17171203
+ 338 0224 1C00     		.short	28
+ 339 0226 0000     		.space	2
+ 340 0228 0100     		.short	1
+ 341 022a 0000     		.space	2
+ 342 022c 70000000 		.word	cyBle_attValuesLen+112
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 7
+
+
+ 343 0230 1D00     		.short	29
+ 344 0232 0328     		.short	10243
+ 345 0234 01001200 		.word	1179649
+ 346 0238 1F00     		.short	31
+ 347 023a 0000     		.space	2
+ 348 023c 222A     		.short	10786
+ 349 023e 0000     		.space	2
+ 350 0240 00000000 		.word	0
+ 351 0244 1E00     		.short	30
+ 352 0246 222A     		.short	10786
+ 353 0248 03001201 		.word	17956867
+ 354 024c 1F00     		.short	31
+ 355 024e 0000     		.space	2
+ 356 0250 0800     		.short	8
+ 357 0252 0000     		.space	2
+ 358 0254 78000000 		.word	cyBle_attValuesLen+120
+ 359 0258 1F00     		.short	31
+ 360 025a 0229     		.short	10498
+ 361 025c 01030A01 		.word	17433345
+ 362 0260 1F00     		.short	31
+ 363 0262 0000     		.space	2
+ 364 0264 0200     		.short	2
+ 365 0266 0000     		.space	2
+ 366 0268 80000000 		.word	cyBle_attValuesLen+128
+ 367 026c 2000     		.short	32
+ 368 026e 0328     		.short	10243
+ 369 0270 01000E00 		.word	917505
+ 370 0274 2100     		.short	33
+ 371 0276 0000     		.space	2
+ 372 0278 322A     		.short	10802
+ 373 027a 0000     		.space	2
+ 374 027c 00000000 		.word	0
+ 375 0280 2100     		.short	33
+ 376 0282 322A     		.short	10802
+ 377 0284 03030E01 		.word	17695491
+ 378 0288 2100     		.short	33
+ 379 028a 0000     		.space	2
+ 380 028c 0100     		.short	1
+ 381 028e 0000     		.space	2
+ 382 0290 88000000 		.word	cyBle_attValuesLen+136
+ 383 0294 2200     		.short	34
+ 384 0296 0028     		.short	10240
+ 385 0298 01000000 		.word	1
+ 386 029c 2800     		.short	40
+ 387 029e 0000     		.space	2
+ 388 02a0 0A18     		.short	6154
+ 389 02a2 0000     		.space	2
+ 390 02a4 00000000 		.word	0
+ 391 02a8 2300     		.short	35
+ 392 02aa 0328     		.short	10243
+ 393 02ac 01000200 		.word	131073
+ 394 02b0 2400     		.short	36
+ 395 02b2 0000     		.space	2
+ 396 02b4 292A     		.short	10793
+ 397 02b6 0000     		.space	2
+ 398 02b8 00000000 		.word	0
+ 399 02bc 2400     		.short	36
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 8
+
+
+ 400 02be 292A     		.short	10793
+ 401 02c0 03000201 		.word	16908291
+ 402 02c4 2400     		.short	36
+ 403 02c6 0000     		.space	2
+ 404 02c8 1500     		.short	21
+ 405 02ca 0000     		.space	2
+ 406 02cc 90000000 		.word	cyBle_attValuesLen+144
+ 407 02d0 2500     		.short	37
+ 408 02d2 0328     		.short	10243
+ 409 02d4 01000200 		.word	131073
+ 410 02d8 2600     		.short	38
+ 411 02da 0000     		.space	2
+ 412 02dc 262A     		.short	10790
+ 413 02de 0000     		.space	2
+ 414 02e0 00000000 		.word	0
+ 415 02e4 2600     		.short	38
+ 416 02e6 262A     		.short	10790
+ 417 02e8 03000201 		.word	16908291
+ 418 02ec 2600     		.short	38
+ 419 02ee 0000     		.space	2
+ 420 02f0 0400     		.short	4
+ 421 02f2 0000     		.space	2
+ 422 02f4 98000000 		.word	cyBle_attValuesLen+152
+ 423 02f8 2700     		.short	39
+ 424 02fa 0328     		.short	10243
+ 425 02fc 01000200 		.word	131073
+ 426 0300 2800     		.short	40
+ 427 0302 0000     		.space	2
+ 428 0304 502A     		.short	10832
+ 429 0306 0000     		.space	2
+ 430 0308 00000000 		.word	0
+ 431 030c 2800     		.short	40
+ 432 030e 502A     		.short	10832
+ 433 0310 03000201 		.word	16908291
+ 434 0314 2800     		.short	40
+ 435 0316 0000     		.space	2
+ 436 0318 0700     		.short	7
+ 437 031a 0000     		.space	2
+ 438 031c A0000000 		.word	cyBle_attValuesLen+160
+ 439 0320 2900     		.short	41
+ 440 0322 0028     		.short	10240
+ 441 0324 01000000 		.word	1
+ 442 0328 2D00     		.short	45
+ 443 032a 0000     		.space	2
+ 444 032c 0F18     		.short	6159
+ 445 032e 0000     		.space	2
+ 446 0330 00000000 		.word	0
+ 447 0334 2A00     		.short	42
+ 448 0336 0328     		.short	10243
+ 449 0338 01001200 		.word	1179649
+ 450 033c 2D00     		.short	45
+ 451 033e 0000     		.space	2
+ 452 0340 192A     		.short	10777
+ 453 0342 0000     		.space	2
+ 454 0344 00000000 		.word	0
+ 455 0348 2B00     		.short	43
+ 456 034a 192A     		.short	10777
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 9
+
+
+ 457 034c 03001201 		.word	17956867
+ 458 0350 2D00     		.short	45
+ 459 0352 0000     		.space	2
+ 460 0354 0100     		.short	1
+ 461 0356 0000     		.space	2
+ 462 0358 A8000000 		.word	cyBle_attValuesLen+168
+ 463 035c 2C00     		.short	44
+ 464 035e 0429     		.short	10500
+ 465 0360 01000201 		.word	16908289
+ 466 0364 2C00     		.short	44
+ 467 0366 0000     		.space	2
+ 468 0368 0700     		.short	7
+ 469 036a 0000     		.space	2
+ 470 036c B0000000 		.word	cyBle_attValuesLen+176
+ 471 0370 2D00     		.short	45
+ 472 0372 0229     		.short	10498
+ 473 0374 01030A01 		.word	17433345
+ 474 0378 2D00     		.short	45
+ 475 037a 0000     		.space	2
+ 476 037c 0200     		.short	2
+ 477 037e 0000     		.space	2
+ 478 0380 B8000000 		.word	cyBle_attValuesLen+184
+ 479 0384 2E00     		.short	46
+ 480 0386 0028     		.short	10240
+ 481 0388 01000000 		.word	1
+ 482 038c 3300     		.short	51
+ 483 038e 0000     		.space	2
+ 484 0390 1318     		.short	6163
+ 485 0392 0000     		.space	2
+ 486 0394 00000000 		.word	0
+ 487 0398 2F00     		.short	47
+ 488 039a 0328     		.short	10243
+ 489 039c 01000400 		.word	262145
+ 490 03a0 3000     		.short	48
+ 491 03a2 0000     		.space	2
+ 492 03a4 4F2A     		.short	10831
+ 493 03a6 0000     		.space	2
+ 494 03a8 00000000 		.word	0
+ 495 03ac 3000     		.short	48
+ 496 03ae 4F2A     		.short	10831
+ 497 03b0 00030401 		.word	17040128
+ 498 03b4 3000     		.short	48
+ 499 03b6 0000     		.space	2
+ 500 03b8 0400     		.short	4
+ 501 03ba 0000     		.space	2
+ 502 03bc C0000000 		.word	cyBle_attValuesLen+192
+ 503 03c0 3100     		.short	49
+ 504 03c2 0328     		.short	10243
+ 505 03c4 01001000 		.word	1048577
+ 506 03c8 3300     		.short	51
+ 507 03ca 0000     		.space	2
+ 508 03cc 312A     		.short	10801
+ 509 03ce 0000     		.space	2
+ 510 03d0 00000000 		.word	0
+ 511 03d4 3200     		.short	50
+ 512 03d6 312A     		.short	10801
+ 513 03d8 00001001 		.word	17825792
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 10
+
+
+ 514 03dc 3300     		.short	51
+ 515 03de 0000     		.space	2
+ 516 03e0 0100     		.short	1
+ 517 03e2 0000     		.space	2
+ 518 03e4 C8000000 		.word	cyBle_attValuesLen+200
+ 519 03e8 3300     		.short	51
+ 520 03ea 0229     		.short	10498
+ 521 03ec 01030A01 		.word	17433345
+ 522 03f0 3300     		.short	51
+ 523 03f2 0000     		.space	2
+ 524 03f4 0200     		.short	2
+ 525 03f6 0000     		.space	2
+ 526 03f8 D0000000 		.word	cyBle_attValuesLen+208
+ 527 03fc 3400     		.short	52
+ 528 03fe 0028     		.short	10240
+ 529 0400 01000000 		.word	1
+ 530 0404 4100     		.short	65
+ 531 0406 0000     		.space	2
+ 532 0408 1218     		.short	6162
+ 533 040a 0000     		.space	2
+ 534 040c 00000000 		.word	0
+ 535 0410 3500     		.short	53
+ 536 0412 0328     		.short	10243
+ 537 0414 01000600 		.word	393217
+ 538 0418 3600     		.short	54
+ 539 041a 0000     		.space	2
+ 540 041c 4E2A     		.short	10830
+ 541 041e 0000     		.space	2
+ 542 0420 00000000 		.word	0
+ 543 0424 3600     		.short	54
+ 544 0426 4E2A     		.short	10830
+ 545 0428 03030601 		.word	17171203
+ 546 042c 3600     		.short	54
+ 547 042e 0000     		.space	2
+ 548 0430 0100     		.short	1
+ 549 0432 0000     		.space	2
+ 550 0434 D8000000 		.word	cyBle_attValuesLen+216
+ 551 0438 3700     		.short	55
+ 552 043a 0328     		.short	10243
+ 553 043c 01001200 		.word	1179649
+ 554 0440 3A00     		.short	58
+ 555 0442 0000     		.space	2
+ 556 0444 4D2A     		.short	10829
+ 557 0446 0000     		.space	2
+ 558 0448 00000000 		.word	0
+ 559 044c 3800     		.short	56
+ 560 044e 4D2A     		.short	10829
+ 561 0450 03001201 		.word	17956867
+ 562 0454 3A00     		.short	58
+ 563 0456 0000     		.space	2
+ 564 0458 1000     		.short	16
+ 565 045a 0000     		.space	2
+ 566 045c E0000000 		.word	cyBle_attValuesLen+224
+ 567 0460 3900     		.short	57
+ 568 0462 0229     		.short	10498
+ 569 0464 01030A01 		.word	17433345
+ 570 0468 3900     		.short	57
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 11
+
+
+ 571 046a 0000     		.space	2
+ 572 046c 0200     		.short	2
+ 573 046e 0000     		.space	2
+ 574 0470 E8000000 		.word	cyBle_attValuesLen+232
+ 575 0474 3A00     		.short	58
+ 576 0476 0829     		.short	10504
+ 577 0478 01000201 		.word	16908289
+ 578 047c 3A00     		.short	58
+ 579 047e 0000     		.space	2
+ 580 0480 0200     		.short	2
+ 581 0482 0000     		.space	2
+ 582 0484 F0000000 		.word	cyBle_attValuesLen+240
+ 583 0488 3B00     		.short	59
+ 584 048a 0328     		.short	10243
+ 585 048c 01000200 		.word	131073
+ 586 0490 3D00     		.short	61
+ 587 0492 0000     		.space	2
+ 588 0494 4B2A     		.short	10827
+ 589 0496 0000     		.space	2
+ 590 0498 00000000 		.word	0
+ 591 049c 3C00     		.short	60
+ 592 049e 4B2A     		.short	10827
+ 593 04a0 03000201 		.word	16908291
+ 594 04a4 3D00     		.short	61
+ 595 04a6 0000     		.space	2
+ 596 04a8 1700     		.short	23
+ 597 04aa 0000     		.space	2
+ 598 04ac F8000000 		.word	cyBle_attValuesLen+248
+ 599 04b0 3D00     		.short	61
+ 600 04b2 0729     		.short	10503
+ 601 04b4 01000201 		.word	16908289
+ 602 04b8 3D00     		.short	61
+ 603 04ba 0000     		.space	2
+ 604 04bc 0000     		.short	0
+ 605 04be 0000     		.space	2
+ 606 04c0 00010000 		.word	cyBle_attValuesLen+256
+ 607 04c4 3E00     		.short	62
+ 608 04c6 0328     		.short	10243
+ 609 04c8 01000200 		.word	131073
+ 610 04cc 3F00     		.short	63
+ 611 04ce 0000     		.space	2
+ 612 04d0 4A2A     		.short	10826
+ 613 04d2 0000     		.space	2
+ 614 04d4 00000000 		.word	0
+ 615 04d8 3F00     		.short	63
+ 616 04da 4A2A     		.short	10826
+ 617 04dc 03000201 		.word	16908291
+ 618 04e0 3F00     		.short	63
+ 619 04e2 0000     		.space	2
+ 620 04e4 0400     		.short	4
+ 621 04e6 0000     		.space	2
+ 622 04e8 08010000 		.word	cyBle_attValuesLen+264
+ 623 04ec 4000     		.short	64
+ 624 04ee 0328     		.short	10243
+ 625 04f0 01000400 		.word	262145
+ 626 04f4 4100     		.short	65
+ 627 04f6 0000     		.space	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 12
+
+
+ 628 04f8 4C2A     		.short	10828
+ 629 04fa 0000     		.space	2
+ 630 04fc 00000000 		.word	0
+ 631 0500 4100     		.short	65
+ 632 0502 4C2A     		.short	10828
+ 633 0504 00030401 		.word	17040128
+ 634 0508 4100     		.short	65
+ 635 050a 0000     		.space	2
+ 636 050c 0100     		.short	1
+ 637 050e 0000     		.space	2
+ 638 0510 10010000 		.word	cyBle_attValuesLen+272
+ 639 0514 4200     		.short	66
+ 640 0516 0028     		.short	10240
+ 641 0518 01000000 		.word	1
+ 642 051c 4F00     		.short	79
+ 643 051e 0000     		.space	2
+ 644 0520 1218     		.short	6162
+ 645 0522 0000     		.space	2
+ 646 0524 00000000 		.word	0
+ 647 0528 4300     		.short	67
+ 648 052a 0328     		.short	10243
+ 649 052c 01000600 		.word	393217
+ 650 0530 4400     		.short	68
+ 651 0532 0000     		.space	2
+ 652 0534 4E2A     		.short	10830
+ 653 0536 0000     		.space	2
+ 654 0538 00000000 		.word	0
+ 655 053c 4400     		.short	68
+ 656 053e 4E2A     		.short	10830
+ 657 0540 03030601 		.word	17171203
+ 658 0544 4400     		.short	68
+ 659 0546 0000     		.space	2
+ 660 0548 0100     		.short	1
+ 661 054a 0000     		.space	2
+ 662 054c 18010000 		.word	cyBle_attValuesLen+280
+ 663 0550 4500     		.short	69
+ 664 0552 0328     		.short	10243
+ 665 0554 01001200 		.word	1179649
+ 666 0558 4800     		.short	72
+ 667 055a 0000     		.space	2
+ 668 055c 4D2A     		.short	10829
+ 669 055e 0000     		.space	2
+ 670 0560 00000000 		.word	0
+ 671 0564 4600     		.short	70
+ 672 0566 4D2A     		.short	10829
+ 673 0568 03001201 		.word	17956867
+ 674 056c 4800     		.short	72
+ 675 056e 0000     		.space	2
+ 676 0570 0100     		.short	1
+ 677 0572 0000     		.space	2
+ 678 0574 20010000 		.word	cyBle_attValuesLen+288
+ 679 0578 4700     		.short	71
+ 680 057a 0229     		.short	10498
+ 681 057c 01030A01 		.word	17433345
+ 682 0580 4700     		.short	71
+ 683 0582 0000     		.space	2
+ 684 0584 0200     		.short	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 13
+
+
+ 685 0586 0000     		.space	2
+ 686 0588 28010000 		.word	cyBle_attValuesLen+296
+ 687 058c 4800     		.short	72
+ 688 058e 0829     		.short	10504
+ 689 0590 01000201 		.word	16908289
+ 690 0594 4800     		.short	72
+ 691 0596 0000     		.space	2
+ 692 0598 0200     		.short	2
+ 693 059a 0000     		.space	2
+ 694 059c 30010000 		.word	cyBle_attValuesLen+304
+ 695 05a0 4900     		.short	73
+ 696 05a2 0328     		.short	10243
+ 697 05a4 01000200 		.word	131073
+ 698 05a8 4B00     		.short	75
+ 699 05aa 0000     		.space	2
+ 700 05ac 4B2A     		.short	10827
+ 701 05ae 0000     		.space	2
+ 702 05b0 00000000 		.word	0
+ 703 05b4 4A00     		.short	74
+ 704 05b6 4B2A     		.short	10827
+ 705 05b8 03000201 		.word	16908291
+ 706 05bc 4B00     		.short	75
+ 707 05be 0000     		.space	2
+ 708 05c0 1500     		.short	21
+ 709 05c2 0000     		.space	2
+ 710 05c4 38010000 		.word	cyBle_attValuesLen+312
+ 711 05c8 4B00     		.short	75
+ 712 05ca 0729     		.short	10503
+ 713 05cc 01000201 		.word	16908289
+ 714 05d0 4B00     		.short	75
+ 715 05d2 0000     		.space	2
+ 716 05d4 0000     		.short	0
+ 717 05d6 0000     		.space	2
+ 718 05d8 40010000 		.word	cyBle_attValuesLen+320
+ 719 05dc 4C00     		.short	76
+ 720 05de 0328     		.short	10243
+ 721 05e0 01000200 		.word	131073
+ 722 05e4 4D00     		.short	77
+ 723 05e6 0000     		.space	2
+ 724 05e8 4A2A     		.short	10826
+ 725 05ea 0000     		.space	2
+ 726 05ec 00000000 		.word	0
+ 727 05f0 4D00     		.short	77
+ 728 05f2 4A2A     		.short	10826
+ 729 05f4 03000201 		.word	16908291
+ 730 05f8 4D00     		.short	77
+ 731 05fa 0000     		.space	2
+ 732 05fc 0400     		.short	4
+ 733 05fe 0000     		.space	2
+ 734 0600 48010000 		.word	cyBle_attValuesLen+328
+ 735 0604 4E00     		.short	78
+ 736 0606 0328     		.short	10243
+ 737 0608 01000400 		.word	262145
+ 738 060c 4F00     		.short	79
+ 739 060e 0000     		.space	2
+ 740 0610 4C2A     		.short	10828
+ 741 0612 0000     		.space	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 14
+
+
+ 742 0614 00000000 		.word	0
+ 743 0618 4F00     		.short	79
+ 744 061a 4C2A     		.short	10828
+ 745 061c 00030401 		.word	17040128
+ 746 0620 4F00     		.short	79
+ 747 0622 0000     		.space	2
+ 748 0624 0100     		.short	1
+ 749 0626 0000     		.space	2
+ 750 0628 50010000 		.word	cyBle_attValuesLen+336
+ 751              		.type	cyBle_gatts, %object
+ 752              		.size	cyBle_gatts, 6
+ 753              	cyBle_gatts:
+ 754 062c 0800     		.short	8
+ 755 062e 0A00     		.short	10
+ 756 0630 0B00     		.short	11
+ 757              		.data
+ 758              		.align	2
+ 759              		.type	cyBle_attValuesLen, %object
+ 760              		.size	cyBle_attValuesLen, 344
+ 761              	cyBle_attValuesLen:
+ 762 0000 0B00     		.short	11
+ 763 0002 0000     		.space	2
+ 764 0004 58010000 		.word	cyBle_attValues
+ 765 0008 0200     		.short	2
+ 766 000a 0000     		.space	2
+ 767 000c 63010000 		.word	cyBle_attValues+11
+ 768 0010 0800     		.short	8
+ 769 0012 0000     		.space	2
+ 770 0014 65010000 		.word	cyBle_attValues+13
+ 771 0018 0400     		.short	4
+ 772 001a 0000     		.space	2
+ 773 001c 6D010000 		.word	cyBle_attValues+21
+ 774 0020 0200     		.short	2
+ 775 0022 0000     		.space	2
+ 776 0024 00000000 		.word	cyBle_attValuesCCCD
+ 777 0028 1400     		.short	20
+ 778 002a 0000     		.space	2
+ 779 002c 71010000 		.word	cyBle_attValues+25
+ 780 0030 0200     		.short	2
+ 781 0032 0000     		.space	2
+ 782 0034 02000000 		.word	cyBle_attValuesCCCD+2
+ 783 0038 0200     		.short	2
+ 784 003a 0000     		.space	2
+ 785 003c 85010000 		.word	cyBle_attValues+45
+ 786 0040 0100     		.short	1
+ 787 0042 0000     		.space	2
+ 788 0044 87010000 		.word	cyBle_attValues+47
+ 789 0048 0200     		.short	2
+ 790 004a 0000     		.space	2
+ 791 004c 04000000 		.word	cyBle_attValuesCCCD+4
+ 792 0050 0200     		.short	2
+ 793 0052 0000     		.space	2
+ 794 0054 88010000 		.word	cyBle_attValues+48
+ 795 0058 4000     		.short	64
+ 796 005a 0000     		.space	2
+ 797 005c 8A010000 		.word	cyBle_attValues+50
+ 798 0060 0400     		.short	4
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 15
+
+
+ 799 0062 0000     		.space	2
+ 800 0064 CA010000 		.word	cyBle_attValues+114
+ 801 0068 0100     		.short	1
+ 802 006a 0000     		.space	2
+ 803 006c CE010000 		.word	cyBle_attValues+118
+ 804 0070 0100     		.short	1
+ 805 0072 0000     		.space	2
+ 806 0074 CF010000 		.word	cyBle_attValues+119
+ 807 0078 0800     		.short	8
+ 808 007a 0000     		.space	2
+ 809 007c D0010000 		.word	cyBle_attValues+120
+ 810 0080 0200     		.short	2
+ 811 0082 0000     		.space	2
+ 812 0084 06000000 		.word	cyBle_attValuesCCCD+6
+ 813 0088 0100     		.short	1
+ 814 008a 0000     		.space	2
+ 815 008c D8010000 		.word	cyBle_attValues+128
+ 816 0090 1500     		.short	21
+ 817 0092 0000     		.space	2
+ 818 0094 D9010000 		.word	cyBle_attValues+129
+ 819 0098 0400     		.short	4
+ 820 009a 0000     		.space	2
+ 821 009c EE010000 		.word	cyBle_attValues+150
+ 822 00a0 0700     		.short	7
+ 823 00a2 0000     		.space	2
+ 824 00a4 F2010000 		.word	cyBle_attValues+154
+ 825 00a8 0100     		.short	1
+ 826 00aa 0000     		.space	2
+ 827 00ac F9010000 		.word	cyBle_attValues+161
+ 828 00b0 0700     		.short	7
+ 829 00b2 0000     		.space	2
+ 830 00b4 FA010000 		.word	cyBle_attValues+162
+ 831 00b8 0200     		.short	2
+ 832 00ba 0000     		.space	2
+ 833 00bc 08000000 		.word	cyBle_attValuesCCCD+8
+ 834 00c0 0400     		.short	4
+ 835 00c2 0000     		.space	2
+ 836 00c4 01020000 		.word	cyBle_attValues+169
+ 837 00c8 0100     		.short	1
+ 838 00ca 0000     		.space	2
+ 839 00cc 05020000 		.word	cyBle_attValues+173
+ 840 00d0 0200     		.short	2
+ 841 00d2 0000     		.space	2
+ 842 00d4 0A000000 		.word	cyBle_attValuesCCCD+10
+ 843 00d8 0100     		.short	1
+ 844 00da 0000     		.space	2
+ 845 00dc 06020000 		.word	cyBle_attValues+174
+ 846 00e0 1000     		.short	16
+ 847 00e2 0000     		.space	2
+ 848 00e4 07020000 		.word	cyBle_attValues+175
+ 849 00e8 0200     		.short	2
+ 850 00ea 0000     		.space	2
+ 851 00ec 0C000000 		.word	cyBle_attValuesCCCD+12
+ 852 00f0 0200     		.short	2
+ 853 00f2 0000     		.space	2
+ 854 00f4 17020000 		.word	cyBle_attValues+191
+ 855 00f8 1700     		.short	23
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 16
+
+
+ 856 00fa 0000     		.space	2
+ 857 00fc 19020000 		.word	cyBle_attValues+193
+ 858 0100 0200     		.short	2
+ 859 0102 0000     		.space	2
+ 860 0104 30020000 		.word	cyBle_attValues+216
+ 861 0108 0400     		.short	4
+ 862 010a 0000     		.space	2
+ 863 010c 30020000 		.word	cyBle_attValues+216
+ 864 0110 0100     		.short	1
+ 865 0112 0000     		.space	2
+ 866 0114 34020000 		.word	cyBle_attValues+220
+ 867 0118 0100     		.short	1
+ 868 011a 0000     		.space	2
+ 869 011c 35020000 		.word	cyBle_attValues+221
+ 870 0120 0100     		.short	1
+ 871 0122 0000     		.space	2
+ 872 0124 36020000 		.word	cyBle_attValues+222
+ 873 0128 0200     		.short	2
+ 874 012a 0000     		.space	2
+ 875 012c 0E000000 		.word	cyBle_attValuesCCCD+14
+ 876 0130 0200     		.short	2
+ 877 0132 0000     		.space	2
+ 878 0134 37020000 		.word	cyBle_attValues+223
+ 879 0138 1500     		.short	21
+ 880 013a 0000     		.space	2
+ 881 013c 39020000 		.word	cyBle_attValues+225
+ 882 0140 0200     		.short	2
+ 883 0142 0000     		.space	2
+ 884 0144 4E020000 		.word	cyBle_attValues+246
+ 885 0148 0400     		.short	4
+ 886 014a 0000     		.space	2
+ 887 014c 4E020000 		.word	cyBle_attValues+246
+ 888 0150 0100     		.short	1
+ 889 0152 0000     		.space	2
+ 890 0154 52020000 		.word	cyBle_attValues+250
+ 891              		.type	cyBle_attValues, %object
+ 892              		.size	cyBle_attValues, 251
+ 893              	cyBle_attValues:
+ 894 0158 43       		.byte	67
+ 895 0159 6F       		.byte	111
+ 896 015a 6D       		.byte	109
+ 897 015b 6D       		.byte	109
+ 898 015c 6F       		.byte	111
+ 899 015d 6E       		.byte	110
+ 900 015e 53       		.byte	83
+ 901 015f 65       		.byte	101
+ 902 0160 6E       		.byte	110
+ 903 0161 73       		.byte	115
+ 904 0162 65       		.byte	101
+ 905 0163 C1       		.byte	-63
+ 906 0164 03       		.byte	3
+ 907 0165 06       		.byte	6
+ 908 0166 00       		.byte	0
+ 909 0167 0C       		.byte	12
+ 910 0168 00       		.byte	0
+ 911 0169 19       		.byte	25
+ 912 016a 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 17
+
+
+ 913 016b 64       		.byte	100
+ 914 016c 00       		.byte	0
+ 915 016d 00       		.byte	0
+ 916 016e 00       		.byte	0
+ 917 016f 00       		.byte	0
+ 918 0170 00       		.byte	0
+ 919 0171 00       		.byte	0
+ 920 0172 00       		.byte	0
+ 921 0173 00       		.byte	0
+ 922 0174 00       		.byte	0
+ 923 0175 00       		.byte	0
+ 924 0176 00       		.byte	0
+ 925 0177 00       		.byte	0
+ 926 0178 00       		.byte	0
+ 927 0179 00       		.byte	0
+ 928 017a 00       		.byte	0
+ 929 017b 00       		.byte	0
+ 930 017c 00       		.byte	0
+ 931 017d 00       		.byte	0
+ 932 017e 00       		.byte	0
+ 933 017f 00       		.byte	0
+ 934 0180 00       		.byte	0
+ 935 0181 00       		.byte	0
+ 936 0182 00       		.byte	0
+ 937 0183 00       		.byte	0
+ 938 0184 00       		.byte	0
+ 939 0185 00       		.byte	0
+ 940 0186 01       		.byte	1
+ 941 0187 00       		.byte	0
+ 942 0188 00       		.byte	0
+ 943 0189 02       		.byte	2
+ 944 018a 05       		.byte	5
+ 945 018b 01       		.byte	1
+ 946 018c 09       		.byte	9
+ 947 018d 06       		.byte	6
+ 948 018e A1       		.byte	-95
+ 949 018f 01       		.byte	1
+ 950 0190 05       		.byte	5
+ 951 0191 07       		.byte	7
+ 952 0192 19       		.byte	25
+ 953 0193 E0       		.byte	-32
+ 954 0194 29       		.byte	41
+ 955 0195 E7       		.byte	-25
+ 956 0196 15       		.byte	21
+ 957 0197 00       		.byte	0
+ 958 0198 25       		.byte	37
+ 959 0199 01       		.byte	1
+ 960 019a 75       		.byte	117
+ 961 019b 01       		.byte	1
+ 962 019c 95       		.byte	-107
+ 963 019d 08       		.byte	8
+ 964 019e 81       		.byte	-127
+ 965 019f 02       		.byte	2
+ 966 01a0 95       		.byte	-107
+ 967 01a1 01       		.byte	1
+ 968 01a2 75       		.byte	117
+ 969 01a3 08       		.byte	8
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 18
+
+
+ 970 01a4 81       		.byte	-127
+ 971 01a5 01       		.byte	1
+ 972 01a6 05       		.byte	5
+ 973 01a7 08       		.byte	8
+ 974 01a8 19       		.byte	25
+ 975 01a9 01       		.byte	1
+ 976 01aa 29       		.byte	41
+ 977 01ab 05       		.byte	5
+ 978 01ac 95       		.byte	-107
+ 979 01ad 05       		.byte	5
+ 980 01ae 75       		.byte	117
+ 981 01af 01       		.byte	1
+ 982 01b0 91       		.byte	-111
+ 983 01b1 02       		.byte	2
+ 984 01b2 95       		.byte	-107
+ 985 01b3 01       		.byte	1
+ 986 01b4 75       		.byte	117
+ 987 01b5 03       		.byte	3
+ 988 01b6 91       		.byte	-111
+ 989 01b7 01       		.byte	1
+ 990 01b8 05       		.byte	5
+ 991 01b9 07       		.byte	7
+ 992 01ba 19       		.byte	25
+ 993 01bb 00       		.byte	0
+ 994 01bc 29       		.byte	41
+ 995 01bd FF       		.byte	-1
+ 996 01be 15       		.byte	21
+ 997 01bf 00       		.byte	0
+ 998 01c0 26       		.byte	38
+ 999 01c1 FF       		.byte	-1
+ 1000 01c2 00       		.byte	0
+ 1001 01c3 95       		.byte	-107
+ 1002 01c4 12       		.byte	18
+ 1003 01c5 75       		.byte	117
+ 1004 01c6 08       		.byte	8
+ 1005 01c7 81       		.byte	-127
+ 1006 01c8 00       		.byte	0
+ 1007 01c9 C0       		.byte	-64
+ 1008 01ca 01       		.byte	1
+ 1009 01cb 01       		.byte	1
+ 1010 01cc 00       		.byte	0
+ 1011 01cd 03       		.byte	3
+ 1012 01ce 00       		.byte	0
+ 1013 01cf 00       		.byte	0
+ 1014 01d0 00       		.byte	0
+ 1015 01d1 00       		.byte	0
+ 1016 01d2 00       		.byte	0
+ 1017 01d3 00       		.byte	0
+ 1018 01d4 00       		.byte	0
+ 1019 01d5 00       		.byte	0
+ 1020 01d6 00       		.byte	0
+ 1021 01d7 00       		.byte	0
+ 1022 01d8 00       		.byte	0
+ 1023 01d9 43       		.byte	67
+ 1024 01da 79       		.byte	121
+ 1025 01db 70       		.byte	112
+ 1026 01dc 72       		.byte	114
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 19
+
+
+ 1027 01dd 65       		.byte	101
+ 1028 01de 73       		.byte	115
+ 1029 01df 73       		.byte	115
+ 1030 01e0 20       		.byte	32
+ 1031 01e1 53       		.byte	83
+ 1032 01e2 65       		.byte	101
+ 1033 01e3 6D       		.byte	109
+ 1034 01e4 69       		.byte	105
+ 1035 01e5 63       		.byte	99
+ 1036 01e6 6F       		.byte	111
+ 1037 01e7 6E       		.byte	110
+ 1038 01e8 64       		.byte	100
+ 1039 01e9 75       		.byte	117
+ 1040 01ea 63       		.byte	99
+ 1041 01eb 74       		.byte	116
+ 1042 01ec 6F       		.byte	111
+ 1043 01ed 72       		.byte	114
+ 1044 01ee 31       		.byte	49
+ 1045 01ef 2E       		.byte	46
+ 1046 01f0 30       		.byte	48
+ 1047 01f1 30       		.byte	48
+ 1048 01f2 02       		.byte	2
+ 1049 01f3 B4       		.byte	-76
+ 1050 01f4 04       		.byte	4
+ 1051 01f5 01       		.byte	1
+ 1052 01f6 00       		.byte	0
+ 1053 01f7 01       		.byte	1
+ 1054 01f8 00       		.byte	0
+ 1055 01f9 64       		.byte	100
+ 1056 01fa 04       		.byte	4
+ 1057 01fb 01       		.byte	1
+ 1058 01fc AD       		.byte	-83
+ 1059 01fd 27       		.byte	39
+ 1060 01fe 01       		.byte	1
+ 1061 01ff 06       		.byte	6
+ 1062 0200 01       		.byte	1
+ 1063 0201 00       		.byte	0
+ 1064 0202 00       		.byte	0
+ 1065 0203 00       		.byte	0
+ 1066 0204 00       		.byte	0
+ 1067 0205 00       		.byte	0
+ 1068 0206 01       		.byte	1
+ 1069 0207 00       		.byte	0
+ 1070 0208 00       		.byte	0
+ 1071 0209 00       		.byte	0
+ 1072 020a 00       		.byte	0
+ 1073 020b 00       		.byte	0
+ 1074 020c 00       		.byte	0
+ 1075 020d 00       		.byte	0
+ 1076 020e 00       		.byte	0
+ 1077 020f 00       		.byte	0
+ 1078 0210 00       		.byte	0
+ 1079 0211 00       		.byte	0
+ 1080 0212 00       		.byte	0
+ 1081 0213 00       		.byte	0
+ 1082 0214 00       		.byte	0
+ 1083 0215 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 20
+
+
+ 1084 0216 00       		.byte	0
+ 1085 0217 00       		.byte	0
+ 1086 0218 01       		.byte	1
+ 1087 0219 05       		.byte	5
+ 1088 021a 0C       		.byte	12
+ 1089 021b 09       		.byte	9
+ 1090 021c 01       		.byte	1
+ 1091 021d A1       		.byte	-95
+ 1092 021e 01       		.byte	1
+ 1093 021f 15       		.byte	21
+ 1094 0220 00       		.byte	0
+ 1095 0221 26       		.byte	38
+ 1096 0222 9C       		.byte	-100
+ 1097 0223 02       		.byte	2
+ 1098 0224 19       		.byte	25
+ 1099 0225 00       		.byte	0
+ 1100 0226 2A       		.byte	42
+ 1101 0227 9C       		.byte	-100
+ 1102 0228 02       		.byte	2
+ 1103 0229 75       		.byte	117
+ 1104 022a 10       		.byte	16
+ 1105 022b 95       		.byte	-107
+ 1106 022c 08       		.byte	8
+ 1107 022d 81       		.byte	-127
+ 1108 022e 00       		.byte	0
+ 1109 022f C0       		.byte	-64
+ 1110 0230 01       		.byte	1
+ 1111 0231 01       		.byte	1
+ 1112 0232 00       		.byte	0
+ 1113 0233 02       		.byte	2
+ 1114 0234 00       		.byte	0
+ 1115 0235 01       		.byte	1
+ 1116 0236 00       		.byte	0
+ 1117 0237 00       		.byte	0
+ 1118 0238 01       		.byte	1
+ 1119 0239 05       		.byte	5
+ 1120 023a 01       		.byte	1
+ 1121 023b 09       		.byte	9
+ 1122 023c 80       		.byte	-128
+ 1123 023d A1       		.byte	-95
+ 1124 023e 01       		.byte	1
+ 1125 023f 15       		.byte	21
+ 1126 0240 00       		.byte	0
+ 1127 0241 25       		.byte	37
+ 1128 0242 01       		.byte	1
+ 1129 0243 1A       		.byte	26
+ 1130 0244 81       		.byte	-127
+ 1131 0245 2A       		.byte	42
+ 1132 0246 88       		.byte	-120
+ 1133 0247 75       		.byte	117
+ 1134 0248 01       		.byte	1
+ 1135 0249 95       		.byte	-107
+ 1136 024a 08       		.byte	8
+ 1137 024b 81       		.byte	-127
+ 1138 024c 02       		.byte	2
+ 1139 024d C0       		.byte	-64
+ 1140 024e 01       		.byte	1
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 21
+
+
+ 1141 024f 01       		.byte	1
+ 1142 0250 00       		.byte	0
+ 1143 0251 02       		.byte	2
+ 1144 0252 00       		.byte	0
+ 1145              		.section	.cy_checksum_exclude,"a",%progbits
+ 1146              		.align	8
+ 1147              		.type	cyBle_flashStorage, %object
+ 1148              		.size	cyBle_flashStorage, 715
+ 1149              	cyBle_flashStorage:
+ 1150 0000 00       		.byte	0
+ 1151 0001 00       		.byte	0
+ 1152 0002 00       		.byte	0
+ 1153 0003 00       		.byte	0
+ 1154 0004 00       		.byte	0
+ 1155 0005 00       		.byte	0
+ 1156 0006 00       		.byte	0
+ 1157 0007 00       		.byte	0
+ 1158 0008 00       		.byte	0
+ 1159 0009 00       		.byte	0
+ 1160 000a 00       		.byte	0
+ 1161 000b 00       		.byte	0
+ 1162 000c 00       		.byte	0
+ 1163 000d 00       		.byte	0
+ 1164 000e 00       		.byte	0
+ 1165 000f 00       		.byte	0
+ 1166 0010 00       		.byte	0
+ 1167 0011 00       		.byte	0
+ 1168 0012 00       		.byte	0
+ 1169 0013 00       		.byte	0
+ 1170 0014 00       		.byte	0
+ 1171 0015 00       		.byte	0
+ 1172 0016 00       		.byte	0
+ 1173 0017 00       		.byte	0
+ 1174 0018 00       		.byte	0
+ 1175 0019 00       		.byte	0
+ 1176 001a 00       		.byte	0
+ 1177 001b 00       		.byte	0
+ 1178 001c 00       		.byte	0
+ 1179 001d 00       		.byte	0
+ 1180 001e 00       		.byte	0
+ 1181 001f 00       		.byte	0
+ 1182 0020 00       		.byte	0
+ 1183 0021 00       		.byte	0
+ 1184 0022 00       		.byte	0
+ 1185 0023 00       		.byte	0
+ 1186 0024 00       		.byte	0
+ 1187 0025 00       		.byte	0
+ 1188 0026 00       		.byte	0
+ 1189 0027 00       		.byte	0
+ 1190 0028 00       		.byte	0
+ 1191 0029 00       		.byte	0
+ 1192 002a 00       		.byte	0
+ 1193 002b 00       		.byte	0
+ 1194 002c 00       		.byte	0
+ 1195 002d 00       		.byte	0
+ 1196 002e 00       		.byte	0
+ 1197 002f 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 22
+
+
+ 1198 0030 00       		.byte	0
+ 1199 0031 00       		.byte	0
+ 1200 0032 00       		.byte	0
+ 1201 0033 00       		.byte	0
+ 1202 0034 00       		.byte	0
+ 1203 0035 00       		.byte	0
+ 1204 0036 00       		.byte	0
+ 1205 0037 00       		.byte	0
+ 1206 0038 00       		.byte	0
+ 1207 0039 00       		.byte	0
+ 1208 003a 00       		.byte	0
+ 1209 003b 00       		.byte	0
+ 1210 003c 00       		.byte	0
+ 1211 003d 00       		.byte	0
+ 1212 003e 00       		.byte	0
+ 1213 003f 00       		.byte	0
+ 1214 0040 00       		.byte	0
+ 1215 0041 00       		.byte	0
+ 1216 0042 00       		.byte	0
+ 1217 0043 00       		.byte	0
+ 1218 0044 00       		.byte	0
+ 1219 0045 00       		.byte	0
+ 1220 0046 00       		.byte	0
+ 1221 0047 00       		.byte	0
+ 1222 0048 00       		.byte	0
+ 1223 0049 00       		.byte	0
+ 1224 004a 00       		.byte	0
+ 1225 004b 00       		.byte	0
+ 1226 004c 00       		.byte	0
+ 1227 004d 00       		.byte	0
+ 1228 004e 00       		.byte	0
+ 1229 004f 00       		.byte	0
+ 1230 0050 00       		.byte	0
+ 1231 0051 00       		.byte	0
+ 1232 0052 00       		.byte	0
+ 1233 0053 00       		.byte	0
+ 1234 0054 00       		.byte	0
+ 1235 0055 00       		.byte	0
+ 1236 0056 00       		.byte	0
+ 1237 0057 00       		.byte	0
+ 1238 0058 00       		.byte	0
+ 1239 0059 00       		.byte	0
+ 1240 005a 00       		.byte	0
+ 1241 005b 00       		.byte	0
+ 1242 005c 00       		.byte	0
+ 1243 005d 00       		.byte	0
+ 1244 005e 00       		.byte	0
+ 1245 005f 00       		.byte	0
+ 1246 0060 00       		.byte	0
+ 1247 0061 00       		.byte	0
+ 1248 0062 00       		.byte	0
+ 1249 0063 00       		.byte	0
+ 1250 0064 00       		.byte	0
+ 1251 0065 00       		.byte	0
+ 1252 0066 00       		.byte	0
+ 1253 0067 00       		.byte	0
+ 1254 0068 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 23
+
+
+ 1255 0069 00       		.byte	0
+ 1256 006a 00       		.byte	0
+ 1257 006b 00       		.byte	0
+ 1258 006c 00       		.byte	0
+ 1259 006d 00       		.byte	0
+ 1260 006e 00       		.byte	0
+ 1261 006f 00       		.byte	0
+ 1262 0070 00       		.byte	0
+ 1263 0071 00       		.byte	0
+ 1264 0072 00       		.byte	0
+ 1265 0073 00       		.byte	0
+ 1266 0074 00       		.byte	0
+ 1267 0075 00       		.byte	0
+ 1268 0076 00       		.byte	0
+ 1269 0077 00       		.byte	0
+ 1270 0078 00       		.byte	0
+ 1271 0079 00       		.byte	0
+ 1272 007a 00       		.byte	0
+ 1273 007b 00       		.byte	0
+ 1274 007c 00       		.byte	0
+ 1275 007d 00       		.byte	0
+ 1276 007e 00       		.byte	0
+ 1277 007f 00       		.byte	0
+ 1278 0080 00       		.byte	0
+ 1279 0081 00       		.byte	0
+ 1280 0082 00       		.byte	0
+ 1281 0083 00       		.byte	0
+ 1282 0084 00       		.byte	0
+ 1283 0085 00       		.byte	0
+ 1284 0086 00       		.byte	0
+ 1285 0087 00       		.byte	0
+ 1286 0088 00       		.byte	0
+ 1287 0089 00       		.byte	0
+ 1288 008a 00       		.byte	0
+ 1289 008b 00       		.byte	0
+ 1290 008c 00       		.byte	0
+ 1291 008d 00       		.byte	0
+ 1292 008e 00       		.byte	0
+ 1293 008f 00       		.byte	0
+ 1294 0090 00       		.byte	0
+ 1295 0091 00       		.byte	0
+ 1296 0092 00       		.byte	0
+ 1297 0093 00       		.byte	0
+ 1298 0094 00       		.byte	0
+ 1299 0095 00       		.byte	0
+ 1300 0096 00       		.byte	0
+ 1301 0097 00       		.byte	0
+ 1302 0098 00       		.byte	0
+ 1303 0099 00       		.byte	0
+ 1304 009a 00       		.byte	0
+ 1305 009b 00       		.byte	0
+ 1306 009c 00       		.byte	0
+ 1307 009d 00       		.byte	0
+ 1308 009e 00       		.byte	0
+ 1309 009f 00       		.byte	0
+ 1310 00a0 00       		.byte	0
+ 1311 00a1 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 24
+
+
+ 1312 00a2 00       		.byte	0
+ 1313 00a3 00       		.byte	0
+ 1314 00a4 00       		.byte	0
+ 1315 00a5 00       		.byte	0
+ 1316 00a6 00       		.byte	0
+ 1317 00a7 00       		.byte	0
+ 1318 00a8 00       		.byte	0
+ 1319 00a9 00       		.byte	0
+ 1320 00aa 00       		.byte	0
+ 1321 00ab 00       		.byte	0
+ 1322 00ac 00       		.byte	0
+ 1323 00ad 00       		.byte	0
+ 1324 00ae 00       		.byte	0
+ 1325 00af 00       		.byte	0
+ 1326 00b0 00       		.byte	0
+ 1327 00b1 00       		.byte	0
+ 1328 00b2 00       		.byte	0
+ 1329 00b3 00       		.byte	0
+ 1330 00b4 00       		.byte	0
+ 1331 00b5 00       		.byte	0
+ 1332 00b6 00       		.byte	0
+ 1333 00b7 00       		.byte	0
+ 1334 00b8 00       		.byte	0
+ 1335 00b9 00       		.byte	0
+ 1336 00ba 00       		.byte	0
+ 1337 00bb 00       		.byte	0
+ 1338 00bc 00       		.byte	0
+ 1339 00bd 00       		.byte	0
+ 1340 00be 00       		.byte	0
+ 1341 00bf 00       		.byte	0
+ 1342 00c0 00       		.byte	0
+ 1343 00c1 00       		.byte	0
+ 1344 00c2 00       		.byte	0
+ 1345 00c3 00       		.byte	0
+ 1346 00c4 00       		.byte	0
+ 1347 00c5 00       		.byte	0
+ 1348 00c6 00       		.byte	0
+ 1349 00c7 00       		.byte	0
+ 1350 00c8 00       		.byte	0
+ 1351 00c9 00       		.byte	0
+ 1352 00ca 00       		.byte	0
+ 1353 00cb 00       		.byte	0
+ 1354 00cc 00       		.byte	0
+ 1355 00cd 00       		.byte	0
+ 1356 00ce 00       		.byte	0
+ 1357 00cf 00       		.byte	0
+ 1358 00d0 00       		.byte	0
+ 1359 00d1 00       		.byte	0
+ 1360 00d2 00       		.byte	0
+ 1361 00d3 00       		.byte	0
+ 1362 00d4 00       		.byte	0
+ 1363 00d5 00       		.byte	0
+ 1364 00d6 00       		.byte	0
+ 1365 00d7 00       		.byte	0
+ 1366 00d8 00       		.byte	0
+ 1367 00d9 00       		.byte	0
+ 1368 00da 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 25
+
+
+ 1369 00db 00       		.byte	0
+ 1370 00dc 00       		.byte	0
+ 1371 00dd 00       		.byte	0
+ 1372 00de 00       		.byte	0
+ 1373 00df 00       		.byte	0
+ 1374 00e0 00       		.byte	0
+ 1375 00e1 00       		.byte	0
+ 1376 00e2 00       		.byte	0
+ 1377 00e3 00       		.byte	0
+ 1378 00e4 00       		.byte	0
+ 1379 00e5 00       		.byte	0
+ 1380 00e6 00       		.byte	0
+ 1381 00e7 00       		.byte	0
+ 1382 00e8 00       		.byte	0
+ 1383 00e9 00       		.byte	0
+ 1384 00ea 00       		.byte	0
+ 1385 00eb 00       		.byte	0
+ 1386 00ec 00       		.byte	0
+ 1387 00ed 00       		.byte	0
+ 1388 00ee 00       		.byte	0
+ 1389 00ef 00       		.byte	0
+ 1390 00f0 00       		.byte	0
+ 1391 00f1 00       		.byte	0
+ 1392 00f2 00       		.byte	0
+ 1393 00f3 00       		.byte	0
+ 1394 00f4 00       		.byte	0
+ 1395 00f5 00       		.byte	0
+ 1396 00f6 00       		.byte	0
+ 1397 00f7 00       		.byte	0
+ 1398 00f8 00       		.byte	0
+ 1399 00f9 00       		.byte	0
+ 1400 00fa 00       		.byte	0
+ 1401 00fb 00       		.byte	0
+ 1402 00fc 00       		.byte	0
+ 1403 00fd 00       		.byte	0
+ 1404 00fe 00       		.byte	0
+ 1405 00ff 00       		.byte	0
+ 1406 0100 00       		.byte	0
+ 1407 0101 00       		.byte	0
+ 1408 0102 00       		.byte	0
+ 1409 0103 00       		.byte	0
+ 1410 0104 00       		.byte	0
+ 1411 0105 00       		.byte	0
+ 1412 0106 00       		.byte	0
+ 1413 0107 00       		.byte	0
+ 1414 0108 00       		.byte	0
+ 1415 0109 00       		.byte	0
+ 1416 010a 00       		.byte	0
+ 1417 010b 00       		.byte	0
+ 1418 010c 00       		.byte	0
+ 1419 010d 00       		.byte	0
+ 1420 010e 00       		.byte	0
+ 1421 010f 00       		.byte	0
+ 1422 0110 00       		.byte	0
+ 1423 0111 00       		.byte	0
+ 1424 0112 00       		.byte	0
+ 1425 0113 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 26
+
+
+ 1426 0114 00       		.byte	0
+ 1427 0115 00       		.byte	0
+ 1428 0116 00       		.byte	0
+ 1429 0117 00       		.byte	0
+ 1430 0118 00       		.byte	0
+ 1431 0119 00       		.byte	0
+ 1432 011a 00       		.byte	0
+ 1433 011b 00       		.byte	0
+ 1434 011c 00       		.byte	0
+ 1435 011d 00       		.byte	0
+ 1436 011e 00       		.byte	0
+ 1437 011f 00       		.byte	0
+ 1438 0120 00       		.byte	0
+ 1439 0121 00       		.byte	0
+ 1440 0122 00       		.byte	0
+ 1441 0123 00       		.byte	0
+ 1442 0124 00       		.byte	0
+ 1443 0125 00       		.byte	0
+ 1444 0126 00       		.byte	0
+ 1445 0127 00       		.byte	0
+ 1446 0128 00       		.byte	0
+ 1447 0129 00       		.byte	0
+ 1448 012a 00       		.byte	0
+ 1449 012b 00       		.byte	0
+ 1450 012c 00       		.byte	0
+ 1451 012d 00       		.byte	0
+ 1452 012e 00       		.byte	0
+ 1453 012f 00       		.byte	0
+ 1454 0130 00       		.byte	0
+ 1455 0131 00       		.byte	0
+ 1456 0132 00       		.byte	0
+ 1457 0133 00       		.byte	0
+ 1458 0134 00       		.byte	0
+ 1459 0135 00       		.byte	0
+ 1460 0136 00       		.byte	0
+ 1461 0137 00       		.byte	0
+ 1462 0138 00       		.byte	0
+ 1463 0139 00       		.byte	0
+ 1464 013a 00       		.byte	0
+ 1465 013b 00       		.byte	0
+ 1466 013c 00       		.byte	0
+ 1467 013d 00       		.byte	0
+ 1468 013e 00       		.byte	0
+ 1469 013f 00       		.byte	0
+ 1470 0140 00       		.byte	0
+ 1471 0141 00       		.byte	0
+ 1472 0142 00       		.byte	0
+ 1473 0143 00       		.byte	0
+ 1474 0144 00       		.byte	0
+ 1475 0145 00       		.byte	0
+ 1476 0146 00       		.byte	0
+ 1477 0147 00       		.byte	0
+ 1478 0148 00       		.byte	0
+ 1479 0149 00       		.byte	0
+ 1480 014a 00       		.byte	0
+ 1481 014b 00       		.byte	0
+ 1482 014c 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 27
+
+
+ 1483 014d 00       		.byte	0
+ 1484 014e 00       		.byte	0
+ 1485 014f 00       		.byte	0
+ 1486 0150 00       		.byte	0
+ 1487 0151 00       		.byte	0
+ 1488 0152 00       		.byte	0
+ 1489 0153 00       		.byte	0
+ 1490 0154 00       		.byte	0
+ 1491 0155 00       		.byte	0
+ 1492 0156 00       		.byte	0
+ 1493 0157 00       		.byte	0
+ 1494 0158 00       		.byte	0
+ 1495 0159 00       		.byte	0
+ 1496 015a 00       		.byte	0
+ 1497 015b 00       		.byte	0
+ 1498 015c 00       		.byte	0
+ 1499 015d 00       		.byte	0
+ 1500 015e 00       		.byte	0
+ 1501 015f 00       		.byte	0
+ 1502 0160 00       		.byte	0
+ 1503 0161 00       		.byte	0
+ 1504 0162 00       		.byte	0
+ 1505 0163 00       		.byte	0
+ 1506 0164 00       		.byte	0
+ 1507 0165 00       		.byte	0
+ 1508 0166 00       		.byte	0
+ 1509 0167 00       		.byte	0
+ 1510 0168 00       		.byte	0
+ 1511 0169 00       		.byte	0
+ 1512 016a 00       		.byte	0
+ 1513 016b 00       		.byte	0
+ 1514 016c 00       		.byte	0
+ 1515 016d 00       		.byte	0
+ 1516 016e 00       		.byte	0
+ 1517 016f 00       		.byte	0
+ 1518 0170 00       		.byte	0
+ 1519 0171 00       		.byte	0
+ 1520 0172 00       		.byte	0
+ 1521 0173 00       		.byte	0
+ 1522 0174 00       		.byte	0
+ 1523 0175 00       		.byte	0
+ 1524 0176 00       		.byte	0
+ 1525 0177 00       		.byte	0
+ 1526 0178 00       		.byte	0
+ 1527 0179 00       		.byte	0
+ 1528 017a 00       		.byte	0
+ 1529 017b 00       		.byte	0
+ 1530 017c 00       		.byte	0
+ 1531 017d 00       		.byte	0
+ 1532 017e 00       		.byte	0
+ 1533 017f 00       		.byte	0
+ 1534 0180 00       		.byte	0
+ 1535 0181 00       		.byte	0
+ 1536 0182 00       		.byte	0
+ 1537 0183 00       		.byte	0
+ 1538 0184 00       		.byte	0
+ 1539 0185 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 28
+
+
+ 1540 0186 00       		.byte	0
+ 1541 0187 00       		.byte	0
+ 1542 0188 00       		.byte	0
+ 1543 0189 00       		.byte	0
+ 1544 018a 00       		.byte	0
+ 1545 018b 00       		.byte	0
+ 1546 018c 00       		.byte	0
+ 1547 018d 00       		.byte	0
+ 1548 018e 00       		.byte	0
+ 1549 018f 00       		.byte	0
+ 1550 0190 00       		.byte	0
+ 1551 0191 00       		.byte	0
+ 1552 0192 00       		.byte	0
+ 1553 0193 00       		.byte	0
+ 1554 0194 00       		.byte	0
+ 1555 0195 00       		.byte	0
+ 1556 0196 00       		.byte	0
+ 1557 0197 00       		.byte	0
+ 1558 0198 00       		.byte	0
+ 1559 0199 00       		.byte	0
+ 1560 019a 00       		.byte	0
+ 1561 019b 00       		.byte	0
+ 1562 019c 00       		.byte	0
+ 1563 019d 00       		.byte	0
+ 1564 019e 00       		.byte	0
+ 1565 019f 00       		.byte	0
+ 1566 01a0 00       		.byte	0
+ 1567 01a1 00       		.byte	0
+ 1568 01a2 00       		.byte	0
+ 1569 01a3 00       		.byte	0
+ 1570 01a4 00       		.byte	0
+ 1571 01a5 00       		.byte	0
+ 1572 01a6 00       		.byte	0
+ 1573 01a7 00       		.byte	0
+ 1574 01a8 00       		.byte	0
+ 1575 01a9 00       		.byte	0
+ 1576 01aa 00       		.byte	0
+ 1577 01ab 00       		.byte	0
+ 1578 01ac 00       		.byte	0
+ 1579 01ad 00       		.byte	0
+ 1580 01ae 00       		.byte	0
+ 1581 01af 00       		.byte	0
+ 1582 01b0 00       		.byte	0
+ 1583 01b1 00       		.byte	0
+ 1584 01b2 00       		.byte	0
+ 1585 01b3 00       		.byte	0
+ 1586 01b4 00       		.byte	0
+ 1587 01b5 00       		.byte	0
+ 1588 01b6 00       		.byte	0
+ 1589 01b7 00       		.byte	0
+ 1590 01b8 00       		.byte	0
+ 1591 01b9 00       		.byte	0
+ 1592 01ba 00       		.byte	0
+ 1593 01bb 00       		.byte	0
+ 1594 01bc 00       		.byte	0
+ 1595 01bd 00       		.byte	0
+ 1596 01be 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 29
+
+
+ 1597 01bf 00       		.byte	0
+ 1598 01c0 00       		.byte	0
+ 1599 01c1 00       		.byte	0
+ 1600 01c2 00       		.byte	0
+ 1601 01c3 00       		.byte	0
+ 1602 01c4 00       		.byte	0
+ 1603 01c5 00       		.byte	0
+ 1604 01c6 00       		.byte	0
+ 1605 01c7 00       		.byte	0
+ 1606 01c8 00       		.byte	0
+ 1607 01c9 00       		.byte	0
+ 1608 01ca 00       		.byte	0
+ 1609 01cb 00       		.byte	0
+ 1610 01cc 00       		.byte	0
+ 1611 01cd 00       		.byte	0
+ 1612 01ce 00       		.byte	0
+ 1613 01cf 00       		.byte	0
+ 1614 01d0 00       		.byte	0
+ 1615 01d1 00       		.byte	0
+ 1616 01d2 00       		.byte	0
+ 1617 01d3 00       		.byte	0
+ 1618 01d4 00       		.byte	0
+ 1619 01d5 00       		.byte	0
+ 1620 01d6 00       		.byte	0
+ 1621 01d7 00       		.byte	0
+ 1622 01d8 00       		.byte	0
+ 1623 01d9 00       		.byte	0
+ 1624 01da 00       		.byte	0
+ 1625 01db 00       		.byte	0
+ 1626 01dc 00       		.byte	0
+ 1627 01dd 00       		.byte	0
+ 1628 01de 00       		.byte	0
+ 1629 01df 00       		.byte	0
+ 1630 01e0 00       		.byte	0
+ 1631 01e1 00       		.byte	0
+ 1632 01e2 00       		.byte	0
+ 1633 01e3 00       		.byte	0
+ 1634 01e4 00       		.byte	0
+ 1635 01e5 00       		.byte	0
+ 1636 01e6 00       		.byte	0
+ 1637 01e7 00       		.byte	0
+ 1638 01e8 00       		.byte	0
+ 1639 01e9 00       		.byte	0
+ 1640 01ea 00       		.byte	0
+ 1641 01eb 00       		.byte	0
+ 1642 01ec 00       		.byte	0
+ 1643 01ed 00       		.byte	0
+ 1644 01ee 00       		.byte	0
+ 1645 01ef 00       		.byte	0
+ 1646 01f0 00       		.byte	0
+ 1647 01f1 00       		.byte	0
+ 1648 01f2 00       		.byte	0
+ 1649 01f3 00       		.byte	0
+ 1650 01f4 00       		.byte	0
+ 1651 01f5 00       		.byte	0
+ 1652 01f6 00       		.byte	0
+ 1653 01f7 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 30
+
+
+ 1654 01f8 00       		.byte	0
+ 1655 01f9 00       		.byte	0
+ 1656 01fa 00       		.byte	0
+ 1657 01fb 00       		.byte	0
+ 1658 01fc 00       		.byte	0
+ 1659 01fd 00       		.byte	0
+ 1660 01fe 00       		.byte	0
+ 1661 01ff 00       		.byte	0
+ 1662 0200 00       		.byte	0
+ 1663 0201 00       		.byte	0
+ 1664 0202 00       		.byte	0
+ 1665 0203 00       		.byte	0
+ 1666 0204 00       		.byte	0
+ 1667 0205 00       		.byte	0
+ 1668 0206 00       		.byte	0
+ 1669 0207 00       		.byte	0
+ 1670 0208 00       		.byte	0
+ 1671 0209 00       		.byte	0
+ 1672 020a 00       		.byte	0
+ 1673 020b 00       		.byte	0
+ 1674 020c 00       		.byte	0
+ 1675 020d 00       		.byte	0
+ 1676 020e 00       		.byte	0
+ 1677 020f 00       		.byte	0
+ 1678 0210 00       		.byte	0
+ 1679 0211 00       		.byte	0
+ 1680 0212 00       		.byte	0
+ 1681 0213 00       		.byte	0
+ 1682 0214 00       		.byte	0
+ 1683 0215 00       		.byte	0
+ 1684 0216 00       		.byte	0
+ 1685 0217 00       		.byte	0
+ 1686 0218 00       		.byte	0
+ 1687 0219 00       		.byte	0
+ 1688 021a 00       		.byte	0
+ 1689 021b 00       		.byte	0
+ 1690 021c 00       		.byte	0
+ 1691 021d 00       		.byte	0
+ 1692 021e 00       		.byte	0
+ 1693 021f 00       		.byte	0
+ 1694 0220 00       		.byte	0
+ 1695 0221 00       		.byte	0
+ 1696 0222 00       		.byte	0
+ 1697 0223 00       		.byte	0
+ 1698 0224 00       		.byte	0
+ 1699 0225 00       		.byte	0
+ 1700 0226 00       		.byte	0
+ 1701 0227 00       		.byte	0
+ 1702 0228 00       		.byte	0
+ 1703 0229 00       		.byte	0
+ 1704 022a 00       		.byte	0
+ 1705 022b 00       		.byte	0
+ 1706 022c 00       		.byte	0
+ 1707 022d 00       		.byte	0
+ 1708 022e 00       		.byte	0
+ 1709 022f 00       		.byte	0
+ 1710 0230 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 31
+
+
+ 1711 0231 00       		.byte	0
+ 1712 0232 00       		.byte	0
+ 1713 0233 00       		.byte	0
+ 1714 0234 00       		.byte	0
+ 1715 0235 00       		.byte	0
+ 1716 0236 00       		.byte	0
+ 1717 0237 00       		.byte	0
+ 1718 0238 00       		.byte	0
+ 1719 0239 00       		.byte	0
+ 1720 023a 00       		.byte	0
+ 1721 023b 00       		.byte	0
+ 1722 023c 00       		.byte	0
+ 1723 023d 00       		.byte	0
+ 1724 023e 00       		.byte	0
+ 1725 023f 00       		.byte	0
+ 1726 0240 00       		.byte	0
+ 1727 0241 00       		.byte	0
+ 1728 0242 00       		.byte	0
+ 1729 0243 00       		.byte	0
+ 1730 0244 00       		.byte	0
+ 1731 0245 00       		.byte	0
+ 1732 0246 00       		.byte	0
+ 1733 0247 00       		.byte	0
+ 1734 0248 00       		.byte	0
+ 1735 0249 00       		.byte	0
+ 1736 024a 00       		.byte	0
+ 1737 024b 00       		.byte	0
+ 1738 024c 00       		.byte	0
+ 1739 024d 00       		.byte	0
+ 1740 024e 00       		.byte	0
+ 1741 024f 00       		.byte	0
+ 1742 0250 00       		.byte	0
+ 1743 0251 00       		.byte	0
+ 1744 0252 00       		.byte	0
+ 1745 0253 00       		.byte	0
+ 1746 0254 00       		.byte	0
+ 1747 0255 00       		.byte	0
+ 1748 0256 00       		.byte	0
+ 1749 0257 00       		.byte	0
+ 1750 0258 00       		.byte	0
+ 1751 0259 00       		.byte	0
+ 1752 025a 00       		.byte	0
+ 1753 025b 00       		.byte	0
+ 1754 025c 00       		.byte	0
+ 1755 025d 00       		.byte	0
+ 1756 025e 00       		.byte	0
+ 1757 025f 00       		.byte	0
+ 1758 0260 00       		.byte	0
+ 1759 0261 00       		.byte	0
+ 1760 0262 00       		.byte	0
+ 1761 0263 00       		.byte	0
+ 1762 0264 00       		.byte	0
+ 1763 0265 00       		.byte	0
+ 1764 0266 00       		.byte	0
+ 1765 0267 00       		.byte	0
+ 1766 0268 00       		.byte	0
+ 1767 0269 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 32
+
+
+ 1768 026a 00       		.byte	0
+ 1769 026b 00       		.byte	0
+ 1770 026c 00       		.byte	0
+ 1771 026d 00       		.byte	0
+ 1772 026e 00       		.byte	0
+ 1773 026f 00       		.byte	0
+ 1774 0270 00       		.byte	0
+ 1775 0271 00       		.byte	0
+ 1776 0272 00       		.byte	0
+ 1777 0273 00       		.byte	0
+ 1778 0274 00       		.byte	0
+ 1779 0275 00       		.byte	0
+ 1780 0276 00       		.byte	0
+ 1781 0277 00       		.byte	0
+ 1782 0278 00       		.byte	0
+ 1783 0279 00       		.byte	0
+ 1784 027a 00       		.byte	0
+ 1785 027b 00       		.byte	0
+ 1786 027c 00       		.byte	0
+ 1787 027d 00       		.byte	0
+ 1788 027e 00       		.byte	0
+ 1789 027f 00       		.byte	0
+ 1790 0280 00       		.byte	0
+ 1791 0281 00       		.byte	0
+ 1792 0282 00       		.byte	0
+ 1793 0283 00       		.byte	0
+ 1794 0284 00       		.byte	0
+ 1795 0285 00       		.byte	0
+ 1796 0286 00       		.byte	0
+ 1797 0287 00       		.byte	0
+ 1798 0288 00       		.byte	0
+ 1799 0289 00       		.byte	0
+ 1800 028a 00       		.byte	0
+ 1801 028b 00       		.byte	0
+ 1802 028c 00       		.byte	0
+ 1803 028d 00       		.byte	0
+ 1804 028e 00       		.byte	0
+ 1805 028f 00       		.byte	0
+ 1806 0290 00       		.byte	0
+ 1807 0291 00       		.byte	0
+ 1808 0292 00       		.byte	0
+ 1809 0293 00       		.byte	0
+ 1810 0294 00       		.byte	0
+ 1811 0295 00       		.byte	0
+ 1812 0296 00       		.byte	0
+ 1813 0297 00       		.byte	0
+ 1814 0298 00       		.byte	0
+ 1815 0299 00       		.byte	0
+ 1816 029a 00       		.byte	0
+ 1817 029b 00       		.byte	0
+ 1818 029c 00       		.byte	0
+ 1819 029d 00       		.byte	0
+ 1820 029e 00       		.byte	0
+ 1821 029f 00       		.byte	0
+ 1822 02a0 00       		.byte	0
+ 1823 02a1 00       		.byte	0
+ 1824 02a2 00       		.byte	0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc81DTqI.s 			page 33
+
+
+ 1825 02a3 00       		.byte	0
+ 1826 02a4 00       		.byte	0
+ 1827 02a5 00       		.byte	0
+ 1828 02a6 00       		.byte	0
+ 1829 02a7 00       		.byte	0
+ 1830 02a8 00       		.byte	0
+ 1831 02a9 00       		.byte	0
+ 1832 02aa 00       		.byte	0
+ 1833 02ab 00       		.byte	0
+ 1834 02ac 00       		.byte	0
+ 1835 02ad 00       		.byte	0
+ 1836 02ae 00       		.byte	0
+ 1837 02af 00       		.byte	0
+ 1838 02b0 00       		.byte	0
+ 1839 02b1 00       		.byte	0
+ 1840 02b2 00       		.byte	0
+ 1841 02b3 00       		.byte	0
+ 1842 02b4 00       		.byte	0
+ 1843 02b5 00       		.byte	0
+ 1844 02b6 00       		.byte	0
+ 1845 02b7 00       		.byte	0
+ 1846 02b8 00       		.byte	0
+ 1847 02b9 00       		.byte	0
+ 1848 02ba 00       		.byte	0
+ 1849 02bb 00       		.byte	0
+ 1850 02bc 00       		.byte	0
+ 1851 02bd 00       		.byte	0
+ 1852 02be 00       		.byte	0
+ 1853 02bf 00       		.byte	0
+ 1854 02c0 00       		.byte	0
+ 1855 02c1 00       		.byte	0
+ 1856 02c2 00       		.byte	0
+ 1857 02c3 00       		.byte	0
+ 1858 02c4 00       		.byte	0
+ 1859 02c5 00       		.byte	0
+ 1860 02c6 00       		.byte	0
+ 1861 02c7 00       		.byte	0
+ 1862 02c8 00       		.byte	0
+ 1863 02c9 10       		.byte	16
+ 1864 02ca 05       		.byte	5
+ 1865              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

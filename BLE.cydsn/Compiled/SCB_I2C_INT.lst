@@ -1,0 +1,637 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"SCB_I2C_INT.c"
+  16              		.section	.text.SCB_I2C_ISR,"ax",%progbits
+  17              		.align	2
+  18              		.global	SCB_I2C_ISR
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	SCB_I2C_ISR, %function
+  22              	SCB_I2C_ISR:
+  23              		@ args = 0, pretend = 0, frame = 8
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+  26 0002 5F46     		mov	r7, fp
+  27 0004 5646     		mov	r6, r10
+  28 0006 4D46     		mov	r5, r9
+  29 0008 4446     		mov	r4, r8
+  30 000a F0B4     		push	{r4, r5, r6, r7}
+  31 000c C34B     		ldr	r3, .L100
+  32 000e 83B0     		sub	sp, sp, #12
+  33 0010 1B68     		ldr	r3, [r3]
+  34 0012 002B     		cmp	r3, #0
+  35 0014 00D0     		beq	.L2
+  36 0016 9847     		blx	r3
+  37              	.L2:
+  38 0018 C14B     		ldr	r3, .L100+4
+  39 001a 1B68     		ldr	r3, [r3]
+  40 001c DB07     		lsls	r3, r3, #31
+  41 001e 02D5     		bpl	.L3
+  42 0020 0022     		movs	r2, #0
+  43 0022 C04B     		ldr	r3, .L100+8
+  44 0024 1A60     		str	r2, [r3]
+  45              	.L3:
+  46 0026 C04B     		ldr	r3, .L100+12
+  47 0028 0020     		movs	r0, #0
+  48 002a 1A78     		ldrb	r2, [r3]
+  49 002c 9206     		lsls	r2, r2, #26
+  50 002e 1AD5     		bpl	.L4
+  51 0030 BE49     		ldr	r1, .L100+16
+  52 0032 0A68     		ldr	r2, [r1]
+  53 0034 D205     		lsls	r2, r2, #23
+  54 0036 00D5     		bpl	.LCB43
+  55 0038 BEE0     		b	.L94	@long jump
+  56              	.LCB43:
+  57 003a 0A68     		ldr	r2, [r1]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 2
+
+
+  58 003c D207     		lsls	r2, r2, #31
+  59 003e 12D5     		bpl	.L4
+  60 0040 BB4A     		ldr	r2, .L100+20
+  61              	.L35:
+  62 0042 9020     		movs	r0, #144
+  63 0044 1188     		ldrh	r1, [r2]
+  64 0046 8000     		lsls	r0, r0, #2
+  65 0048 0143     		orrs	r1, r0
+  66 004a 1180     		strh	r1, [r2]
+  67              	.L6:
+  68 004c 0120     		movs	r0, #1
+  69 004e 1978     		ldrb	r1, [r3]
+  70 0050 0840     		ands	r0, r1
+  71 0052 4142     		rsbs	r1, r0, #0
+  72 0054 4141     		adcs	r1, r1, r0
+  73 0056 1088     		ldrh	r0, [r2]
+  74 0058 0131     		adds	r1, r1, #1
+  75 005a 0143     		orrs	r1, r0
+  76 005c 89B2     		uxth	r1, r1
+  77 005e 1180     		strh	r1, [r2]
+  78 0060 0022     		movs	r2, #0
+  79 0062 0120     		movs	r0, #1
+  80 0064 1A70     		strb	r2, [r3]
+  81              	.L4:
+  82 0066 1A78     		ldrb	r2, [r3]
+  83 0068 9206     		lsls	r2, r2, #26
+  84 006a 19D5     		bpl	.L8
+  85 006c 1021     		movs	r1, #16
+  86 006e AF4A     		ldr	r2, .L100+16
+  87 0070 1468     		ldr	r4, [r2]
+  88 0072 2142     		tst	r1, r4
+  89 0074 1AD0     		beq	.L9
+  90 0076 0120     		movs	r0, #1
+  91 0078 AE4A     		ldr	r2, .L100+24
+  92 007a AD4C     		ldr	r4, .L100+20
+  93 007c 1160     		str	r1, [r2]
+  94 007e 1A78     		ldrb	r2, [r3]
+  95 0080 1040     		ands	r0, r2
+  96 0082 4242     		rsbs	r2, r0, #0
+  97 0084 4241     		adcs	r2, r2, r0
+  98 0086 2088     		ldrh	r0, [r4]
+  99 0088 0132     		adds	r2, r2, #1
+ 100 008a 0243     		orrs	r2, r0
+ 101 008c 92B2     		uxth	r2, r2
+ 102 008e 2280     		strh	r2, [r4]
+ 103 0090 1970     		strb	r1, [r3]
+ 104              	.L1:
+ 105 0092 03B0     		add	sp, sp, #12
+ 106              		@ sp needed
+ 107 0094 3CBC     		pop	{r2, r3, r4, r5}
+ 108 0096 9046     		mov	r8, r2
+ 109 0098 9946     		mov	r9, r3
+ 110 009a A246     		mov	r10, r4
+ 111 009c AB46     		mov	fp, r5
+ 112 009e F0BD     		pop	{r4, r5, r6, r7, pc}
+ 113              	.L8:
+ 114 00a0 1B78     		ldrb	r3, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 3
+
+
+ 115 00a2 DB06     		lsls	r3, r3, #27
+ 116 00a4 F5D4     		bmi	.L1
+ 117 00a6 FFF7FEFF 		bl	SCB_I2CFwBlockReset
+ 118 00aa F2E7     		b	.L1
+ 119              	.L9:
+ 120 00ac 1C78     		ldrb	r4, [r3]
+ 121 00ae 2407     		lsls	r4, r4, #28
+ 122 00b0 00D5     		bpl	.LCB143
+ 123 00b2 8CE0     		b	.L95	@long jump
+ 124              	.LCB143:
+ 125              	.L13:
+ 126 00b4 1A78     		ldrb	r2, [r3]
+ 127 00b6 5207     		lsls	r2, r2, #29
+ 128 00b8 00D4     		bmi	.LCB151
+ 129 00ba CFE0     		b	.L19	@long jump
+ 130              	.LCB151:
+ 131              	.L15:
+ 132 00bc 0121     		movs	r1, #1
+ 133 00be 1A78     		ldrb	r2, [r3]
+ 134 00c0 1142     		tst	r1, r2
+ 135 00c2 00D1     		bne	.LCB159
+ 136 00c4 E5E0     		b	.L20	@long jump
+ 137              	.LCB159:
+ 138 00c6 9C4A     		ldr	r2, .L100+28
+ 139 00c8 1168     		ldr	r1, [r2]
+ 140 00ca 0907     		lsls	r1, r1, #28
+ 141 00cc 00D4     		bmi	.LCB165
+ 142 00ce AAE0     		b	.L21	@long jump
+ 143              	.LCB165:
+ 144 00d0 9A4A     		ldr	r2, .L100+32
+ 145 00d2 1168     		ldr	r1, [r2]
+ 146 00d4 9A4A     		ldr	r2, .L100+36
+ 147 00d6 1468     		ldr	r4, [r2]
+ 148 00d8 9A4A     		ldr	r2, .L100+40
+ 149 00da 1568     		ldr	r5, [r2]
+ 150 00dc 4D1B     		subs	r5, r1, r5
+ 151 00de 1F21     		movs	r1, #31
+ 152 00e0 2140     		ands	r1, r4
+ 153 00e2 691A     		subs	r1, r5, r1
+ 154 00e4 0829     		cmp	r1, #8
+ 155 00e6 08D8     		bhi	.L22
+ 156 00e8 0029     		cmp	r1, #0
+ 157 00ea 00D0     		beq	.LCB179
+ 158 00ec 84E1     		b	.L23	@long jump
+ 159              	.LCB179:
+ 160 00ee 9648     		ldr	r0, .L100+44
+ 161 00f0 9649     		ldr	r1, .L100+48
+ 162 00f2 0468     		ldr	r4, [r0]
+ 163 00f4 2140     		ands	r1, r4
+ 164 00f6 0160     		str	r1, [r0]
+ 165 00f8 0120     		movs	r0, #1
+ 166              	.L22:
+ 167 00fa 954C     		ldr	r4, .L100+52
+ 168 00fc 954E     		ldr	r6, .L100+56
+ 169 00fe 2568     		ldr	r5, [r4]
+ 170 0100 1168     		ldr	r1, [r2]
+ 171 0102 AC46     		mov	ip, r5
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 4
+
+
+ 172 0104 3568     		ldr	r5, [r6]
+ 173 0106 6144     		add	r1, r1, ip
+ 174 0108 EDB2     		uxtb	r5, r5
+ 175 010a 0D70     		strb	r5, [r1]
+ 176 010c 2568     		ldr	r5, [r4]
+ 177 010e 1168     		ldr	r1, [r2]
+ 178 0110 AC46     		mov	ip, r5
+ 179 0112 0131     		adds	r1, r1, #1
+ 180 0114 1160     		str	r1, [r2]
+ 181 0116 1168     		ldr	r1, [r2]
+ 182 0118 3568     		ldr	r5, [r6]
+ 183 011a 6144     		add	r1, r1, ip
+ 184 011c EDB2     		uxtb	r5, r5
+ 185 011e 0D70     		strb	r5, [r1]
+ 186 0120 1168     		ldr	r1, [r2]
+ 187 0122 0131     		adds	r1, r1, #1
+ 188 0124 1160     		str	r1, [r2]
+ 189 0126 0621     		movs	r1, #6
+ 190              	.L38:
+ 191 0128 2568     		ldr	r5, [r4]
+ 192 012a 1668     		ldr	r6, [r2]
+ 193 012c AC46     		mov	ip, r5
+ 194 012e 894D     		ldr	r5, .L100+56
+ 195 0130 6644     		add	r6, r6, ip
+ 196 0132 2F68     		ldr	r7, [r5]
+ 197 0134 FFB2     		uxtb	r7, r7
+ 198 0136 3770     		strb	r7, [r6]
+ 199 0138 1668     		ldr	r6, [r2]
+ 200 013a 0136     		adds	r6, r6, #1
+ 201 013c 1660     		str	r6, [r2]
+ 202 013e 0129     		cmp	r1, #1
+ 203 0140 00D1     		bne	.LCB229
+ 204 0142 88E0     		b	.L24	@long jump
+ 205              	.LCB229:
+ 206 0144 2768     		ldr	r7, [r4]
+ 207 0146 1668     		ldr	r6, [r2]
+ 208 0148 BC46     		mov	ip, r7
+ 209 014a 2F68     		ldr	r7, [r5]
+ 210 014c 6644     		add	r6, r6, ip
+ 211 014e FFB2     		uxtb	r7, r7
+ 212 0150 3770     		strb	r7, [r6]
+ 213 0152 1668     		ldr	r6, [r2]
+ 214 0154 0136     		adds	r6, r6, #1
+ 215 0156 1660     		str	r6, [r2]
+ 216 0158 0229     		cmp	r1, #2
+ 217 015a 7CD0     		beq	.L24
+ 218 015c 2768     		ldr	r7, [r4]
+ 219 015e 1668     		ldr	r6, [r2]
+ 220 0160 BC46     		mov	ip, r7
+ 221 0162 2F68     		ldr	r7, [r5]
+ 222 0164 6644     		add	r6, r6, ip
+ 223 0166 FFB2     		uxtb	r7, r7
+ 224 0168 3770     		strb	r7, [r6]
+ 225 016a 1668     		ldr	r6, [r2]
+ 226 016c 0136     		adds	r6, r6, #1
+ 227 016e 1660     		str	r6, [r2]
+ 228 0170 0329     		cmp	r1, #3
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 5
+
+
+ 229 0172 70D0     		beq	.L24
+ 230 0174 2768     		ldr	r7, [r4]
+ 231 0176 1668     		ldr	r6, [r2]
+ 232 0178 BC46     		mov	ip, r7
+ 233 017a 2F68     		ldr	r7, [r5]
+ 234 017c 6644     		add	r6, r6, ip
+ 235 017e FFB2     		uxtb	r7, r7
+ 236 0180 3770     		strb	r7, [r6]
+ 237 0182 1668     		ldr	r6, [r2]
+ 238 0184 0136     		adds	r6, r6, #1
+ 239 0186 1660     		str	r6, [r2]
+ 240 0188 0429     		cmp	r1, #4
+ 241 018a 64D0     		beq	.L24
+ 242 018c 2768     		ldr	r7, [r4]
+ 243 018e 1668     		ldr	r6, [r2]
+ 244 0190 BC46     		mov	ip, r7
+ 245 0192 2F68     		ldr	r7, [r5]
+ 246 0194 6644     		add	r6, r6, ip
+ 247 0196 FFB2     		uxtb	r7, r7
+ 248 0198 3770     		strb	r7, [r6]
+ 249 019a 1668     		ldr	r6, [r2]
+ 250 019c 0136     		adds	r6, r6, #1
+ 251 019e 1660     		str	r6, [r2]
+ 252 01a0 0529     		cmp	r1, #5
+ 253 01a2 58D0     		beq	.L24
+ 254 01a4 1168     		ldr	r1, [r2]
+ 255 01a6 2468     		ldr	r4, [r4]
+ 256 01a8 6118     		adds	r1, r4, r1
+ 257 01aa 2C68     		ldr	r4, [r5]
+ 258 01ac E4B2     		uxtb	r4, r4
+ 259 01ae 0C70     		strb	r4, [r1]
+ 260 01b0 1168     		ldr	r1, [r2]
+ 261 01b2 0131     		adds	r1, r1, #1
+ 262 01b4 1160     		str	r1, [r2]
+ 263 01b6 4EE0     		b	.L24
+ 264              	.L94:
+ 265 01b8 C024     		movs	r4, #192
+ 266 01ba 5D4A     		ldr	r2, .L100+20
+ 267 01bc A400     		lsls	r4, r4, #2
+ 268 01be 1088     		ldrh	r0, [r2]
+ 269 01c0 2043     		orrs	r0, r4
+ 270 01c2 1080     		strh	r0, [r2]
+ 271 01c4 0968     		ldr	r1, [r1]
+ 272 01c6 C907     		lsls	r1, r1, #31
+ 273 01c8 00D4     		bmi	.LCB310
+ 274 01ca 3FE7     		b	.L6	@long jump
+ 275              	.LCB310:
+ 276 01cc 39E7     		b	.L35
+ 277              	.L95:
+ 278 01ce 1468     		ldr	r4, [r2]
+ 279 01d0 0222     		movs	r2, #2
+ 280 01d2 2242     		tst	r2, r4
+ 281 01d4 4FD0     		beq	.L14
+ 282 01d6 8820     		movs	r0, #136
+ 283 01d8 5649     		ldr	r1, .L100+24
+ 284 01da 8000     		lsls	r0, r0, #2
+ 285 01dc 0A60     		str	r2, [r1]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 6
+
+
+ 286 01de 5449     		ldr	r1, .L100+20
+ 287 01e0 0A88     		ldrh	r2, [r1]
+ 288 01e2 0243     		orrs	r2, r0
+ 289 01e4 0A80     		strh	r2, [r1]
+ 290 01e6 1A78     		ldrb	r2, [r3]
+ 291 01e8 5207     		lsls	r2, r2, #29
+ 292 01ea 00D5     		bpl	.LCB336
+ 293 01ec 93E0     		b	.L42	@long jump
+ 294              	.LCB336:
+ 295              	.L16:
+ 296 01ee 5649     		ldr	r1, .L100+44
+ 297 01f0 564A     		ldr	r2, .L100+48
+ 298 01f2 0868     		ldr	r0, [r1]
+ 299 01f4 0240     		ands	r2, r0
+ 300 01f6 0A60     		str	r2, [r1]
+ 301 01f8 0022     		movs	r2, #0
+ 302 01fa 5749     		ldr	r1, .L100+60
+ 303 01fc 0A60     		str	r2, [r1]
+ 304 01fe 5749     		ldr	r1, .L100+64
+ 305 0200 0A60     		str	r2, [r1]
+ 306 0202 574A     		ldr	r2, .L100+68
+ 307 0204 1278     		ldrb	r2, [r2]
+ 308 0206 9207     		lsls	r2, r2, #30
+ 309 0208 2CD5     		bpl	.L96
+ 310 020a 0121     		movs	r1, #1
+ 311 020c 1A78     		ldrb	r2, [r3]
+ 312 020e 4848     		ldr	r0, .L100+20
+ 313 0210 1140     		ands	r1, r2
+ 314 0212 4A42     		rsbs	r2, r1, #0
+ 315 0214 4A41     		adcs	r2, r2, r1
+ 316 0216 0188     		ldrh	r1, [r0]
+ 317 0218 0932     		adds	r2, r2, #9
+ 318 021a 0A43     		orrs	r2, r1
+ 319 021c 92B2     		uxth	r2, r2
+ 320 021e 0280     		strh	r2, [r0]
+ 321 0220 6022     		movs	r2, #96
+ 322 0222 1A70     		strb	r2, [r3]
+ 323 0224 35E7     		b	.L1
+ 324              	.L21:
+ 325 0226 0421     		movs	r1, #4
+ 326 0228 1268     		ldr	r2, [r2]
+ 327 022a 1142     		tst	r1, r2
+ 328 022c 13D0     		beq	.L24
+ 329 022e 454A     		ldr	r2, .L100+40
+ 330 0230 474D     		ldr	r5, .L100+52
+ 331 0232 1468     		ldr	r4, [r2]
+ 332 0234 2D68     		ldr	r5, [r5]
+ 333 0236 2C19     		adds	r4, r5, r4
+ 334 0238 464D     		ldr	r5, .L100+56
+ 335 023a 2D68     		ldr	r5, [r5]
+ 336 023c EDB2     		uxtb	r5, r5
+ 337 023e 2570     		strb	r5, [r4]
+ 338 0240 1468     		ldr	r4, [r2]
+ 339 0242 0134     		adds	r4, r4, #1
+ 340 0244 1460     		str	r4, [r2]
+ 341 0246 1468     		ldr	r4, [r2]
+ 342 0248 3C4A     		ldr	r2, .L100+32
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 7
+
+
+ 343 024a 1268     		ldr	r2, [r2]
+ 344 024c 9442     		cmp	r4, r2
+ 345 024e 00D3     		bcc	.LCB396
+ 346 0250 F0E0     		b	.L43	@long jump
+ 347              	.LCB396:
+ 348 0252 444A     		ldr	r2, .L100+72
+ 349 0254 1160     		str	r1, [r2]
+ 350              	.L24:
+ 351 0256 4449     		ldr	r1, .L100+76
+ 352 0258 444A     		ldr	r2, .L100+80
+ 353 025a 1160     		str	r1, [r2]
+ 354              	.L19:
+ 355 025c 0028     		cmp	r0, #0
+ 356 025e 00D1     		bne	.LCB407
+ 357 0260 17E7     		b	.L1	@long jump
+ 358              	.LCB407:
+ 359 0262 C4E7     		b	.L16
+ 360              	.L96:
+ 361 0264 424B     		ldr	r3, .L100+84
+ 362 0266 1A68     		ldr	r2, [r3]
+ 363 0268 1023     		movs	r3, #16
+ 364 026a 9206     		lsls	r2, r2, #26
+ 365 026c 00D5     		bpl	.LCB418
+ 366 026e B4E0     		b	.L97	@long jump
+ 367              	.LCB418:
+ 368              	.L33:
+ 369 0270 3C4A     		ldr	r2, .L100+72
+ 370 0272 1360     		str	r3, [r2]
+ 371 0274 0DE7     		b	.L1
+ 372              	.L14:
+ 373 0276 1A78     		ldrb	r2, [r3]
+ 374 0278 D207     		lsls	r2, r2, #31
+ 375 027a 00D5     		bpl	.LCB432
+ 376 027c AAE0     		b	.L98	@long jump
+ 377              	.LCB432:
+ 378 027e 2422     		movs	r2, #36
+ 379 0280 1A70     		strb	r2, [r3]
+ 380 0282 3C4A     		ldr	r2, .L100+88
+ 381 0284 1268     		ldr	r2, [r2]
+ 382 0286 002A     		cmp	r2, #0
+ 383 0288 00D1     		bne	.LCB438
+ 384 028a 13E7     		b	.L13	@long jump
+ 385              	.LCB438:
+ 386 028c 334A     		ldr	r2, .L100+64
+ 387 028e 1160     		str	r1, [r2]
+ 388 0290 10E7     		b	.L13
+ 389              	.L20:
+ 390 0292 264A     		ldr	r2, .L100+16
+ 391 0294 1468     		ldr	r4, [r2]
+ 392 0296 0222     		movs	r2, #2
+ 393 0298 2242     		tst	r2, r4
+ 394 029a 79D1     		bne	.L99
+ 395 029c 364A     		ldr	r2, .L100+92
+ 396 029e 1168     		ldr	r1, [r2]
+ 397 02a0 C906     		lsls	r1, r1, #27
+ 398 02a2 00D4     		bmi	.LCB456
+ 399 02a4 9FE0     		b	.L26	@long jump
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 8
+
+
+ 400              	.LCB456:
+ 401 02a6 1F21     		movs	r1, #31
+ 402 02a8 344D     		ldr	r5, .L100+96
+ 403 02aa 2A68     		ldr	r2, [r5]
+ 404 02ac 0A40     		ands	r2, r1
+ 405 02ae 082A     		cmp	r2, #8
+ 406 02b0 00D1     		bne	.LCB462
+ 407 02b2 94E0     		b	.L28	@long jump
+ 408              	.LCB462:
+ 409 02b4 324A     		ldr	r2, .L100+100
+ 410 02b6 2F4C     		ldr	r4, .L100+88
+ 411 02b8 1168     		ldr	r1, [r2]
+ 412 02ba 2668     		ldr	r6, [r4]
+ 413 02bc 8E42     		cmp	r6, r1
+ 414 02be 00D8     		bhi	.LCB468
+ 415 02c0 8DE0     		b	.L28	@long jump
+ 416              	.LCB468:
+ 417 02c2 3049     		ldr	r1, .L100+104
+ 418 02c4 304F     		ldr	r7, .L100+108
+ 419 02c6 0968     		ldr	r1, [r1]
+ 420 02c8 0195     		str	r5, [sp, #4]
+ 421 02ca 8C46     		mov	ip, r1
+ 422 02cc 2F49     		ldr	r1, .L100+112
+ 423 02ce 1F26     		movs	r6, #31
+ 424 02d0 8A46     		mov	r10, r1
+ 425 02d2 4021     		movs	r1, #64
+ 426 02d4 8846     		mov	r8, r1
+ 427 02d6 2149     		ldr	r1, .L100+64
+ 428 02d8 8946     		mov	r9, r1
+ 429 02da 11E0     		b	.L29
+ 430              	.L30:
+ 431 02dc 1168     		ldr	r1, [r2]
+ 432 02de 6144     		add	r1, r1, ip
+ 433 02e0 0978     		ldrb	r1, [r1]
+ 434 02e2 C9B2     		uxtb	r1, r1
+ 435 02e4 3960     		str	r1, [r7]
+ 436 02e6 1168     		ldr	r1, [r2]
+ 437 02e8 0131     		adds	r1, r1, #1
+ 438 02ea 1160     		str	r1, [r2]
+ 439 02ec 0199     		ldr	r1, [sp, #4]
+ 440 02ee 0968     		ldr	r1, [r1]
+ 441 02f0 3140     		ands	r1, r6
+ 442 02f2 0829     		cmp	r1, #8
+ 443 02f4 73D0     		beq	.L28
+ 444 02f6 1168     		ldr	r1, [r2]
+ 445 02f8 8B46     		mov	fp, r1
+ 446 02fa 2168     		ldr	r1, [r4]
+ 447 02fc 8B45     		cmp	fp, r1
+ 448 02fe 6ED2     		bcs	.L28
+ 449              	.L29:
+ 450 0300 2168     		ldr	r1, [r4]
+ 451 0302 1568     		ldr	r5, [r2]
+ 452 0304 0139     		subs	r1, r1, #1
+ 453 0306 A942     		cmp	r1, r5
+ 454 0308 E8D1     		bne	.L30
+ 455 030a 5146     		mov	r1, r10
+ 456 030c 4546     		mov	r5, r8
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 9
+
+
+ 457 030e 0D60     		str	r5, [r1]
+ 458 0310 4946     		mov	r1, r9
+ 459 0312 0D60     		str	r5, [r1]
+ 460 0314 E2E7     		b	.L30
+ 461              	.L42:
+ 462 0316 0120     		movs	r0, #1
+ 463 0318 D0E6     		b	.L15
+ 464              	.L101:
+ 465 031a C046     		.align	2
+ 466              	.L100:
+ 467 031c 00000000 		.word	SCB_customIntrHandler
+ 468 0320 8C0E2540 		.word	1076170380
+ 469 0324 880E2540 		.word	1076170376
+ 470 0328 00000000 		.word	SCB_state
+ 471 032c 0C0F2540 		.word	1076170508
+ 472 0330 00000000 		.word	SCB_mstrStatus
+ 473 0334 000F2540 		.word	1076170496
+ 474 0338 CC0F2540 		.word	1076170700
+ 475 033c 00000000 		.word	SCB_mstrRdBufSize
+ 476 0340 08032540 		.word	1076167432
+ 477 0344 00000000 		.word	SCB_mstrRdBufIndex
+ 478 0348 60002540 		.word	1076166752
+ 479 034c FFFEFFFF 		.word	-257
+ 480 0350 00000000 		.word	SCB_mstrRdBufPtr
+ 481 0354 40032540 		.word	1076167488
+ 482 0358 C80F2540 		.word	1076170696
+ 483 035c 880F2540 		.word	1076170632
+ 484 0360 00000000 		.word	SCB_mstrControl
+ 485 0364 68002540 		.word	1076166760
+ 486 0368 ED0F0000 		.word	4077
+ 487 036c C00F2540 		.word	1076170688
+ 488 0370 64002540 		.word	1076166756
+ 489 0374 00000000 		.word	SCB_mstrWrBufSize
+ 490 0378 8C0F2540 		.word	1076170636
+ 491 037c 08022540 		.word	1076167176
+ 492 0380 00000000 		.word	SCB_mstrWrBufIndexTmp
+ 493 0384 00000000 		.word	SCB_mstrWrBufPtr
+ 494 0388 40022540 		.word	1076167232
+ 495 038c 800F2540 		.word	1076170624
+ 496              	.L99:
+ 497 0390 1F26     		movs	r6, #31
+ 498 0392 2948     		ldr	r0, .L102
+ 499 0394 294D     		ldr	r5, .L102+4
+ 500 0396 0260     		str	r2, [r0]
+ 501 0398 2948     		ldr	r0, .L102+8
+ 502 039a 0268     		ldr	r2, [r0]
+ 503 039c 0468     		ldr	r4, [r0]
+ 504 039e 2868     		ldr	r0, [r5]
+ 505 03a0 3240     		ands	r2, r6
+ 506 03a2 821A     		subs	r2, r0, r2
+ 507 03a4 E00B     		lsrs	r0, r4, #15
+ 508 03a6 0140     		ands	r1, r0
+ 509 03a8 8420     		movs	r0, #132
+ 510 03aa 511A     		subs	r1, r2, r1
+ 511 03ac 2960     		str	r1, [r5]
+ 512 03ae 2968     		ldr	r1, [r5]
+ 513 03b0 244A     		ldr	r2, .L102+12
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 10
+
+
+ 514 03b2 8000     		lsls	r0, r0, #2
+ 515 03b4 1160     		str	r1, [r2]
+ 516 03b6 2449     		ldr	r1, .L102+16
+ 517 03b8 0A88     		ldrh	r2, [r1]
+ 518 03ba 0243     		orrs	r2, r0
+ 519 03bc 8020     		movs	r0, #128
+ 520 03be 0A80     		strh	r2, [r1]
+ 521 03c0 224A     		ldr	r2, .L102+20
+ 522 03c2 4002     		lsls	r0, r0, #9
+ 523 03c4 1168     		ldr	r1, [r2]
+ 524 03c6 0143     		orrs	r1, r0
+ 525 03c8 1160     		str	r1, [r2]
+ 526 03ca 1068     		ldr	r0, [r2]
+ 527 03cc 2049     		ldr	r1, .L102+24
+ 528 03ce 0140     		ands	r1, r0
+ 529 03d0 1160     		str	r1, [r2]
+ 530 03d2 0CE7     		b	.L16
+ 531              	.L98:
+ 532 03d4 2522     		movs	r2, #37
+ 533 03d6 1A70     		strb	r2, [r3]
+ 534 03d8 6CE6     		b	.L13
+ 535              	.L97:
+ 536 03da 0833     		adds	r3, r3, #8
+ 537 03dc 48E7     		b	.L33
+ 538              	.L28:
+ 539 03de 1021     		movs	r1, #16
+ 540 03e0 1C4A     		ldr	r2, .L102+28
+ 541 03e2 1160     		str	r1, [r2]
+ 542 03e4 3AE7     		b	.L19
+ 543              	.L26:
+ 544 03e6 1268     		ldr	r2, [r2]
+ 545 03e8 5206     		lsls	r2, r2, #25
+ 546 03ea 00D4     		bmi	.LCB618
+ 547 03ec 36E7     		b	.L19	@long jump
+ 548              	.LCB618:
+ 549 03ee 134A     		ldr	r2, .L102+4
+ 550 03f0 1168     		ldr	r1, [r2]
+ 551 03f2 144A     		ldr	r2, .L102+12
+ 552 03f4 1160     		str	r1, [r2]
+ 553 03f6 FAE6     		b	.L16
+ 554              	.L23:
+ 555 03f8 174C     		ldr	r4, .L102+32
+ 556 03fa 184F     		ldr	r7, .L102+36
+ 557 03fc 2668     		ldr	r6, [r4]
+ 558 03fe 1568     		ldr	r5, [r2]
+ 559 0400 B446     		mov	ip, r6
+ 560 0402 3E68     		ldr	r6, [r7]
+ 561 0404 6544     		add	r5, r5, ip
+ 562 0406 F6B2     		uxtb	r6, r6
+ 563 0408 2E70     		strb	r6, [r5]
+ 564 040a 1568     		ldr	r5, [r2]
+ 565 040c 0135     		adds	r5, r5, #1
+ 566 040e 1560     		str	r5, [r2]
+ 567 0410 0129     		cmp	r1, #1
+ 568 0412 00D1     		bne	.LCB642
+ 569 0414 1FE7     		b	.L24	@long jump
+ 570              	.LCB642:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccZ64EgQ.s 			page 11
+
+
+ 571 0416 2668     		ldr	r6, [r4]
+ 572 0418 1568     		ldr	r5, [r2]
+ 573 041a B446     		mov	ip, r6
+ 574 041c 3E68     		ldr	r6, [r7]
+ 575 041e 6544     		add	r5, r5, ip
+ 576 0420 F6B2     		uxtb	r6, r6
+ 577 0422 2E70     		strb	r6, [r5]
+ 578 0424 1568     		ldr	r5, [r2]
+ 579 0426 0239     		subs	r1, r1, #2
+ 580 0428 0135     		adds	r5, r5, #1
+ 581 042a 1560     		str	r5, [r2]
+ 582 042c 0029     		cmp	r1, #0
+ 583 042e 00D0     		beq	.LCB656
+ 584 0430 7AE6     		b	.L38	@long jump
+ 585              	.LCB656:
+ 586 0432 10E7     		b	.L24
+ 587              	.L43:
+ 588 0434 0120     		movs	r0, #1
+ 589 0436 0EE7     		b	.L24
+ 590              	.L103:
+ 591              		.align	2
+ 592              	.L102:
+ 593 0438 000F2540 		.word	1076170496
+ 594 043c 00000000 		.word	SCB_mstrWrBufIndexTmp
+ 595 0440 08022540 		.word	1076167176
+ 596 0444 00000000 		.word	SCB_mstrWrBufIndex
+ 597 0448 00000000 		.word	SCB_mstrStatus
+ 598 044c 04022540 		.word	1076167172
+ 599 0450 FFFFFEFF 		.word	-65537
+ 600 0454 800F2540 		.word	1076170624
+ 601 0458 00000000 		.word	SCB_mstrRdBufPtr
+ 602 045c 40032540 		.word	1076167488
+ 603              		.size	SCB_I2C_ISR, .-SCB_I2C_ISR
+ 604              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

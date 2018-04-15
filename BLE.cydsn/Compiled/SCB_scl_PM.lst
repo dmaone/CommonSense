@@ -1,0 +1,75 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccgKg88N.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"SCB_scl_PM.c"
+  16              		.section	.text.SCB_scl_Sleep,"ax",%progbits
+  17              		.align	2
+  18              		.global	SCB_scl_Sleep
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	SCB_scl_Sleep, %function
+  22              	SCB_scl_Sleep:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25              		@ link register save eliminated.
+  26 0000 024B     		ldr	r3, .L2
+  27              		@ sp needed
+  28 0002 1A68     		ldr	r2, [r3]
+  29 0004 024B     		ldr	r3, .L2+4
+  30 0006 1A60     		str	r2, [r3]
+  31 0008 7047     		bx	lr
+  32              	.L3:
+  33 000a C046     		.align	2
+  34              	.L2:
+  35 000c 08030440 		.word	1074004744
+  36 0010 00000000 		.word	.LANCHOR0
+  37              		.size	SCB_scl_Sleep, .-SCB_scl_Sleep
+  38              		.section	.text.SCB_scl_Wakeup,"ax",%progbits
+  39              		.align	2
+  40              		.global	SCB_scl_Wakeup
+  41              		.code	16
+  42              		.thumb_func
+  43              		.type	SCB_scl_Wakeup, %function
+  44              	SCB_scl_Wakeup:
+  45              		@ args = 0, pretend = 0, frame = 0
+  46              		@ frame_needed = 0, uses_anonymous_args = 0
+  47              		@ link register save eliminated.
+  48 0000 024B     		ldr	r3, .L5
+  49              		@ sp needed
+  50 0002 1A68     		ldr	r2, [r3]
+  51 0004 024B     		ldr	r3, .L5+4
+  52 0006 1A60     		str	r2, [r3]
+  53 0008 7047     		bx	lr
+  54              	.L6:
+  55 000a C046     		.align	2
+  56              	.L5:
+  57 000c 00000000 		.word	.LANCHOR0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccgKg88N.s 			page 2
+
+
+  58 0010 08030440 		.word	1074004744
+  59              		.size	SCB_scl_Wakeup, .-SCB_scl_Wakeup
+  60              		.bss
+  61              		.align	2
+  62              		.set	.LANCHOR0,. + 0
+  63              		.type	SCB_scl_backup, %object
+  64              		.size	SCB_scl_backup, 12
+  65              	SCB_scl_backup:
+  66 0000 00000000 		.space	12
+  66      00000000 
+  66      00000000 
+  67              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

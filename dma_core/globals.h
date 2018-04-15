@@ -43,7 +43,7 @@
  * If you don't - USB will likely not work.
  * If you do and power from 5V though - you'll most likely fry USB regulator.
  */
-#undef SELF_POWERED
+#define SELF_POWERED
 #define USB_POWER_MODE USB_5V_OPERATION
 
 /*
@@ -128,7 +128,7 @@ enum devicePowerStates {
   DEVSTATE_WATCH,
   DEVSTATE_SUSPENDING,
   DEVSTATE_RESUMING,
-  
+  DEVSTATE_SHUTDOWN_REQUEST,
   DEVSTATE_MAX
 };
 // Modified by ISR!

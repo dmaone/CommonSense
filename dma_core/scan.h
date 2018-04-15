@@ -68,5 +68,7 @@ uint8_t scancode_buffer_readpos;
 void scan_init(uint8_t);
 void scan_start(void);
 void scan_reset(void);
+void scan_nap(void);
+void scan_wake(void);
 void scan_sanity_check(void);
 void report_matrix_readouts(void);

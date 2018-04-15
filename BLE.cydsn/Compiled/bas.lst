@@ -1,0 +1,288 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccH0BMJT.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"bas.c"
+  16              		.section	.text.BasCallBack,"ax",%progbits
+  17              		.align	2
+  18              		.global	BasCallBack
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	BasCallBack, %function
+  22              	BasCallBack:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 70B5     		push	{r4, r5, r6, lr}
+  26 0002 0400     		movs	r4, r0
+  27 0004 8D78     		ldrb	r5, [r1, #2]
+  28 0006 0100     		movs	r1, r0
+  29 0008 1348     		ldr	r0, .L11
+  30 000a FFF7FEFF 		bl	printf
+  31 000e 9923     		movs	r3, #153
+  32 0010 5B00     		lsls	r3, r3, #1
+  33 0012 9C42     		cmp	r4, r3
+  34 0014 13D0     		beq	.L3
+  35 0016 04D9     		bls	.L10
+  36 0018 9B23     		movs	r3, #155
+  37 001a 5B00     		lsls	r3, r3, #1
+  38 001c 9C42     		cmp	r4, r3
+  39 001e 17D8     		bhi	.L2
+  40              	.L1:
+  41              		@ sp needed
+  42 0020 70BD     		pop	{r4, r5, r6, pc}
+  43              	.L10:
+  44 0022 3223     		movs	r3, #50
+  45 0024 FF33     		adds	r3, r3, #255
+  46 0026 9C42     		cmp	r4, r3
+  47 0028 12D1     		bne	.L2
+  48 002a 2900     		movs	r1, r5
+  49 002c 0B48     		ldr	r0, .L11+4
+  50 002e FFF7FEFF 		bl	printf
+  51 0032 002D     		cmp	r5, #0
+  52 0034 F4D1     		bne	.L1
+  53 0036 0122     		movs	r2, #1
+  54 0038 094B     		ldr	r3, .L11+8
+  55 003a 1A80     		strh	r2, [r3]
+  56 003c F0E7     		b	.L1
+  57              	.L3:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccH0BMJT.s 			page 2
+
+
+  58 003e 2900     		movs	r1, r5
+  59 0040 0848     		ldr	r0, .L11+12
+  60 0042 FFF7FEFF 		bl	printf
+  61 0046 002D     		cmp	r5, #0
+  62 0048 EAD1     		bne	.L1
+  63 004a 054B     		ldr	r3, .L11+8
+  64 004c 1D80     		strh	r5, [r3]
+  65 004e E7E7     		b	.L1
+  66              	.L2:
+  67 0050 0548     		ldr	r0, .L11+16
+  68 0052 FFF7FEFF 		bl	puts
+  69 0056 E3E7     		b	.L1
+  70              	.L12:
+  71              		.align	2
+  72              	.L11:
+  73 0058 00000000 		.word	.LC0
+  74 005c 14000000 		.word	.LC2
+  75 0060 00000000 		.word	.LANCHOR0
+  76 0064 40000000 		.word	.LC5
+  77 0068 6C000000 		.word	.LC7
+  78              		.size	BasCallBack, .-BasCallBack
+  79              		.section	.text.BasInit,"ax",%progbits
+  80              		.align	2
+  81              		.global	BasInit
+  82              		.code	16
+  83              		.thumb_func
+  84              		.type	BasInit, %function
+  85              	BasInit:
+  86              		@ args = 0, pretend = 0, frame = 8
+  87              		@ frame_needed = 0, uses_anonymous_args = 0
+  88 0000 00B5     		push	{lr}
+  89 0002 0D48     		ldr	r0, .L18
+  90 0004 85B0     		sub	sp, sp, #20
+  91 0006 FFF7FEFF 		bl	CyBle_BasRegisterAttrCallback
+  92 000a 0E23     		movs	r3, #14
+  93 000c 6B44     		add	r3, r3, sp
+  94 000e 0093     		str	r3, [sp]
+  95 0010 0022     		movs	r2, #0
+  96 0012 0223     		movs	r3, #2
+  97 0014 0021     		movs	r1, #0
+  98 0016 0020     		movs	r0, #0
+  99 0018 FFF7FEFF 		bl	CyBle_BassGetCharacteristicDescriptor
+ 100 001c 0028     		cmp	r0, #0
+ 101 001e 08D1     		bne	.L13
+ 102 0020 6B46     		mov	r3, sp
+ 103 0022 DB89     		ldrh	r3, [r3, #14]
+ 104 0024 002B     		cmp	r3, #0
+ 105 0026 04D0     		beq	.L13
+ 106 0028 0123     		movs	r3, #1
+ 107 002a 044A     		ldr	r2, .L18+4
+ 108 002c 1188     		ldrh	r1, [r2]
+ 109 002e 0B43     		orrs	r3, r1
+ 110 0030 1380     		strh	r3, [r2]
+ 111              	.L13:
+ 112 0032 05B0     		add	sp, sp, #20
+ 113              		@ sp needed
+ 114 0034 00BD     		pop	{pc}
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccH0BMJT.s 			page 3
+
+
+ 115              	.L19:
+ 116 0036 C046     		.align	2
+ 117              	.L18:
+ 118 0038 00000000 		.word	BasCallBack
+ 119 003c 00000000 		.word	.LANCHOR0
+ 120              		.size	BasInit, .-BasInit
+ 121              		.section	.text.SimulateBattery,"ax",%progbits
+ 122              		.align	2
+ 123              		.global	SimulateBattery
+ 124              		.code	16
+ 125              		.thumb_func
+ 126              		.type	SimulateBattery, %function
+ 127              	SimulateBattery:
+ 128              		@ args = 0, pretend = 0, frame = 0
+ 129              		@ frame_needed = 0, uses_anonymous_args = 0
+ 130 0000 30B5     		push	{r4, r5, lr}
+ 131 0002 204B     		ldr	r3, .L35
+ 132 0004 83B0     		sub	sp, sp, #12
+ 133 0006 1B78     		ldrb	r3, [r3]
+ 134 0008 002B     		cmp	r3, #0
+ 135 000a 1CD1     		bne	.L20
+ 136 000c 1E4C     		ldr	r4, .L35+4
+ 137 000e 2368     		ldr	r3, [r4]
+ 138 0010 013B     		subs	r3, r3, #1
+ 139 0012 002B     		cmp	r3, #0
+ 140 0014 19D1     		bne	.L31
+ 141 0016 3223     		movs	r3, #50
+ 142 0018 2360     		str	r3, [r4]
+ 143 001a 2379     		ldrb	r3, [r4, #4]
+ 144 001c 0133     		adds	r3, r3, #1
+ 145 001e DBB2     		uxtb	r3, r3
+ 146 0020 142B     		cmp	r3, #20
+ 147 0022 14D8     		bhi	.L32
+ 148 0024 194D     		ldr	r5, .L35+8
+ 149 0026 2371     		strb	r3, [r4, #4]
+ 150 0028 2B88     		ldrh	r3, [r5]
+ 151 002a 012B     		cmp	r3, #1
+ 152 002c 15D0     		beq	.L33
+ 153              	.L27:
+ 154 002e 231D     		adds	r3, r4, #4
+ 155 0030 0122     		movs	r2, #1
+ 156 0032 0021     		movs	r1, #0
+ 157 0034 0020     		movs	r0, #0
+ 158 0036 FFF7FEFF 		bl	CyBle_BassSetCharacteristicValue
+ 159 003a 0028     		cmp	r0, #0
+ 160 003c 1BD1     		bne	.L34
+ 161              	.L29:
+ 162 003e 2179     		ldrb	r1, [r4, #4]
+ 163 0040 1348     		ldr	r0, .L35+12
+ 164 0042 FFF7FEFF 		bl	printf
+ 165              	.L20:
+ 166 0046 03B0     		add	sp, sp, #12
+ 167              		@ sp needed
+ 168 0048 30BD     		pop	{r4, r5, pc}
+ 169              	.L31:
+ 170 004a 2360     		str	r3, [r4]
+ 171 004c FBE7     		b	.L20
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccH0BMJT.s 			page 4
+
+
+ 172              	.L32:
+ 173 004e 0223     		movs	r3, #2
+ 174 0050 0E4D     		ldr	r5, .L35+8
+ 175 0052 2371     		strb	r3, [r4, #4]
+ 176 0054 2B88     		ldrh	r3, [r5]
+ 177 0056 012B     		cmp	r3, #1
+ 178 0058 E9D1     		bne	.L27
+ 179              	.L33:
+ 180 005a 0E4A     		ldr	r2, .L35+16
+ 181 005c 231D     		adds	r3, r4, #4
+ 182 005e 0093     		str	r3, [sp]
+ 183 0060 5078     		ldrb	r0, [r2, #1]
+ 184 0062 1378     		ldrb	r3, [r2]
+ 185 0064 0002     		lsls	r0, r0, #8
+ 186 0066 1843     		orrs	r0, r3
+ 187 0068 0022     		movs	r2, #0
+ 188 006a 0123     		movs	r3, #1
+ 189 006c 0021     		movs	r1, #0
+ 190 006e FFF7FEFF 		bl	CyBle_BassSendNotification
+ 191 0072 0028     		cmp	r0, #0
+ 192 0074 E3D0     		beq	.L29
+ 193              	.L34:
+ 194 0076 0100     		movs	r1, r0
+ 195 0078 0748     		ldr	r0, .L35+20
+ 196 007a FFF7FEFF 		bl	printf
+ 197 007e 0023     		movs	r3, #0
+ 198 0080 2B80     		strh	r3, [r5]
+ 199 0082 E0E7     		b	.L20
+ 200              	.L36:
+ 201              		.align	2
+ 202              	.L35:
+ 203 0084 00000000 		.word	cyBle_busyStatus
+ 204 0088 00000000 		.word	.LANCHOR1
+ 205 008c 00000000 		.word	.LANCHOR0
+ 206 0090 98000000 		.word	.LC17
+ 207 0094 00000000 		.word	cyBle_connHandle
+ 208 0098 84000000 		.word	.LC15
+ 209              		.size	SimulateBattery, .-SimulateBattery
+ 210              		.global	batterySimulationNotify
+ 211              		.comm	keyboard_report_usage,1,1
+ 212              		.comm	keyboard_report,20,4
+ 213              		.data
+ 214              		.align	2
+ 215              		.set	.LANCHOR1,. + 0
+ 216              		.type	batteryTimer.8688, %object
+ 217              		.size	batteryTimer.8688, 4
+ 218              	batteryTimer.8688:
+ 219 0000 32000000 		.word	50
+ 220              		.type	batteryLevel.8689, %object
+ 221              		.size	batteryLevel.8689, 1
+ 222              	batteryLevel.8689:
+ 223 0004 02       		.byte	2
+ 224              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 225              		.align	2
+ 226              	.LC0:
+ 227 0000 42415320 		.ascii	"BAS event: %lx, \000"
+ 227      6576656E 
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccH0BMJT.s 			page 5
+
+
+ 227      743A2025 
+ 227      6C782C20 
+ 227      00
+ 228 0011 000000   		.space	3
+ 229              	.LC2:
+ 230 0014 4359424C 		.ascii	"CYBLE_EVT_BASS_NOTIFICATION_ENABLED: %x \015\012\000"
+ 230      455F4556 
+ 230      545F4241 
+ 230      53535F4E 
+ 230      4F544946 
+ 231 003f 00       		.space	1
+ 232              	.LC5:
+ 233 0040 4359424C 		.ascii	"CYBLE_EVT_BASS_NOTIFICATION_DISABLED: %x \015\012\000"
+ 233      455F4556 
+ 233      545F4241 
+ 233      53535F4E 
+ 233      4F544946 
+ 234              	.LC7:
+ 235 006c 4E6F7420 		.ascii	"Not supported event\015\000"
+ 235      73757070 
+ 235      6F727465 
+ 235      64206576 
+ 235      656E740D 
+ 236 0081 000000   		.space	3
+ 237              	.LC15:
+ 238 0084 41504920 		.ascii	"API Error: %x \015\012\000"
+ 238      4572726F 
+ 238      723A2025 
+ 238      78200D0A 
+ 238      00
+ 239 0095 000000   		.space	3
+ 240              	.LC17:
+ 241 0098 53696D75 		.ascii	"SimulBatteryLevelUpdate: %d \015\012\000"
+ 241      6C426174 
+ 241      74657279 
+ 241      4C657665 
+ 241      6C557064 
+ 242              		.bss
+ 243              		.align	1
+ 244              		.set	.LANCHOR0,. + 0
+ 245              		.type	batterySimulationNotify, %object
+ 246              		.size	batterySimulationNotify, 2
+ 247              	batterySimulationNotify:
+ 248 0000 0000     		.space	2
+ 249              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

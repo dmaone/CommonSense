@@ -6,12 +6,14 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "pipeline.h"
-#include "PSoC_USB.h"
-#include "exp.h"
-#include "scan.h"
 #include <project.h>
 #include <string.h>
+
+#include "exp.h"
+#include "scan.h"
+#include "pipeline.h"
+#include "PSoC_USB.h"
+#include "sup_serial.h"
 
 uint8_t pipeline_prev_usbkey;
 uint32_t pipeline_prev_usbkey_time;
@@ -283,6 +285,7 @@ inline void update_reports(void) {
         update_system_report(&USBQueue[pos]);
       } else {
         update_keyboard_report(&USBQueue[pos]);
+        update_serial_keyboard_report(&USBQueue[pos]);
       }
       if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
         // We only throttle keypresses. Key release doesn't slow us down -

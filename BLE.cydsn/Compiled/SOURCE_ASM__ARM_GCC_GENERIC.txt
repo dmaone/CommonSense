@@ -1,0 +1,1 @@
+'C:\Projects\CommonSense\BLE.cydsn\Generated_Source\PSoC4\CyBootAsmGnu.s' -o .o -T SOURCE_ASM__ARM_GCC_GENERIC -I 'C:\Projects\CommonSense\BLE.cydsn' -I 'C:\Projects\CommonSense\BLE.cydsn\Generated_Source\PSoC4' -f 'C:\Projects\CommonSense\BLE.cydsn\Compiled\.deps\SOURCE_ASM__ARM_GCC_GENERIC.d'

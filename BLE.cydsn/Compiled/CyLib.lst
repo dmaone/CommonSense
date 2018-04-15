@@ -1,0 +1,2043 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"CyLib.c"
+  16              		.section	.text.CySysTickServiceCallbacks,"ax",%progbits
+  17              		.align	2
+  18              		.code	16
+  19              		.thumb_func
+  20              		.type	CySysTickServiceCallbacks, %function
+  21              	CySysTickServiceCallbacks:
+  22              		@ args = 0, pretend = 0, frame = 0
+  23              		@ frame_needed = 0, uses_anonymous_args = 0
+  24 0000 074B     		ldr	r3, .L12
+  25 0002 70B5     		push	{r4, r5, r6, lr}
+  26 0004 1B68     		ldr	r3, [r3]
+  27 0006 DB03     		lsls	r3, r3, #15
+  28 0008 00D4     		bmi	.L11
+  29              	.L1:
+  30              		@ sp needed
+  31 000a 70BD     		pop	{r4, r5, r6, pc}
+  32              	.L11:
+  33 000c 0024     		movs	r4, #0
+  34 000e 054D     		ldr	r5, .L12+4
+  35              	.L4:
+  36 0010 2B59     		ldr	r3, [r5, r4]
+  37 0012 002B     		cmp	r3, #0
+  38 0014 00D0     		beq	.L3
+  39 0016 9847     		blx	r3
+  40              	.L3:
+  41 0018 0434     		adds	r4, r4, #4
+  42 001a 142C     		cmp	r4, #20
+  43 001c F8D1     		bne	.L4
+  44 001e F4E7     		b	.L1
+  45              	.L13:
+  46              		.align	2
+  47              	.L12:
+  48 0020 10E000E0 		.word	-536813552
+  49 0024 00000000 		.word	.LANCHOR0
+  50              		.size	CySysTickServiceCallbacks, .-CySysTickServiceCallbacks
+  51              		.section	.text.CySysClkImoStart,"ax",%progbits
+  52              		.align	2
+  53              		.global	CySysClkImoStart
+  54              		.code	16
+  55              		.thumb_func
+  56              		.type	CySysClkImoStart, %function
+  57              	CySysClkImoStart:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 2
+
+
+  58              		@ args = 0, pretend = 0, frame = 0
+  59              		@ frame_needed = 0, uses_anonymous_args = 0
+  60              		@ link register save eliminated.
+  61 0000 8021     		movs	r1, #128
+  62 0002 034A     		ldr	r2, .L15
+  63 0004 0906     		lsls	r1, r1, #24
+  64 0006 1368     		ldr	r3, [r2]
+  65              		@ sp needed
+  66 0008 0B43     		orrs	r3, r1
+  67 000a 1360     		str	r3, [r2]
+  68 000c 7047     		bx	lr
+  69              	.L16:
+  70 000e C046     		.align	2
+  71              	.L15:
+  72 0010 08010B40 		.word	1074462984
+  73              		.size	CySysClkImoStart, .-CySysClkImoStart
+  74              		.section	.text.CySysClkImoStop,"ax",%progbits
+  75              		.align	2
+  76              		.global	CySysClkImoStop
+  77              		.code	16
+  78              		.thumb_func
+  79              		.type	CySysClkImoStop, %function
+  80              	CySysClkImoStop:
+  81              		@ args = 0, pretend = 0, frame = 0
+  82              		@ frame_needed = 0, uses_anonymous_args = 0
+  83              		@ link register save eliminated.
+  84 0000 024A     		ldr	r2, .L18
+  85              		@ sp needed
+  86 0002 1368     		ldr	r3, [r2]
+  87 0004 5B00     		lsls	r3, r3, #1
+  88 0006 5B08     		lsrs	r3, r3, #1
+  89 0008 1360     		str	r3, [r2]
+  90 000a 7047     		bx	lr
+  91              	.L19:
+  92              		.align	2
+  93              	.L18:
+  94 000c 08010B40 		.word	1074462984
+  95              		.size	CySysClkImoStop, .-CySysClkImoStop
+  96              		.section	.text.CySysClkWriteHfclkDirect,"ax",%progbits
+  97              		.align	2
+  98              		.global	CySysClkWriteHfclkDirect
+  99              		.code	16
+ 100              		.thumb_func
+ 101              		.type	CySysClkWriteHfclkDirect, %function
+ 102              	CySysClkWriteHfclkDirect:
+ 103              		@ args = 0, pretend = 0, frame = 0
+ 104              		@ frame_needed = 0, uses_anonymous_args = 0
+ 105 0000 10B5     		push	{r4, lr}
+ 106 0002 0400     		movs	r4, r0
+ 107 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 108 0008 0723     		movs	r3, #7
+ 109 000a 0449     		ldr	r1, .L21
+ 110              		@ sp needed
+ 111 000c 0A68     		ldr	r2, [r1]
+ 112 000e 9A43     		bics	r2, r3
+ 113 0010 2340     		ands	r3, r4
+ 114 0012 1343     		orrs	r3, r2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 3
+
+
+ 115 0014 0B60     		str	r3, [r1]
+ 116 0016 FFF7FEFF 		bl	CyExitCriticalSection
+ 117 001a 10BD     		pop	{r4, pc}
+ 118              	.L22:
+ 119              		.align	2
+ 120              	.L21:
+ 121 001c 00010B40 		.word	1074462976
+ 122              		.size	CySysClkWriteHfclkDirect, .-CySysClkWriteHfclkDirect
+ 123              		.section	.text.CySysEnablePumpClock,"ax",%progbits
+ 124              		.align	2
+ 125              		.global	CySysEnablePumpClock
+ 126              		.code	16
+ 127              		.thumb_func
+ 128              		.type	CySysEnablePumpClock, %function
+ 129              	CySysEnablePumpClock:
+ 130              		@ args = 0, pretend = 0, frame = 0
+ 131              		@ frame_needed = 0, uses_anonymous_args = 0
+ 132              		@ link register save eliminated.
+ 133 0000 C307     		lsls	r3, r0, #31
+ 134 0002 0AD4     		bmi	.L26
+ 135 0004 094A     		ldr	r2, .L27
+ 136 0006 0A49     		ldr	r1, .L27+4
+ 137 0008 1368     		ldr	r3, [r2]
+ 138 000a 1B01     		lsls	r3, r3, #4
+ 139 000c 5B0F     		lsrs	r3, r3, #29
+ 140 000e 0B60     		str	r3, [r1]
+ 141 0010 1168     		ldr	r1, [r2]
+ 142 0012 084B     		ldr	r3, .L27+8
+ 143 0014 0B40     		ands	r3, r1
+ 144 0016 1360     		str	r3, [r2]
+ 145              	.L23:
+ 146              		@ sp needed
+ 147 0018 7047     		bx	lr
+ 148              	.L26:
+ 149 001a 054B     		ldr	r3, .L27+4
+ 150 001c 0349     		ldr	r1, .L27
+ 151 001e 1B68     		ldr	r3, [r3]
+ 152 0020 0A68     		ldr	r2, [r1]
+ 153 0022 5B06     		lsls	r3, r3, #25
+ 154 0024 1343     		orrs	r3, r2
+ 155 0026 0B60     		str	r3, [r1]
+ 156 0028 F6E7     		b	.L23
+ 157              	.L28:
+ 158 002a C046     		.align	2
+ 159              	.L27:
+ 160 002c 08010B40 		.word	1074462984
+ 161 0030 00000000 		.word	.LANCHOR1
+ 162 0034 FFFFFFF1 		.word	-234881025
+ 163              		.size	CySysEnablePumpClock, .-CySysEnablePumpClock
+ 164              		.section	.text.CySysClkGetSysclkSource,"ax",%progbits
+ 165              		.align	2
+ 166              		.global	CySysClkGetSysclkSource
+ 167              		.code	16
+ 168              		.thumb_func
+ 169              		.type	CySysClkGetSysclkSource, %function
+ 170              	CySysClkGetSysclkSource:
+ 171              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 4
+
+
+ 172              		@ frame_needed = 0, uses_anonymous_args = 0
+ 173 0000 10B5     		push	{r4, lr}
+ 174 0002 FFF7FEFF 		bl	CyEnterCriticalSection
+ 175 0006 034B     		ldr	r3, .L30
+ 176              		@ sp needed
+ 177 0008 1C68     		ldr	r4, [r3]
+ 178 000a FFF7FEFF 		bl	CyExitCriticalSection
+ 179 000e 0720     		movs	r0, #7
+ 180 0010 2040     		ands	r0, r4
+ 181 0012 10BD     		pop	{r4, pc}
+ 182              	.L31:
+ 183              		.align	2
+ 184              	.L30:
+ 185 0014 00010B40 		.word	1074462976
+ 186              		.size	CySysClkGetSysclkSource, .-CySysClkGetSysclkSource
+ 187              		.section	.text.CySysClkWriteSysclkDiv,"ax",%progbits
+ 188              		.align	2
+ 189              		.global	CySysClkWriteSysclkDiv
+ 190              		.code	16
+ 191              		.thumb_func
+ 192              		.type	CySysClkWriteSysclkDiv, %function
+ 193              	CySysClkWriteSysclkDiv:
+ 194              		@ args = 0, pretend = 0, frame = 0
+ 195              		@ frame_needed = 0, uses_anonymous_args = 0
+ 196 0000 70B5     		push	{r4, r5, r6, lr}
+ 197 0002 0400     		movs	r4, r0
+ 198 0004 FFF7FEFF 		bl	CyEnterCriticalSection
+ 199 0008 E104     		lsls	r1, r4, #19
+ 200 000a E024     		movs	r4, #224
+ 201 000c 054D     		ldr	r5, .L33
+ 202 000e A403     		lsls	r4, r4, #14
+ 203 0010 2B68     		ldr	r3, [r5]
+ 204 0012 054A     		ldr	r2, .L33+4
+ 205 0014 2140     		ands	r1, r4
+ 206 0016 1A40     		ands	r2, r3
+ 207 0018 0B00     		movs	r3, r1
+ 208 001a 1343     		orrs	r3, r2
+ 209 001c 2B60     		str	r3, [r5]
+ 210 001e FFF7FEFF 		bl	CyExitCriticalSection
+ 211              		@ sp needed
+ 212 0022 70BD     		pop	{r4, r5, r6, pc}
+ 213              	.L34:
+ 214              		.align	2
+ 215              	.L33:
+ 216 0024 00010B40 		.word	1074462976
+ 217 0028 FFFFC7FF 		.word	-3670017
+ 218              		.size	CySysClkWriteSysclkDiv, .-CySysClkWriteSysclkDiv
+ 219              		.section	.text.CySysClkWriteImoFreq,"ax",%progbits
+ 220              		.align	2
+ 221              		.global	CySysClkWriteImoFreq
+ 222              		.code	16
+ 223              		.thumb_func
+ 224              		.type	CySysClkWriteImoFreq, %function
+ 225              	CySysClkWriteImoFreq:
+ 226              		@ args = 0, pretend = 0, frame = 0
+ 227              		@ frame_needed = 0, uses_anonymous_args = 0
+ 228 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 5
+
+
+ 229 0002 5F46     		mov	r7, fp
+ 230 0004 4D46     		mov	r5, r9
+ 231 0006 4446     		mov	r4, r8
+ 232 0008 5646     		mov	r6, r10
+ 233 000a F0B4     		push	{r4, r5, r6, r7}
+ 234 000c 0400     		movs	r4, r0
+ 235 000e FFF7FEFF 		bl	CyEnterCriticalSection
+ 236 0012 E51E     		subs	r5, r4, #3
+ 237 0014 0700     		movs	r7, r0
+ 238 0016 2D2D     		cmp	r5, #45
+ 239 0018 3BD8     		bhi	.L36
+ 240 001a 484B     		ldr	r3, .L48
+ 241 001c 1B78     		ldrb	r3, [r3]
+ 242 001e 9C42     		cmp	r4, r3
+ 243 0020 41D8     		bhi	.L37
+ 244 0022 474B     		ldr	r3, .L48+4
+ 245 0024 1B78     		ldrb	r3, [r3]
+ 246 0026 DBB2     		uxtb	r3, r3
+ 247 0028 9A46     		mov	r10, r3
+ 248 002a 464B     		ldr	r3, .L48+8
+ 249 002c 1B78     		ldrb	r3, [r3]
+ 250 002e DBB2     		uxtb	r3, r3
+ 251 0030 9946     		mov	r9, r3
+ 252              	.L38:
+ 253 0032 454B     		ldr	r3, .L48+12
+ 254 0034 9B46     		mov	fp, r3
+ 255 0036 5B5D     		ldrb	r3, [r3, r5]
+ 256 0038 9846     		mov	r8, r3
+ 257 003a 2F2B     		cmp	r3, #47
+ 258 003c 01D9     		bls	.L42
+ 259 003e 2A2C     		cmp	r4, #42
+ 260 0040 4BD8     		bhi	.L46
+ 261              	.L42:
+ 262 0042 3F26     		movs	r6, #63
+ 263 0044 414B     		ldr	r3, .L48+16
+ 264 0046 1A68     		ldr	r2, [r3]
+ 265 0048 1640     		ands	r6, r2
+ 266 004a B045     		cmp	r8, r6
+ 267 004c 04D2     		bcs	.L44
+ 268 004e 4246     		mov	r2, r8
+ 269 0050 0520     		movs	r0, #5
+ 270 0052 1A60     		str	r2, [r3]
+ 271 0054 FFF7FEFF 		bl	CyDelayCycles
+ 272              	.L44:
+ 273 0058 3D4B     		ldr	r3, .L48+20
+ 274 005a 3E4A     		ldr	r2, .L48+24
+ 275 005c 9C46     		mov	ip, r3
+ 276 005e 6444     		add	r4, r4, ip
+ 277 0060 2378     		ldrb	r3, [r4]
+ 278 0062 DBB2     		uxtb	r3, r3
+ 279 0064 1360     		str	r3, [r2]
+ 280 0066 5246     		mov	r2, r10
+ 281 0068 3B4B     		ldr	r3, .L48+28
+ 282 006a 1A60     		str	r2, [r3]
+ 283 006c 4A46     		mov	r2, r9
+ 284 006e 3B4B     		ldr	r3, .L48+32
+ 285 0070 1A60     		str	r2, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 6
+
+
+ 286 0072 3B4B     		ldr	r3, .L48+36
+ 287 0074 1879     		ldrb	r0, [r3, #4]
+ 288 0076 8300     		lsls	r3, r0, #2
+ 289 0078 1818     		adds	r0, r3, r0
+ 290 007a FFF7FEFF 		bl	CyDelayCycles
+ 291 007e B045     		cmp	r8, r6
+ 292 0080 08D9     		bls	.L45
+ 293              	.L43:
+ 294 0082 5B46     		mov	r3, fp
+ 295 0084 5A5D     		ldrb	r2, [r3, r5]
+ 296 0086 314B     		ldr	r3, .L48+16
+ 297 0088 0520     		movs	r0, #5
+ 298 008a 1A60     		str	r2, [r3]
+ 299 008c FFF7FEFF 		bl	CyDelayCycles
+ 300 0090 00E0     		b	.L45
+ 301              	.L36:
+ 302              		.syntax divided
+ 303              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 304 0092 01BE     		    bkpt    1
+ 305              	@ 0 "" 2
+ 306              		.thumb
+ 307              		.syntax unified
+ 308              	.L45:
+ 309 0094 3800     		movs	r0, r7
+ 310 0096 FFF7FEFF 		bl	CyExitCriticalSection
+ 311              		@ sp needed
+ 312 009a 3CBC     		pop	{r2, r3, r4, r5}
+ 313 009c 9046     		mov	r8, r2
+ 314 009e 9946     		mov	r9, r3
+ 315 00a0 A246     		mov	r10, r4
+ 316 00a2 AB46     		mov	fp, r5
+ 317 00a4 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 318              	.L37:
+ 319 00a6 2F4B     		ldr	r3, .L48+40
+ 320 00a8 1B78     		ldrb	r3, [r3]
+ 321 00aa 9C42     		cmp	r4, r3
+ 322 00ac 0CD9     		bls	.L47
+ 323 00ae 2E4B     		ldr	r3, .L48+44
+ 324 00b0 1B78     		ldrb	r3, [r3]
+ 325 00b2 9C42     		cmp	r4, r3
+ 326 00b4 2BD8     		bhi	.L40
+ 327 00b6 2D4B     		ldr	r3, .L48+48
+ 328 00b8 1B78     		ldrb	r3, [r3]
+ 329 00ba DBB2     		uxtb	r3, r3
+ 330 00bc 9A46     		mov	r10, r3
+ 331 00be 2C4B     		ldr	r3, .L48+52
+ 332 00c0 1B78     		ldrb	r3, [r3]
+ 333 00c2 DBB2     		uxtb	r3, r3
+ 334 00c4 9946     		mov	r9, r3
+ 335 00c6 B4E7     		b	.L38
+ 336              	.L47:
+ 337 00c8 2A4B     		ldr	r3, .L48+56
+ 338 00ca 1B78     		ldrb	r3, [r3]
+ 339 00cc DBB2     		uxtb	r3, r3
+ 340 00ce 9A46     		mov	r10, r3
+ 341 00d0 294B     		ldr	r3, .L48+60
+ 342 00d2 1B78     		ldrb	r3, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 7
+
+
+ 343 00d4 DBB2     		uxtb	r3, r3
+ 344 00d6 9946     		mov	r9, r3
+ 345 00d8 ABE7     		b	.L38
+ 346              	.L46:
+ 347 00da 1922     		movs	r2, #25
+ 348 00dc 1B4B     		ldr	r3, .L48+16
+ 349 00de 0520     		movs	r0, #5
+ 350 00e0 1A60     		str	r2, [r3]
+ 351 00e2 FFF7FEFF 		bl	CyDelayCycles
+ 352 00e6 1A4B     		ldr	r3, .L48+20
+ 353 00e8 1A4A     		ldr	r2, .L48+24
+ 354 00ea 9C46     		mov	ip, r3
+ 355 00ec 6444     		add	r4, r4, ip
+ 356 00ee 2378     		ldrb	r3, [r4]
+ 357 00f0 DBB2     		uxtb	r3, r3
+ 358 00f2 1360     		str	r3, [r2]
+ 359 00f4 5246     		mov	r2, r10
+ 360 00f6 184B     		ldr	r3, .L48+28
+ 361 00f8 1A60     		str	r2, [r3]
+ 362 00fa 4A46     		mov	r2, r9
+ 363 00fc 174B     		ldr	r3, .L48+32
+ 364 00fe 1A60     		str	r2, [r3]
+ 365 0100 174B     		ldr	r3, .L48+36
+ 366 0102 1879     		ldrb	r0, [r3, #4]
+ 367 0104 8300     		lsls	r3, r0, #2
+ 368 0106 1818     		adds	r0, r3, r0
+ 369 0108 FFF7FEFF 		bl	CyDelayCycles
+ 370 010c B9E7     		b	.L43
+ 371              	.L40:
+ 372 010e 1B4B     		ldr	r3, .L48+64
+ 373 0110 1B78     		ldrb	r3, [r3]
+ 374 0112 9C42     		cmp	r4, r3
+ 375 0114 08D8     		bhi	.L41
+ 376 0116 1A4B     		ldr	r3, .L48+68
+ 377 0118 1B78     		ldrb	r3, [r3]
+ 378 011a DBB2     		uxtb	r3, r3
+ 379 011c 9A46     		mov	r10, r3
+ 380 011e 194B     		ldr	r3, .L48+72
+ 381 0120 1B78     		ldrb	r3, [r3]
+ 382 0122 DBB2     		uxtb	r3, r3
+ 383 0124 9946     		mov	r9, r3
+ 384 0126 84E7     		b	.L38
+ 385              	.L41:
+ 386 0128 174B     		ldr	r3, .L48+76
+ 387 012a 1B78     		ldrb	r3, [r3]
+ 388 012c DBB2     		uxtb	r3, r3
+ 389 012e 9A46     		mov	r10, r3
+ 390 0130 074B     		ldr	r3, .L48+20
+ 391 0132 1B78     		ldrb	r3, [r3]
+ 392 0134 DBB2     		uxtb	r3, r3
+ 393 0136 9946     		mov	r9, r3
+ 394 0138 7BE7     		b	.L38
+ 395              	.L49:
+ 396 013a C046     		.align	2
+ 397              	.L48:
+ 398 013c 40F3FF0F 		.word	268432192
+ 399 0140 41F3FF0F 		.word	268432193
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 8
+
+
+ 400 0144 42F3FF0F 		.word	268432194
+ 401 0148 00000000 		.word	.LANCHOR2
+ 402 014c 2CFF0B40 		.word	1074528044
+ 403 0150 4DF3FF0F 		.word	268432205
+ 404 0154 28FF0B40 		.word	1074528040
+ 405 0158 1CFF0B40 		.word	1074528028
+ 406 015c 20FF0B40 		.word	1074528032
+ 407 0160 00000000 		.word	.LANCHOR1
+ 408 0164 43F3FF0F 		.word	268432195
+ 409 0168 46F3FF0F 		.word	268432198
+ 410 016c 47F3FF0F 		.word	268432199
+ 411 0170 48F3FF0F 		.word	268432200
+ 412 0174 44F3FF0F 		.word	268432196
+ 413 0178 45F3FF0F 		.word	268432197
+ 414 017c 49F3FF0F 		.word	268432201
+ 415 0180 4AF3FF0F 		.word	268432202
+ 416 0184 4BF3FF0F 		.word	268432203
+ 417 0188 4CF3FF0F 		.word	268432204
+ 418              		.size	CySysClkWriteImoFreq, .-CySysClkWriteImoFreq
+ 419              		.section	.text.CySysClkEcoStart,"ax",%progbits
+ 420              		.align	2
+ 421              		.global	CySysClkEcoStart
+ 422              		.code	16
+ 423              		.thumb_func
+ 424              		.type	CySysClkEcoStart, %function
+ 425              	CySysClkEcoStart:
+ 426              		@ args = 0, pretend = 0, frame = 0
+ 427              		@ frame_needed = 0, uses_anonymous_args = 0
+ 428 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 429 0002 0123     		movs	r3, #1
+ 430 0004 0F4A     		ldr	r2, .L56
+ 431 0006 0400     		movs	r4, r0
+ 432 0008 1168     		ldr	r1, [r2]
+ 433 000a 0B43     		orrs	r3, r1
+ 434 000c 8021     		movs	r1, #128
+ 435 000e 1360     		str	r3, [r2]
+ 436 0010 0D4A     		ldr	r2, .L56+4
+ 437 0012 0E4B     		ldr	r3, .L56+8
+ 438 0014 0902     		lsls	r1, r1, #8
+ 439 0016 1A60     		str	r2, [r3]
+ 440 0018 0D4A     		ldr	r2, .L56+12
+ 441 001a 1368     		ldr	r3, [r2]
+ 442 001c 0B43     		orrs	r3, r1
+ 443 001e 1360     		str	r3, [r2]
+ 444 0020 0028     		cmp	r0, #0
+ 445 0022 0DD0     		beq	.L53
+ 446 0024 0125     		movs	r5, #1
+ 447 0026 0B4F     		ldr	r7, .L56+16
+ 448 0028 0B4E     		ldr	r6, .L56+20
+ 449              	.L54:
+ 450 002a 3879     		ldrb	r0, [r7, #4]
+ 451 002c FFF7FEFF 		bl	CyDelayCycles
+ 452 0030 3368     		ldr	r3, [r6]
+ 453 0032 1D42     		tst	r5, r3
+ 454 0034 04D1     		bne	.L53
+ 455 0036 013C     		subs	r4, r4, #1
+ 456 0038 002C     		cmp	r4, #0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 9
+
+
+ 457 003a F6D1     		bne	.L54
+ 458 003c 1020     		movs	r0, #16
+ 459 003e 00E0     		b	.L52
+ 460              	.L53:
+ 461 0040 0020     		movs	r0, #0
+ 462              	.L52:
+ 463              		@ sp needed
+ 464 0042 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 465              	.L57:
+ 466              		.align	2
+ 467              	.L56:
+ 468 0044 60F02E40 		.word	1076818016
+ 469 0048 02200000 		.word	8194
+ 470 004c 78002E40 		.word	1076756600
+ 471 0050 10002E40 		.word	1076756496
+ 472 0054 00000000 		.word	.LANCHOR1
+ 473 0058 0C002E40 		.word	1076756492
+ 474              		.size	CySysClkEcoStart, .-CySysClkEcoStart
+ 475              		.section	.text.CySysClkEcoStop,"ax",%progbits
+ 476              		.align	2
+ 477              		.global	CySysClkEcoStop
+ 478              		.code	16
+ 479              		.thumb_func
+ 480              		.type	CySysClkEcoStop, %function
+ 481              	CySysClkEcoStop:
+ 482              		@ args = 0, pretend = 0, frame = 0
+ 483              		@ frame_needed = 0, uses_anonymous_args = 0
+ 484              		@ link register save eliminated.
+ 485 0000 0121     		movs	r1, #1
+ 486 0002 054A     		ldr	r2, .L59
+ 487              		@ sp needed
+ 488 0004 1368     		ldr	r3, [r2]
+ 489 0006 8B43     		bics	r3, r1
+ 490 0008 1360     		str	r3, [r2]
+ 491 000a 044A     		ldr	r2, .L59+4
+ 492 000c 044B     		ldr	r3, .L59+8
+ 493 000e 1168     		ldr	r1, [r2]
+ 494 0010 0B40     		ands	r3, r1
+ 495 0012 1360     		str	r3, [r2]
+ 496 0014 7047     		bx	lr
+ 497              	.L60:
+ 498 0016 C046     		.align	2
+ 499              	.L59:
+ 500 0018 60F02E40 		.word	1076818016
+ 501 001c 10002E40 		.word	1076756496
+ 502 0020 FF7FFFFF 		.word	-32769
+ 503              		.size	CySysClkEcoStop, .-CySysClkEcoStop
+ 504              		.section	.text.CySysClkEcoReadStatus,"ax",%progbits
+ 505              		.align	2
+ 506              		.global	CySysClkEcoReadStatus
+ 507              		.code	16
+ 508              		.thumb_func
+ 509              		.type	CySysClkEcoReadStatus, %function
+ 510              	CySysClkEcoReadStatus:
+ 511              		@ args = 0, pretend = 0, frame = 0
+ 512              		@ frame_needed = 0, uses_anonymous_args = 0
+ 513              		@ link register save eliminated.
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 10
+
+
+ 514 0000 0120     		movs	r0, #1
+ 515 0002 024B     		ldr	r3, .L62
+ 516              		@ sp needed
+ 517 0004 1B68     		ldr	r3, [r3]
+ 518 0006 1840     		ands	r0, r3
+ 519 0008 7047     		bx	lr
+ 520              	.L63:
+ 521 000a C046     		.align	2
+ 522              	.L62:
+ 523 000c 0C002E40 		.word	1076756492
+ 524              		.size	CySysClkEcoReadStatus, .-CySysClkEcoReadStatus
+ 525              		.section	.text.CySysClkWriteEcoDiv,"ax",%progbits
+ 526              		.align	2
+ 527              		.global	CySysClkWriteEcoDiv
+ 528              		.code	16
+ 529              		.thumb_func
+ 530              		.type	CySysClkWriteEcoDiv, %function
+ 531              	CySysClkWriteEcoDiv:
+ 532              		@ args = 0, pretend = 0, frame = 0
+ 533              		@ frame_needed = 0, uses_anonymous_args = 0
+ 534 0000 0722     		movs	r2, #7
+ 535 0002 0A4B     		ldr	r3, .L68
+ 536 0004 10B5     		push	{r4, lr}
+ 537 0006 1B68     		ldr	r3, [r3]
+ 538 0008 0400     		movs	r4, r0
+ 539 000a 1340     		ands	r3, r2
+ 540 000c 022B     		cmp	r3, #2
+ 541 000e 01D1     		bne	.L67
+ 542              		.syntax divided
+ 543              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 544 0010 01BE     		    bkpt    1
+ 545              	@ 0 "" 2
+ 546              		.thumb
+ 547              		.syntax unified
+ 548              	.L64:
+ 549              		@ sp needed
+ 550 0012 10BD     		pop	{r4, pc}
+ 551              	.L67:
+ 552 0014 FFF7FEFF 		bl	CyEnterCriticalSection
+ 553 0018 0321     		movs	r1, #3
+ 554 001a 054A     		ldr	r2, .L68+4
+ 555 001c 0C40     		ands	r4, r1
+ 556 001e 1368     		ldr	r3, [r2]
+ 557 0020 8B43     		bics	r3, r1
+ 558 0022 2343     		orrs	r3, r4
+ 559 0024 1360     		str	r3, [r2]
+ 560 0026 FFF7FEFF 		bl	CyExitCriticalSection
+ 561 002a F2E7     		b	.L64
+ 562              	.L69:
+ 563              		.align	2
+ 564              	.L68:
+ 565 002c 00010B40 		.word	1074462976
+ 566 0030 64F02E40 		.word	1076818020
+ 567              		.size	CySysClkWriteEcoDiv, .-CySysClkWriteEcoDiv
+ 568              		.section	.text.CySysLvdEnable,"ax",%progbits
+ 569              		.align	2
+ 570              		.global	CySysLvdEnable
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 11
+
+
+ 571              		.code	16
+ 572              		.thumb_func
+ 573              		.type	CySysLvdEnable, %function
+ 574              	CySysLvdEnable:
+ 575              		@ args = 0, pretend = 0, frame = 0
+ 576              		@ frame_needed = 0, uses_anonymous_args = 0
+ 577 0000 70B5     		push	{r4, r5, r6, lr}
+ 578 0002 0224     		movs	r4, #2
+ 579 0004 1E21     		movs	r1, #30
+ 580 0006 0E4D     		ldr	r5, .L71
+ 581 0008 0E4A     		ldr	r2, .L71+4
+ 582 000a 2B68     		ldr	r3, [r5]
+ 583 000c 4000     		lsls	r0, r0, #1
+ 584 000e A343     		bics	r3, r4
+ 585 0010 2B60     		str	r3, [r5]
+ 586 0012 1368     		ldr	r3, [r2]
+ 587 0014 0840     		ands	r0, r1
+ 588 0016 8B43     		bics	r3, r1
+ 589 0018 1843     		orrs	r0, r3
+ 590 001a 0123     		movs	r3, #1
+ 591 001c 1060     		str	r0, [r2]
+ 592 001e 1168     		ldr	r1, [r2]
+ 593              		@ sp needed
+ 594 0020 0B43     		orrs	r3, r1
+ 595 0022 1360     		str	r3, [r2]
+ 596 0024 084B     		ldr	r3, .L71+8
+ 597 0026 1879     		ldrb	r0, [r3, #4]
+ 598 0028 FA23     		movs	r3, #250
+ 599 002a 9B00     		lsls	r3, r3, #2
+ 600 002c 5843     		muls	r0, r3
+ 601 002e FFF7FEFF 		bl	CyDelayCycles
+ 602 0032 064B     		ldr	r3, .L71+12
+ 603 0034 1C60     		str	r4, [r3]
+ 604 0036 2B68     		ldr	r3, [r5]
+ 605 0038 1C43     		orrs	r4, r3
+ 606 003a 2C60     		str	r4, [r5]
+ 607 003c 70BD     		pop	{r4, r5, r6, pc}
+ 608              	.L72:
+ 609 003e C046     		.align	2
+ 610              	.L71:
+ 611 0040 08000B40 		.word	1074462728
+ 612 0044 18000B40 		.word	1074462744
+ 613 0048 00000000 		.word	.LANCHOR1
+ 614 004c 04000B40 		.word	1074462724
+ 615              		.size	CySysLvdEnable, .-CySysLvdEnable
+ 616              		.section	.text.CySysLvdDisable,"ax",%progbits
+ 617              		.align	2
+ 618              		.global	CySysLvdDisable
+ 619              		.code	16
+ 620              		.thumb_func
+ 621              		.type	CySysLvdDisable, %function
+ 622              	CySysLvdDisable:
+ 623              		@ args = 0, pretend = 0, frame = 0
+ 624              		@ frame_needed = 0, uses_anonymous_args = 0
+ 625              		@ link register save eliminated.
+ 626 0000 0221     		movs	r1, #2
+ 627 0002 054A     		ldr	r2, .L74
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 12
+
+
+ 628              		@ sp needed
+ 629 0004 1368     		ldr	r3, [r2]
+ 630 0006 8B43     		bics	r3, r1
+ 631 0008 1360     		str	r3, [r2]
+ 632 000a 044A     		ldr	r2, .L74+4
+ 633 000c 0139     		subs	r1, r1, #1
+ 634 000e 1368     		ldr	r3, [r2]
+ 635 0010 8B43     		bics	r3, r1
+ 636 0012 1360     		str	r3, [r2]
+ 637 0014 7047     		bx	lr
+ 638              	.L75:
+ 639 0016 C046     		.align	2
+ 640              	.L74:
+ 641 0018 08000B40 		.word	1074462728
+ 642 001c 18000B40 		.word	1074462744
+ 643              		.size	CySysLvdDisable, .-CySysLvdDisable
+ 644              		.section	.text.CySysLvdGetInterruptSource,"ax",%progbits
+ 645              		.align	2
+ 646              		.global	CySysLvdGetInterruptSource
+ 647              		.code	16
+ 648              		.thumb_func
+ 649              		.type	CySysLvdGetInterruptSource, %function
+ 650              	CySysLvdGetInterruptSource:
+ 651              		@ args = 0, pretend = 0, frame = 0
+ 652              		@ frame_needed = 0, uses_anonymous_args = 0
+ 653              		@ link register save eliminated.
+ 654 0000 0220     		movs	r0, #2
+ 655 0002 024B     		ldr	r3, .L77
+ 656              		@ sp needed
+ 657 0004 1B68     		ldr	r3, [r3]
+ 658 0006 1840     		ands	r0, r3
+ 659 0008 7047     		bx	lr
+ 660              	.L78:
+ 661 000a C046     		.align	2
+ 662              	.L77:
+ 663 000c 04000B40 		.word	1074462724
+ 664              		.size	CySysLvdGetInterruptSource, .-CySysLvdGetInterruptSource
+ 665              		.section	.text.CySysLvdClearInterrupt,"ax",%progbits
+ 666              		.align	2
+ 667              		.global	CySysLvdClearInterrupt
+ 668              		.code	16
+ 669              		.thumb_func
+ 670              		.type	CySysLvdClearInterrupt, %function
+ 671              	CySysLvdClearInterrupt:
+ 672              		@ args = 0, pretend = 0, frame = 0
+ 673              		@ frame_needed = 0, uses_anonymous_args = 0
+ 674              		@ link register save eliminated.
+ 675 0000 0222     		movs	r2, #2
+ 676 0002 014B     		ldr	r3, .L80
+ 677              		@ sp needed
+ 678 0004 1A60     		str	r2, [r3]
+ 679 0006 7047     		bx	lr
+ 680              	.L81:
+ 681              		.align	2
+ 682              	.L80:
+ 683 0008 04000B40 		.word	1074462724
+ 684              		.size	CySysLvdClearInterrupt, .-CySysLvdClearInterrupt
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 13
+
+
+ 685              		.section	.text.CySysGetResetReason,"ax",%progbits
+ 686              		.align	2
+ 687              		.global	CySysGetResetReason
+ 688              		.code	16
+ 689              		.thumb_func
+ 690              		.type	CySysGetResetReason, %function
+ 691              	CySysGetResetReason:
+ 692              		@ args = 0, pretend = 0, frame = 0
+ 693              		@ frame_needed = 0, uses_anonymous_args = 0
+ 694              		@ link register save eliminated.
+ 695 0000 0200     		movs	r2, r0
+ 696 0002 1920     		movs	r0, #25
+ 697 0004 0249     		ldr	r1, .L83
+ 698 0006 0240     		ands	r2, r0
+ 699 0008 0B68     		ldr	r3, [r1]
+ 700              		@ sp needed
+ 701 000a 1840     		ands	r0, r3
+ 702 000c 0A60     		str	r2, [r1]
+ 703 000e 7047     		bx	lr
+ 704              	.L84:
+ 705              		.align	2
+ 706              	.L83:
+ 707 0010 00030B40 		.word	1074463488
+ 708              		.size	CySysGetResetReason, .-CySysGetResetReason
+ 709              		.section	.text.CyDisableInts,"ax",%progbits
+ 710              		.align	2
+ 711              		.global	CyDisableInts
+ 712              		.code	16
+ 713              		.thumb_func
+ 714              		.type	CyDisableInts, %function
+ 715              	CyDisableInts:
+ 716              		@ args = 0, pretend = 0, frame = 0
+ 717              		@ frame_needed = 0, uses_anonymous_args = 0
+ 718              		@ link register save eliminated.
+ 719 0000 0122     		movs	r2, #1
+ 720 0002 024B     		ldr	r3, .L86
+ 721 0004 5242     		rsbs	r2, r2, #0
+ 722 0006 1868     		ldr	r0, [r3]
+ 723              		@ sp needed
+ 724 0008 1A60     		str	r2, [r3]
+ 725 000a 7047     		bx	lr
+ 726              	.L87:
+ 727              		.align	2
+ 728              	.L86:
+ 729 000c 80E100E0 		.word	-536813184
+ 730              		.size	CyDisableInts, .-CyDisableInts
+ 731              		.section	.text.CyEnableInts,"ax",%progbits
+ 732              		.align	2
+ 733              		.global	CyEnableInts
+ 734              		.code	16
+ 735              		.thumb_func
+ 736              		.type	CyEnableInts, %function
+ 737              	CyEnableInts:
+ 738              		@ args = 0, pretend = 0, frame = 0
+ 739              		@ frame_needed = 0, uses_anonymous_args = 0
+ 740              		@ link register save eliminated.
+ 741 0000 014B     		ldr	r3, .L89
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 14
+
+
+ 742              		@ sp needed
+ 743 0002 1860     		str	r0, [r3]
+ 744 0004 7047     		bx	lr
+ 745              	.L90:
+ 746 0006 C046     		.align	2
+ 747              	.L89:
+ 748 0008 00E100E0 		.word	-536813312
+ 749              		.size	CyEnableInts, .-CyEnableInts
+ 750              		.section	.text.CyIntSetSysVector,"ax",%progbits
+ 751              		.align	2
+ 752              		.global	CyIntSetSysVector
+ 753              		.code	16
+ 754              		.thumb_func
+ 755              		.type	CyIntSetSysVector, %function
+ 756              	CyIntSetSysVector:
+ 757              		@ args = 0, pretend = 0, frame = 0
+ 758              		@ frame_needed = 0, uses_anonymous_args = 0
+ 759              		@ link register save eliminated.
+ 760 0000 0F28     		cmp	r0, #15
+ 761 0002 00D9     		bls	.L92
+ 762              		.syntax divided
+ 763              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 764 0004 01BE     		    bkpt    1
+ 765              	@ 0 "" 2
+ 766              		.thumb
+ 767              		.syntax unified
+ 768              	.L92:
+ 769 0006 8023     		movs	r3, #128
+ 770 0008 8000     		lsls	r0, r0, #2
+ 771 000a 9B05     		lsls	r3, r3, #22
+ 772 000c C318     		adds	r3, r0, r3
+ 773 000e 1868     		ldr	r0, [r3]
+ 774              		@ sp needed
+ 775 0010 1960     		str	r1, [r3]
+ 776 0012 7047     		bx	lr
+ 777              		.size	CyIntSetSysVector, .-CyIntSetSysVector
+ 778              		.section	.text.CyIntGetSysVector,"ax",%progbits
+ 779              		.align	2
+ 780              		.global	CyIntGetSysVector
+ 781              		.code	16
+ 782              		.thumb_func
+ 783              		.type	CyIntGetSysVector, %function
+ 784              	CyIntGetSysVector:
+ 785              		@ args = 0, pretend = 0, frame = 0
+ 786              		@ frame_needed = 0, uses_anonymous_args = 0
+ 787              		@ link register save eliminated.
+ 788 0000 0F28     		cmp	r0, #15
+ 789 0002 00D9     		bls	.L94
+ 790              		.syntax divided
+ 791              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 792 0004 01BE     		    bkpt    1
+ 793              	@ 0 "" 2
+ 794              		.thumb
+ 795              		.syntax unified
+ 796              	.L94:
+ 797 0006 8023     		movs	r3, #128
+ 798 0008 9B05     		lsls	r3, r3, #22
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 15
+
+
+ 799 000a 9C46     		mov	ip, r3
+ 800 000c 8000     		lsls	r0, r0, #2
+ 801 000e 6044     		add	r0, r0, ip
+ 802 0010 0068     		ldr	r0, [r0]
+ 803              		@ sp needed
+ 804 0012 7047     		bx	lr
+ 805              		.size	CyIntGetSysVector, .-CyIntGetSysVector
+ 806              		.section	.text.CyIntSetVector,"ax",%progbits
+ 807              		.align	2
+ 808              		.global	CyIntSetVector
+ 809              		.code	16
+ 810              		.thumb_func
+ 811              		.type	CyIntSetVector, %function
+ 812              	CyIntSetVector:
+ 813              		@ args = 0, pretend = 0, frame = 0
+ 814              		@ frame_needed = 0, uses_anonymous_args = 0
+ 815              		@ link register save eliminated.
+ 816 0000 1F28     		cmp	r0, #31
+ 817 0002 00D9     		bls	.L96
+ 818              		.syntax divided
+ 819              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 820 0004 01BE     		    bkpt    1
+ 821              	@ 0 "" 2
+ 822              		.thumb
+ 823              		.syntax unified
+ 824              	.L96:
+ 825 0006 034B     		ldr	r3, .L97
+ 826 0008 8000     		lsls	r0, r0, #2
+ 827 000a C318     		adds	r3, r0, r3
+ 828 000c 1868     		ldr	r0, [r3]
+ 829              		@ sp needed
+ 830 000e 1960     		str	r1, [r3]
+ 831 0010 7047     		bx	lr
+ 832              	.L98:
+ 833 0012 C046     		.align	2
+ 834              	.L97:
+ 835 0014 40000020 		.word	536870976
+ 836              		.size	CyIntSetVector, .-CyIntSetVector
+ 837              		.section	.text.CyIntGetVector,"ax",%progbits
+ 838              		.align	2
+ 839              		.global	CyIntGetVector
+ 840              		.code	16
+ 841              		.thumb_func
+ 842              		.type	CyIntGetVector, %function
+ 843              	CyIntGetVector:
+ 844              		@ args = 0, pretend = 0, frame = 0
+ 845              		@ frame_needed = 0, uses_anonymous_args = 0
+ 846              		@ link register save eliminated.
+ 847 0000 1F28     		cmp	r0, #31
+ 848 0002 00D9     		bls	.L100
+ 849              		.syntax divided
+ 850              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 851 0004 01BE     		    bkpt    1
+ 852              	@ 0 "" 2
+ 853              		.thumb
+ 854              		.syntax unified
+ 855              	.L100:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 16
+
+
+ 856 0006 034B     		ldr	r3, .L101
+ 857 0008 8000     		lsls	r0, r0, #2
+ 858 000a 9C46     		mov	ip, r3
+ 859 000c 6044     		add	r0, r0, ip
+ 860 000e 0068     		ldr	r0, [r0]
+ 861              		@ sp needed
+ 862 0010 7047     		bx	lr
+ 863              	.L102:
+ 864 0012 C046     		.align	2
+ 865              	.L101:
+ 866 0014 40000020 		.word	536870976
+ 867              		.size	CyIntGetVector, .-CyIntGetVector
+ 868              		.section	.text.CyIntSetPriority,"ax",%progbits
+ 869              		.align	2
+ 870              		.global	CyIntSetPriority
+ 871              		.code	16
+ 872              		.thumb_func
+ 873              		.type	CyIntSetPriority, %function
+ 874              	CyIntSetPriority:
+ 875              		@ args = 0, pretend = 0, frame = 0
+ 876              		@ frame_needed = 0, uses_anonymous_args = 0
+ 877 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 878 0002 0400     		movs	r4, r0
+ 879 0004 0E00     		movs	r6, r1
+ 880 0006 0329     		cmp	r1, #3
+ 881 0008 00D9     		bls	.L104
+ 882              		.syntax divided
+ 883              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 884 000a 01BE     		    bkpt    1
+ 885              	@ 0 "" 2
+ 886              		.thumb
+ 887              		.syntax unified
+ 888              	.L104:
+ 889 000c 1F2C     		cmp	r4, #31
+ 890 000e 00D9     		bls	.L105
+ 891              		.syntax divided
+ 892              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 893 0010 01BE     		    bkpt    1
+ 894              	@ 0 "" 2
+ 895              		.thumb
+ 896              		.syntax unified
+ 897              	.L105:
+ 898 0012 0327     		movs	r7, #3
+ 899 0014 FFF7FEFF 		bl	CyEnterCriticalSection
+ 900 0018 3D00     		movs	r5, r7
+ 901 001a 094B     		ldr	r3, .L106
+ 902 001c 2540     		ands	r5, r4
+ 903 001e 9C46     		mov	ip, r3
+ 904 0020 A408     		lsrs	r4, r4, #2
+ 905 0022 A400     		lsls	r4, r4, #2
+ 906 0024 6444     		add	r4, r4, ip
+ 907 0026 2168     		ldr	r1, [r4]
+ 908 0028 ED00     		lsls	r5, r5, #3
+ 909 002a 0B00     		movs	r3, r1
+ 910 002c 3100     		movs	r1, r6
+ 911 002e 0635     		adds	r5, r5, #6
+ 912 0030 AF40     		lsls	r7, r7, r5
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 17
+
+
+ 913 0032 A940     		lsls	r1, r1, r5
+ 914 0034 BB43     		bics	r3, r7
+ 915 0036 1943     		orrs	r1, r3
+ 916 0038 2160     		str	r1, [r4]
+ 917 003a FFF7FEFF 		bl	CyExitCriticalSection
+ 918              		@ sp needed
+ 919 003e F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 920              	.L107:
+ 921              		.align	2
+ 922              	.L106:
+ 923 0040 00E400E0 		.word	-536812544
+ 924              		.size	CyIntSetPriority, .-CyIntSetPriority
+ 925              		.section	.text.CyIntGetPriority,"ax",%progbits
+ 926              		.align	2
+ 927              		.global	CyIntGetPriority
+ 928              		.code	16
+ 929              		.thumb_func
+ 930              		.type	CyIntGetPriority, %function
+ 931              	CyIntGetPriority:
+ 932              		@ args = 0, pretend = 0, frame = 0
+ 933              		@ frame_needed = 0, uses_anonymous_args = 0
+ 934              		@ link register save eliminated.
+ 935 0000 1F28     		cmp	r0, #31
+ 936 0002 00D9     		bls	.L109
+ 937              		.syntax divided
+ 938              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 939 0004 01BE     		    bkpt    1
+ 940              	@ 0 "" 2
+ 941              		.thumb
+ 942              		.syntax unified
+ 943              	.L109:
+ 944 0006 074A     		ldr	r2, .L110
+ 945 0008 8308     		lsrs	r3, r0, #2
+ 946 000a 9446     		mov	ip, r2
+ 947 000c 9B00     		lsls	r3, r3, #2
+ 948 000e 6344     		add	r3, r3, ip
+ 949 0010 1A68     		ldr	r2, [r3]
+ 950 0012 0321     		movs	r1, #3
+ 951 0014 0300     		movs	r3, r0
+ 952 0016 0B40     		ands	r3, r1
+ 953 0018 DB00     		lsls	r3, r3, #3
+ 954 001a 0633     		adds	r3, r3, #6
+ 955 001c DA40     		lsrs	r2, r2, r3
+ 956 001e 1000     		movs	r0, r2
+ 957              		@ sp needed
+ 958 0020 0840     		ands	r0, r1
+ 959 0022 7047     		bx	lr
+ 960              	.L111:
+ 961              		.align	2
+ 962              	.L110:
+ 963 0024 00E400E0 		.word	-536812544
+ 964              		.size	CyIntGetPriority, .-CyIntGetPriority
+ 965              		.section	.text.CyIntEnable,"ax",%progbits
+ 966              		.align	2
+ 967              		.global	CyIntEnable
+ 968              		.code	16
+ 969              		.thumb_func
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 18
+
+
+ 970              		.type	CyIntEnable, %function
+ 971              	CyIntEnable:
+ 972              		@ args = 0, pretend = 0, frame = 0
+ 973              		@ frame_needed = 0, uses_anonymous_args = 0
+ 974              		@ link register save eliminated.
+ 975 0000 1F23     		movs	r3, #31
+ 976 0002 1840     		ands	r0, r3
+ 977 0004 1E3B     		subs	r3, r3, #30
+ 978 0006 8340     		lsls	r3, r3, r0
+ 979 0008 014A     		ldr	r2, .L113
+ 980              		@ sp needed
+ 981 000a 1360     		str	r3, [r2]
+ 982 000c 7047     		bx	lr
+ 983              	.L114:
+ 984 000e C046     		.align	2
+ 985              	.L113:
+ 986 0010 00E100E0 		.word	-536813312
+ 987              		.size	CyIntEnable, .-CyIntEnable
+ 988              		.section	.text.CyIntGetState,"ax",%progbits
+ 989              		.align	2
+ 990              		.global	CyIntGetState
+ 991              		.code	16
+ 992              		.thumb_func
+ 993              		.type	CyIntGetState, %function
+ 994              	CyIntGetState:
+ 995              		@ args = 0, pretend = 0, frame = 0
+ 996              		@ frame_needed = 0, uses_anonymous_args = 0
+ 997              		@ link register save eliminated.
+ 998 0000 1F22     		movs	r2, #31
+ 999 0002 044B     		ldr	r3, .L116
+ 1000 0004 1040     		ands	r0, r2
+ 1001 0006 1B68     		ldr	r3, [r3]
+ 1002              		@ sp needed
+ 1003 0008 C340     		lsrs	r3, r3, r0
+ 1004 000a 1800     		movs	r0, r3
+ 1005 000c 0123     		movs	r3, #1
+ 1006 000e 1840     		ands	r0, r3
+ 1007 0010 7047     		bx	lr
+ 1008              	.L117:
+ 1009 0012 C046     		.align	2
+ 1010              	.L116:
+ 1011 0014 00E100E0 		.word	-536813312
+ 1012              		.size	CyIntGetState, .-CyIntGetState
+ 1013              		.section	.text.CyIntDisable,"ax",%progbits
+ 1014              		.align	2
+ 1015              		.global	CyIntDisable
+ 1016              		.code	16
+ 1017              		.thumb_func
+ 1018              		.type	CyIntDisable, %function
+ 1019              	CyIntDisable:
+ 1020              		@ args = 0, pretend = 0, frame = 0
+ 1021              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1022              		@ link register save eliminated.
+ 1023 0000 1F23     		movs	r3, #31
+ 1024 0002 1840     		ands	r0, r3
+ 1025 0004 1E3B     		subs	r3, r3, #30
+ 1026 0006 8340     		lsls	r3, r3, r0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 19
+
+
+ 1027 0008 014A     		ldr	r2, .L119
+ 1028              		@ sp needed
+ 1029 000a 1360     		str	r3, [r2]
+ 1030 000c 7047     		bx	lr
+ 1031              	.L120:
+ 1032 000e C046     		.align	2
+ 1033              	.L119:
+ 1034 0010 80E100E0 		.word	-536813184
+ 1035              		.size	CyIntDisable, .-CyIntDisable
+ 1036              		.section	.text.CyIntSetPending,"ax",%progbits
+ 1037              		.align	2
+ 1038              		.global	CyIntSetPending
+ 1039              		.code	16
+ 1040              		.thumb_func
+ 1041              		.type	CyIntSetPending, %function
+ 1042              	CyIntSetPending:
+ 1043              		@ args = 0, pretend = 0, frame = 0
+ 1044              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1045              		@ link register save eliminated.
+ 1046 0000 1F23     		movs	r3, #31
+ 1047 0002 1840     		ands	r0, r3
+ 1048 0004 1E3B     		subs	r3, r3, #30
+ 1049 0006 8340     		lsls	r3, r3, r0
+ 1050 0008 014A     		ldr	r2, .L122
+ 1051              		@ sp needed
+ 1052 000a 1360     		str	r3, [r2]
+ 1053 000c 7047     		bx	lr
+ 1054              	.L123:
+ 1055 000e C046     		.align	2
+ 1056              	.L122:
+ 1057 0010 00E200E0 		.word	-536813056
+ 1058              		.size	CyIntSetPending, .-CyIntSetPending
+ 1059              		.section	.text.CyIntClearPending,"ax",%progbits
+ 1060              		.align	2
+ 1061              		.global	CyIntClearPending
+ 1062              		.code	16
+ 1063              		.thumb_func
+ 1064              		.type	CyIntClearPending, %function
+ 1065              	CyIntClearPending:
+ 1066              		@ args = 0, pretend = 0, frame = 0
+ 1067              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1068              		@ link register save eliminated.
+ 1069 0000 1F23     		movs	r3, #31
+ 1070 0002 1840     		ands	r0, r3
+ 1071 0004 1E3B     		subs	r3, r3, #30
+ 1072 0006 8340     		lsls	r3, r3, r0
+ 1073 0008 014A     		ldr	r2, .L125
+ 1074              		@ sp needed
+ 1075 000a 1360     		str	r3, [r2]
+ 1076 000c 7047     		bx	lr
+ 1077              	.L126:
+ 1078 000e C046     		.align	2
+ 1079              	.L125:
+ 1080 0010 80E200E0 		.word	-536812928
+ 1081              		.size	CyIntClearPending, .-CyIntClearPending
+ 1082              		.section	.text.CyHalt,"ax",%progbits
+ 1083              		.align	2
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 20
+
+
+ 1084              		.global	CyHalt
+ 1085              		.code	16
+ 1086              		.thumb_func
+ 1087              		.type	CyHalt, %function
+ 1088              	CyHalt:
+ 1089              		@ args = 0, pretend = 0, frame = 0
+ 1090              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1091              		@ link register save eliminated.
+ 1092              		.syntax divided
+ 1093              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 1094 0000 01BE     		    bkpt    1
+ 1095              	@ 0 "" 2
+ 1096              		.thumb
+ 1097              		.syntax unified
+ 1098              		@ sp needed
+ 1099 0002 7047     		bx	lr
+ 1100              		.size	CyHalt, .-CyHalt
+ 1101              		.section	.text.CySoftwareReset,"ax",%progbits
+ 1102              		.align	2
+ 1103              		.global	CySoftwareReset
+ 1104              		.code	16
+ 1105              		.thumb_func
+ 1106              		.type	CySoftwareReset, %function
+ 1107              	CySoftwareReset:
+ 1108              		@ args = 0, pretend = 0, frame = 0
+ 1109              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1110              		@ link register save eliminated.
+ 1111 0000 034A     		ldr	r2, .L129
+ 1112 0002 0449     		ldr	r1, .L129+4
+ 1113 0004 1368     		ldr	r3, [r2]
+ 1114              		@ sp needed
+ 1115 0006 1B04     		lsls	r3, r3, #16
+ 1116 0008 1B0C     		lsrs	r3, r3, #16
+ 1117 000a 0B43     		orrs	r3, r1
+ 1118 000c 1360     		str	r3, [r2]
+ 1119 000e 7047     		bx	lr
+ 1120              	.L130:
+ 1121              		.align	2
+ 1122              	.L129:
+ 1123 0010 0CED00E0 		.word	-536810228
+ 1124 0014 0400FA05 		.word	100270084
+ 1125              		.size	CySoftwareReset, .-CySoftwareReset
+ 1126              		.section	.text.CyDelay,"ax",%progbits
+ 1127              		.align	2
+ 1128              		.global	CyDelay
+ 1129              		.code	16
+ 1130              		.thumb_func
+ 1131              		.type	CyDelay, %function
+ 1132              	CyDelay:
+ 1133              		@ args = 0, pretend = 0, frame = 0
+ 1134              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1135 0000 F8B5     		push	{r3, r4, r5, r6, r7, lr}
+ 1136 0002 8025     		movs	r5, #128
+ 1137 0004 0700     		movs	r7, r0
+ 1138 0006 2D02     		lsls	r5, r5, #8
+ 1139 0008 A842     		cmp	r0, r5
+ 1140 000a 14D9     		bls	.L137
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 21
+
+
+ 1141 000c 0400     		movs	r4, r0
+ 1142 000e 0B4E     		ldr	r6, .L138
+ 1143              	.L133:
+ 1144 0010 B068     		ldr	r0, [r6, #8]
+ 1145 0012 FFF7FEFF 		bl	CyDelayCycles
+ 1146 0016 0A4B     		ldr	r3, .L138+4
+ 1147 0018 9C46     		mov	ip, r3
+ 1148 001a 6444     		add	r4, r4, ip
+ 1149 001c AC42     		cmp	r4, r5
+ 1150 001e F7D8     		bhi	.L133
+ 1151 0020 084B     		ldr	r3, .L138+8
+ 1152 0022 FB18     		adds	r3, r7, r3
+ 1153 0024 DB0B     		lsrs	r3, r3, #15
+ 1154 0026 DB03     		lsls	r3, r3, #15
+ 1155 0028 6744     		add	r7, r7, ip
+ 1156 002a FF1A     		subs	r7, r7, r3
+ 1157              	.L132:
+ 1158 002c F068     		ldr	r0, [r6, #12]
+ 1159              		@ sp needed
+ 1160 002e 7843     		muls	r0, r7
+ 1161 0030 FFF7FEFF 		bl	CyDelayCycles
+ 1162 0034 F8BD     		pop	{r3, r4, r5, r6, r7, pc}
+ 1163              	.L137:
+ 1164 0036 014E     		ldr	r6, .L138
+ 1165 0038 F8E7     		b	.L132
+ 1166              	.L139:
+ 1167 003a C046     		.align	2
+ 1168              	.L138:
+ 1169 003c 00000000 		.word	.LANCHOR1
+ 1170 0040 0080FFFF 		.word	-32768
+ 1171 0044 FF7FFFFF 		.word	-32769
+ 1172              		.size	CyDelay, .-CyDelay
+ 1173              		.section	.text.CyDelayUs,"ax",%progbits
+ 1174              		.align	2
+ 1175              		.global	CyDelayUs
+ 1176              		.code	16
+ 1177              		.thumb_func
+ 1178              		.type	CyDelayUs, %function
+ 1179              	CyDelayUs:
+ 1180              		@ args = 0, pretend = 0, frame = 0
+ 1181              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1182 0000 10B5     		push	{r4, lr}
+ 1183 0002 034B     		ldr	r3, .L141
+ 1184              		@ sp needed
+ 1185 0004 1B79     		ldrb	r3, [r3, #4]
+ 1186 0006 5843     		muls	r0, r3
+ 1187 0008 FFF7FEFF 		bl	CyDelayCycles
+ 1188 000c 10BD     		pop	{r4, pc}
+ 1189              	.L142:
+ 1190 000e C046     		.align	2
+ 1191              	.L141:
+ 1192 0010 00000000 		.word	.LANCHOR1
+ 1193              		.size	CyDelayUs, .-CyDelayUs
+ 1194              		.global	__aeabi_uidiv
+ 1195              		.section	.text.CyDelayFreq,"ax",%progbits
+ 1196              		.align	2
+ 1197              		.global	CyDelayFreq
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 22
+
+
+ 1198              		.code	16
+ 1199              		.thumb_func
+ 1200              		.type	CyDelayFreq, %function
+ 1201              	CyDelayFreq:
+ 1202              		@ args = 0, pretend = 0, frame = 0
+ 1203              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1204 0000 70B5     		push	{r4, r5, r6, lr}
+ 1205 0002 041E     		subs	r4, r0, #0
+ 1206 0004 09D1     		bne	.L146
+ 1207 0006 1825     		movs	r5, #24
+ 1208 0008 0B4A     		ldr	r2, .L147
+ 1209 000a 0C48     		ldr	r0, .L147+4
+ 1210 000c 0C4C     		ldr	r4, .L147+8
+ 1211              	.L144:
+ 1212 000e 0D4B     		ldr	r3, .L147+12
+ 1213              		@ sp needed
+ 1214 0010 1D71     		strb	r5, [r3, #4]
+ 1215 0012 1C61     		str	r4, [r3, #16]
+ 1216 0014 D860     		str	r0, [r3, #12]
+ 1217 0016 9A60     		str	r2, [r3, #8]
+ 1218 0018 70BD     		pop	{r4, r5, r6, pc}
+ 1219              	.L146:
+ 1220 001a 0B4B     		ldr	r3, .L147+16
+ 1221 001c 0B49     		ldr	r1, .L147+20
+ 1222 001e C018     		adds	r0, r0, r3
+ 1223 0020 FFF7FEFF 		bl	__aeabi_uidiv
+ 1224 0024 FA21     		movs	r1, #250
+ 1225 0026 0A4B     		ldr	r3, .L147+24
+ 1226 0028 C5B2     		uxtb	r5, r0
+ 1227 002a 8900     		lsls	r1, r1, #2
+ 1228 002c E018     		adds	r0, r4, r3
+ 1229 002e FFF7FEFF 		bl	__aeabi_uidiv
+ 1230 0032 C203     		lsls	r2, r0, #15
+ 1231 0034 EBE7     		b	.L144
+ 1232              	.L148:
+ 1233 0036 C046     		.align	2
+ 1234              	.L147:
+ 1235 0038 0000E02E 		.word	786432000
+ 1236 003c C05D0000 		.word	24000
+ 1237 0040 00366E01 		.word	24000000
+ 1238 0044 00000000 		.word	.LANCHOR1
+ 1239 0048 3F420F00 		.word	999999
+ 1240 004c 40420F00 		.word	1000000
+ 1241 0050 E7030000 		.word	999
+ 1242              		.size	CyDelayFreq, .-CyDelayFreq
+ 1243              		.section	.text.CySysTickStart,"ax",%progbits
+ 1244              		.align	2
+ 1245              		.global	CySysTickStart
+ 1246              		.code	16
+ 1247              		.thumb_func
+ 1248              		.type	CySysTickStart, %function
+ 1249              	CySysTickStart:
+ 1250              		@ args = 0, pretend = 0, frame = 0
+ 1251              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1252 0000 70B5     		push	{r4, r5, r6, lr}
+ 1253 0002 134C     		ldr	r4, .L151
+ 1254 0004 6569     		ldr	r5, [r4, #20]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 23
+
+
+ 1255 0006 002D     		cmp	r5, #0
+ 1256 0008 18D1     		bne	.L150
+ 1257 000a 124A     		ldr	r2, .L151+4
+ 1258 000c 124B     		ldr	r3, .L151+8
+ 1259 000e 2560     		str	r5, [r4]
+ 1260 0010 6560     		str	r5, [r4, #4]
+ 1261 0012 A560     		str	r5, [r4, #8]
+ 1262 0014 E560     		str	r5, [r4, #12]
+ 1263 0016 2561     		str	r5, [r4, #16]
+ 1264 0018 1A60     		str	r2, [r3]
+ 1265 001a 0423     		movs	r3, #4
+ 1266 001c 0F4A     		ldr	r2, .L151+12
+ 1267 001e 1168     		ldr	r1, [r2]
+ 1268 0020 0B43     		orrs	r3, r1
+ 1269 0022 FA21     		movs	r1, #250
+ 1270 0024 1360     		str	r3, [r2]
+ 1271 0026 0E4B     		ldr	r3, .L151+16
+ 1272 0028 8900     		lsls	r1, r1, #2
+ 1273 002a 1869     		ldr	r0, [r3, #16]
+ 1274 002c FFF7FEFF 		bl	__aeabi_uidiv
+ 1275 0030 0C4B     		ldr	r3, .L151+20
+ 1276 0032 1860     		str	r0, [r3]
+ 1277 0034 0C4B     		ldr	r3, .L151+24
+ 1278 0036 1D60     		str	r5, [r3]
+ 1279 0038 0123     		movs	r3, #1
+ 1280 003a 6361     		str	r3, [r4, #20]
+ 1281              	.L150:
+ 1282 003c 0222     		movs	r2, #2
+ 1283 003e 074B     		ldr	r3, .L151+12
+ 1284              		@ sp needed
+ 1285 0040 1968     		ldr	r1, [r3]
+ 1286 0042 0A43     		orrs	r2, r1
+ 1287 0044 1A60     		str	r2, [r3]
+ 1288 0046 0122     		movs	r2, #1
+ 1289 0048 1968     		ldr	r1, [r3]
+ 1290 004a 0A43     		orrs	r2, r1
+ 1291 004c 1A60     		str	r2, [r3]
+ 1292 004e 70BD     		pop	{r4, r5, r6, pc}
+ 1293              	.L152:
+ 1294              		.align	2
+ 1295              	.L151:
+ 1296 0050 00000000 		.word	.LANCHOR0
+ 1297 0054 00000000 		.word	CySysTickServiceCallbacks
+ 1298 0058 3C000020 		.word	536870972
+ 1299 005c 10E000E0 		.word	-536813552
+ 1300 0060 00000000 		.word	.LANCHOR1
+ 1301 0064 14E000E0 		.word	-536813548
+ 1302 0068 18E000E0 		.word	-536813544
+ 1303              		.size	CySysTickStart, .-CySysTickStart
+ 1304              		.section	.text.CySysTickInit,"ax",%progbits
+ 1305              		.align	2
+ 1306              		.global	CySysTickInit
+ 1307              		.code	16
+ 1308              		.thumb_func
+ 1309              		.type	CySysTickInit, %function
+ 1310              	CySysTickInit:
+ 1311              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 24
+
+
+ 1312              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1313 0000 10B5     		push	{r4, lr}
+ 1314 0002 0024     		movs	r4, #0
+ 1315 0004 0C4B     		ldr	r3, .L154
+ 1316 0006 0D4A     		ldr	r2, .L154+4
+ 1317 0008 1C60     		str	r4, [r3]
+ 1318 000a 1C61     		str	r4, [r3, #16]
+ 1319 000c 5C60     		str	r4, [r3, #4]
+ 1320 000e 9C60     		str	r4, [r3, #8]
+ 1321 0010 DC60     		str	r4, [r3, #12]
+ 1322 0012 0B4B     		ldr	r3, .L154+8
+ 1323              		@ sp needed
+ 1324 0014 1A60     		str	r2, [r3]
+ 1325 0016 0423     		movs	r3, #4
+ 1326 0018 0A4A     		ldr	r2, .L154+12
+ 1327 001a 1168     		ldr	r1, [r2]
+ 1328 001c 0B43     		orrs	r3, r1
+ 1329 001e FA21     		movs	r1, #250
+ 1330 0020 1360     		str	r3, [r2]
+ 1331 0022 094B     		ldr	r3, .L154+16
+ 1332 0024 8900     		lsls	r1, r1, #2
+ 1333 0026 1869     		ldr	r0, [r3, #16]
+ 1334 0028 FFF7FEFF 		bl	__aeabi_uidiv
+ 1335 002c 074B     		ldr	r3, .L154+20
+ 1336 002e 1860     		str	r0, [r3]
+ 1337 0030 074B     		ldr	r3, .L154+24
+ 1338 0032 1C60     		str	r4, [r3]
+ 1339 0034 10BD     		pop	{r4, pc}
+ 1340              	.L155:
+ 1341 0036 C046     		.align	2
+ 1342              	.L154:
+ 1343 0038 00000000 		.word	.LANCHOR0
+ 1344 003c 00000000 		.word	CySysTickServiceCallbacks
+ 1345 0040 3C000020 		.word	536870972
+ 1346 0044 10E000E0 		.word	-536813552
+ 1347 0048 00000000 		.word	.LANCHOR1
+ 1348 004c 14E000E0 		.word	-536813548
+ 1349 0050 18E000E0 		.word	-536813544
+ 1350              		.size	CySysTickInit, .-CySysTickInit
+ 1351              		.section	.text.CySysTickEnable,"ax",%progbits
+ 1352              		.align	2
+ 1353              		.global	CySysTickEnable
+ 1354              		.code	16
+ 1355              		.thumb_func
+ 1356              		.type	CySysTickEnable, %function
+ 1357              	CySysTickEnable:
+ 1358              		@ args = 0, pretend = 0, frame = 0
+ 1359              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1360              		@ link register save eliminated.
+ 1361 0000 0222     		movs	r2, #2
+ 1362 0002 044B     		ldr	r3, .L157
+ 1363              		@ sp needed
+ 1364 0004 1968     		ldr	r1, [r3]
+ 1365 0006 0A43     		orrs	r2, r1
+ 1366 0008 1A60     		str	r2, [r3]
+ 1367 000a 0122     		movs	r2, #1
+ 1368 000c 1968     		ldr	r1, [r3]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 25
+
+
+ 1369 000e 0A43     		orrs	r2, r1
+ 1370 0010 1A60     		str	r2, [r3]
+ 1371 0012 7047     		bx	lr
+ 1372              	.L158:
+ 1373              		.align	2
+ 1374              	.L157:
+ 1375 0014 10E000E0 		.word	-536813552
+ 1376              		.size	CySysTickEnable, .-CySysTickEnable
+ 1377              		.section	.text.CySysTickStop,"ax",%progbits
+ 1378              		.align	2
+ 1379              		.global	CySysTickStop
+ 1380              		.code	16
+ 1381              		.thumb_func
+ 1382              		.type	CySysTickStop, %function
+ 1383              	CySysTickStop:
+ 1384              		@ args = 0, pretend = 0, frame = 0
+ 1385              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1386              		@ link register save eliminated.
+ 1387 0000 0121     		movs	r1, #1
+ 1388 0002 024A     		ldr	r2, .L160
+ 1389              		@ sp needed
+ 1390 0004 1368     		ldr	r3, [r2]
+ 1391 0006 8B43     		bics	r3, r1
+ 1392 0008 1360     		str	r3, [r2]
+ 1393 000a 7047     		bx	lr
+ 1394              	.L161:
+ 1395              		.align	2
+ 1396              	.L160:
+ 1397 000c 10E000E0 		.word	-536813552
+ 1398              		.size	CySysTickStop, .-CySysTickStop
+ 1399              		.section	.text.CySysTickEnableInterrupt,"ax",%progbits
+ 1400              		.align	2
+ 1401              		.global	CySysTickEnableInterrupt
+ 1402              		.code	16
+ 1403              		.thumb_func
+ 1404              		.type	CySysTickEnableInterrupt, %function
+ 1405              	CySysTickEnableInterrupt:
+ 1406              		@ args = 0, pretend = 0, frame = 0
+ 1407              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1408              		@ link register save eliminated.
+ 1409 0000 0223     		movs	r3, #2
+ 1410 0002 024A     		ldr	r2, .L163
+ 1411              		@ sp needed
+ 1412 0004 1168     		ldr	r1, [r2]
+ 1413 0006 0B43     		orrs	r3, r1
+ 1414 0008 1360     		str	r3, [r2]
+ 1415 000a 7047     		bx	lr
+ 1416              	.L164:
+ 1417              		.align	2
+ 1418              	.L163:
+ 1419 000c 10E000E0 		.word	-536813552
+ 1420              		.size	CySysTickEnableInterrupt, .-CySysTickEnableInterrupt
+ 1421              		.section	.text.CySysTickDisableInterrupt,"ax",%progbits
+ 1422              		.align	2
+ 1423              		.global	CySysTickDisableInterrupt
+ 1424              		.code	16
+ 1425              		.thumb_func
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 26
+
+
+ 1426              		.type	CySysTickDisableInterrupt, %function
+ 1427              	CySysTickDisableInterrupt:
+ 1428              		@ args = 0, pretend = 0, frame = 0
+ 1429              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1430              		@ link register save eliminated.
+ 1431 0000 0221     		movs	r1, #2
+ 1432 0002 024A     		ldr	r2, .L166
+ 1433              		@ sp needed
+ 1434 0004 1368     		ldr	r3, [r2]
+ 1435 0006 8B43     		bics	r3, r1
+ 1436 0008 1360     		str	r3, [r2]
+ 1437 000a 7047     		bx	lr
+ 1438              	.L167:
+ 1439              		.align	2
+ 1440              	.L166:
+ 1441 000c 10E000E0 		.word	-536813552
+ 1442              		.size	CySysTickDisableInterrupt, .-CySysTickDisableInterrupt
+ 1443              		.section	.text.CySysTickSetReload,"ax",%progbits
+ 1444              		.align	2
+ 1445              		.global	CySysTickSetReload
+ 1446              		.code	16
+ 1447              		.thumb_func
+ 1448              		.type	CySysTickSetReload, %function
+ 1449              	CySysTickSetReload:
+ 1450              		@ args = 0, pretend = 0, frame = 0
+ 1451              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1452              		@ link register save eliminated.
+ 1453 0000 024B     		ldr	r3, .L169
+ 1454 0002 0002     		lsls	r0, r0, #8
+ 1455 0004 000A     		lsrs	r0, r0, #8
+ 1456 0006 1860     		str	r0, [r3]
+ 1457              		@ sp needed
+ 1458 0008 7047     		bx	lr
+ 1459              	.L170:
+ 1460 000a C046     		.align	2
+ 1461              	.L169:
+ 1462 000c 14E000E0 		.word	-536813548
+ 1463              		.size	CySysTickSetReload, .-CySysTickSetReload
+ 1464              		.section	.text.CySysTickGetReload,"ax",%progbits
+ 1465              		.align	2
+ 1466              		.global	CySysTickGetReload
+ 1467              		.code	16
+ 1468              		.thumb_func
+ 1469              		.type	CySysTickGetReload, %function
+ 1470              	CySysTickGetReload:
+ 1471              		@ args = 0, pretend = 0, frame = 0
+ 1472              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1473              		@ link register save eliminated.
+ 1474 0000 024B     		ldr	r3, .L172
+ 1475              		@ sp needed
+ 1476 0002 1868     		ldr	r0, [r3]
+ 1477 0004 0002     		lsls	r0, r0, #8
+ 1478 0006 000A     		lsrs	r0, r0, #8
+ 1479 0008 7047     		bx	lr
+ 1480              	.L173:
+ 1481 000a C046     		.align	2
+ 1482              	.L172:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 27
+
+
+ 1483 000c 14E000E0 		.word	-536813548
+ 1484              		.size	CySysTickGetReload, .-CySysTickGetReload
+ 1485              		.section	.text.CySysTickGetValue,"ax",%progbits
+ 1486              		.align	2
+ 1487              		.global	CySysTickGetValue
+ 1488              		.code	16
+ 1489              		.thumb_func
+ 1490              		.type	CySysTickGetValue, %function
+ 1491              	CySysTickGetValue:
+ 1492              		@ args = 0, pretend = 0, frame = 0
+ 1493              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1494              		@ link register save eliminated.
+ 1495 0000 024B     		ldr	r3, .L175
+ 1496              		@ sp needed
+ 1497 0002 1868     		ldr	r0, [r3]
+ 1498 0004 0002     		lsls	r0, r0, #8
+ 1499 0006 000A     		lsrs	r0, r0, #8
+ 1500 0008 7047     		bx	lr
+ 1501              	.L176:
+ 1502 000a C046     		.align	2
+ 1503              	.L175:
+ 1504 000c 18E000E0 		.word	-536813544
+ 1505              		.size	CySysTickGetValue, .-CySysTickGetValue
+ 1506              		.section	.text.CySysTickSetClockSource,"ax",%progbits
+ 1507              		.align	2
+ 1508              		.global	CySysTickSetClockSource
+ 1509              		.code	16
+ 1510              		.thumb_func
+ 1511              		.type	CySysTickSetClockSource, %function
+ 1512              	CySysTickSetClockSource:
+ 1513              		@ args = 0, pretend = 0, frame = 0
+ 1514              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1515              		@ link register save eliminated.
+ 1516 0000 064A     		ldr	r2, .L181
+ 1517 0002 0128     		cmp	r0, #1
+ 1518 0004 04D0     		beq	.L180
+ 1519 0006 0421     		movs	r1, #4
+ 1520 0008 1368     		ldr	r3, [r2]
+ 1521 000a 8B43     		bics	r3, r1
+ 1522 000c 1360     		str	r3, [r2]
+ 1523              	.L177:
+ 1524              		@ sp needed
+ 1525 000e 7047     		bx	lr
+ 1526              	.L180:
+ 1527 0010 0423     		movs	r3, #4
+ 1528 0012 1168     		ldr	r1, [r2]
+ 1529 0014 0B43     		orrs	r3, r1
+ 1530 0016 1360     		str	r3, [r2]
+ 1531 0018 F9E7     		b	.L177
+ 1532              	.L182:
+ 1533 001a C046     		.align	2
+ 1534              	.L181:
+ 1535 001c 10E000E0 		.word	-536813552
+ 1536              		.size	CySysTickSetClockSource, .-CySysTickSetClockSource
+ 1537              		.section	.text.CySysTickGetClockSource,"ax",%progbits
+ 1538              		.align	2
+ 1539              		.global	CySysTickGetClockSource
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 28
+
+
+ 1540              		.code	16
+ 1541              		.thumb_func
+ 1542              		.type	CySysTickGetClockSource, %function
+ 1543              	CySysTickGetClockSource:
+ 1544              		@ args = 0, pretend = 0, frame = 0
+ 1545              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1546              		@ link register save eliminated.
+ 1547 0000 024B     		ldr	r3, .L184
+ 1548              		@ sp needed
+ 1549 0002 1868     		ldr	r0, [r3]
+ 1550 0004 4007     		lsls	r0, r0, #29
+ 1551 0006 C00F     		lsrs	r0, r0, #31
+ 1552 0008 7047     		bx	lr
+ 1553              	.L185:
+ 1554 000a C046     		.align	2
+ 1555              	.L184:
+ 1556 000c 10E000E0 		.word	-536813552
+ 1557              		.size	CySysTickGetClockSource, .-CySysTickGetClockSource
+ 1558              		.section	.text.CySysTickGetCountFlag,"ax",%progbits
+ 1559              		.align	2
+ 1560              		.global	CySysTickGetCountFlag
+ 1561              		.code	16
+ 1562              		.thumb_func
+ 1563              		.type	CySysTickGetCountFlag, %function
+ 1564              	CySysTickGetCountFlag:
+ 1565              		@ args = 0, pretend = 0, frame = 0
+ 1566              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1567              		@ link register save eliminated.
+ 1568 0000 024B     		ldr	r3, .L187
+ 1569              		@ sp needed
+ 1570 0002 1868     		ldr	r0, [r3]
+ 1571 0004 C003     		lsls	r0, r0, #15
+ 1572 0006 C00F     		lsrs	r0, r0, #31
+ 1573 0008 7047     		bx	lr
+ 1574              	.L188:
+ 1575 000a C046     		.align	2
+ 1576              	.L187:
+ 1577 000c 10E000E0 		.word	-536813552
+ 1578              		.size	CySysTickGetCountFlag, .-CySysTickGetCountFlag
+ 1579              		.section	.text.CySysTickClear,"ax",%progbits
+ 1580              		.align	2
+ 1581              		.global	CySysTickClear
+ 1582              		.code	16
+ 1583              		.thumb_func
+ 1584              		.type	CySysTickClear, %function
+ 1585              	CySysTickClear:
+ 1586              		@ args = 0, pretend = 0, frame = 0
+ 1587              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1588              		@ link register save eliminated.
+ 1589 0000 0022     		movs	r2, #0
+ 1590 0002 014B     		ldr	r3, .L190
+ 1591              		@ sp needed
+ 1592 0004 1A60     		str	r2, [r3]
+ 1593 0006 7047     		bx	lr
+ 1594              	.L191:
+ 1595              		.align	2
+ 1596              	.L190:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 29
+
+
+ 1597 0008 18E000E0 		.word	-536813544
+ 1598              		.size	CySysTickClear, .-CySysTickClear
+ 1599              		.section	.text.CySysTickSetCallback,"ax",%progbits
+ 1600              		.align	2
+ 1601              		.global	CySysTickSetCallback
+ 1602              		.code	16
+ 1603              		.thumb_func
+ 1604              		.type	CySysTickSetCallback, %function
+ 1605              	CySysTickSetCallback:
+ 1606              		@ args = 0, pretend = 0, frame = 0
+ 1607              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1608              		@ link register save eliminated.
+ 1609 0000 024A     		ldr	r2, .L193
+ 1610 0002 8300     		lsls	r3, r0, #2
+ 1611 0004 9858     		ldr	r0, [r3, r2]
+ 1612              		@ sp needed
+ 1613 0006 9950     		str	r1, [r3, r2]
+ 1614 0008 7047     		bx	lr
+ 1615              	.L194:
+ 1616 000a C046     		.align	2
+ 1617              	.L193:
+ 1618 000c 00000000 		.word	.LANCHOR0
+ 1619              		.size	CySysTickSetCallback, .-CySysTickSetCallback
+ 1620              		.section	.text.CySysTickGetCallback,"ax",%progbits
+ 1621              		.align	2
+ 1622              		.global	CySysTickGetCallback
+ 1623              		.code	16
+ 1624              		.thumb_func
+ 1625              		.type	CySysTickGetCallback, %function
+ 1626              	CySysTickGetCallback:
+ 1627              		@ args = 0, pretend = 0, frame = 0
+ 1628              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1629              		@ link register save eliminated.
+ 1630 0000 014B     		ldr	r3, .L196
+ 1631 0002 8000     		lsls	r0, r0, #2
+ 1632 0004 C058     		ldr	r0, [r0, r3]
+ 1633              		@ sp needed
+ 1634 0006 7047     		bx	lr
+ 1635              	.L197:
+ 1636              		.align	2
+ 1637              	.L196:
+ 1638 0008 00000000 		.word	.LANCHOR0
+ 1639              		.size	CySysTickGetCallback, .-CySysTickGetCallback
+ 1640              		.section	.text.CyGetUniqueId,"ax",%progbits
+ 1641              		.align	2
+ 1642              		.global	CyGetUniqueId
+ 1643              		.code	16
+ 1644              		.thumb_func
+ 1645              		.type	CyGetUniqueId, %function
+ 1646              	CyGetUniqueId:
+ 1647              		@ args = 0, pretend = 0, frame = 0
+ 1648              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1649              		@ link register save eliminated.
+ 1650 0000 144B     		ldr	r3, .L199
+ 1651              		@ sp needed
+ 1652 0002 1A78     		ldrb	r2, [r3]
+ 1653 0004 144B     		ldr	r3, .L199+4
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 30
+
+
+ 1654 0006 D1B2     		uxtb	r1, r2
+ 1655 0008 0160     		str	r1, [r0]
+ 1656 000a 1B78     		ldrb	r3, [r3]
+ 1657 000c 1B02     		lsls	r3, r3, #8
+ 1658 000e 0B43     		orrs	r3, r1
+ 1659 0010 1A00     		movs	r2, r3
+ 1660 0012 0360     		str	r3, [r0]
+ 1661 0014 114B     		ldr	r3, .L199+8
+ 1662 0016 1B78     		ldrb	r3, [r3]
+ 1663 0018 1B04     		lsls	r3, r3, #16
+ 1664 001a 1343     		orrs	r3, r2
+ 1665 001c 104A     		ldr	r2, .L199+12
+ 1666 001e 0360     		str	r3, [r0]
+ 1667 0020 1278     		ldrb	r2, [r2]
+ 1668 0022 1206     		lsls	r2, r2, #24
+ 1669 0024 1343     		orrs	r3, r2
+ 1670 0026 0360     		str	r3, [r0]
+ 1671 0028 0E4B     		ldr	r3, .L199+16
+ 1672 002a 1A78     		ldrb	r2, [r3]
+ 1673 002c 0E4B     		ldr	r3, .L199+20
+ 1674 002e D1B2     		uxtb	r1, r2
+ 1675 0030 4160     		str	r1, [r0, #4]
+ 1676 0032 1B78     		ldrb	r3, [r3]
+ 1677 0034 1B02     		lsls	r3, r3, #8
+ 1678 0036 0B43     		orrs	r3, r1
+ 1679 0038 1A00     		movs	r2, r3
+ 1680 003a 4360     		str	r3, [r0, #4]
+ 1681 003c 0B4B     		ldr	r3, .L199+24
+ 1682 003e 1B78     		ldrb	r3, [r3]
+ 1683 0040 1B04     		lsls	r3, r3, #16
+ 1684 0042 1343     		orrs	r3, r2
+ 1685 0044 0A4A     		ldr	r2, .L199+28
+ 1686 0046 4360     		str	r3, [r0, #4]
+ 1687 0048 1278     		ldrb	r2, [r2]
+ 1688 004a 1206     		lsls	r2, r2, #24
+ 1689 004c 1343     		orrs	r3, r2
+ 1690 004e 4360     		str	r3, [r0, #4]
+ 1691 0050 7047     		bx	lr
+ 1692              	.L200:
+ 1693 0052 C046     		.align	2
+ 1694              	.L199:
+ 1695 0054 78F2FF0F 		.word	268431992
+ 1696 0058 79F2FF0F 		.word	268431993
+ 1697 005c 7AF2FF0F 		.word	268431994
+ 1698 0060 7BF2FF0F 		.word	268431995
+ 1699 0064 7CF2FF0F 		.word	268431996
+ 1700 0068 7DF2FF0F 		.word	268431997
+ 1701 006c 7EF2FF0F 		.word	268431998
+ 1702 0070 7FF2FF0F 		.word	268431999
+ 1703              		.size	CyGetUniqueId, .-CyGetUniqueId
+ 1704              		.section	.text.CySysSetRamAccessArbPriority,"ax",%progbits
+ 1705              		.align	2
+ 1706              		.global	CySysSetRamAccessArbPriority
+ 1707              		.code	16
+ 1708              		.thumb_func
+ 1709              		.type	CySysSetRamAccessArbPriority, %function
+ 1710              	CySysSetRamAccessArbPriority:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 31
+
+
+ 1711              		@ args = 0, pretend = 0, frame = 0
+ 1712              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1713              		@ link register save eliminated.
+ 1714 0000 0549     		ldr	r1, .L202
+ 1715 0002 064B     		ldr	r3, .L202+4
+ 1716 0004 0A68     		ldr	r2, [r1]
+ 1717 0006 4004     		lsls	r0, r0, #17
+ 1718 0008 1340     		ands	r3, r2
+ 1719 000a C022     		movs	r2, #192
+ 1720 000c D202     		lsls	r2, r2, #11
+ 1721 000e 1040     		ands	r0, r2
+ 1722 0010 1843     		orrs	r0, r3
+ 1723 0012 0860     		str	r0, [r1]
+ 1724              		@ sp needed
+ 1725 0014 7047     		bx	lr
+ 1726              	.L203:
+ 1727 0016 C046     		.align	2
+ 1728              	.L202:
+ 1729 0018 38001040 		.word	1074790456
+ 1730 001c FFFFF9FF 		.word	-393217
+ 1731              		.size	CySysSetRamAccessArbPriority, .-CySysSetRamAccessArbPriority
+ 1732              		.section	.text.CySysSetFlashAccessArbPriority,"ax",%progbits
+ 1733              		.align	2
+ 1734              		.global	CySysSetFlashAccessArbPriority
+ 1735              		.code	16
+ 1736              		.thumb_func
+ 1737              		.type	CySysSetFlashAccessArbPriority, %function
+ 1738              	CySysSetFlashAccessArbPriority:
+ 1739              		@ args = 0, pretend = 0, frame = 0
+ 1740              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1741              		@ link register save eliminated.
+ 1742 0000 0549     		ldr	r1, .L205
+ 1743 0002 064B     		ldr	r3, .L205+4
+ 1744 0004 0A68     		ldr	r2, [r1]
+ 1745 0006 4004     		lsls	r0, r0, #17
+ 1746 0008 1340     		ands	r3, r2
+ 1747 000a C022     		movs	r2, #192
+ 1748 000c D202     		lsls	r2, r2, #11
+ 1749 000e 1040     		ands	r0, r2
+ 1750 0010 1843     		orrs	r0, r3
+ 1751 0012 0860     		str	r0, [r1]
+ 1752              		@ sp needed
+ 1753 0014 7047     		bx	lr
+ 1754              	.L206:
+ 1755 0016 C046     		.align	2
+ 1756              	.L205:
+ 1757 0018 30001040 		.word	1074790448
+ 1758 001c FFFFF9FF 		.word	-393217
+ 1759              		.size	CySysSetFlashAccessArbPriority, .-CySysSetFlashAccessArbPriority
+ 1760              		.section	.text.CySysSetDmacAccessArbPriority,"ax",%progbits
+ 1761              		.align	2
+ 1762              		.global	CySysSetDmacAccessArbPriority
+ 1763              		.code	16
+ 1764              		.thumb_func
+ 1765              		.type	CySysSetDmacAccessArbPriority, %function
+ 1766              	CySysSetDmacAccessArbPriority:
+ 1767              		@ args = 0, pretend = 0, frame = 0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 32
+
+
+ 1768              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1769              		@ link register save eliminated.
+ 1770 0000 0549     		ldr	r1, .L208
+ 1771 0002 064B     		ldr	r3, .L208+4
+ 1772 0004 0A68     		ldr	r2, [r1]
+ 1773 0006 4004     		lsls	r0, r0, #17
+ 1774 0008 1340     		ands	r3, r2
+ 1775 000a C022     		movs	r2, #192
+ 1776 000c D202     		lsls	r2, r2, #11
+ 1777 000e 1040     		ands	r0, r2
+ 1778 0010 1843     		orrs	r0, r3
+ 1779 0012 0860     		str	r0, [r1]
+ 1780              		@ sp needed
+ 1781 0014 7047     		bx	lr
+ 1782              	.L209:
+ 1783 0016 C046     		.align	2
+ 1784              	.L208:
+ 1785 0018 3C001040 		.word	1074790460
+ 1786 001c FFFFF9FF 		.word	-393217
+ 1787              		.size	CySysSetDmacAccessArbPriority, .-CySysSetDmacAccessArbPriority
+ 1788              		.section	.text.CySysSetPeripheralAccessArbPriority,"ax",%progbits
+ 1789              		.align	2
+ 1790              		.global	CySysSetPeripheralAccessArbPriority
+ 1791              		.code	16
+ 1792              		.thumb_func
+ 1793              		.type	CySysSetPeripheralAccessArbPriority, %function
+ 1794              	CySysSetPeripheralAccessArbPriority:
+ 1795              		@ args = 0, pretend = 0, frame = 0
+ 1796              		@ frame_needed = 0, uses_anonymous_args = 0
+ 1797              		@ link register save eliminated.
+ 1798 0000 0028     		cmp	r0, #0
+ 1799 0002 05D0     		beq	.L216
+ 1800 0004 0128     		cmp	r0, #1
+ 1801 0006 0ED0     		beq	.L217
+ 1802 0008 0228     		cmp	r0, #2
+ 1803 000a 0ED0     		beq	.L218
+ 1804              		.syntax divided
+ 1805              	@ 2647 "Generated_Source\PSoC4\CyLib.c" 1
+ 1806 000c 01BE     		    bkpt    1
+ 1807              	@ 0 "" 2
+ 1808              		.thumb
+ 1809              		.syntax unified
+ 1810              	.L210:
+ 1811              		@ sp needed
+ 1812 000e 7047     		bx	lr
+ 1813              	.L216:
+ 1814 0010 0748     		ldr	r0, .L219
+ 1815              	.L215:
+ 1816 0012 0268     		ldr	r2, [r0]
+ 1817 0014 074B     		ldr	r3, .L219+4
+ 1818 0016 4904     		lsls	r1, r1, #17
+ 1819 0018 1340     		ands	r3, r2
+ 1820 001a C022     		movs	r2, #192
+ 1821 001c D202     		lsls	r2, r2, #11
+ 1822 001e 1140     		ands	r1, r2
+ 1823 0020 1943     		orrs	r1, r3
+ 1824 0022 0160     		str	r1, [r0]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 33
+
+
+ 1825 0024 F3E7     		b	.L210
+ 1826              	.L217:
+ 1827 0026 0448     		ldr	r0, .L219+8
+ 1828 0028 F3E7     		b	.L215
+ 1829              	.L218:
+ 1830 002a 0448     		ldr	r0, .L219+12
+ 1831 002c F1E7     		b	.L215
+ 1832              	.L220:
+ 1833 002e C046     		.align	2
+ 1834              	.L219:
+ 1835 0030 00011040 		.word	1074790656
+ 1836 0034 FFFFF9FF 		.word	-393217
+ 1837 0038 04011040 		.word	1074790660
+ 1838 003c 08011040 		.word	1074790664
+ 1839              		.size	CySysSetPeripheralAccessArbPriority, .-CySysSetPeripheralAccessArbPriority
+ 1840              		.global	CySysClkPumpConfig
+ 1841              		.global	cyImoFreqMhz2Reg
+ 1842              		.global	CySysTickInitVar
+ 1843              		.global	cydelay32kMs
+ 1844              		.global	cydelayFreqMhz
+ 1845              		.global	cydelayFreqKhz
+ 1846              		.global	cydelayFreqHz
+ 1847              		.section	.rodata
+ 1848              		.align	2
+ 1849              		.set	.LANCHOR2,. + 0
+ 1850              		.type	cyImoFreqMhz2Reg, %object
+ 1851              		.size	cyImoFreqMhz2Reg, 46
+ 1852              	cyImoFreqMhz2Reg:
+ 1853 0000 03       		.byte	3
+ 1854 0001 04       		.byte	4
+ 1855 0002 05       		.byte	5
+ 1856 0003 06       		.byte	6
+ 1857 0004 07       		.byte	7
+ 1858 0005 08       		.byte	8
+ 1859 0006 09       		.byte	9
+ 1860 0007 0A       		.byte	10
+ 1861 0008 0B       		.byte	11
+ 1862 0009 0C       		.byte	12
+ 1863 000a 0E       		.byte	14
+ 1864 000b 0F       		.byte	15
+ 1865 000c 10       		.byte	16
+ 1866 000d 11       		.byte	17
+ 1867 000e 12       		.byte	18
+ 1868 000f 13       		.byte	19
+ 1869 0010 14       		.byte	20
+ 1870 0011 15       		.byte	21
+ 1871 0012 16       		.byte	22
+ 1872 0013 17       		.byte	23
+ 1873 0014 18       		.byte	24
+ 1874 0015 19       		.byte	25
+ 1875 0016 1B       		.byte	27
+ 1876 0017 1C       		.byte	28
+ 1877 0018 1D       		.byte	29
+ 1878 0019 1E       		.byte	30
+ 1879 001a 1F       		.byte	31
+ 1880 001b 20       		.byte	32
+ 1881 001c 21       		.byte	33
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 34
+
+
+ 1882 001d 22       		.byte	34
+ 1883 001e 23       		.byte	35
+ 1884 001f 25       		.byte	37
+ 1885 0020 26       		.byte	38
+ 1886 0021 27       		.byte	39
+ 1887 0022 28       		.byte	40
+ 1888 0023 29       		.byte	41
+ 1889 0024 2A       		.byte	42
+ 1890 0025 2B       		.byte	43
+ 1891 0026 2E       		.byte	46
+ 1892 0027 2F       		.byte	47
+ 1893 0028 30       		.byte	48
+ 1894 0029 31       		.byte	49
+ 1895 002a 32       		.byte	50
+ 1896 002b 33       		.byte	51
+ 1897 002c 34       		.byte	52
+ 1898 002d 35       		.byte	53
+ 1899              		.data
+ 1900              		.align	2
+ 1901              		.set	.LANCHOR1,. + 0
+ 1902              		.type	CySysClkPumpConfig, %object
+ 1903              		.size	CySysClkPumpConfig, 4
+ 1904              	CySysClkPumpConfig:
+ 1905 0000 01000000 		.word	1
+ 1906              		.type	cydelayFreqMhz, %object
+ 1907              		.size	cydelayFreqMhz, 1
+ 1908              	cydelayFreqMhz:
+ 1909 0004 18       		.byte	24
+ 1910 0005 000000   		.space	3
+ 1911              		.type	cydelay32kMs, %object
+ 1912              		.size	cydelay32kMs, 4
+ 1913              	cydelay32kMs:
+ 1914 0008 0000E02E 		.word	786432000
+ 1915              		.type	cydelayFreqKhz, %object
+ 1916              		.size	cydelayFreqKhz, 4
+ 1917              	cydelayFreqKhz:
+ 1918 000c C05D0000 		.word	24000
+ 1919              		.type	cydelayFreqHz, %object
+ 1920              		.size	cydelayFreqHz, 4
+ 1921              	cydelayFreqHz:
+ 1922 0010 00366E01 		.word	24000000
+ 1923              		.bss
+ 1924              		.align	2
+ 1925              		.set	.LANCHOR0,. + 0
+ 1926              		.type	CySysTickCallbacks, %object
+ 1927              		.size	CySysTickCallbacks, 20
+ 1928              	CySysTickCallbacks:
+ 1929 0000 00000000 		.space	20
+ 1929      00000000 
+ 1929      00000000 
+ 1929      00000000 
+ 1929      00000000 
+ 1930              		.type	CySysTickInitVar, %object
+ 1931              		.size	CySysTickInitVar, 4
+ 1932              	CySysTickInitVar:
+ 1933 0014 00000000 		.space	4
+ 1934              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccpwYJdL.s 			page 35
+
+

@@ -9,33 +9,98 @@
 #include <project.h>
 #include "sup_serial.h"
 
-Sup_Pdu_t inbox;
-uint8_t current_inbox_position = 0;
+#define BLE_BUFFER_END 31
+#define BLE_BUFFER_NEXT(X) ((X + 1) & BLE_BUFFER_END)
+#define BLE_BUFFER_PREV(X) ((X + BLE_BUFFER_END) & BLE_BUFFER_END)
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
+
+Sup_Pdu_t SCQueue[32];
+uint8_t SCQueueReadPos = 0;
+uint8_t SCQueueWritePos = 0;
+Sup_Pdu_t i2c_inbox;
+Sup_Pdu_t i2c_outbox;
+
+// None of this happens in ISR, so we can be sloppy
+inline void queue_ble_command(Sup_Pdu_t *cmd) {
+  SCQueueWritePos = BLE_BUFFER_NEXT(SCQueueWritePos);
+  SCQueue[SCQueueWritePos] = *cmd;
+}
+
+// None of this happens in ISR, so we can be sloppy
+inline void read_ble_command(Sup_Pdu_t *result) {
+  if (SCQueueReadPos == SCQueueWritePos) {
+    result->command = SUP_CMD_NOOP;
+    return;
+  } else {
+    *result = SCQueue[SCQueueReadPos];
+    SCQueueReadPos = BLE_BUFFER_NEXT(SCQueueReadPos);
+  }
+}
 
 void serial_init(void) {
-  SupervisoryUART_Start();
+  Sup_I2C_SlaveInitReadBuf(i2c_outbox.raw, sizeof(i2c_outbox));
+  Sup_I2C_SlaveInitWriteBuf(i2c_inbox.raw, sizeof(i2c_inbox));
+  Sup_I2C_Start();
+}
+
+void serial_nap(void) {
+  Sup_I2C_Sleep();
+}
+
+void serial_wake(void) {
+  Sup_I2C_Wakeup();
 }
 
 void serial_send(Sup_Pdu_t* packet) {
-  SupervisoryUART_PutArray(packet->raw, sizeof(packet->raw));
+  queue_ble_command(packet);
 }
 
 bool serial_receive(Sup_Pdu_t* data) {
-  while
-      (SupervisoryUART_ReadRxStatus() == SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
-    inbox.raw[current_inbox_position++] = SupervisoryUART_ReadRxData();
-    if (current_inbox_position >= sizeof(inbox)) {
-      memcpy(data, &inbox, sizeof(inbox));
-      current_inbox_position = 0;
-      return true;
-    }
-  }
+//  while
+//      (SupervisoryUART_ReadRxStatus() == SupervisoryUART_RX_STS_FIFO_NOTEMPTY) {
+//    inbox.raw[current_inbox_position++] = SupervisoryUART_ReadRxData();
+//    if (current_inbox_position >= sizeof(inbox)) {
+//      memcpy(data, &inbox, sizeof(inbox));
+//      current_inbox_position = 0;
+//      return true;
+//    }
+//  }
   return false;
 }
 
 void serial_tick(void) {
-  Sup_Pdu_t data;
-  if (serial_receive(&data)) {
-    serial_send(&data);
+  if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_WR_CMPLT) {
+    if (Sup_I2C_SlaveGetWriteBufSize() == sizeof(i2c_inbox)) {
+      Sup_I2C_SlaveClearWriteBuf();
+      xprintf("%d %d", i2c_inbox.command, i2c_inbox.data);
+      if (i2c_inbox.command == SUP_CMD_SUSPEND && power_state == DEVSTATE_FULL_THROTTLE) {
+        Sup_Pdu_t buf;
+        buf.command = SUP_CMD_WAKEUP;
+        buf.data = 5;
+//        serial_send(&buf);
+        power_state = DEVSTATE_SHUTDOWN_REQUEST;
+      }
+    }
   }
+  if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_RD_CMPLT) {
+    if (SCQueueReadPos != SCQueueWritePos) {
+      if (Sup_I2C_SlaveGetReadBufSize() == 2) {
+        SCQueueReadPos = BLE_BUFFER_NEXT(SCQueueReadPos);
+        i2c_outbox = SCQueue[SCQueueReadPos];
+        Sup_I2C_SlaveClearReadBuf();
+        Sup_I2C_SlaveClearReadStatus();
+        xprintf("%d %d", i2c_outbox.command, i2c_outbox.data);
+      }
+    }
+  }
+}
+
+void update_serial_keyboard_report(queuedScancode *key) {
+  Sup_Pdu_t buffer;
+  buffer.command =
+      (key->flags & USBQUEUE_RELEASED_MASK) ? SUP_CMD_KEYUP : SUP_CMD_KEYDOWN;
+  buffer.data = key->keycode;
+  SCQueueWritePos = BLE_BUFFER_NEXT(SCQueueWritePos);
+  SCQueue[SCQueueWritePos] = buffer;
+  xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
 }

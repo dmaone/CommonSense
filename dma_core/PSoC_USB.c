@@ -18,7 +18,7 @@
 
 #define USB_STATUS_CONNECTED 0
 #define USB_STATUS_DISCONNECTED 1
-uint8_t status = USB_STATUS_DISCONNECTED;
+uint8_t usb_status = USB_STATUS_DISCONNECTED;
 uint8_t wakeup_enabled = 0;
 
 // How long (in system ticks) to wait for power to be disconnected
@@ -187,8 +187,16 @@ void usb_receive(OUT_c2packet_t *inbox) {
   }
 }
 
+uint8_t waitForEp(uint8_t ep) {
+  while (USB_GetEPState(ep) != USB_IN_BUFFER_EMPTY) {
+    if (power_state != DEVSTATE_FULL_THROTTLE)
+      return 0;
+  }
+  return 1;
+}
+
 void usb_send_c2(void) {
-  if (status != USB_STATUS_CONNECTED) {
+  if (usb_status != USB_STATUS_CONNECTED) {
     return;
   }
   USB_WAIT_FOR_IN_EP(OUTBOX_EP);
@@ -370,9 +378,9 @@ void usb_configure(void) {
   memset(SYSTEM_OUTBOX, 0, sizeof(SYSTEM_OUTBOX));
   if (0u == USB_GetConfiguration()) {
     // This never happens. But let's handle it just in case.
-    status = USB_STATUS_DISCONNECTED;
+    usb_status = USB_STATUS_DISCONNECTED;
   } else {
-    status = USB_STATUS_CONNECTED;
+    usb_status = USB_STATUS_CONNECTED;
     usb_suspend_monitor_start();
   }
 }
@@ -384,9 +392,9 @@ void usb_tick(void) {
       USB_Start(0u, USB_POWER_MODE);
     }
   } else {
-    if (status == USB_STATUS_CONNECTED) {
+    if (usb_status == USB_STATUS_CONNECTED) {
       USB_Stop();
-      status = USB_STATUS_DISCONNECTED;
+      usb_status = USB_STATUS_DISCONNECTED;
     }
     return;
   }

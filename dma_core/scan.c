@@ -72,6 +72,18 @@ void init_sensor(uint8_t debouncing_period) {
   scan_reset();
 }
 
+void sensor_nap(void) {
+  ChargeDelay_Sleep();
+  DischargeDelay_Sleep();
+  ADC0_Sleep();
+}
+
+void sensor_wake(void) {
+  ADC0_Wakeup();
+  DischargeDelay_Wakeup();
+  ChargeDelay_Wakeup();
+}
+
 void BufferSetup(uint8 chan, uint8 *td, uint8 channel_config,
                         uint32 src_addr, uint32 dst_addr) {
   (void)CyDmaClearPendingDrq(chan);
@@ -304,6 +316,15 @@ void scan_init(uint8_t debouncing_period) {
   while (scan_in_progress) {}; // Make sure scan is stopped.
   init_sensor(debouncing_period);
   enable_sensor();
+}
+
+void scan_nap(void) {
+  while (scan_in_progress) {}
+  sensor_nap();
+}
+
+void scan_wake(void) {
+  sensor_wake();
 }
 
 void scan_sanity_check(void) {

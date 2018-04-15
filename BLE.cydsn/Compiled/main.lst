@@ -1,0 +1,1349 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"main.c"
+  16              		.section	.text.HidsCallBack,"ax",%progbits
+  17              		.align	2
+  18              		.global	HidsCallBack
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	HidsCallBack, %function
+  22              	HidsCallBack:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25 0000 70B5     		push	{r4, r5, r6, lr}
+  26 0002 0400     		movs	r4, r0
+  27 0004 963C     		subs	r4, r4, #150
+  28 0006 0D00     		movs	r5, r1
+  29 0008 FF3C     		subs	r4, r4, #255
+  30 000a 0100     		movs	r1, r0
+  31 000c 2648     		ldr	r0, .L15
+  32 000e FFF7FEFF 		bl	printf
+  33 0012 0B2C     		cmp	r4, #11
+  34 0014 43D8     		bhi	.L2
+  35 0016 254B     		ldr	r3, .L15+4
+  36 0018 A400     		lsls	r4, r4, #2
+  37 001a 1B59     		ldr	r3, [r3, r4]
+  38 001c 9F46     		mov	pc, r3
+  39              		.section	.rodata
+  40              		.align	2
+  41              	.L4:
+  42 0000 1E000000 		.word	.L3
+  43 0004 48000000 		.word	.L5
+  44 0008 5E000000 		.word	.L6
+  45 000c 6C000000 		.word	.L7
+  46 0010 7A000000 		.word	.L8
+  47 0014 8C000000 		.word	.L9
+  48 0018 36000000 		.word	.L10
+  49 001c 34000000 		.word	.L1
+  50 0020 34000000 		.word	.L1
+  51 0024 34000000 		.word	.L1
+  52 0028 34000000 		.word	.L1
+  53 002c 34000000 		.word	.L1
+  54              		.section	.text.HidsCallBack
+  55              	.L3:
+  56 001e EA78     		ldrb	r2, [r5, #3]
+  57 0020 A978     		ldrb	r1, [r5, #2]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 2
+
+
+  58 0022 2348     		ldr	r0, .L15+8
+  59 0024 FFF7FEFF 		bl	printf
+  60 0028 AB78     		ldrb	r3, [r5, #2]
+  61 002a 002B     		cmp	r3, #0
+  62 002c 02D1     		bne	.L1
+  63 002e 0122     		movs	r2, #1
+  64 0030 204B     		ldr	r3, .L15+12
+  65 0032 1A70     		strb	r2, [r3]
+  66              	.L1:
+  67              		@ sp needed
+  68 0034 70BD     		pop	{r4, r5, r6, pc}
+  69              	.L10:
+  70 0036 EA78     		ldrb	r2, [r5, #3]
+  71 0038 A978     		ldrb	r1, [r5, #2]
+  72 003a 1F48     		ldr	r0, .L15+16
+  73 003c FFF7FEFF 		bl	printf
+  74 0040 6868     		ldr	r0, [r5, #4]
+  75 0042 FFF7FEFF 		bl	ShowValue
+  76 0046 F5E7     		b	.L1
+  77              	.L5:
+  78 0048 EA78     		ldrb	r2, [r5, #3]
+  79 004a A978     		ldrb	r1, [r5, #2]
+  80 004c 1B48     		ldr	r0, .L15+20
+  81 004e FFF7FEFF 		bl	printf
+  82 0052 AB78     		ldrb	r3, [r5, #2]
+  83 0054 002B     		cmp	r3, #0
+  84 0056 EDD1     		bne	.L1
+  85 0058 164A     		ldr	r2, .L15+12
+  86 005a 1370     		strb	r3, [r2]
+  87 005c EAE7     		b	.L1
+  88              	.L6:
+  89 005e 1848     		ldr	r0, .L15+24
+  90 0060 FFF7FEFF 		bl	puts
+  91 0064 0022     		movs	r2, #0
+  92 0066 134B     		ldr	r3, .L15+12
+  93 0068 5A70     		strb	r2, [r3, #1]
+  94 006a E3E7     		b	.L1
+  95              	.L7:
+  96 006c 1548     		ldr	r0, .L15+28
+  97 006e FFF7FEFF 		bl	puts
+  98 0072 0122     		movs	r2, #1
+  99 0074 0F4B     		ldr	r3, .L15+12
+ 100 0076 5A70     		strb	r2, [r3, #1]
+ 101 0078 DCE7     		b	.L1
+ 102              	.L8:
+ 103 007a 1348     		ldr	r0, .L15+32
+ 104 007c FFF7FEFF 		bl	puts
+ 105 0080 0022     		movs	r2, #0
+ 106 0082 124B     		ldr	r3, .L15+36
+ 107 0084 1A70     		strb	r2, [r3]
+ 108 0086 FFF7FEFF 		bl	UART_DEB_Stop
+ 109 008a D3E7     		b	.L1
+ 110              	.L9:
+ 111 008c FFF7FEFF 		bl	UART_DEB_Start
+ 112 0090 0F48     		ldr	r0, .L15+40
+ 113 0092 FFF7FEFF 		bl	puts
+ 114 0096 0122     		movs	r2, #1
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 3
+
+
+ 115 0098 0C4B     		ldr	r3, .L15+36
+ 116 009a 1A70     		strb	r2, [r3]
+ 117 009c CAE7     		b	.L1
+ 118              	.L2:
+ 119 009e 0D48     		ldr	r0, .L15+44
+ 120 00a0 FFF7FEFF 		bl	puts
+ 121 00a4 C6E7     		b	.L1
+ 122              	.L16:
+ 123 00a6 C046     		.align	2
+ 124              	.L15:
+ 125 00a8 00000000 		.word	.LC0
+ 126 00ac 00000000 		.word	.L4
+ 127 00b0 14000000 		.word	.LC3
+ 128 00b4 00000000 		.word	.LANCHOR0
+ 129 00b8 10010000 		.word	.LC17
+ 130 00bc 50000000 		.word	.LC6
+ 131 00c0 8C000000 		.word	.LC8
+ 132 00c4 B0000000 		.word	.LC10
+ 133 00c8 D4000000 		.word	.LC12
+ 134 00cc 00000000 		.word	.LANCHOR1
+ 135 00d0 F0000000 		.word	.LC15
+ 136 00d4 4C010000 		.word	.LC19
+ 137              		.size	HidsCallBack, .-HidsCallBack
+ 138              		.section	.text.AppCallBack,"ax",%progbits
+ 139              		.align	2
+ 140              		.global	AppCallBack
+ 141              		.code	16
+ 142              		.thumb_func
+ 143              		.type	AppCallBack, %function
+ 144              	AppCallBack:
+ 145              		@ args = 0, pretend = 0, frame = 8
+ 146              		@ frame_needed = 0, uses_anonymous_args = 0
+ 147 0000 70B5     		push	{r4, r5, r6, lr}
+ 148 0002 0C00     		movs	r4, r1
+ 149 0004 84B0     		sub	sp, sp, #16
+ 150 0006 2628     		cmp	r0, #38
+ 151 0008 00D1     		bne	.LCB136
+ 152 000a D6E0     		b	.L19	@long jump
+ 153              	.LCB136:
+ 154 000c 1BD9     		bls	.L64
+ 155 000e 4128     		cmp	r0, #65
+ 156 0010 00D1     		bne	.LCB140
+ 157 0012 9BE0     		b	.L34	@long jump
+ 158              	.LCB140:
+ 159 0014 27D8     		bhi	.L35
+ 160 0016 2928     		cmp	r0, #41
+ 161 0018 00D1     		bne	.LCB144
+ 162 001a A5E0     		b	.L36	@long jump
+ 163              	.LCB144:
+ 164 001c 4BD8     		bhi	.L37
+ 165 001e 2728     		cmp	r0, #39
+ 166 0020 00D1     		bne	.LCB148
+ 167 0022 7EE0     		b	.L38	@long jump
+ 168              	.LCB148:
+ 169 0024 2828     		cmp	r0, #40
+ 170 0026 00D0     		beq	.LCB150
+ 171 0028 C2E0     		b	.L18	@long jump
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 4
+
+
+ 172              	.LCB150:
+ 173 002a 7B48     		ldr	r0, .L68
+ 174 002c FFF7FEFF 		bl	puts
+ 175 0030 0020     		movs	r0, #0
+ 176 0032 FFF7FEFF 		bl	CyBle_GappStartAdvertisement
+ 177 0036 0028     		cmp	r0, #0
+ 178 0038 03D0     		beq	.L17
+ 179 003a 0100     		movs	r1, r0
+ 180 003c 7748     		ldr	r0, .L68+4
+ 181 003e FFF7FEFF 		bl	printf
+ 182              	.L17:
+ 183 0042 04B0     		add	sp, sp, #16
+ 184              		@ sp needed
+ 185 0044 70BD     		pop	{r4, r5, r6, pc}
+ 186              	.L64:
+ 187 0046 0528     		cmp	r0, #5
+ 188 0048 00D1     		bne	.LCB174
+ 189 004a DBE0     		b	.L21	@long jump
+ 190              	.LCB174:
+ 191 004c 1CD9     		bls	.L65
+ 192 004e 2328     		cmp	r0, #35
+ 193 0050 57D0     		beq	.L28
+ 194 0052 26D8     		bhi	.L29
+ 195 0054 2128     		cmp	r0, #33
+ 196 0056 4BD0     		beq	.L30
+ 197 0058 2228     		cmp	r0, #34
+ 198 005a 00D0     		beq	.LCB184
+ 199 005c A8E0     		b	.L18	@long jump
+ 200              	.LCB184:
+ 201 005e 7048     		ldr	r0, .L68+8
+ 202 0060 FFF7FEFF 		bl	puts
+ 203 0064 EDE7     		b	.L17
+ 204              	.L35:
+ 205 0066 4C28     		cmp	r0, #76
+ 206 0068 50D0     		beq	.L42
+ 207 006a 2CD8     		bhi	.L43
+ 208 006c 4228     		cmp	r0, #66
+ 209 006e 32D0     		beq	.L44
+ 210 0070 4328     		cmp	r0, #67
+ 211 0072 00D0     		beq	.LCB198
+ 212 0074 9CE0     		b	.L18	@long jump
+ 213              	.LCB198:
+ 214 0076 02AC     		add	r4, sp, #8
+ 215 0078 2000     		movs	r0, r4
+ 216 007a FFF7FEFF 		bl	CyBle_GattGetMtuSize
+ 217 007e 2188     		ldrh	r1, [r4]
+ 218 0080 6848     		ldr	r0, .L68+12
+ 219 0082 FFF7FEFF 		bl	printf
+ 220 0086 DCE7     		b	.L17
+ 221              	.L65:
+ 222 0088 0228     		cmp	r0, #2
+ 223 008a DAD0     		beq	.L17
+ 224 008c 71D9     		bls	.L66
+ 225 008e 0328     		cmp	r0, #3
+ 226 0090 58D0     		beq	.L26
+ 227 0092 0428     		cmp	r0, #4
+ 228 0094 00D0     		beq	.LCB216
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 5
+
+
+ 229 0096 8BE0     		b	.L18	@long jump
+ 230              	.LCB216:
+ 231 0098 0978     		ldrb	r1, [r1]
+ 232 009a 6348     		ldr	r0, .L68+16
+ 233 009c FFF7FEFF 		bl	printf
+ 234 00a0 CFE7     		b	.L17
+ 235              	.L29:
+ 236 00a2 2428     		cmp	r0, #36
+ 237 00a4 1BD0     		beq	.L32
+ 238 00a6 2528     		cmp	r0, #37
+ 239 00a8 00D0     		beq	.LCB227
+ 240 00aa 81E0     		b	.L18	@long jump
+ 241              	.LCB227:
+ 242 00ac 0978     		ldrb	r1, [r1]
+ 243 00ae 5F48     		ldr	r0, .L68+20
+ 244 00b0 FFF7FEFF 		bl	printf
+ 245 00b4 C5E7     		b	.L17
+ 246              	.L37:
+ 247 00b6 2A28     		cmp	r0, #42
+ 248 00b8 3FD0     		beq	.L40
+ 249 00ba 2C28     		cmp	r0, #44
+ 250 00bc 78D1     		bne	.L18
+ 251 00be 5C48     		ldr	r0, .L68+24
+ 252 00c0 FFF7FEFF 		bl	puts
+ 253 00c4 BDE7     		b	.L17
+ 254              	.L43:
+ 255 00c6 5728     		cmp	r0, #87
+ 256 00c8 32D0     		beq	.L46
+ 257 00ca FA28     		cmp	r0, #250
+ 258 00cc 70D1     		bne	.L18
+ 259 00ce 5948     		ldr	r0, .L68+28
+ 260 00d0 FFF7FEFF 		bl	puts
+ 261 00d4 B5E7     		b	.L17
+ 262              	.L44:
+ 263 00d6 5848     		ldr	r0, .L68+32
+ 264 00d8 FFF7FEFF 		bl	puts
+ 265 00dc B1E7     		b	.L17
+ 266              	.L32:
+ 267 00de E078     		ldrb	r0, [r4, #3]
+ 268 00e0 8B78     		ldrb	r3, [r1, #2]
+ 269 00e2 4A78     		ldrb	r2, [r1, #1]
+ 270 00e4 0978     		ldrb	r1, [r1]
+ 271 00e6 0090     		str	r0, [sp]
+ 272 00e8 5448     		ldr	r0, .L68+36
+ 273 00ea FFF7FEFF 		bl	printf
+ 274 00ee A8E7     		b	.L17
+ 275              	.L30:
+ 276 00f0 E078     		ldrb	r0, [r4, #3]
+ 277 00f2 8B78     		ldrb	r3, [r1, #2]
+ 278 00f4 4A78     		ldrb	r2, [r1, #1]
+ 279 00f6 0978     		ldrb	r1, [r1]
+ 280 00f8 0090     		str	r0, [sp]
+ 281 00fa 5148     		ldr	r0, .L68+40
+ 282 00fc FFF7FEFF 		bl	printf
+ 283 0100 9FE7     		b	.L17
+ 284              	.L28:
+ 285 0102 0968     		ldr	r1, [r1]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 6
+
+
+ 286 0104 4F48     		ldr	r0, .L68+44
+ 287 0106 FFF7FEFF 		bl	printf
+ 288 010a 9AE7     		b	.L17
+ 289              	.L42:
+ 290 010c 8989     		ldrh	r1, [r1, #12]
+ 291 010e 4E48     		ldr	r0, .L68+48
+ 292 0110 FFF7FEFF 		bl	printf
+ 293 0114 201D     		adds	r0, r4, #4
+ 294 0116 FFF7FEFF 		bl	ShowValue
+ 295 011a 2068     		ldr	r0, [r4]
+ 296 011c FFF7FEFF 		bl	CyBle_GattsWriteRsp
+ 297 0120 8FE7     		b	.L17
+ 298              	.L38:
+ 299 0122 4A48     		ldr	r0, .L68+52
+ 300 0124 FFF7FEFF 		bl	puts
+ 301 0128 0120     		movs	r0, #1
+ 302 012a FFF7FEFF 		bl	LED_RED_Write
+ 303 012e 88E7     		b	.L17
+ 304              	.L46:
+ 305 0130 4988     		ldrh	r1, [r1, #2]
+ 306 0132 4748     		ldr	r0, .L68+56
+ 307 0134 FFF7FEFF 		bl	printf
+ 308 0138 83E7     		b	.L17
+ 309              	.L40:
+ 310 013a 0978     		ldrb	r1, [r1]
+ 311 013c 4548     		ldr	r0, .L68+60
+ 312 013e FFF7FEFF 		bl	printf
+ 313 0142 7EE7     		b	.L17
+ 314              	.L26:
+ 315 0144 4448     		ldr	r0, .L68+64
+ 316 0146 FFF7FEFF 		bl	puts
+ 317 014a 7AE7     		b	.L17
+ 318              	.L34:
+ 319 014c 434B     		ldr	r3, .L68+68
+ 320 014e 4448     		ldr	r0, .L68+72
+ 321 0150 1A78     		ldrb	r2, [r3]
+ 322 0152 5978     		ldrb	r1, [r3, #1]
+ 323 0154 FFF7FEFF 		bl	printf
+ 324 0158 4248     		ldr	r0, .L68+76
+ 325 015a FFF7FEFF 		bl	CyBle_HidsRegisterAttrCallback
+ 326 015e FFF7FEFF 		bl	BasInit
+ 327 0162 FFF7FEFF 		bl	ScpsInit
+ 328 0166 6CE7     		b	.L17
+ 329              	.L36:
+ 330 0168 0978     		ldrb	r1, [r1]
+ 331 016a 3F48     		ldr	r0, .L68+80
+ 332 016c FFF7FEFF 		bl	printf
+ 333 0170 67E7     		b	.L17
+ 334              	.L66:
+ 335 0172 0128     		cmp	r0, #1
+ 336 0174 1CD1     		bne	.L18
+ 337 0176 0020     		movs	r0, #0
+ 338 0178 FFF7FEFF 		bl	CyBle_GappStartAdvertisement
+ 339 017c 0028     		cmp	r0, #0
+ 340 017e 46D1     		bne	.L67
+ 341              	.L48:
+ 342 0180 3A48     		ldr	r0, .L68+84
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 7
+
+
+ 343 0182 FFF7FEFF 		bl	printf
+ 344 0186 0023     		movs	r3, #0
+ 345 0188 02A8     		add	r0, sp, #8
+ 346 018a 8371     		strb	r3, [r0, #6]
+ 347 018c 0D24     		movs	r4, #13
+ 348 018e FFF7FEFF 		bl	CyBle_GetDeviceAddress
+ 349 0192 6B46     		mov	r3, sp
+ 350 0194 364D     		ldr	r5, .L68+88
+ 351 0196 6C44     		add	r4, r4, sp
+ 352 0198 DE1D     		adds	r6, r3, #7
+ 353              	.L49:
+ 354 019a 2178     		ldrb	r1, [r4]
+ 355 019c 2800     		movs	r0, r5
+ 356 019e 013C     		subs	r4, r4, #1
+ 357 01a0 FFF7FEFF 		bl	printf
+ 358 01a4 B442     		cmp	r4, r6
+ 359 01a6 F8D1     		bne	.L49
+ 360 01a8 3248     		ldr	r0, .L68+92
+ 361 01aa FFF7FEFF 		bl	puts
+ 362 01ae 48E7     		b	.L17
+ 363              	.L18:
+ 364 01b0 0100     		movs	r1, r0
+ 365 01b2 3148     		ldr	r0, .L68+96
+ 366 01b4 FFF7FEFF 		bl	printf
+ 367 01b8 43E7     		b	.L17
+ 368              	.L19:
+ 369 01ba 304C     		ldr	r4, .L68+100
+ 370 01bc 3048     		ldr	r0, .L68+104
+ 371 01be 2178     		ldrb	r1, [r4]
+ 372 01c0 FFF7FEFF 		bl	printf
+ 373 01c4 2378     		ldrb	r3, [r4]
+ 374 01c6 042B     		cmp	r3, #4
+ 375 01c8 00D0     		beq	.LCB394
+ 376 01ca 3AE7     		b	.L17	@long jump
+ 377              	.LCB394:
+ 378 01cc 2D48     		ldr	r0, .L68+108
+ 379 01ce FFF7FEFF 		bl	puts
+ 380 01d2 0120     		movs	r0, #1
+ 381 01d4 FFF7FEFF 		bl	LED_RED_Write
+ 382 01d8 0020     		movs	r0, #0
+ 383 01da FFF7FEFF 		bl	LED_GRN_Write
+ 384 01de 0124     		movs	r4, #1
+ 385 01e0 FFF7FEFF 		bl	SW2_ClearInterrupt
+ 386 01e4 FFF7FEFF 		bl	Wakeup_Interrupt_ClearPending
+ 387 01e8 FFF7FEFF 		bl	Wakeup_Interrupt_Start
+ 388 01ec 264D     		ldr	r5, .L68+112
+ 389              	.L51:
+ 390 01ee FFF7FEFF 		bl	UART_DEB_SpiUartGetTxBufferSize
+ 391 01f2 2B68     		ldr	r3, [r5]
+ 392 01f4 DB0B     		lsrs	r3, r3, #15
+ 393 01f6 2340     		ands	r3, r4
+ 394 01f8 1B18     		adds	r3, r3, r0
+ 395 01fa 002B     		cmp	r3, #0
+ 396 01fc F7D1     		bne	.L51
+ 397 01fe FFF7FEFF 		bl	CySysPmHibernate
+ 398 0202 1EE7     		b	.L17
+ 399              	.L21:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 8
+
+
+ 400 0204 0978     		ldrb	r1, [r1]
+ 401 0206 2148     		ldr	r0, .L68+116
+ 402 0208 FFF7FEFF 		bl	printf
+ 403 020c 19E7     		b	.L17
+ 404              	.L67:
+ 405 020e 0100     		movs	r1, r0
+ 406 0210 0248     		ldr	r0, .L68+4
+ 407 0212 FFF7FEFF 		bl	printf
+ 408 0216 B3E7     		b	.L48
+ 409              	.L69:
+ 410              		.align	2
+ 411              	.L68:
+ 412 0218 B0030000 		.word	.LC56
+ 413 021c 64010000 		.word	.LC23
+ 414 0220 64020000 		.word	.LC39
+ 415 0224 D4030000 		.word	.LC58
+ 416 0228 04020000 		.word	.LC35
+ 417 022c 3C030000 		.word	.LC47
+ 418 0230 D0020000 		.word	.LC43
+ 419 0234 F4040000 		.word	.LC74
+ 420 0238 9C040000 		.word	.LC70
+ 421 023c F8020000 		.word	.LC45
+ 422 0240 20020000 		.word	.LC37
+ 423 0244 A4020000 		.word	.LC41
+ 424 0248 04040000 		.word	.LC60
+ 425 024c 8C030000 		.word	.LC54
+ 426 0250 BC040000 		.word	.LC72
+ 427 0254 48040000 		.word	.LC64
+ 428 0258 C4010000 		.word	.LC31
+ 429 025c 00000000 		.word	cyBle_connHandle
+ 430 0260 74040000 		.word	.LC67
+ 431 0264 00000000 		.word	HidsCallBack
+ 432 0268 24040000 		.word	.LC62
+ 433 026c 88010000 		.word	.LC25
+ 434 0270 B8010000 		.word	.LC27
+ 435 0274 C0010000 		.word	.LC29
+ 436 0278 14050000 		.word	.LC76
+ 437 027c 00000000 		.word	cyBle_state
+ 438 0280 5C030000 		.word	.LC50
+ 439 0284 80030000 		.word	.LC52
+ 440 0288 08022440 		.word	1076101640
+ 441 028c E0010000 		.word	.LC33
+ 442              		.size	AppCallBack, .-AppCallBack
+ 443              		.section	.text.keyboard_press,"ax",%progbits
+ 444              		.align	2
+ 445              		.global	keyboard_press
+ 446              		.code	16
+ 447              		.thumb_func
+ 448              		.type	keyboard_press, %function
+ 449              	keyboard_press:
+ 450              		@ args = 0, pretend = 0, frame = 0
+ 451              		@ frame_needed = 0, uses_anonymous_args = 0
+ 452 0000 0721     		movs	r1, #7
+ 453 0002 0300     		movs	r3, r0
+ 454 0004 10B5     		push	{r4, lr}
+ 455 0006 8B43     		bics	r3, r1
+ 456 0008 E02B     		cmp	r3, #224
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 9
+
+
+ 457 000a 18D0     		beq	.L77
+ 458 000c 0022     		movs	r2, #0
+ 459 000e 104B     		ldr	r3, .L80
+ 460              	.L75:
+ 461 0010 1C78     		ldrb	r4, [r3]
+ 462 0012 D1B2     		uxtb	r1, r2
+ 463 0014 A042     		cmp	r0, r4
+ 464 0016 06D0     		beq	.L78
+ 465 0018 002C     		cmp	r4, #0
+ 466 001a 09D0     		beq	.L79
+ 467 001c 0132     		adds	r2, r2, #1
+ 468 001e 0133     		adds	r3, r3, #1
+ 469 0020 122A     		cmp	r2, #18
+ 470 0022 F5D1     		bne	.L75
+ 471              	.L70:
+ 472              		@ sp needed
+ 473 0024 10BD     		pop	{r4, pc}
+ 474              	.L78:
+ 475 0026 0100     		movs	r1, r0
+ 476 0028 0A48     		ldr	r0, .L80+4
+ 477 002a FFF7FEFF 		bl	printf
+ 478 002e F9E7     		b	.L70
+ 479              	.L79:
+ 480 0030 094B     		ldr	r3, .L80+8
+ 481 0032 0131     		adds	r1, r1, #1
+ 482 0034 9A18     		adds	r2, r3, r2
+ 483 0036 094B     		ldr	r3, .L80+12
+ 484 0038 9070     		strb	r0, [r2, #2]
+ 485 003a 1970     		strb	r1, [r3]
+ 486 003c F2E7     		b	.L70
+ 487              	.L77:
+ 488 003e 0840     		ands	r0, r1
+ 489 0040 DF3B     		subs	r3, r3, #223
+ 490 0042 8340     		lsls	r3, r3, r0
+ 491 0044 044C     		ldr	r4, .L80+8
+ 492 0046 2278     		ldrb	r2, [r4]
+ 493 0048 1343     		orrs	r3, r2
+ 494 004a 2370     		strb	r3, [r4]
+ 495 004c EAE7     		b	.L70
+ 496              	.L81:
+ 497 004e C046     		.align	2
+ 498              	.L80:
+ 499 0050 02000000 		.word	keyboard_report+2
+ 500 0054 28050000 		.word	.LC80
+ 501 0058 00000000 		.word	keyboard_report
+ 502 005c 00000000 		.word	keyboard_report_usage
+ 503              		.size	keyboard_press, .-keyboard_press
+ 504              		.section	.text.keyboard_release,"ax",%progbits
+ 505              		.align	2
+ 506              		.global	keyboard_release
+ 507              		.code	16
+ 508              		.thumb_func
+ 509              		.type	keyboard_release, %function
+ 510              	keyboard_release:
+ 511              		@ args = 0, pretend = 0, frame = 0
+ 512              		@ frame_needed = 0, uses_anonymous_args = 0
+ 513 0000 0723     		movs	r3, #7
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 10
+
+
+ 514 0002 0200     		movs	r2, r0
+ 515 0004 10B5     		push	{r4, lr}
+ 516 0006 9A43     		bics	r2, r3
+ 517 0008 E02A     		cmp	r2, #224
+ 518 000a 1DD0     		beq	.L92
+ 519 000c 124B     		ldr	r3, .L95
+ 520 000e 0022     		movs	r2, #0
+ 521 0010 1900     		movs	r1, r3
+ 522 0012 1231     		adds	r1, r1, #18
+ 523 0014 04E0     		b	.L87
+ 524              	.L94:
+ 525 0016 5C78     		ldrb	r4, [r3, #1]
+ 526 0018 1C70     		strb	r4, [r3]
+ 527 001a 0133     		adds	r3, r3, #1
+ 528 001c 9942     		cmp	r1, r3
+ 529 001e 09D0     		beq	.L93
+ 530              	.L87:
+ 531 0020 002A     		cmp	r2, #0
+ 532 0022 F8D1     		bne	.L94
+ 533 0024 5A78     		ldrb	r2, [r3, #1]
+ 534 0026 0133     		adds	r3, r3, #1
+ 535 0028 121A     		subs	r2, r2, r0
+ 536 002a 5442     		rsbs	r4, r2, #0
+ 537 002c 6241     		adcs	r2, r2, r4
+ 538 002e D2B2     		uxtb	r2, r2
+ 539 0030 9942     		cmp	r1, r3
+ 540 0032 F5D1     		bne	.L87
+ 541              	.L93:
+ 542 0034 002A     		cmp	r2, #0
+ 543 0036 06D0     		beq	.L82
+ 544 0038 0022     		movs	r2, #0
+ 545 003a 084B     		ldr	r3, .L95+4
+ 546 003c DA74     		strb	r2, [r3, #19]
+ 547 003e 084A     		ldr	r2, .L95+8
+ 548 0040 1378     		ldrb	r3, [r2]
+ 549 0042 013B     		subs	r3, r3, #1
+ 550 0044 1370     		strb	r3, [r2]
+ 551              	.L82:
+ 552              		@ sp needed
+ 553 0046 10BD     		pop	{r4, pc}
+ 554              	.L92:
+ 555 0048 1840     		ands	r0, r3
+ 556 004a DF3A     		subs	r2, r2, #223
+ 557 004c 8240     		lsls	r2, r2, r0
+ 558 004e 0349     		ldr	r1, .L95+4
+ 559 0050 0B78     		ldrb	r3, [r1]
+ 560 0052 9343     		bics	r3, r2
+ 561 0054 0B70     		strb	r3, [r1]
+ 562 0056 F6E7     		b	.L82
+ 563              	.L96:
+ 564              		.align	2
+ 565              	.L95:
+ 566 0058 01000000 		.word	keyboard_report+1
+ 567 005c 00000000 		.word	keyboard_report
+ 568 0060 00000000 		.word	keyboard_report_usage
+ 569              		.size	keyboard_release, .-keyboard_release
+ 570              		.section	.text.process_inbox,"ax",%progbits
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 11
+
+
+ 571              		.align	2
+ 572              		.global	process_inbox
+ 573              		.code	16
+ 574              		.thumb_func
+ 575              		.type	process_inbox, %function
+ 576              	process_inbox:
+ 577              		@ args = 0, pretend = 0, frame = 8
+ 578              		@ frame_needed = 0, uses_anonymous_args = 0
+ 579 0000 10B5     		push	{r4, lr}
+ 580 0002 0400     		movs	r4, r0
+ 581 0004 0178     		ldrb	r1, [r0]
+ 582 0006 4278     		ldrb	r2, [r0, #1]
+ 583 0008 84B0     		sub	sp, sp, #16
+ 584 000a 4D48     		ldr	r0, .L135
+ 585 000c FFF7FEFF 		bl	printf
+ 586 0010 2178     		ldrb	r1, [r4]
+ 587 0012 7029     		cmp	r1, #112
+ 588 0014 58D0     		beq	.L99
+ 589 0016 7229     		cmp	r1, #114
+ 590 0018 32D0     		beq	.L100
+ 591 001a 0029     		cmp	r1, #0
+ 592 001c 08D0     		beq	.L128
+ 593 001e 4948     		ldr	r0, .L135+4
+ 594 0020 FFF7FEFF 		bl	printf
+ 595              	.L103:
+ 596 0024 484B     		ldr	r3, .L135+8
+ 597 0026 1B78     		ldrb	r3, [r3]
+ 598 0028 002B     		cmp	r3, #0
+ 599 002a 08D0     		beq	.L129
+ 600              	.L97:
+ 601 002c 04B0     		add	sp, sp, #16
+ 602              		@ sp needed
+ 603 002e 10BD     		pop	{r4, pc}
+ 604              	.L128:
+ 605 0030 4648     		ldr	r0, .L135+12
+ 606 0032 FFF7FEFF 		bl	printf
+ 607 0036 444B     		ldr	r3, .L135+8
+ 608 0038 1B78     		ldrb	r3, [r3]
+ 609 003a 002B     		cmp	r3, #0
+ 610 003c F6D1     		bne	.L97
+ 611              	.L129:
+ 612 003e 0F33     		adds	r3, r3, #15
+ 613 0040 6B44     		add	r3, r3, sp
+ 614 0042 0122     		movs	r2, #1
+ 615 0044 0021     		movs	r1, #0
+ 616 0046 0020     		movs	r0, #0
+ 617 0048 FFF7FEFF 		bl	CyBle_HidssGetCharacteristicValue
+ 618 004c C0B2     		uxtb	r0, r0
+ 619 004e 0028     		cmp	r0, #0
+ 620 0050 ECD1     		bne	.L97
+ 621 0052 6B46     		mov	r3, sp
+ 622 0054 DB7B     		ldrb	r3, [r3, #15]
+ 623 0056 3E4A     		ldr	r2, .L135+16
+ 624 0058 002B     		cmp	r3, #0
+ 625 005a 4CD1     		bne	.L115
+ 626 005c 3D4B     		ldr	r3, .L135+20
+ 627 005e 0021     		movs	r1, #0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 12
+
+
+ 628 0060 0093     		str	r3, [sp]
+ 629 0062 5078     		ldrb	r0, [r2, #1]
+ 630 0064 1378     		ldrb	r3, [r2]
+ 631 0066 0002     		lsls	r0, r0, #8
+ 632 0068 1843     		orrs	r0, r3
+ 633 006a 0422     		movs	r2, #4
+ 634 006c 1423     		movs	r3, #20
+ 635 006e FFF7FEFF 		bl	CyBle_HidssSendNotification
+ 636 0072 C1B2     		uxtb	r1, r0
+ 637              	.L116:
+ 638 0074 0029     		cmp	r1, #0
+ 639 0076 D9D0     		beq	.L97
+ 640 0078 3748     		ldr	r0, .L135+24
+ 641 007a FFF7FEFF 		bl	printf
+ 642 007e D5E7     		b	.L97
+ 643              	.L100:
+ 644 0080 6478     		ldrb	r4, [r4, #1]
+ 645 0082 0723     		movs	r3, #7
+ 646 0084 2200     		movs	r2, r4
+ 647 0086 9A43     		bics	r2, r3
+ 648 0088 E02A     		cmp	r2, #224
+ 649 008a 50D0     		beq	.L130
+ 650 008c 334B     		ldr	r3, .L135+28
+ 651 008e 0022     		movs	r2, #0
+ 652 0090 1900     		movs	r1, r3
+ 653 0092 1231     		adds	r1, r1, #18
+ 654 0094 04E0     		b	.L110
+ 655              	.L132:
+ 656 0096 5878     		ldrb	r0, [r3, #1]
+ 657 0098 1870     		strb	r0, [r3]
+ 658 009a 0133     		adds	r3, r3, #1
+ 659 009c 8B42     		cmp	r3, r1
+ 660 009e 09D0     		beq	.L131
+ 661              	.L110:
+ 662 00a0 002A     		cmp	r2, #0
+ 663 00a2 F8D1     		bne	.L132
+ 664 00a4 5A78     		ldrb	r2, [r3, #1]
+ 665 00a6 0133     		adds	r3, r3, #1
+ 666 00a8 121B     		subs	r2, r2, r4
+ 667 00aa 5042     		rsbs	r0, r2, #0
+ 668 00ac 4241     		adcs	r2, r2, r0
+ 669 00ae D2B2     		uxtb	r2, r2
+ 670 00b0 8B42     		cmp	r3, r1
+ 671 00b2 F5D1     		bne	.L110
+ 672              	.L131:
+ 673 00b4 002A     		cmp	r2, #0
+ 674 00b6 B5D0     		beq	.L103
+ 675 00b8 0022     		movs	r2, #0
+ 676 00ba 264B     		ldr	r3, .L135+20
+ 677 00bc DA74     		strb	r2, [r3, #19]
+ 678 00be 284A     		ldr	r2, .L135+32
+ 679 00c0 1378     		ldrb	r3, [r2]
+ 680 00c2 013B     		subs	r3, r3, #1
+ 681 00c4 1370     		strb	r3, [r2]
+ 682 00c6 ADE7     		b	.L103
+ 683              	.L99:
+ 684 00c8 6178     		ldrb	r1, [r4, #1]
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 13
+
+
+ 685 00ca 0723     		movs	r3, #7
+ 686 00cc 0A00     		movs	r2, r1
+ 687 00ce 9A43     		bics	r2, r3
+ 688 00d0 E02A     		cmp	r2, #224
+ 689 00d2 24D0     		beq	.L133
+ 690 00d4 234B     		ldr	r3, .L135+36
+ 691 00d6 0022     		movs	r2, #0
+ 692 00d8 05E0     		b	.L106
+ 693              	.L104:
+ 694 00da 0028     		cmp	r0, #0
+ 695 00dc 18D0     		beq	.L134
+ 696 00de 0132     		adds	r2, r2, #1
+ 697 00e0 0133     		adds	r3, r3, #1
+ 698 00e2 122A     		cmp	r2, #18
+ 699 00e4 9ED0     		beq	.L103
+ 700              	.L106:
+ 701 00e6 1878     		ldrb	r0, [r3]
+ 702 00e8 D4B2     		uxtb	r4, r2
+ 703 00ea 8142     		cmp	r1, r0
+ 704 00ec F5D1     		bne	.L104
+ 705 00ee 1E48     		ldr	r0, .L135+40
+ 706 00f0 FFF7FEFF 		bl	printf
+ 707 00f4 96E7     		b	.L103
+ 708              	.L115:
+ 709 00f6 174B     		ldr	r3, .L135+20
+ 710 00f8 0021     		movs	r1, #0
+ 711 00fa 0093     		str	r3, [sp]
+ 712 00fc 5078     		ldrb	r0, [r2, #1]
+ 713 00fe 1378     		ldrb	r3, [r2]
+ 714 0100 0002     		lsls	r0, r0, #8
+ 715 0102 1843     		orrs	r0, r3
+ 716 0104 0722     		movs	r2, #7
+ 717 0106 1423     		movs	r3, #20
+ 718 0108 FFF7FEFF 		bl	CyBle_HidssSendNotification
+ 719 010c C1B2     		uxtb	r1, r0
+ 720 010e B1E7     		b	.L116
+ 721              	.L134:
+ 722 0110 104B     		ldr	r3, .L135+20
+ 723 0112 0134     		adds	r4, r4, #1
+ 724 0114 9A18     		adds	r2, r3, r2
+ 725 0116 124B     		ldr	r3, .L135+32
+ 726 0118 9170     		strb	r1, [r2, #2]
+ 727 011a 1C70     		strb	r4, [r3]
+ 728 011c 82E7     		b	.L103
+ 729              	.L133:
+ 730 011e 1940     		ands	r1, r3
+ 731 0120 063B     		subs	r3, r3, #6
+ 732 0122 8B40     		lsls	r3, r3, r1
+ 733 0124 0B48     		ldr	r0, .L135+20
+ 734 0126 0278     		ldrb	r2, [r0]
+ 735 0128 1343     		orrs	r3, r2
+ 736 012a 0370     		strb	r3, [r0]
+ 737 012c 7AE7     		b	.L103
+ 738              	.L130:
+ 739 012e 1C40     		ands	r4, r3
+ 740 0130 DF3A     		subs	r2, r2, #223
+ 741 0132 A240     		lsls	r2, r2, r4
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 14
+
+
+ 742 0134 0749     		ldr	r1, .L135+20
+ 743 0136 0B78     		ldrb	r3, [r1]
+ 744 0138 9343     		bics	r3, r2
+ 745 013a 0B70     		strb	r3, [r1]
+ 746 013c 72E7     		b	.L103
+ 747              	.L136:
+ 748 013e C046     		.align	2
+ 749              	.L135:
+ 750 0140 3C050000 		.word	.LC91
+ 751 0144 74050000 		.word	.LC98
+ 752 0148 00000000 		.word	cyBle_busyStatus
+ 753 014c 64050000 		.word	.LC96
+ 754 0150 00000000 		.word	cyBle_connHandle
+ 755 0154 00000000 		.word	keyboard_report
+ 756 0158 88050000 		.word	.LC102
+ 757 015c 01000000 		.word	keyboard_report+1
+ 758 0160 00000000 		.word	keyboard_report_usage
+ 759 0164 02000000 		.word	keyboard_report+2
+ 760 0168 28050000 		.word	.LC80
+ 761              		.size	process_inbox, .-process_inbox
+ 762              		.section	.text.startup.main,"ax",%progbits
+ 763              		.align	2
+ 764              		.global	main
+ 765              		.code	16
+ 766              		.thumb_func
+ 767              		.type	main, %function
+ 768              	main:
+ 769              		@ args = 0, pretend = 0, frame = 8
+ 770              		@ frame_needed = 0, uses_anonymous_args = 0
+ 771 0000 F0B5     		push	{r4, r5, r6, r7, lr}
+ 772 0002 5F46     		mov	r7, fp
+ 773 0004 5646     		mov	r6, r10
+ 774 0006 4D46     		mov	r5, r9
+ 775 0008 4446     		mov	r4, r8
+ 776 000a F0B4     		push	{r4, r5, r6, r7}
+ 777 000c 83B0     		sub	sp, sp, #12
+ 778              		.syntax divided
+ 779              	@ 434 "main.c" 1
+ 780 000e 62B6     		CPSIE   i
+ 781              	@ 0 "" 2
+ 782              		.thumb
+ 783              		.syntax unified
+ 784 0010 FFF7FEFF 		bl	SCB_Start
+ 785 0014 FFF7FEFF 		bl	UART_DEB_Start
+ 786 0018 5448     		ldr	r0, .L186
+ 787 001a FFF7FEFF 		bl	puts
+ 788 001e 0120     		movs	r0, #1
+ 789 0020 FFF7FEFF 		bl	LED_RED_Write
+ 790 0024 0120     		movs	r0, #1
+ 791 0026 FFF7FEFF 		bl	LED_GRN_Write
+ 792 002a 0120     		movs	r0, #1
+ 793 002c FFF7FEFF 		bl	LED_BLU_Write
+ 794 0030 4F48     		ldr	r0, .L186+4
+ 795 0032 FFF7FEFF 		bl	CyBle_Start
+ 796 0036 6B46     		mov	r3, sp
+ 797 0038 DE1C     		adds	r6, r3, #3
+ 798 003a 4E4B     		ldr	r3, .L186+8
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 15
+
+
+ 799 003c 0427     		movs	r7, #4
+ 800 003e 9846     		mov	r8, r3
+ 801 0040 4D4B     		ldr	r3, .L186+12
+ 802 0042 9B46     		mov	fp, r3
+ 803 0044 4D4B     		ldr	r3, .L186+16
+ 804 0046 9A46     		mov	r10, r3
+ 805 0048 FC23     		movs	r3, #252
+ 806 004a 9B00     		lsls	r3, r3, #2
+ 807 004c 9946     		mov	r9, r3
+ 808              	.L158:
+ 809 004e FFF7FEFF 		bl	SCB_I2CMasterClearStatus
+ 810 0052 FFF7FEFF 		bl	CyBle_ProcessEvents
+ 811 0056 0023     		movs	r3, #0
+ 812 0058 0122     		movs	r2, #1
+ 813 005a 3100     		movs	r1, r6
+ 814 005c 0820     		movs	r0, #8
+ 815 005e FFF7FEFF 		bl	SCB_I2CMasterReadBuf
+ 816 0062 6324     		movs	r4, #99
+ 817 0064 0125     		movs	r5, #1
+ 818 0066 0742     		tst	r7, r0
+ 819 0068 03D0     		beq	.L171
+ 820 006a 22E0     		b	.L139
+ 821              	.L142:
+ 822 006c 013C     		subs	r4, r4, #1
+ 823 006e 002C     		cmp	r4, #0
+ 824 0070 5AD0     		beq	.L180
+ 825              	.L171:
+ 826 0072 FFF7FEFF 		bl	SCB_I2CMasterStatus
+ 827 0076 0542     		tst	r5, r0
+ 828 0078 F8D0     		beq	.L142
+ 829 007a FFF7FEFF 		bl	SCB_I2CMasterStatus
+ 830 007e 4B46     		mov	r3, r9
+ 831 0080 1842     		tst	r0, r3
+ 832 0082 16D1     		bne	.L139
+ 833 0084 3378     		ldrb	r3, [r6]
+ 834 0086 FF2B     		cmp	r3, #255
+ 835 0088 13D0     		beq	.L139
+ 836 008a 6A46     		mov	r2, sp
+ 837 008c 1371     		strb	r3, [r2, #4]
+ 838              	.L145:
+ 839 008e 0023     		movs	r3, #0
+ 840 0090 0122     		movs	r2, #1
+ 841 0092 3100     		movs	r1, r6
+ 842 0094 0820     		movs	r0, #8
+ 843 0096 FFF7FEFF 		bl	SCB_I2CMasterReadBuf
+ 844 009a 0742     		tst	r7, r0
+ 845 009c F7D1     		bne	.L145
+ 846 009e 0124     		movs	r4, #1
+ 847              	.L146:
+ 848 00a0 FFF7FEFF 		bl	SCB_I2CMasterStatus
+ 849 00a4 0442     		tst	r4, r0
+ 850 00a6 FBD0     		beq	.L146
+ 851 00a8 FFF7FEFF 		bl	SCB_I2CMasterStatus
+ 852 00ac 4B46     		mov	r3, r9
+ 853 00ae 1842     		tst	r0, r3
+ 854 00b0 55D0     		beq	.L184
+ 855              	.L139:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 16
+
+
+ 856 00b2 4346     		mov	r3, r8
+ 857 00b4 1B78     		ldrb	r3, [r3]
+ 858 00b6 023B     		subs	r3, r3, #2
+ 859 00b8 012B     		cmp	r3, #1
+ 860 00ba C8D8     		bhi	.L158
+ 861 00bc 0320     		movs	r0, #3
+ 862 00be FFF7FEFF 		bl	CyBle_EnterLPM
+ 863 00c2 0500     		movs	r5, r0
+ 864 00c4 FFF7FEFF 		bl	CyEnterCriticalSection
+ 865 00c8 0400     		movs	r4, r0
+ 866 00ca 032D     		cmp	r5, #3
+ 867 00cc 33D0     		beq	.L185
+ 868 00ce FFF7FEFF 		bl	CyBle_GetBleSsState
+ 869 00d2 0228     		cmp	r0, #2
+ 870 00d4 01D0     		beq	.L153
+ 871              	.L151:
+ 872 00d6 FFF7FEFF 		bl	CySysPmSleep
+ 873              	.L153:
+ 874 00da 2000     		movs	r0, r4
+ 875 00dc FFF7FEFF 		bl	CyExitCriticalSection
+ 876 00e0 4346     		mov	r3, r8
+ 877 00e2 1B78     		ldrb	r3, [r3]
+ 878 00e4 022B     		cmp	r3, #2
+ 879 00e6 B2D1     		bne	.L158
+ 880 00e8 254B     		ldr	r3, .L186+20
+ 881 00ea 1B78     		ldrb	r3, [r3]
+ 882 00ec 002B     		cmp	r3, #0
+ 883 00ee AED0     		beq	.L158
+ 884 00f0 5B46     		mov	r3, fp
+ 885 00f2 5B68     		ldr	r3, [r3, #4]
+ 886 00f4 002B     		cmp	r3, #0
+ 887 00f6 02D0     		beq	.L157
+ 888 00f8 0023     		movs	r3, #0
+ 889 00fa 5A46     		mov	r2, fp
+ 890 00fc 5360     		str	r3, [r2, #4]
+ 891              	.L157:
+ 892 00fe 214B     		ldr	r3, .L186+24
+ 893 0100 1B78     		ldrb	r3, [r3]
+ 894 0102 002B     		cmp	r3, #0
+ 895 0104 A3D0     		beq	.L158
+ 896 0106 FFF7FEFF 		bl	UART_DEB_SpiUartGetTxBufferSize
+ 897 010a 1F4B     		ldr	r3, .L186+28
+ 898 010c 1B68     		ldr	r3, [r3]
+ 899 010e 1B04     		lsls	r3, r3, #16
+ 900 0110 DB0F     		lsrs	r3, r3, #31
+ 901 0112 1B18     		adds	r3, r3, r0
+ 902 0114 002B     		cmp	r3, #0
+ 903 0116 9AD1     		bne	.L158
+ 904 0118 0020     		movs	r0, #0
+ 905 011a FFF7FEFF 		bl	CyBle_StoreBondingData
+ 906 011e 0100     		movs	r1, r0
+ 907 0120 1A48     		ldr	r0, .L186+32
+ 908 0122 FFF7FEFF 		bl	printf
+ 909 0126 92E7     		b	.L158
+ 910              	.L180:
+ 911 0128 FFF7FEFF 		bl	SCB_I2CMasterStatus
+ 912 012c 0100     		movs	r1, r0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 17
+
+
+ 913 012e 5046     		mov	r0, r10
+ 914 0130 FFF7FEFF 		bl	printf
+ 915 0134 BDE7     		b	.L139
+ 916              	.L185:
+ 917 0136 FFF7FEFF 		bl	CyBle_GetBleSsState
+ 918 013a 0428     		cmp	r0, #4
+ 919 013c 03D0     		beq	.L152
+ 920 013e FFF7FEFF 		bl	CyBle_GetBleSsState
+ 921 0142 0628     		cmp	r0, #6
+ 922 0144 C9D1     		bne	.L153
+ 923              	.L152:
+ 924 0146 FFF7FEFF 		bl	UART_DEB_SpiUartGetTxBufferSize
+ 925 014a 0F4B     		ldr	r3, .L186+28
+ 926 014c 1B68     		ldr	r3, [r3]
+ 927 014e 1B04     		lsls	r3, r3, #16
+ 928 0150 DB0F     		lsrs	r3, r3, #31
+ 929 0152 1B18     		adds	r3, r3, r0
+ 930 0154 002B     		cmp	r3, #0
+ 931 0156 BED1     		bne	.L151
+ 932 0158 FFF7FEFF 		bl	CySysPmDeepSleep
+ 933 015c BDE7     		b	.L153
+ 934              	.L184:
+ 935 015e 6A46     		mov	r2, sp
+ 936 0160 3378     		ldrb	r3, [r6]
+ 937 0162 01A8     		add	r0, sp, #4
+ 938 0164 5371     		strb	r3, [r2, #5]
+ 939 0166 FFF7FEFF 		bl	process_inbox
+ 940 016a A2E7     		b	.L139
+ 941              	.L187:
+ 942              		.align	2
+ 943              	.L186:
+ 944 016c AC050000 		.word	.LC104
+ 945 0170 00000000 		.word	AppCallBack
+ 946 0174 00000000 		.word	cyBle_state
+ 947 0178 00000000 		.word	.LANCHOR0
+ 948 017c F4050000 		.word	.LC113
+ 949 0180 00000000 		.word	.LANCHOR1
+ 950 0184 00000000 		.word	cyBle_pendingFlashWrite
+ 951 0188 08022440 		.word	1076101640
+ 952 018c D0050000 		.word	.LC111
+ 953              		.size	main, .-main
+ 954              		.global	protocol
+ 955              		.global	suspend
+ 956              		.global	mainTimer
+ 957              		.global	keyboardEnabled
+ 958              		.comm	keyboard_report_usage,1,1
+ 959              		.comm	keyboard_report,20,4
+ 960              		.data
+ 961              		.set	.LANCHOR1,. + 0
+ 962              		.type	suspend, %object
+ 963              		.size	suspend, 1
+ 964              	suspend:
+ 965 0000 01       		.byte	1
+ 966              		.section	.rodata.str1.4,"aMS",%progbits,1
+ 967              		.align	2
+ 968              	.LC0:
+ 969 0000 48494453 		.ascii	"HIDS event: %lx, \000"
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 18
+
+
+ 969      20657665 
+ 969      6E743A20 
+ 969      256C782C 
+ 969      2000
+ 970 0012 0000     		.space	2
+ 971              	.LC3:
+ 972 0014 4359424C 		.ascii	"CYBLE_EVT_HIDSS_NOTIFICATION_ENABLED: serv=%x, char"
+ 972      455F4556 
+ 972      545F4849 
+ 972      4453535F 
+ 972      4E4F5449 
+ 973 0047 3D25780D 		.ascii	"=%x\015\012\000"
+ 973      0A00
+ 974 004d 000000   		.space	3
+ 975              	.LC6:
+ 976 0050 4359424C 		.ascii	"CYBLE_EVT_HIDSS_NOTIFICATION_DISABLED: serv=%x, cha"
+ 976      455F4556 
+ 976      545F4849 
+ 976      4453535F 
+ 976      4E4F5449 
+ 977 0083 723D2578 		.ascii	"r=%x\015\012\000"
+ 977      0D0A00
+ 978 008a 0000     		.space	2
+ 979              	.LC8:
+ 980 008c 4359424C 		.ascii	"CYBLE_EVT_HIDSS_BOOT_MODE_ENTER \015\000"
+ 980      455F4556 
+ 980      545F4849 
+ 980      4453535F 
+ 980      424F4F54 
+ 981 00ae 0000     		.space	2
+ 982              	.LC10:
+ 983 00b0 4359424C 		.ascii	"CYBLE_EVT_HIDSS_REPORT_MODE_ENTER \015\000"
+ 983      455F4556 
+ 983      545F4849 
+ 983      4453535F 
+ 983      5245504F 
+ 984              	.LC12:
+ 985 00d4 4359424C 		.ascii	"CYBLE_EVT_HIDSS_SUSPEND \015\000"
+ 985      455F4556 
+ 985      545F4849 
+ 985      4453535F 
+ 985      53555350 
+ 986 00ee 0000     		.space	2
+ 987              	.LC15:
+ 988 00f0 4359424C 		.ascii	"CYBLE_EVT_HIDSS_EXIT_SUSPEND \015\000"
+ 988      455F4556 
+ 988      545F4849 
+ 988      4453535F 
+ 988      45584954 
+ 989 010f 00       		.space	1
+ 990              	.LC17:
+ 991 0110 4359424C 		.ascii	"CYBLE_EVT_HIDSS_REPORT_CHAR_WRITE: serv=%x, char=%x"
+ 991      455F4556 
+ 991      545F4849 
+ 991      4453535F 
+ 991      5245504F 
+ 992 0143 2C207661 		.ascii	", value=\000"
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 19
+
+
+ 992      6C75653D 
+ 992      00
+ 993              	.LC19:
+ 994 014c 4E6F7420 		.ascii	"Not supported event\015\000"
+ 994      73757070 
+ 994      6F727465 
+ 994      64206576 
+ 994      656E740D 
+ 995 0161 000000   		.space	3
+ 996              	.LC23:
+ 997 0164 53746172 		.ascii	"StartAdvertisement API Error: %d \015\012\000"
+ 997      74416476 
+ 997      65727469 
+ 997      73656D65 
+ 997      6E742041 
+ 998              	.LC25:
+ 999 0188 426C7565 		.ascii	"Bluetooth On, StartAdvertisement with addr: \000"
+ 999      746F6F74 
+ 999      68204F6E 
+ 999      2C205374 
+ 999      61727441 
+ 1000 01b5 000000   		.space	3
+ 1001              	.LC27:
+ 1002 01b8 25322E32 		.ascii	"%2.2x\000"
+ 1002      7800
+ 1003 01be 0000     		.space	2
+ 1004              	.LC29:
+ 1005 01c0 0D00     		.ascii	"\015\000"
+ 1006 01c2 0000     		.space	2
+ 1007              	.LC31:
+ 1008 01c4 4359424C 		.ascii	"CYBLE_EVT_HARDWARE_ERROR \015\000"
+ 1008      455F4556 
+ 1008      545F4841 
+ 1008      52445741 
+ 1008      52455F45 
+ 1009 01df 00       		.space	1
+ 1010              	.LC33:
+ 1011 01e0 4359424C 		.ascii	"CYBLE_EVT_STACK_BUSY_STATUS: %x\015\012\000"
+ 1011      455F4556 
+ 1011      545F5354 
+ 1011      41434B5F 
+ 1011      42555359 
+ 1012 0202 0000     		.space	2
+ 1013              	.LC35:
+ 1014 0204 4359424C 		.ascii	"CYBLE_EVT_HCI_STATUS: %x \015\012\000"
+ 1014      455F4556 
+ 1014      545F4843 
+ 1014      495F5354 
+ 1014      41545553 
+ 1015              	.LC37:
+ 1016 0220 4359424C 		.ascii	"CYBLE_EVT_AUTH_REQ: security=%x, bonding=%x, ekeySi"
+ 1016      455F4556 
+ 1016      545F4155 
+ 1016      54485F52 
+ 1016      45513A20 
+ 1017 0253 7A653D25 		.ascii	"ze=%x, err=%x \015\012\000"
+ 1017      782C2065 
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 20
+
+
+ 1017      72723D25 
+ 1017      78200D0A 
+ 1017      00
+ 1018              	.LC39:
+ 1019 0264 4359424C 		.ascii	"CYBLE_EVT_PASSKEY_ENTRY_REQUEST press 'p' to enter "
+ 1019      455F4556 
+ 1019      545F5041 
+ 1019      53534B45 
+ 1019      595F454E 
+ 1020 0297 70617373 		.ascii	"passkey \015\000"
+ 1020      6B657920 
+ 1020      0D00
+ 1021 02a1 000000   		.space	3
+ 1022              	.LC41:
+ 1023 02a4 4359424C 		.ascii	"CYBLE_EVT_PASSKEY_DISPLAY_REQUEST %6.6ld \015\012\000"
+ 1023      455F4556 
+ 1023      545F5041 
+ 1023      53534B45 
+ 1023      595F4449 
+ 1024              	.LC43:
+ 1025 02d0 4359424C 		.ascii	"CYBLE_EVT_GAP_KEYINFO_EXCHNGE_CMPLT \015\000"
+ 1025      455F4556 
+ 1025      545F4741 
+ 1025      505F4B45 
+ 1025      59494E46 
+ 1026 02f6 0000     		.space	2
+ 1027              	.LC45:
+ 1028 02f8 41555448 		.ascii	"AUTH_COMPLETE: security:%x, bonding:%x, ekeySize:%x"
+ 1028      5F434F4D 
+ 1028      504C4554 
+ 1028      453A2073 
+ 1028      65637572 
+ 1029 032b 2C206175 		.ascii	", authErr %x \015\012\000"
+ 1029      74684572 
+ 1029      72202578 
+ 1029      200D0A00 
+ 1030 033b 00       		.space	1
+ 1031              	.LC47:
+ 1032 033c 4359424C 		.ascii	"CYBLE_EVT_AUTH_FAILED: %x \015\012\000"
+ 1032      455F4556 
+ 1032      545F4155 
+ 1032      54485F46 
+ 1032      41494C45 
+ 1033 0359 000000   		.space	3
+ 1034              	.LC50:
+ 1035 035c 4359424C 		.ascii	"CYBLE_EVT_ADVERTISING, state: %x \015\012\000"
+ 1035      455F4556 
+ 1035      545F4144 
+ 1035      56455254 
+ 1035      4953494E 
+ 1036              	.LC52:
+ 1037 0380 48696265 		.ascii	"Hibernate \015\000"
+ 1037      726E6174 
+ 1037      65200D00 
+ 1038              	.LC54:
+ 1039 038c 4359424C 		.ascii	"CYBLE_EVT_GAP_DEVICE_CONNECTED \015\000"
+ 1039      455F4556 
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 21
+
+
+ 1039      545F4741 
+ 1039      505F4445 
+ 1039      56494345 
+ 1040 03ad 000000   		.space	3
+ 1041              	.LC56:
+ 1042 03b0 4359424C 		.ascii	"CYBLE_EVT_GAP_DEVICE_DISCONNECTED\015\000"
+ 1042      455F4556 
+ 1042      545F4741 
+ 1042      505F4445 
+ 1042      56494345 
+ 1043 03d3 00       		.space	1
+ 1044              	.LC58:
+ 1045 03d4 4359424C 		.ascii	"CYBLE_EVT_GATTS_XCNHG_MTU_REQ, final mtu= %d \015\012"
+ 1045      455F4556 
+ 1045      545F4741 
+ 1045      5454535F 
+ 1045      58434E48 
+ 1046 0403 00       		.ascii	"\000"
+ 1047              	.LC60:
+ 1048 0404 4359424C 		.ascii	"CYBLE_EVT_GATT_WRITE_REQ: %x = \000"
+ 1048      455F4556 
+ 1048      545F4741 
+ 1048      54545F57 
+ 1048      52495445 
+ 1049              	.LC62:
+ 1050 0424 4359424C 		.ascii	"CYBLE_EVT_GAP_ENCRYPT_CHANGE: %x \015\012\000"
+ 1050      455F4556 
+ 1050      545F4741 
+ 1050      505F454E 
+ 1050      43525950 
+ 1051              	.LC64:
+ 1052 0448 4359424C 		.ascii	"CYBLE_EVT_CONNECTION_UPDATE_COMPLETE: %x \015\012\000"
+ 1052      455F4556 
+ 1052      545F434F 
+ 1052      4E4E4543 
+ 1052      54494F4E 
+ 1053              	.LC67:
+ 1054 0474 4359424C 		.ascii	"CYBLE_EVT_GATT_CONNECT_IND: %x, %x \015\012\000"
+ 1054      455F4556 
+ 1054      545F4741 
+ 1054      54545F43 
+ 1054      4F4E4E45 
+ 1055 049a 0000     		.space	2
+ 1056              	.LC70:
+ 1057 049c 4359424C 		.ascii	"CYBLE_EVT_GATT_DISCONNECT_IND \015\000"
+ 1057      455F4556 
+ 1057      545F4741 
+ 1057      54545F44 
+ 1057      4953434F 
+ 1058              	.LC72:
+ 1059 04bc 4359424C 		.ascii	"CYBLE_EVT_GATTS_READ_CHAR_VAL_ACCESS_REQ: handle: %"
+ 1059      455F4556 
+ 1059      545F4741 
+ 1059      5454535F 
+ 1059      52454144 
+ 1060 04ef 78200D0A 		.ascii	"x \015\012\000"
+ 1060      00
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 22
+
+
+ 1061              	.LC74:
+ 1062 04f4 4359424C 		.ascii	"CYBLE_EVT_PENDING_FLASH_WRITE\015\000"
+ 1062      455F4556 
+ 1062      545F5045 
+ 1062      4E44494E 
+ 1062      475F464C 
+ 1063 0513 00       		.space	1
+ 1064              	.LC76:
+ 1065 0514 4F544845 		.ascii	"OTHER event: %lx \015\012\000"
+ 1065      52206576 
+ 1065      656E743A 
+ 1065      20256C78 
+ 1065      200D0A00 
+ 1066              	.LC80:
+ 1067 0528 45786973 		.ascii	"Existing %d pos %d\000"
+ 1067      74696E67 
+ 1067      20256420 
+ 1067      706F7320 
+ 1067      256400
+ 1068 053b 00       		.space	1
+ 1069              	.LC91:
+ 1070 053c 4D657373 		.ascii	"Message for you in the lobby! %d %d\015\012\000"
+ 1070      61676520 
+ 1070      666F7220 
+ 1070      796F7520 
+ 1070      696E2074 
+ 1071 0562 0000     		.space	2
+ 1072              	.LC96:
+ 1073 0564 52656365 		.ascii	"Received NOOP\000"
+ 1073      69766564 
+ 1073      204E4F4F 
+ 1073      5000
+ 1074 0572 0000     		.space	2
+ 1075              	.LC98:
+ 1076 0574 556E6B6E 		.ascii	"Unknown command: %d\000"
+ 1076      6F776E20 
+ 1076      636F6D6D 
+ 1076      616E643A 
+ 1076      20256400 
+ 1077              	.LC102:
+ 1078 0588 48494420 		.ascii	"HID notification API Error: %x \015\012\000"
+ 1078      6E6F7469 
+ 1078      66696361 
+ 1078      74696F6E 
+ 1078      20415049 
+ 1079 05aa 0000     		.space	2
+ 1080              	.LC104:
+ 1081 05ac 424C4520 		.ascii	"BLE HID Keyboard Example Project \015\000"
+ 1081      48494420 
+ 1081      4B657962 
+ 1081      6F617264 
+ 1081      20457861 
+ 1082 05cf 00       		.space	1
+ 1083              	.LC111:
+ 1084 05d0 53746F72 		.ascii	"Store bonding data, status: %x \015\012\000"
+ 1084      6520626F 
+ 1084      6E64696E 
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\cc5gKhuw.s 			page 23
+
+
+ 1084      67206461 
+ 1084      74612C20 
+ 1085 05f2 0000     		.space	2
+ 1086              	.LC113:
+ 1087 05f4 73747563 		.ascii	"stuck in I2C RX: %ld\015\012\000"
+ 1087      6B20696E 
+ 1087      20493243 
+ 1087      2052583A 
+ 1087      20256C64 
+ 1088              		.bss
+ 1089              		.align	2
+ 1090              		.set	.LANCHOR0,. + 0
+ 1091              		.type	keyboardEnabled, %object
+ 1092              		.size	keyboardEnabled, 1
+ 1093              	keyboardEnabled:
+ 1094 0000 00       		.space	1
+ 1095              		.type	protocol, %object
+ 1096              		.size	protocol, 1
+ 1097              	protocol:
+ 1098 0001 00       		.space	1
+ 1099 0002 0000     		.space	2
+ 1100              		.type	mainTimer, %object
+ 1101              		.size	mainTimer, 4
+ 1102              	mainTimer:
+ 1103 0004 00000000 		.space	4
+ 1104              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran

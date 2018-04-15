@@ -1,0 +1,142 @@
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccUU0QZm.s 			page 1
+
+
+   1              		.syntax unified
+   2              		.cpu cortex-m0
+   3              		.fpu softvfp
+   4              		.eabi_attribute 20, 1
+   5              		.eabi_attribute 21, 1
+   6              		.eabi_attribute 23, 3
+   7              		.eabi_attribute 24, 1
+   8              		.eabi_attribute 25, 1
+   9              		.eabi_attribute 26, 1
+  10              		.eabi_attribute 30, 2
+  11              		.eabi_attribute 34, 0
+  12              		.eabi_attribute 18, 4
+  13              		.thumb
+  14              		.syntax unified
+  15              		.file	"SCB_SCBCLK.c"
+  16              		.section	.text.SCB_SCBCLK_StartEx,"ax",%progbits
+  17              		.align	2
+  18              		.global	SCB_SCBCLK_StartEx
+  19              		.code	16
+  20              		.thumb_func
+  21              		.type	SCB_SCBCLK_StartEx, %function
+  22              	SCB_SCBCLK_StartEx:
+  23              		@ args = 0, pretend = 0, frame = 0
+  24              		@ frame_needed = 0, uses_anonymous_args = 0
+  25              		@ link register save eliminated.
+  26 0000 044A     		ldr	r2, .L5
+  27              	.L2:
+  28 0002 1368     		ldr	r3, [r2]
+  29 0004 002B     		cmp	r3, #0
+  30 0006 FCDB     		blt	.L2
+  31 0008 034B     		ldr	r3, .L5+4
+  32 000a 0002     		lsls	r0, r0, #8
+  33 000c 1843     		orrs	r0, r3
+  34 000e 014B     		ldr	r3, .L5
+  35              		@ sp needed
+  36 0010 1860     		str	r0, [r3]
+  37 0012 7047     		bx	lr
+  38              	.L6:
+  39              		.align	2
+  40              	.L5:
+  41 0014 00000140 		.word	1073807360
+  42 0018 40000080 		.word	-2147483584
+  43              		.size	SCB_SCBCLK_StartEx, .-SCB_SCBCLK_StartEx
+  44              		.section	.text.SCB_SCBCLK_Stop,"ax",%progbits
+  45              		.align	2
+  46              		.global	SCB_SCBCLK_Stop
+  47              		.code	16
+  48              		.thumb_func
+  49              		.type	SCB_SCBCLK_Stop, %function
+  50              	SCB_SCBCLK_Stop:
+  51              		@ args = 0, pretend = 0, frame = 0
+  52              		@ frame_needed = 0, uses_anonymous_args = 0
+  53              		@ link register save eliminated.
+  54 0000 034A     		ldr	r2, .L10
+  55              	.L8:
+  56 0002 1368     		ldr	r3, [r2]
+  57 0004 002B     		cmp	r3, #0
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccUU0QZm.s 			page 2
+
+
+  58 0006 FCDB     		blt	.L8
+  59 0008 024A     		ldr	r2, .L10+4
+  60 000a 014B     		ldr	r3, .L10
+  61              		@ sp needed
+  62 000c 1A60     		str	r2, [r3]
+  63 000e 7047     		bx	lr
+  64              	.L11:
+  65              		.align	2
+  66              	.L10:
+  67 0010 00000140 		.word	1073807360
+  68 0014 40000040 		.word	1073741888
+  69              		.size	SCB_SCBCLK_Stop, .-SCB_SCBCLK_Stop
+  70              		.section	.text.SCB_SCBCLK_SetFractionalDividerRegister,"ax",%progbits
+  71              		.align	2
+  72              		.global	SCB_SCBCLK_SetFractionalDividerRegister
+  73              		.code	16
+  74              		.thumb_func
+  75              		.type	SCB_SCBCLK_SetFractionalDividerRegister, %function
+  76              	SCB_SCBCLK_SetFractionalDividerRegister:
+  77              		@ args = 0, pretend = 0, frame = 0
+  78              		@ frame_needed = 0, uses_anonymous_args = 0
+  79 0000 10B5     		push	{r4, lr}
+  80 0002 FF24     		movs	r4, #255
+  81 0004 C900     		lsls	r1, r1, #3
+  82 0006 2140     		ands	r1, r4
+  83 0008 0002     		lsls	r0, r0, #8
+  84 000a 0843     		orrs	r0, r1
+  85 000c 0721     		movs	r1, #7
+  86 000e 034A     		ldr	r2, .L13
+  87              		@ sp needed
+  88 0010 1368     		ldr	r3, [r2]
+  89 0012 0B40     		ands	r3, r1
+  90 0014 1843     		orrs	r0, r3
+  91 0016 1060     		str	r0, [r2]
+  92 0018 10BD     		pop	{r4, pc}
+  93              	.L14:
+  94 001a C046     		.align	2
+  95              	.L13:
+  96 001c 00030140 		.word	1073808128
+  97              		.size	SCB_SCBCLK_SetFractionalDividerRegister, .-SCB_SCBCLK_SetFractionalDividerRegister
+  98              		.section	.text.SCB_SCBCLK_GetDividerRegister,"ax",%progbits
+  99              		.align	2
+ 100              		.global	SCB_SCBCLK_GetDividerRegister
+ 101              		.code	16
+ 102              		.thumb_func
+ 103              		.type	SCB_SCBCLK_GetDividerRegister, %function
+ 104              	SCB_SCBCLK_GetDividerRegister:
+ 105              		@ args = 0, pretend = 0, frame = 0
+ 106              		@ frame_needed = 0, uses_anonymous_args = 0
+ 107              		@ link register save eliminated.
+ 108 0000 024B     		ldr	r3, .L16
+ 109              		@ sp needed
+ 110 0002 1868     		ldr	r0, [r3]
+ 111 0004 000A     		lsrs	r0, r0, #8
+ 112 0006 80B2     		uxth	r0, r0
+ 113 0008 7047     		bx	lr
+ 114              	.L17:
+ARM GAS  C:\Users\DMA\AppData\Local\Temp\ccUU0QZm.s 			page 3
+
+
+ 115 000a C046     		.align	2
+ 116              	.L16:
+ 117 000c 00030140 		.word	1073808128
+ 118              		.size	SCB_SCBCLK_GetDividerRegister, .-SCB_SCBCLK_GetDividerRegister
+ 119              		.section	.text.SCB_SCBCLK_GetFractionalDividerRegister,"ax",%progbits
+ 120              		.align	2
+ 121              		.global	SCB_SCBCLK_GetFractionalDividerRegister
+ 122              		.code	16
+ 123              		.thumb_func
+ 124              		.type	SCB_SCBCLK_GetFractionalDividerRegister, %function
+ 125              	SCB_SCBCLK_GetFractionalDividerRegister:
+ 126              		@ args = 0, pretend = 0, frame = 0
+ 127              		@ frame_needed = 0, uses_anonymous_args = 0
+ 128              		@ link register save eliminated.
+ 129 0000 0020     		movs	r0, #0
+ 130              		@ sp needed
+ 131 0002 7047     		bx	lr
+ 132              		.size	SCB_SCBCLK_GetFractionalDividerRegister, .-SCB_SCBCLK_GetFractionalDividerRegister
+ 133              		.ident	"GCC: (GNU Tools for ARM Embedded Processors) 5.4.1 20160609 (release) [ARM/embedded-5-bran
