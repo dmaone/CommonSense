@@ -44,25 +44,22 @@ int main() {
 #endif
     switch (power_state) {
     case DEVSTATE_FULL_THROTTLE:
-      //power_state = DEVSTATE_SHUTDOWN_REQUEST;
-//      CyPins_SetPin(ExpHdr_2);
       if (tick) {
         exp_tick(tick);
         tick = 0;
         if (sanity_check_timer > 0) {
           scan_sanity_check();
         }
-        usb_tick();
-        serial_tick();
         if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
           report_matrix_readouts();
         } else if (TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
           pipeline_process();
         }
       }
+      usb_tick();
+      serial_tick();
       // Timer ISR will wake us up.
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
-//      CyPins_ClearPin(ExpHdr_2);
       break;
     case DEVSTATE_PREPARING_TO_SLEEP:
       if (tick) {
@@ -94,24 +91,14 @@ int main() {
       tick = 0;
       usb_wake();
       break;
-    case DEVSTATE_SHUTDOWN_REQUEST:
-      //xprintf("shutdown");
+    case DEVSTATE_SLEEP_REQUEST:
       scan_nap();
       serial_nap();
       SysTimer_Sleep();
       //usb_nap();
-      CyPins_SetPin(ExpHdr_2);
       CyPmSaveClocks();
-      //CyPmAltAct(PM_SLEEP_TIME_NONE, PM_ALT_ACT_SRC_I2C|PM_ALT_ACT_SRC_PICU|PM_ALT_ACT_SRC_CTW);
       CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_I2C|PM_SLEEP_SRC_PICU);
       CyPmRestoreClocks();
-      CyDelay(50);
-      CyPins_ClearPin(ExpHdr_2);
-//      CyPins_SetPin(ExpHdr_2);
-//      CyDelay(50);
-//      CyPins_ClearPin(ExpHdr_2);
-//      CyDelay(50);
-      //CyGlobalIntEnable;
       SysTimer_Wakeup();
       serial_wake();
       Sup_Pdu_t buf;
@@ -120,7 +107,6 @@ int main() {
       serial_send(&buf);
       //usb_wake();
       scan_wake();
-      //xprintf("restart");
       power_state = DEVSTATE_FULL_THROTTLE;
       break;
     default:

@@ -73,12 +73,9 @@ void serial_tick(void) {
     if (Sup_I2C_SlaveGetWriteBufSize() == sizeof(i2c_inbox)) {
       Sup_I2C_SlaveClearWriteBuf();
       xprintf("%d %d", i2c_inbox.command, i2c_inbox.data);
-      if (i2c_inbox.command == SUP_CMD_SUSPEND && power_state == DEVSTATE_FULL_THROTTLE) {
-        Sup_Pdu_t buf;
-        buf.command = SUP_CMD_WAKEUP;
-        buf.data = 5;
-//        serial_send(&buf);
-        power_state = DEVSTATE_SHUTDOWN_REQUEST;
+      if (i2c_inbox.command == SUP_CMD_SUSPEND 
+          && power_state == DEVSTATE_FULL_THROTTLE) {
+        power_state = DEVSTATE_SLEEP_REQUEST;
       }
     }
   }
@@ -89,7 +86,7 @@ void serial_tick(void) {
         i2c_outbox = SCQueue[SCQueueReadPos];
         Sup_I2C_SlaveClearReadBuf();
         Sup_I2C_SlaveClearReadStatus();
-        xprintf("%d %d", i2c_outbox.command, i2c_outbox.data);
+        //xprintf("%d %d", i2c_outbox.command, i2c_outbox.data);
       }
     }
   }
@@ -102,5 +99,5 @@ void update_serial_keyboard_report(queuedScancode *key) {
   buffer.data = key->keycode;
   SCQueueWritePos = BLE_BUFFER_NEXT(SCQueueWritePos);
   SCQueue[SCQueueWritePos] = buffer;
-  xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
+  //xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
 }

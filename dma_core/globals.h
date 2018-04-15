@@ -122,13 +122,13 @@ volatile uint8_t tick;
 volatile uint32_t systime;
 
 enum devicePowerStates {
-  DEVSTATE_FULL_THROTTLE = 1,
-  DEVSTATE_PREPARING_TO_SLEEP,
-  DEVSTATE_SLEEP,
-  DEVSTATE_WATCH,
-  DEVSTATE_SUSPENDING,
-  DEVSTATE_RESUMING,
-  DEVSTATE_SHUTDOWN_REQUEST,
+  DEVSTATE_FULL_THROTTLE = 1, // Going full bore
+  DEVSTATE_PREPARING_TO_SLEEP, // USB suspend condition detected
+  DEVSTATE_SLEEP, // USB suspend, not allowed to bring host from standby
+  DEVSTATE_WATCH, // USB suspend, monitoring for remote wakeup
+  DEVSTATE_SUSPENDING, // USB suspend condition detected
+  DEVSTATE_RESUMING, // Host-initiated USB wakeup
+  DEVSTATE_SLEEP_REQUEST, // external controller wants us to sleep.
   DEVSTATE_MAX
 };
 // Modified by ISR!

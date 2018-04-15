@@ -355,14 +355,6 @@ void usb_suspend_monitor_stop(void) {
   USBSuspendIRQ_Stop();
 }
 
-uint8_t usb_powered() {
-#ifdef SELF_POWERED
-  return USB_VBusPresent();
-#else
-  return 1;
-#endif
-}
-
 void usb_init(void) {
   memset(keyboard_report.raw, 0, sizeof keyboard_report.raw);
   keyboard_report_usage = 0;
@@ -383,6 +375,14 @@ void usb_configure(void) {
     usb_status = USB_STATUS_CONNECTED;
     usb_suspend_monitor_start();
   }
+}
+
+uint8_t usb_powered() {
+#ifdef SELF_POWERED
+  return USB_VBusPresent();
+#else
+  return 1;
+#endif
 }
 
 void usb_tick(void) {
@@ -454,7 +454,7 @@ void usb_check_power(void) {
   if (0) { //Skip the first option.
 #else
   if (power_check_timer-- > 0) {
-    if (usb_powered() != 0) {
+    if (usb_powered()) {
       return;
     }
     // power disconnected. No point waiting further.
@@ -469,10 +469,6 @@ void usb_check_power(void) {
     CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
   } else {
     power_state = DEVSTATE_WATCH;
-    // SetFreq hangs us dry.
-    // CyIMO_SetFreq(CY_IMO_FREQ_24MHZ);
-    // CyFlash_SetWaitCycles(3);
-    // CyDelayFreq(3000000); - not supposed to be used, busy loops are evil
   }
 }
 
