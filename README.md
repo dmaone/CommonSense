@@ -52,12 +52,11 @@ Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator
 * Open PSoC Creator
 * File -> Open -> Project/Workspace "CommonSense.cywrk".
 * IMPORTANT: Select "Release" in the  rightmost combo box on the top toolbar that says "Debug".
-* Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097" It's likely selected already.
+* Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097". It's likely selected already.
 * Press F6 to build everything.
 
-Now it's a good time to make your firmware customizations.
-Firmware is in model F mode - "normally low". To switch to beamspring mode - #define SWITCH_TYPE BEAMSPRING in dma_core/globals.h
-But, again: build without any changes first!
+Now it's a good time to make your firmware customizations. CommonSense/dma_core/config.h is a config file. You can set number of rows, columns and layers there, as well as switch type.
+But, again: _build without any changes first_!
 
 * Open "Project "Firmware"" in the left pane, click "Pins" in "Design Wide Resources". You will see chip model and a table on the right. Assign pins according to plan.
 * Press "Ctrl-F5" (Debug -> Program). The kit should be plugged in, of course. PSoC Programmer will demand to update KitProg - it explains how.

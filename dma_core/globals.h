@@ -8,6 +8,16 @@
  */
 
 #pragma once
+
+#define BEAMSPRING 0
+#define BUCKLING_SPRING 1
+// Do not touch above definitions. To change switch type change config.h
+
+#include "config.h"
+
+// Main safety switch
+#define NOT_A_KEYBOARD 0
+
 // LIB.H!!!
 #define TEST_BIT(VAR, BN) (VAR & (1 << BN))
 //#define CLEAR_BIT(VAR, BN) {xprintf("CLR %d %d", VAR, BN); VAR &= !(1 << BN); }
@@ -15,46 +25,7 @@
 #define CLEAR_BIT(VAR, BN) VAR &= ~(1 << BN)
 #define SET_BIT(VAR, BN) VAR |= (1 << BN)
 #define FORCE_BIT(VAR, BN, TO) { CLEAR_BIT(VAR, BN); if (TO) SET_BIT(VAR, BN); }
-#define BEAMSPRING 0
-#define BUCKLING_SPRING 1
 // /LIB.H!!!
-
-// Do not touch above definitions. To change switch type change this.
-#define SWITCH_TYPE BUCKLING_SPRING
-
-// Main safety switch
-#define NOT_A_KEYBOARD 0
-
-/*
- * if SELF_POWERED is defined - the device is self/battery-powered.
- * What does this mean:
- * \USB:VBUS\ pin MUST be assigned to one of the SIO pins (P12[0]-P12[7])
- * That pin must be connected to a point which is connected to VBUS
- * but deenergized when USB is disconnected.
- * NOTE: having a diode between device power rail and USB is not enough.
- * You must add a resistor between VBUS and the ground on USB side.
- * I experimented with 10kOhm - but that's 0.5mA which will make achieving
- * USB standby compliance pretty hard.
- * I think 100kOhm will work just fine - although you _may_ have to
- * increase POWER_CHECK_DELAY in PSoC_USB.c
- *
- * Also, if your power source is <3.6V (No, Li-ion/LiPoly are not <3.6V!)
- * you MUST set USB_POWER_MODE to USB_3V_OPERATION.
- * If you don't - USB will likely not work.
- * If you do and power from 5V though - you'll most likely fry USB regulator.
- */
-#define SELF_POWERED
-#define USB_POWER_MODE USB_3V_OPERATION
-
-/*
- * pin assignment: direct order, aligned to the right of ADC.
- * for dual ADCs it means column X..11, X+12..23
- *
- * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
- */
-#define MATRIX_COLS 12
-#define MATRIX_ROWS 8
-#define MATRIX_LAYERS 4
 
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
