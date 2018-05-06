@@ -55,7 +55,7 @@ Download and install (PSoC Creator)[http://www.cypress.com/products/psoc-creator
 * Go to Project -> Device Selector menu, find and select "CY8C5888LTI-LP097". It's likely selected already.
 * Press F6 to build everything.
 
-Now it's a good time to make your firmware customizations. CommonSense/dma_core/config.h is a config file. You can set number of rows, columns and layers there, as well as switch type.
+Now it's a good time to make your firmware customizations. CommonSense/Firmware.cydsn/config.h is a config file. You can set number of rows, columns and layers there, as well as switch type.
 But, again: _build without any changes first_!
 
 * Open "Project "Firmware"" in the left pane, click "Pins" in "Design Wide Resources". You will see chip model and a table on the right. Assign pins according to plan.

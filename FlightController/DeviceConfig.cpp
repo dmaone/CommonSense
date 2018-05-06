@@ -177,7 +177,6 @@ void DeviceConfig::_assemble(void) {
     for (uint8_t i=0; i<bin.length(); i++) {
       _eeprom.stash[macros_cursor++] = bin[i];
     }
-    qInfo() << m.keyCode;
   }
 }
 

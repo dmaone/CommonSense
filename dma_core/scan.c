@@ -327,6 +327,8 @@ void scan_wake(void) {
   sensor_wake();
 }
 
+inline void scan_tick() {};
+
 void scan_sanity_check(void) {
   --sanity_check_timer;
   if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {

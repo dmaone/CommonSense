@@ -11,6 +11,12 @@
 
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
+#define ADB 2
+#define SUN 3
+
+#define SCANNER_CS 0
+#define SCANNER_ADB 1
+#define SCANNER_SUN 2
 // Do not touch above definitions. To change switch type change config.h
 
 #include "config.h"
@@ -121,9 +127,17 @@ enum outputDirection {
 void xprintf(const char *format_p, ...);
 
 #if SWITCH_TYPE == BEAMSPRING
+#define SCANNER_TYPE SCANNER_CS
 #define NORMALLY_LOW 0
 #elif SWITCH_TYPE == BUCKLING_SPRING
+#define SCANNER_TYPE SCANNER_CS
 #define NORMALLY_LOW 1
+#elif SWITCH_TYPE == ADB
+#define SCANNER_TYPE SCANNER_ADB
+#define NORMALLY_LOW 0
+#elif SWITCH_TYPE == SUN
+#define SCANNER_TYPE SCANNER_SUN
+#define NORMALLY_LOW 0
 #else
 #error "Unknown switch type"
 #endif

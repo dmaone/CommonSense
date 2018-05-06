@@ -293,8 +293,10 @@ hid_device *DeviceInterface::acquireDevice(void) {
           deviceSelected = true;
       break;
     case DeviceInterfaceBootloader:
-      if (d->vendor_id == 0x04b4 && d->product_id == 0xb71d)
+      if (d->vendor_id == 0x04b4 &&
+          (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
         deviceSelected = true;
+      }
       break;
     default:
       break;
