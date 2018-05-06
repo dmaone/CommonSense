@@ -255,7 +255,7 @@ extern uint8 Sup_I2C_initVar;
 
 #define Sup_I2C_DATA_RATE          (400u)
 #define Sup_I2C_DEFAULT_ADDR       (8u)
-#define Sup_I2C_I2C_PAIR_SELECTED  (2u)
+#define Sup_I2C_I2C_PAIR_SELECTED  (1u)
 
 /* I2C pair enum */
 #define Sup_I2C_I2C_PAIR_ANY   (0x01u) /* Any pins for I2C */

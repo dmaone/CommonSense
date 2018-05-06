@@ -12,7 +12,7 @@
 #define MATRIX_LAYERS 4
 
 // See globals.h bottom for possible values
-#define SWITCH_TYPE ADB
+#define SWITCH_TYPE SUN
 
 /*
  * if SELF_POWERED is defined - the device is self/battery-powered.

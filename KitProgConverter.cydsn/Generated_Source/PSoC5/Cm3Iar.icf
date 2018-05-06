@@ -29,7 +29,7 @@ if (!CY_APPL_LOADABLE) {
 }
 
 define symbol CY_FLASH_SIZE     = 262144;
-define symbol CY_APPL_ORIGIN    = 0;
+define symbol CY_APPL_ORIGIN    = 10240;
 define symbol CY_FLASH_ROW_SIZE = 256;
 define symbol CY_ECC_ROW_SIZE   = 32;
 

@@ -181,6 +181,7 @@ void LayoutEditor::receiveScancode(uint8_t row, uint8_t col,
     return;
   if (status == DeviceInterface::KeyPressed) {
     display[row][col]->setStyleSheet("background-color: #ffff33;");
+    display[row][col]->setFocus();
   } else {
     display[row][col]->setStyleSheet("background-color: #ffffff;");
   }

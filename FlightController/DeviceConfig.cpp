@@ -171,6 +171,7 @@ void DeviceConfig::_assemble(void) {
       }
     }
   }
+
   size_t macros_cursor = tableSize * (numLayers + 1);
   for (auto& m : macros) {
     auto bin = m.toBin();
@@ -178,6 +179,7 @@ void DeviceConfig::_assemble(void) {
       _eeprom.stash[macros_cursor++] = bin[i];
     }
   }
+
 }
 
 void DeviceConfig::fromFile() {
