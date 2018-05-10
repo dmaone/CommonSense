@@ -264,54 +264,61 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
   }
 }
 
+std::vector<std::string> DeviceInterface::listPaths() {
+  std::vector<std::string> retval;
+  hid_device_info *root = hid_enumerate(0, 0);
+  if (!root) {
+    qInfo() << "No HID devices on this system?";
+    return retval;
+  }
+  hid_device_info *d = root;
+  while (d) {
+    switch (mode) {
+    case DeviceInterfaceNormal:
+//        qInfo() << d->path << d->vendor_id << d->product_id;
+// Usage and usage page are win and mac only :(
+#ifdef __linux__
+      if (d->vendor_id == 0x4114 && d->interface_number == 1) {
+#else
+      if (d->usage_page == 0x6213 && d->usage == 0x88) {
+#endif
+        retval.push_back(d->path);
+      }
+      break;
+    case DeviceInterfaceBootloader:
+      if (d->vendor_id == 0x04b4 &&
+          (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
+        retval.push_back(d->path);
+      }
+      break;
+    default:
+      break;
+    }
+    d = d->next;
+  }
+  hid_free_enumeration(root);
+  return retval;
+}
+
 hid_device *DeviceInterface::acquireDevice(void) {
   hid_device *retval = NULL;
   if (hid_init()) {
     qInfo() << "Cannot initialize hidapi!";
     return NULL;
   }
-  hid_device_info *root = hid_enumerate(0, 0);
-  if (!root) {
-    qInfo() << "No HID devices on this system?";
-    return NULL;
+  auto paths = listPaths();
+  if (paths.size() == 1) {
+    qInfo() << "Found a node!";
+ //   qInfo() << "Trying to use" << paths[0];
+    retval = hid_open_path(paths[0].data());
+  } else if (paths.size() > 1) {
+    // More than one device.
+    qInfo() << "Hello, fellow DT member! Please select a device:";
+    retval = hid_open_path(paths[0].data());
   }
-  hid_device_info *d = root;
-  while (d) {
-    bool deviceSelected = false;
-    switch (mode) {
-    case DeviceInterfaceNormal:
-//        qInfo() << d->path << d->vendor_id << d->product_id;
-// Usage and usage page are win and mac only :(
-#ifdef __linux__
-      if (d->vendor_id == 0x4114)
-#else
-      if (d->usage_page == 0x6213 && d->usage == 0x88)
-#endif
-#ifdef __linux__
-        if (d->interface_number == 1)
-#endif
-          deviceSelected = true;
-      break;
-    case DeviceInterfaceBootloader:
-      if (d->vendor_id == 0x04b4 &&
-          (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
-        deviceSelected = true;
-      }
-      break;
-    default:
-      break;
-    }
-    if (deviceSelected) {
-      qInfo() << "Found a node!";
-      qInfo() << "Trying to use" << d->path;
-      retval = hid_open_path(d->path);
-      if (retval)
-        break;
-      qInfo() << "Cannot open device. Linux permissions problem?";
-    }
-    d = d->next;
+  if (!retval) {
+    qInfo() << "Cannot open device. Linux permissions problem?";
   }
-  hid_free_enumeration(root);
   return retval;
 }
 

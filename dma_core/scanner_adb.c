@@ -138,6 +138,7 @@ void sync_leds(void) {
 }
 
 void scan_init(uint8_t debouncing_period) {
+  append_scancode(KEY_UP_MASK | COMMONSENSE_NOKEY);
   ADB_Data_Write(1);
   CyDelayUs(1000);
   adb_host_init();
@@ -179,6 +180,7 @@ void scan_tick(void) {
     xprintf("ADB Error: received %x", codes.raw);
     return;
   } else {
+    xprintf("%02x %02x", codes.key0, codes.key1);
     append_scancode(codes.key1);        
     if (codes.key0 != 0xFF) {
       append_scancode(codes.key0);

@@ -1,16 +1,16 @@
-Loading plugins phase: Elapsed time ==> 0s.127ms
+Loading plugins phase: Elapsed time ==> 0s.128ms
 <CYPRESSTAG name="CyDsfit arguments...">
-cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 -s C:\Projects\CommonSense\KitProgConverter.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE
+cydsfit arguments: -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 -s C:\Projects\CommonSense\KitProgConverter.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE
 </CYPRESSTAG>
 <CYPRESSTAG name="Design elaboration results...">
 ADD: fit.M0015: information: One or more rows of flash have been configured to be protected; however, debugging has been enabled in the System DWR Editor. This means that while write restrictions are honored flash rows can still be read via SWD or JTAG. To prevent any ability to read the flash rows, disable debugging in the System DWR Editor.
  * C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cydwr (Enable Device Protection)
 
 </CYPRESSTAG>
-Elaboration phase: Elapsed time ==> 2s.685ms
+Elaboration phase: Elapsed time ==> 2s.569ms
 <CYPRESSTAG name="HDL generation results...">
 </CYPRESSTAG>
-HDL generation phase: Elapsed time ==> 0s.058ms
+HDL generation phase: Elapsed time ==> 0s.059ms
 <CYPRESSTAG name="Synthesis results...">
 
      | | | | | | |
@@ -28,23 +28,23 @@ HDL generation phase: Elapsed time ==> 0s.058ms
 ======================================================================
 Compiling:  KitProgConverter.v
 Program  :   C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\bin\warp.exe
-Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
+Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
 ======================================================================
 
 ======================================================================
 Compiling:  KitProgConverter.v
 Program  :   C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\bin\warp.exe
-Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
+Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
 ======================================================================
 
 ======================================================================
 Compiling:  KitProgConverter.v
 Program  :   vlogfe
-Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
+Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
 ======================================================================
 
 vlogfe V6.3 IR 41:  Verilog parser
-Sun May 06 16:02:08 2018
+Wed May 09 19:38:06 2018
 
 
 ======================================================================
@@ -54,7 +54,7 @@ Options  :    -yv2 -q10 KitProgConverter.v
 ======================================================================
 
 vpp V6.3 IR 41:  Verilog Pre-Processor
-Sun May 06 16:02:08 2018
+Wed May 09 19:38:06 2018
 
 Flattening file 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\OneTerminal\OneTerminal.v'
 Flattening file 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\psoc\content\CyPrimitives\cyprimitives.cylib\ZeroTerminal\ZeroTerminal.v'
@@ -105,11 +105,11 @@ vlogfe:  No errors.
 ======================================================================
 Compiling:  KitProgConverter.v
 Program  :   tovif
-Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
+Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
 ======================================================================
 
 tovif V6.3 IR 41:  High-level synthesis
-Sun May 06 16:02:08 2018
+Wed May 09 19:38:06 2018
 
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -145,11 +145,11 @@ tovif:  No errors.
 ======================================================================
 Compiling:  KitProgConverter.v
 Program  :   topld
-Options  :    -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
+Options  :    -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 -verilog KitProgConverter.v
 ======================================================================
 
 topld V6.3 IR 41:  Synthesis and optimization
-Sun May 06 16:02:09 2018
+Wed May 09 19:38:07 2018
 
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\std.vhd'.
 Linking 'C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\cypress.vhd'.
@@ -676,7 +676,7 @@ Note:  Expanding virtual equation for '\P_UART:BUART:rx_poll_bit1\' (cost = 1):
 Note:  Expanding virtual equation for '\P_UART:BUART:rx_poll_bit2\' (cost = 1):
 \P_UART:BUART:rx_poll_bit2\ <= ((not \P_UART:BUART:rx_count_2\ and not \P_UART:BUART:rx_count_1\ and not \P_UART:BUART:rx_count_0\));
 
-Note:  Expanding virtual equation for '\P_UART:BUART:pollingrange\' (cost = 4):
+Note:  Expanding virtual equation for '\P_UART:BUART:pollingrange\' (cost = 2):
 \P_UART:BUART:pollingrange\ <= ((not \P_UART:BUART:rx_count_2\ and not \P_UART:BUART:rx_count_1\));
 
 Note:  Expanding virtual equation for '\P_UART:BUART:sRX:s23Poll:MODULE_1:g2:a0:g1:z1:s0:g1:u0:c_1\' (cost = 0):
@@ -734,7 +734,7 @@ Note:  Expanding virtual equation for '\P_UART:BUART:sRX:MODULE_4:g2:a0:lta_1\' 
 Note:  Expanding virtual equation for '\P_UART:BUART:sRX:MODULE_4:g2:a0:gta_1\' (cost = 0):
 \P_UART:BUART:sRX:MODULE_4:g2:a0:gta_1\ <= (MODIN4_6);
 
-Note:  Expanding virtual equation for '\P_UART:BUART:sRX:MODULE_4:g2:a0:lta_0\' (cost = 8):
+Note:  Expanding virtual equation for '\P_UART:BUART:sRX:MODULE_4:g2:a0:lta_0\' (cost = 2):
 \P_UART:BUART:sRX:MODULE_4:g2:a0:lta_0\ <= ((not MODIN4_6 and not MODIN4_4)
 	OR (not MODIN4_6 and not MODIN4_5));
 
@@ -760,7 +760,7 @@ Note:  Expanding virtual equation for '\N_UART:BUART:rx_poll_bit1\' (cost = 1):
 Note:  Expanding virtual equation for '\N_UART:BUART:rx_poll_bit2\' (cost = 1):
 \N_UART:BUART:rx_poll_bit2\ <= ((not \N_UART:BUART:rx_count_2\ and not \N_UART:BUART:rx_count_1\ and not \N_UART:BUART:rx_count_0\));
 
-Note:  Expanding virtual equation for '\N_UART:BUART:pollingrange\' (cost = 4):
+Note:  Expanding virtual equation for '\N_UART:BUART:pollingrange\' (cost = 2):
 \N_UART:BUART:pollingrange\ <= ((not \N_UART:BUART:rx_count_2\ and not \N_UART:BUART:rx_count_1\));
 
 Note:  Expanding virtual equation for '\N_UART:BUART:sRX:s23Poll:MODULE_6:g2:a0:g1:z1:s0:g1:u0:c_1\' (cost = 0):
@@ -818,7 +818,7 @@ Note:  Expanding virtual equation for '\N_UART:BUART:sRX:MODULE_9:g2:a0:lta_1\' 
 Note:  Expanding virtual equation for '\N_UART:BUART:sRX:MODULE_9:g2:a0:gta_1\' (cost = 0):
 \N_UART:BUART:sRX:MODULE_9:g2:a0:gta_1\ <= (\N_UART:BUART:rx_count_6\);
 
-Note:  Expanding virtual equation for '\N_UART:BUART:sRX:MODULE_9:g2:a0:lta_0\' (cost = 8):
+Note:  Expanding virtual equation for '\N_UART:BUART:sRX:MODULE_9:g2:a0:lta_0\' (cost = 2):
 \N_UART:BUART:sRX:MODULE_9:g2:a0:lta_0\ <= ((not \N_UART:BUART:rx_count_6\ and not \N_UART:BUART:rx_count_4\)
 	OR (not \N_UART:BUART:rx_count_6\ and not \N_UART:BUART:rx_count_5\));
 
@@ -848,7 +848,7 @@ Note:  Expanding virtual equation for '\N_UART:BUART:sRX:s23Poll:MODULE_6:g2:a0:
 
 Substituting virtuals - pass 3:
 
-Note:  Expanding virtual equation for '\P_UART:BUART:rx_postpoll\' (cost = 72):
+Note:  Expanding virtual equation for '\P_UART:BUART:rx_postpoll\' (cost = 4):
 \P_UART:BUART:rx_postpoll\ <= (MODIN1_1
 	OR (Net_78 and MODIN1_0));
 
@@ -864,7 +864,7 @@ Note:  Expanding virtual equation for '\P_UART:BUART:sRX:MODULE_5:g1:a0:gx:u0:ae
 	OR (MODIN1_1 and \P_UART:BUART:rx_parity_bit\)
 	OR (Net_78 and MODIN1_0 and \P_UART:BUART:rx_parity_bit\));
 
-Note:  Expanding virtual equation for '\N_UART:BUART:rx_postpoll\' (cost = 72):
+Note:  Expanding virtual equation for '\N_UART:BUART:rx_postpoll\' (cost = 4):
 \N_UART:BUART:rx_postpoll\ <= (\N_UART:BUART:pollcount_1\
 	OR (not Net_46 and \N_UART:BUART:pollcount_0\));
 
@@ -889,7 +889,7 @@ Circuit simplification results:
 
 	Expanded 69 signals.
 	Turned 0 signals into soft nodes.
-	Maximum default expansion cost was set at 3.
+	Maximum default expansion cost was set at infinity.
 ----------------------------------------------------------
 
 ------------------------------------------------------
@@ -962,23 +962,23 @@ Circuit simplification results:
 
 	Expanded 0 signals.
 	Turned 0 signals into soft nodes.
-	Maximum default expansion cost was set at 3.
+	Maximum default expansion cost was set at infinity.
 ----------------------------------------------------------
 
 topld:  No errors.
 
 CYPRESS_DIR    : C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp
 Warp Program   : C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\bin\warp.exe
-Warp Arguments : -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
+Warp Arguments : -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -dcpsoc3 KitProgConverter.v -verilog
 </CYPRESSTAG>
-Warp synthesis phase: Elapsed time ==> 1s.110ms
+Warp synthesis phase: Elapsed time ==> 1s.096ms
 <CYPRESSTAG name="Fitter results...">
 <CYPRESSTAG name="Fitter startup details...">
-cyp3fit: V4.2.0.641, Family: PSoC3, Started at: Sunday, 06 May 2018 16:02:09
-Options: -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 KitProgConverter.v -verilog
+cyp3fit: V4.2.0.641, Family: PSoC3, Started at: Wednesday, 09 May 2018 19:38:07
+Options: -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE -ya -.fftprj=C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 KitProgConverter.v -verilog
 </CYPRESSTAG>
 <CYPRESSTAG name="Design parsing">
-Design parsing phase: Elapsed time ==> 0s.019ms
+Design parsing phase: Elapsed time ==> 0s.020ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Tech Mapping">
 <CYPRESSTAG name="Initial Mapping" icon="FILE_RPT_TECHM">
@@ -3309,8 +3309,8 @@ Analog (SC/CT) Blocks         :    0 :    4 :    4 :  0.00 %
 DAC                           :      :      :      :        
   VIDAC                       :    0 :    4 :    4 :  0.00 %
 </CYPRESSTAG>
-Technology Mapping: Elapsed time ==> 0s.173ms
-Tech Mapping phase: Elapsed time ==> 0s.233ms
+Technology Mapping: Elapsed time ==> 0s.157ms
+Tech Mapping phase: Elapsed time ==> 0s.225ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Placement">
 Initial Analog Placement Results:
@@ -3332,7 +3332,7 @@ IO_7@[IOP=(15)][IoId=(7)] : \USB:Dm(0)\ (fixed)
 IO_6@[IOP=(15)][IoId=(6)] : \USB:Dp(0)\ (fixed)
 IO_5@[IOP=(15)][IoId=(5)] : \USB:VBUS(0)\ (fixed)
 USB[0]@[FFB(USB,0)] : \USB:USB\
-Analog Placement phase: Elapsed time ==> 0s.025ms
+Analog Placement phase: Elapsed time ==> 0s.024ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Analog Routing">
 Analog Routing phase: Elapsed time ==> 0s.000ms
@@ -3350,7 +3350,7 @@ Dump of CyP35AnalogRoutingResultsDB
 IsVddaHalfUsedForComp = False
 IsVddaHalfUsedForSar0 = False
 IsVddaHalfUsedForSar1 = False
-Analog Code Generation phase: Elapsed time ==> 0s.327ms
+Analog Code Generation phase: Elapsed time ==> 0s.289ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Placement">
 <CYPRESSTAG name="Detailed placement messages">
@@ -3378,14 +3378,14 @@ PLD Packing Summary
 <CYPRESSTAG name="Packed PLD Contents">
 Packed PLD Contents not displayed at this verbose level.</CYPRESSTAG>
 </CYPRESSTAG>
-PLD Packing: Elapsed time ==> 0s.001ms
+PLD Packing: Elapsed time ==> 0s.002ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Partitioning">
 <CYPRESSTAG name="Initial Partitioning Summary">
 Initial Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
 <CYPRESSTAG name="Final Partitioning Summary">
 Final Partitioning Summary not displayed at this verbose level.</CYPRESSTAG>
-Partitioning: Elapsed time ==> 0s.124ms
+Partitioning: Elapsed time ==> 0s.120ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Final Placement Summary">
 
@@ -6008,33 +6008,33 @@ Port | Pin | Fixed |      Type |       Drive Mode |          Name | Connections
 </CYPRESSTAG>
 </CYPRESSTAG>
 </CYPRESSTAG>
-Digital component placer commit/Report: Elapsed time ==> 0s.084ms
-Digital Placement phase: Elapsed time ==> 1s.830ms
+Digital component placer commit/Report: Elapsed time ==> 0s.083ms
+Digital Placement phase: Elapsed time ==> 1s.788ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Digital Routing">
 "C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\bin/sjrouter.exe" --xml-path "C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\dev\psoc5/psoc5lp/route_arch-rrg.cydata" --vh2-path "KitProgConverter_r.vh2" --pcf-path "KitProgConverter.pco" --des-name "KitProgConverter" --dsf-path "KitProgConverter.dsf" --sdc-path "KitProgConverter.sdc" --lib-path "KitProgConverter_r.lib"
 Routing successful.
-Digital Routing phase: Elapsed time ==> 2s.360ms
+Digital Routing phase: Elapsed time ==> 2s.350ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Generation">
-Bitstream Generation phase: Elapsed time ==> 0s.444ms
+Bitstream Generation phase: Elapsed time ==> 0s.468ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Bitstream Verification">
-Bitstream Verification phase: Elapsed time ==> 0s.083ms
+Bitstream Verification phase: Elapsed time ==> 0s.103ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Static timing analysis">
 Timing report is in KitProgConverter_timing.html.
-Static timing analysis phase: Elapsed time ==> 0s.418ms
+Static timing analysis phase: Elapsed time ==> 0s.413ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Data reporting">
-Data reporting phase: Elapsed time ==> 0s.145ms
+Data reporting phase: Elapsed time ==> 0s.154ms
 </CYPRESSTAG>
 <CYPRESSTAG name="Database update...">
-Design database save phase: Elapsed time ==> 0s.228ms
+Design database save phase: Elapsed time ==> 0s.243ms
 </CYPRESSTAG>
-cydsfit: Elapsed time ==> 6s.136ms
+cydsfit: Elapsed time ==> 6s.101ms
 </CYPRESSTAG>
-Fitter phase: Elapsed time ==> 6s.136ms
-API generation phase: Elapsed time ==> 2s.723ms
-Dependency generation phase: Elapsed time ==> 0s.011ms
+Fitter phase: Elapsed time ==> 6s.102ms
+API generation phase: Elapsed time ==> 2s.811ms
+Dependency generation phase: Elapsed time ==> 0s.012ms
 Cleanup phase: Elapsed time ==> 0s.001ms

@@ -1056,84 +1056,71 @@
 <dep name="..\dma_core\sup_serial.h" />
 </file>
 <file name="..\dma_core\sup_serial.c" />
-<file name=".\Compiled\cybootloader.o">
-<dep name=".\Generated_Source\PSoC5\cybootloader.c" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-</file>
-<file name=".\Generated_Source\PSoC5\cybootloader.c" />
-<file name=".\Compiled\Sup_I2C.o">
+<file name=".\Compiled\scanner_adb.o">
+<dep name=".\c2\c2_protocol.h" />
+<dep name=".\Generated_Source\PSoC5\ADB_Data.h" />
+<dep name=".\Generated_Source\PSoC5\ADB_Data_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\Boot.h" />
+<dep name=".\Generated_Source\PSoC5\BootPin.h" />
+<dep name=".\Generated_Source\PSoC5\BootPin_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\EEPROM.h" />
+<dep name=".\Generated_Source\PSoC5\ExpHdr_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\N_UART_IntClock.h" />
+<dep name=".\Generated_Source\PSoC5\P_UART_IntClock.h" />
+<dep name=".\Generated_Source\PSoC5\SuspendWD.h" />
+<dep name=".\Generated_Source\PSoC5\SysTimer.h" />
+<dep name=".\Generated_Source\PSoC5\USB_Dm.h" />
+<dep name=".\Generated_Source\PSoC5\USB_Dm_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\USB_VBUS.h" />
+<dep name=".\Generated_Source\PSoC5\USB_VBUS_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\cmsis_armcc.h" />
+<dep name=".\Generated_Source\PSoC5\cmsis_compiler.h" />
+<dep name=".\Generated_Source\PSoC5\cmsis_gcc.h" />
+<dep name=".\Generated_Source\PSoC5\core_cm3.h" />
+<dep name=".\Generated_Source\PSoC5\core_cm3_psoc5.h" />
+<dep name=".\Generated_Source\PSoC5\cy_em_eeprom.h" />
+<dep name=".\Generated_Source\PSoC5\cydisabledsheets.h" />
+<dep name=".\Generated_Source\PSoC5\project.h" />
+<dep name=".\Generated_Source\PSoC5\BootIRQ.h" />
+<dep name=".\Generated_Source\PSoC5\CyDmac.h" />
 <dep name=".\Generated_Source\PSoC5\CyFlash.h" />
 <dep name=".\Generated_Source\PSoC5\CyLib.h" />
 <dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.c" />
+<dep name=".\Generated_Source\PSoC5\ILO_Trim.h" />
+<dep name=".\Generated_Source\PSoC5\ILO_Trim_CorrectionISR.h" />
+<dep name=".\Generated_Source\PSoC5\N_UART.h" />
+<dep name=".\Generated_Source\PSoC5\P_UART.h" />
 <dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
 <dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\TimerIRQ.h" />
+<dep name=".\Generated_Source\PSoC5\USB.h" />
+<dep name=".\Generated_Source\PSoC5\USBSuspendIRQ.h" />
+<dep name=".\Generated_Source\PSoC5\USB_Dp.h" />
+<dep name=".\Generated_Source\PSoC5\USB_Dp_aliases.h" />
+<dep name=".\Generated_Source\PSoC5\USB_audio.h" />
+<dep name=".\Generated_Source\PSoC5\USB_cdc.h" />
+<dep name=".\Generated_Source\PSoC5\USB_cydmac.h" />
+<dep name=".\Generated_Source\PSoC5\USB_hid.h" />
+<dep name=".\Generated_Source\PSoC5\USB_midi.h" />
+<dep name=".\Generated_Source\PSoC5\USB_msc.h" />
+<dep name=".\Generated_Source\PSoC5\USB_pvt.h" />
 <dep name=".\Generated_Source\PSoC5\cyPm.h" />
 <dep name=".\Generated_Source\PSoC5\cydevice.h" />
 <dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
 <dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter_cfg.h" />
+<dep name=".\Generated_Source\PSoC5\cypins.h" />
 <dep name=".\Generated_Source\PSoC5\cytypes.h" />
+<dep name=".\config.h" />
+<dep name=".\cyapicallbacks.h" />
+<dep name="..\c2\c2_protocol.h" />
+<dep name="..\c2\nvram.h" />
+<dep name="..\dma_core\globals.h" />
+<dep name="..\dma_core\scan_common.h" />
+<dep name="..\dma_core\scanner_adb.c" />
+<dep name="..\dma_core\scanner_adb.h" />
 </file>
-<file name=".\Generated_Source\PSoC5\Sup_I2C.c" />
-<file name=".\Compiled\Sup_I2C_BOOT.o">
-<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
-<dep name=".\Generated_Source\PSoC5\CyLib.h" />
-<dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_BOOT.c" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
-<dep name=".\Generated_Source\PSoC5\cyPm.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-</file>
-<file name=".\Generated_Source\PSoC5\Sup_I2C_BOOT.c" />
-<file name=".\Compiled\Sup_I2C_MASTER.o">
-<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
-<dep name=".\Generated_Source\PSoC5\CyLib.h" />
-<dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_MASTER.c" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
-<dep name=".\Generated_Source\PSoC5\cyPm.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-</file>
-<file name=".\Generated_Source\PSoC5\Sup_I2C_MASTER.c" />
-<file name=".\Compiled\Sup_I2C_PM.o">
-<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
-<dep name=".\Generated_Source\PSoC5\CyLib.h" />
-<dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PM.c" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
-<dep name=".\Generated_Source\PSoC5\cyPm.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-</file>
-<file name=".\Generated_Source\PSoC5\Sup_I2C_PM.c" />
-<file name=".\Compiled\Sup_I2C_SLAVE.o">
-<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
-<dep name=".\Generated_Source\PSoC5\CyLib.h" />
-<dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_SLAVE.c" />
-<dep name=".\Generated_Source\PSoC5\cyPm.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-</file>
-<file name=".\Generated_Source\PSoC5\Sup_I2C_SLAVE.c" />
+<file name="..\dma_core\scanner_adb.c" />
 <file name=".\Compiled\ADB_Data.o">
 <dep name=".\Generated_Source\PSoC5\ADB_Data.c" />
 <dep name=".\Generated_Source\PSoC5\ADB_Data.h" />
@@ -1339,6 +1326,76 @@
 <dep name=".\Generated_Source\PSoC5\cytypes.h" />
 </file>
 <file name=".\Generated_Source\PSoC5\P_UART_PM.c" />
+<file name=".\Compiled\Sup_I2C.o">
+<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
+<dep name=".\Generated_Source\PSoC5\CyLib.h" />
+<dep name=".\Generated_Source\PSoC5\CySpc.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.c" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\cyPm.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\Sup_I2C.c" />
+<file name=".\Compiled\Sup_I2C_BOOT.o">
+<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
+<dep name=".\Generated_Source\PSoC5\CyLib.h" />
+<dep name=".\Generated_Source\PSoC5\CySpc.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_BOOT.c" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\cyPm.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\Sup_I2C_BOOT.c" />
+<file name=".\Compiled\Sup_I2C_MASTER.o">
+<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
+<dep name=".\Generated_Source\PSoC5\CyLib.h" />
+<dep name=".\Generated_Source\PSoC5\CySpc.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_MASTER.c" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\cyPm.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\Sup_I2C_MASTER.c" />
+<file name=".\Compiled\Sup_I2C_PM.o">
+<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
+<dep name=".\Generated_Source\PSoC5\CyLib.h" />
+<dep name=".\Generated_Source\PSoC5\CySpc.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PM.c" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\cyPm.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\Sup_I2C_PM.c" />
+<file name=".\Compiled\Sup_I2C_SLAVE.o">
+<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
+<dep name=".\Generated_Source\PSoC5\CyLib.h" />
+<dep name=".\Generated_Source\PSoC5\CySpc.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
+<dep name=".\Generated_Source\PSoC5\Sup_I2C_SLAVE.c" />
+<dep name=".\Generated_Source\PSoC5\cyPm.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\Sup_I2C_SLAVE.c" />
 <file name=".\Compiled\SuspendWD.o">
 <dep name=".\Generated_Source\PSoC5\CyFlash.h" />
 <dep name=".\Generated_Source\PSoC5\CyLib.h" />
@@ -1437,6 +1494,18 @@
 <dep name=".\Generated_Source\PSoC5\cytypes.h" />
 </file>
 <file name=".\Generated_Source\PSoC5\cy_em_eeprom.c" />
+<file name=".\Compiled\cybootloader.o">
+<dep name=".\Generated_Source\PSoC5\cybootloader.c" />
+<dep name=".\Generated_Source\PSoC5\cydevice.h" />
+<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
+<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
+<dep name=".\Generated_Source\PSoC5\cytypes.h" />
+</file>
+<file name=".\Generated_Source\PSoC5\cybootloader.c" />
+<file name=".\Compiled\cymetadata.o">
+<dep name=".\Generated_Source\PSoC5\cymetadata.c" />
+</file>
+<file name=".\Generated_Source\PSoC5\cymetadata.c" />
 <file name=".\Compiled\cyutils.o">
 <dep name=".\Generated_Source\PSoC5\cydevice.h" />
 <dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
@@ -1445,6 +1514,11 @@
 <dep name=".\Generated_Source\PSoC5\cyutils.c" />
 </file>
 <file name=".\Generated_Source\PSoC5\cyutils.c" />
+<file name=".\Compiled\main.o">
+<dep name=".\main.c" />
+<dep name="..\dma_core\core.h" />
+</file>
+<file name=".\main.c" />
 <file name=".\Compiled\CyBootAsmGnu.o">
 <dep name=".\Generated_Source\PSoC5\CyBootAsmGnu.s" />
 <dep name=".\Generated_Source\PSoC5\cydevicegnu.inc" />
@@ -1455,80 +1529,6 @@
 <file name=".\Generated_Source\PSoC5\cydevicegnu.inc" />
 <file name=".\Generated_Source\PSoC5\cydevicegnu_trm.inc" />
 <file name=".\Generated_Source\PSoC5\cyfittergnu.inc" />
-<file name=".\Compiled\cymetadata.o">
-<dep name=".\Generated_Source\PSoC5\cymetadata.c" />
-</file>
-<file name=".\Generated_Source\PSoC5\cymetadata.c" />
-<file name=".\Compiled\main.o">
-<dep name=".\main.c" />
-<dep name="..\dma_core\core.h" />
-</file>
-<file name=".\main.c" />
-<file name=".\Compiled\scanner_adb.o">
-<dep name=".\c2\c2_protocol.h" />
-<dep name=".\Generated_Source\PSoC5\ExpHdr_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\cmsis_armcc.h" />
-<dep name=".\Generated_Source\PSoC5\cmsis_compiler.h" />
-<dep name=".\Generated_Source\PSoC5\cmsis_gcc.h" />
-<dep name=".\Generated_Source\PSoC5\core_cm3.h" />
-<dep name=".\Generated_Source\PSoC5\core_cm3_psoc5.h" />
-<dep name=".\Generated_Source\PSoC5\cydisabledsheets.h" />
-<dep name=".\Generated_Source\PSoC5\project.h" />
-<dep name=".\Generated_Source\PSoC5\ADB_Data.h" />
-<dep name=".\Generated_Source\PSoC5\ADB_Data_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\Boot.h" />
-<dep name=".\Generated_Source\PSoC5\BootIRQ.h" />
-<dep name=".\Generated_Source\PSoC5\BootPin.h" />
-<dep name=".\Generated_Source\PSoC5\BootPin_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\CyDmac.h" />
-<dep name=".\Generated_Source\PSoC5\CyFlash.h" />
-<dep name=".\Generated_Source\PSoC5\CyLib.h" />
-<dep name=".\Generated_Source\PSoC5\CySpc.h" />
-<dep name=".\Generated_Source\PSoC5\EEPROM.h" />
-<dep name=".\Generated_Source\PSoC5\ILO_Trim.h" />
-<dep name=".\Generated_Source\PSoC5\ILO_Trim_CorrectionISR.h" />
-<dep name=".\Generated_Source\PSoC5\N_UART.h" />
-<dep name=".\Generated_Source\PSoC5\N_UART_IntClock.h" />
-<dep name=".\Generated_Source\PSoC5\P_UART.h" />
-<dep name=".\Generated_Source\PSoC5\P_UART_IntClock.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C.h" />
-<dep name=".\Generated_Source\PSoC5\Sup_I2C_PVT.h" />
-<dep name=".\Generated_Source\PSoC5\SuspendWD.h" />
-<dep name=".\Generated_Source\PSoC5\SysTimer.h" />
-<dep name=".\Generated_Source\PSoC5\TimerIRQ.h" />
-<dep name=".\Generated_Source\PSoC5\USB.h" />
-<dep name=".\Generated_Source\PSoC5\USBSuspendIRQ.h" />
-<dep name=".\Generated_Source\PSoC5\USB_Dm.h" />
-<dep name=".\Generated_Source\PSoC5\USB_Dm_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\USB_Dp.h" />
-<dep name=".\Generated_Source\PSoC5\USB_Dp_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\USB_VBUS.h" />
-<dep name=".\Generated_Source\PSoC5\USB_VBUS_aliases.h" />
-<dep name=".\Generated_Source\PSoC5\USB_audio.h" />
-<dep name=".\Generated_Source\PSoC5\USB_cdc.h" />
-<dep name=".\Generated_Source\PSoC5\USB_cydmac.h" />
-<dep name=".\Generated_Source\PSoC5\USB_hid.h" />
-<dep name=".\Generated_Source\PSoC5\USB_midi.h" />
-<dep name=".\Generated_Source\PSoC5\USB_msc.h" />
-<dep name=".\Generated_Source\PSoC5\USB_pvt.h" />
-<dep name=".\Generated_Source\PSoC5\cyPm.h" />
-<dep name=".\Generated_Source\PSoC5\cy_em_eeprom.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice.h" />
-<dep name=".\Generated_Source\PSoC5\cydevice_trm.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter.h" />
-<dep name=".\Generated_Source\PSoC5\cyfitter_cfg.h" />
-<dep name=".\Generated_Source\PSoC5\cypins.h" />
-<dep name=".\Generated_Source\PSoC5\cytypes.h" />
-<dep name=".\config.h" />
-<dep name=".\cyapicallbacks.h" />
-<dep name="..\c2\c2_protocol.h" />
-<dep name="..\c2\nvram.h" />
-<dep name="..\dma_core\globals.h" />
-<dep name="..\dma_core\scan_common.h" />
-<dep name="..\dma_core\scanner_adb.c" />
-<dep name="..\dma_core\scanner_adb.h" />
-</file>
-<file name="..\dma_core\scanner_adb.c" />
 <file name=".\CortexM3\ARM_GCC_541\Release\ADB_Data.o">
 <dep name=".\Generated_Source\PSoC5\ADB_Data.c" />
 <dep name=".\Generated_Source\PSoC5\ADB_Data.h" />
@@ -2936,79 +2936,79 @@
 <CyGuid_b0374e30-ce3a-47f2-ad85-821643292c68 type_name="CyDesigner.Common.ProjMgmt.Common.CyCmdLineData" version="2">
 <genericCmdLineData>
 <name v="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3">
-<name_val_pair name="main.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cyfitter_cfg.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cybootloader.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cymetadata.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Boot.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\ILO_Trim.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\ILO_Trim_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\EEPROM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_audio.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_boot.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_cdc.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_cls.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_descr.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_drv.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_episr.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_hid.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_pm.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_std.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_vnd.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_midi.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_msc.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\SysTimer.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\SysTimer_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\TimerIRQ.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\BootIRQ.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USBSuspendIRQ.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\SuspendWD.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\SuspendWD_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\P_UART.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\P_UART_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\P_UART_INT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\P_UART_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\N_UART.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\N_UART_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\N_UART_INT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\N_UART_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\ADB_Data.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\BootPin.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_INT.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_PM.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_SLAVE.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_MASTER.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\ILO_Trim_CorrectionISR.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_VBUS.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_Dm.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\USB_Dp.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\P_UART_IntClock.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\N_UART_IntClock.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\Cm3Start.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
+<name_val_pair name="main.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cyfitter_cfg.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cybootloader.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cymetadata.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Boot.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\ILO_Trim.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\ILO_Trim_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\EEPROM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_audio.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_boot.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_cdc.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_cls.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_descr.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_drv.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_episr.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_hid.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_pm.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_std.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_vnd.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_midi.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_msc.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\SysTimer.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\SysTimer_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\TimerIRQ.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\BootIRQ.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USBSuspendIRQ.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\SuspendWD.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\SuspendWD_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\P_UART.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\P_UART_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\P_UART_INT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\P_UART_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\N_UART.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\N_UART_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\N_UART_INT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\N_UART_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\ADB_Data.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\BootPin.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_BOOT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_INT.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_PM.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_SLAVE.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Sup_I2C_MASTER.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\ILO_Trim_CorrectionISR.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_VBUS.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_Dm.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\USB_Dp.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\P_UART_IntClock.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\N_UART_IntClock.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\Cm3Start.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
 <name_val_pair name="Generated_Source\PSoC5\CyBootAsmGnu.s" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -alh=${OutputDir}/${CompileFile}.lst -g -W" />
-<name_val_pair name="Generated_Source\PSoC5\CyDmac.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\CyFlash.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\CyLib.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cyPm.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\CySpc.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cyutils.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="Generated_Source\PSoC5\cy_em_eeprom.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
+<name_val_pair name="Generated_Source\PSoC5\CyDmac.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\CyFlash.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\CyLib.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cyPm.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\CySpc.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cyutils.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="Generated_Source\PSoC5\cy_em_eeprom.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
 <name_val_pair name="C:\Projects\CommonSense\KitProgConverter.cydsn\CortexM3\ARM_GCC_541\Release\KitProgConverter.hex" v="-mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Os -ffat-lto-objects" />
-<name_val_pair name="..\dma_core\exp.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\pipeline.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\PSoC_USB.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\sup_serial.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\scanner_adb.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\core.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\scan_common.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="..\dma_core\scanner_sun.c" v="-mcpu=cortex-m3 -mthumb -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -Os" />
-<name_val_pair name="C:\Projects\CommonSense\KitProgConverter.cydsn\Compiled\KitProgConverter.hex" v="-mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -Os -ffat-lto-objects" />
+<name_val_pair name="..\dma_core\exp.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\pipeline.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\PSoC_USB.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\sup_serial.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\scanner_adb.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\core.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\scan_common.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="..\dma_core\scanner_sun.c" v="-mcpu=cortex-m3 -mthumb -I..\dma_core -I. -IGenerated_Source\PSoC5 -Wa,-alh=${OutputDir}/${CompileFile}.lst -g -D NDEBUG -D CY_CORE_ID=0 -Wall -ffunction-sections -ffat-lto-objects -finline-functions -O2" />
+<name_val_pair name="C:\Projects\CommonSense\KitProgConverter.cydsn\Compiled\KitProgConverter.hex" v="-mcpu=cortex-m3 -mthumb -L Generated_Source\PSoC5 -Wl,-Map,${OutputDir}/${ProjectShortName}.map -T Generated_Source\PSoC5\cm3gcc.ld -specs=nano.specs -Wl,--gc-sections -g -ffunction-sections -finline-functions -O2 -ffat-lto-objects" />
 </name>
 </genericCmdLineData>
-<codeGenCmdLineTag v="-.appdatapath &quot;C:\Users\DMA\AppData\Local\Cypress Semiconductor\PSoC Creator\4.2&quot; -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 -s C:\Projects\CommonSense\KitProgConverter.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v3 -.fftcfgtype=LE" />
+<codeGenCmdLineTag v="-.appdatapath &quot;C:\Users\DMA\AppData\Local\Cypress Semiconductor\PSoC Creator\4.2&quot; -.fdsnotice -.fdswarpdepfile=warp_dependencies.txt -.fdselabdepfile=elab_dependencies.txt -.fdsbldfile=generated_files.txt -.fdsreffile=referenced_files.txt -p C:\Projects\CommonSense\KitProgConverter.cydsn\KitProgConverter.cyprj -d CY8C5868LTI-LP039 -s C:\Projects\CommonSense\KitProgConverter.cydsn\Generated_Source\PSoC5 -- -yv2 -q10 -ygs -o2 -v11 -.fftcfgtype=LE" />
 </CyGuid_b0374e30-ce3a-47f2-ad85-821643292c68>
 </dataGuid>
 <dataGuid v="597c5b74-0c46-4204-8b7f-96f3570671dc">
@@ -3557,7 +3557,7 @@
 <v>C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\stdlogic\rtlpkg.vif</v>
 <v>C:\P\PSoC_Creator\PSoC Creator\4.2\PSoC Creator\warp\lib\common\stdlogic\cy_psoc3.vif</v>
 </warp_dep>
-<deps_time v="131701213387659450" />
+<deps_time v="131703934967473549" />
 <top_block v="TopDesign" />
 <last_generation v="0" />
 <pdl_path v="" />
@@ -3567,7 +3567,7 @@
 <dataGuid v="769d31ea-68b1-4f0c-b90a-7c10a43ee563">
 <CyGuid_769d31ea-68b1-4f0c-b90a-7c10a43ee563 type_name="CyDesigner.Common.ProjMgmt.Model.CyLinkCustomData" version="1">
 <link_deps_times>
-<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3" v="131701243633099106" />
+<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3" v="131703946780592743" />
 </link_deps_times>
 </CyGuid_769d31ea-68b1-4f0c-b90a-7c10a43ee563>
 </dataGuid>

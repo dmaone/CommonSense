@@ -43,7 +43,8 @@ SOURCES += main.cpp \
     LayerCondition.cpp \
     Delays.cpp \
     Hardware.cpp \
-    Macro.cpp
+    Macro.cpp \
+    DeviceSelector.cpp
 
 HEADERS  += \
     ../c2/c2_protocol.h \
@@ -67,7 +68,8 @@ HEADERS  += \
     LayerCondition.h \
     Delays.h \
     Hardware.h \
-    Macro.h
+    Macro.h \
+    DeviceSelector.h
 
 FORMS    += \
     FlightController.ui \
@@ -75,6 +77,7 @@ FORMS    += \
     LayoutEditor.ui \
     ThresholdEditor.ui \
     MacroEditor.ui \
-    Hardware.ui
+    Hardware.ui \
+    DeviceSelector.ui
 
 DISTFILES +=

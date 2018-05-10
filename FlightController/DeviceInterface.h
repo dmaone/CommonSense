@@ -28,6 +28,7 @@ public:
   void start(void);
   bool event(QEvent *e);
   device_status_t *getStatus(void);
+  std::vector<std::string> listPaths();
   DeviceConfig *config;
   enum DeviceStatus {
     DeviceConnected,

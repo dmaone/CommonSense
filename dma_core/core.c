@@ -15,11 +15,11 @@
 #include <project.h>
 
 #if SCANNER_TYPE == SCANNER_SUN
-#include "../dma_core/scanner_sun.h"
+#include "scanner_sun.h"
 #elif SCANNER_TYPE == SCANNER_ADB
-#include "../dma_core/scanner_adb.h"
+#include "scanner_adb.h"
 #else
-#include "../dma_core/scan.h"
+#include "scan.h"
 #endif
 
 CY_ISR(BootIRQ_ISR) { Boot_Load(); }

@@ -1495,7 +1495,7 @@
 <name_val_pair name="General@Quiet Output" v="True" />
 <name_val_pair name="General@Synthesis Goal" v="Speed" />
 <name_val_pair name="General@Synthesis Optimization Effort" v="Exhaustive" />
-<name_val_pair name="General@Virtual Node Substitution" v="3" />
+<name_val_pair name="General@Virtual Node Substitution" v="11" />
 <name_val_pair name="General@Custom Fitter Options" v="" />
 </GlobalPages>
 </GlobalTools>
@@ -1565,7 +1565,7 @@
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@Assembly@General@Join Data and Text Sections" v="False" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@Assembly@General@Suppress Warnings" v="True" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@Assembly@Command Line@Command Line" v="" />
-<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Additional Include Directories" v="" />
+<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Additional Include Directories" v="..\dma_core" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Create Listing File" v="True" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Default Char Unsigned" v="False" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Generate Debugging Information" v="True" />
@@ -1577,9 +1577,9 @@
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@General@Verbose Asm" v="False" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Remove Unused Functions" v="True" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Fat LTO objects" v="True" />
-<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Inline Functions" v="False" />
+<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Inline Functions" v="True" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Link Time Optimization" v="False" />
-<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Optimization Level" v="Size" />
+<name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Optimization@Optimization Level" v="High" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@C/C++@Command Line@Command Line" v="" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@Library Generation@Command Line@Command Line" v="" />
 <name_val_pair name="c9323d49-d323-40b8-9b59-cc008d68a989@Release@CortexM3@Linker@General@Additional Libraries" v="" />
