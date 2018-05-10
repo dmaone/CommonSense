@@ -1,6 +1,7 @@
 #include "DeviceInterface.h"
 #include <QCoreApplication>
 #include <QDebug>
+#include <QInputDialog>
 #include <QMessageBox>
 #include <algorithm>
 #include <string>
@@ -313,8 +314,24 @@ hid_device *DeviceInterface::acquireDevice(void) {
     retval = hid_open_path(paths[0].data());
   } else if (paths.size() > 1) {
     // More than one device.
-    qInfo() << "Hello, fellow DT member! Please select a device:";
-    retval = hid_open_path(paths[0].data());
+    qInfo() << "Hello, fellow DT member!";
+    QStringList items;
+    for (auto it : paths) {
+      items << QString(it.data());
+    }
+    bool ok;
+    auto device_path = QInputDialog::getItem(
+        nullptr,
+        tr("Please select a device"),
+        tr("Path"),
+        items,
+        0,
+        false,
+        &ok
+    );
+    if (ok) {
+      retval = hid_open_path(device_path.toStdString().data());
+    }
   }
   if (!retval) {
     qInfo() << "Cannot open device. Linux permissions problem?";
