@@ -39,11 +39,19 @@ void MacroEditor::show(void) {
 
 MacroEditor::~MacroEditor() { delete ui; }
 
-void MacroEditor::on_applyButton_clicked() {
-}
-
 void MacroEditor::on_revertButton_clicked() {
   on_macroListCombo_currentIndexChanged(ui->macroListCombo->currentIndex());
+}
+
+void MacroEditor::on_resetButton_clicked() {
+  auto result = QMessageBox::question(
+      this, "Are you sure?", "Erase all macros?",
+      QMessageBox::Yes | QMessageBox::No);
+  if (result == QMessageBox::Yes) {
+    deviceConfig->macros.clear();
+    currentMacro = 0;
+    show();
+  }
 }
 
 void MacroEditor::populateSteps(QByteArray &bytes) {
@@ -182,8 +190,7 @@ void MacroEditor::on_addButton_clicked() {
     ui->macroListCombo->removeItem(pos);
     ui->macroListCombo->addItem(newMacro.fullName());
     ui->macroListCombo->addItem(kNew);
-    ui->macroListCombo->setCurrentIndex(pos);
-    //on_macroListCombo_currentIndexChanged(pos);
+    ui->macroListCombo->setCurrentIndex(pos+1);
   }
 }
 

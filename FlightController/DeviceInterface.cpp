@@ -265,7 +265,7 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
   }
 }
 
-std::vector<std::string> DeviceInterface::listPaths() {
+std::vector<std::string> DeviceInterface::listDevices() {
   std::vector<std::string> retval;
   hid_device_info *root = hid_enumerate(0, 0);
   if (!root) {
@@ -307,7 +307,7 @@ hid_device *DeviceInterface::acquireDevice(void) {
     qInfo() << "Cannot initialize hidapi!";
     return NULL;
   }
-  auto paths = listPaths();
+  auto paths = listDevices();
   if (paths.size() == 1) {
     qInfo() << "Found a node!";
  //   qInfo() << "Trying to use" << paths[0];

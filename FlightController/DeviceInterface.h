@@ -28,7 +28,6 @@ public:
   void start(void);
   bool event(QEvent *e);
   device_status_t *getStatus(void);
-  std::vector<std::string> listPaths();
   DeviceConfig *config;
   enum DeviceStatus {
     DeviceConnected,
@@ -94,6 +93,7 @@ private:
   void _sendPacket(void);
   void _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
+  std::vector<std::string> listDevices();
 
 private slots:
   void deviceMessageReceiver(void);

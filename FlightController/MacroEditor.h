@@ -34,7 +34,7 @@ private:
 
 private slots:
   void on_closeButton_clicked();
-  void on_applyButton_clicked();
+  void on_resetButton_clicked();
   void on_revertButton_clicked();
   void on_addButton_clicked();
   void on_deleteButton_clicked();
