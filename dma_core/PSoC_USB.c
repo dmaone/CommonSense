@@ -400,7 +400,6 @@ void usb_configure(void) {
     // This never happens. But let's handle it just in case.
     usb_status = USB_STATUS_DISCONNECTED;
     output_direction = OUTPUT_DIRECTION_SERIAL;
-    CyPins_SetPin(ExpHdr_2);
   } else {
     usb_status = USB_STATUS_CONNECTED;
     output_direction = OUTPUT_DIRECTION_USB;

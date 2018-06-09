@@ -20,7 +20,7 @@
 // Flags enabling debug pulses on exp header
 #define DEBUG_SHOW_KEYPRESSES 0
 #define DEBUG_SHOW_MATRIX_EVENTS 0
-#define PROFILE_SCAN_PROCESSING 1
+#define PROFILE_SCAN_PROCESSING 0
 
 // number of ticks to check for spam after scan starts
 #define SANITY_CHECK_DURATION 1000

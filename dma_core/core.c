@@ -22,7 +22,9 @@
 #include "scan.h"
 #endif
 
-CY_ISR(BootIRQ_ISR) { Boot_Load(); }
+CY_ISR(BootIRQ_ISR) {
+  Boot_Load();
+}
 
 CY_ISR(Timer_ISR) {
   tick++;
