@@ -35,6 +35,7 @@ void MacroEditor::show(void) {
   changed = false;
   ui->macroListCombo->setCurrentIndex(std::max(currentMacro, 0));
   QWidget::show();
+  QWidget::raise();
 }
 
 MacroEditor::~MacroEditor() { delete ui; }

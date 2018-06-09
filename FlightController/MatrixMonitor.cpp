@@ -34,6 +34,7 @@ void MatrixMonitor::show(void) {
   if (deviceConfig->bValid) {
     updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
     QWidget::show();
+    QWidget::raise();
   } else {
     QMessageBox::critical(this, "Error",
                           "Matrix not configured - cannot monitor");

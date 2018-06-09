@@ -138,7 +138,7 @@ STOP</string>
        </widget>
       </item>
       <item row="16" column="0">
-       <widget class="QPushButton" name="expButton">
+       <widget class="QPushButton" name="hwButton">
         <property name="text">
          <string>Hardware</string>
         </property>
@@ -337,11 +337,11 @@ STOP</string>
     <addaction name="action_Layout"/>
     <addaction name="action_Macros"/>
     <addaction name="action_Delays"/>
-    <addaction name="action_Exp_Header"/>
+    <addaction name="action_Hardware"/>
    </widget>
    <widget class="QMenu" name="menuCommands">
     <property name="title">
-     <string>Command</string>
+     <string>&amp;Action</string>
     </property>
     <addaction name="action_Setup_mode"/>
     <addaction name="separator"/>
@@ -454,9 +454,9 @@ STOP</string>
     <string>Firmware &amp;File...</string>
    </property>
   </action>
-  <action name="action_Exp_Header">
+  <action name="action_Hardware">
    <property name="text">
-    <string>Exp. Header</string>
+    <string>&amp;Hardware</string>
    </property>
   </action>
   <action name="action_Delays">

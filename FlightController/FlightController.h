@@ -83,5 +83,5 @@ private slots:
   void on_statusRequestButton_clicked(void);
   void on_reconnectButton_clicked(void);
   void editDelays(void);
-  void editExpHeader(void);
+  void editHardware(void);
 };

@@ -92,9 +92,9 @@ void FlightController::setup(void) {
   connect(ui->delaysButton, SIGNAL(clicked()), this, SLOT(editDelays()));
   connect(ui->action_Delays, SIGNAL(triggered()), this, SLOT(editDelays()));
 
-  connect(ui->expButton, SIGNAL(clicked()), this, SLOT(editExpHeader()));
-  connect(ui->action_Exp_Header, SIGNAL(triggered()), this,
-          SLOT(editExpHeader()));
+  connect(ui->hwButton, SIGNAL(clicked()), this, SLOT(editHardware()));
+  connect(ui->action_Hardware, SIGNAL(triggered()), this,
+          SLOT(editHardware()));
 
   connect(ui->BootloaderButton, SIGNAL(clicked()), loader, SLOT(start()));
   connect(ui->action_Update_Firmware, SIGNAL(triggered()), loader,
@@ -253,24 +253,36 @@ void FlightController::lockUI(bool lock) {
   ui->layoutButton->setDisabled(lock);
   ui->layerModsButton->setDisabled(lock);
   ui->delaysButton->setDisabled(lock);
-  ui->expButton->setDisabled(lock);
+  ui->hwButton->setDisabled(lock);
 }
 
-void FlightController::editLayoutClick(void) { layoutEditor->show(); }
+void FlightController::editLayoutClick(void) {
+  layoutEditor->show();
+  layoutEditor->raise();
+}
 
 void FlightController::editMacrosClick(void) { macroEditor->show(); }
 
 void FlightController::editThresholdsClick(void) { thresholdEditor->show(); }
 
-void FlightController::showLayerConditions(void) { layerConditions->show(); }
+void FlightController::showLayerConditions(void) {
+  layerConditions->show();
+  layerConditions->raise();
+}
 
 void FlightController::on_action_Setup_mode_triggered(bool bMode) {
   emit sendCommand(C2CMD_SET_MODE, bMode ? C2DEVMODE_SETUP : C2DEVMODE_NORMAL);
 }
 
-void FlightController::editDelays() { _delays->show(); }
+void FlightController::editDelays() {
+  _delays->show();
+  _delays->raise();
+}
 
-void FlightController::editExpHeader() { _hardware->show(); }
+void FlightController::editHardware() {
+  _hardware->show();
+  _hardware->raise();
+}
 
 void FlightController::on_scanButton_clicked() {
   emit flipStatusBit(C2DEVSTATUS_SCAN_ENABLED);

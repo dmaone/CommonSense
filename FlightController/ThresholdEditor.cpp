@@ -23,6 +23,7 @@ void ThresholdEditor::show(void) {
     updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
     resetThresholds();
     QWidget::show();
+    QWidget::raise();
   } else {
     QMessageBox::critical(this, "Error", "Matrix not configured - cannot edit");
   }

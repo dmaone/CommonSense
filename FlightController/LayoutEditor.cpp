@@ -29,6 +29,7 @@ void LayoutEditor::show(void) {
     connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetLayout()));
     connect(ui->switchButton, SIGNAL(clicked()), this, SLOT(switchLayer()));
     QWidget::show();
+    QWidget::raise();
   } else
     QMessageBox::critical(this, "Error",
                           "Matrix not configured - cannot edit layout");
