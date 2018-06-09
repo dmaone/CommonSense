@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2015, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -135,7 +135,7 @@ static Bootloader_callback_type Bootloader_callback = NULL;
                                     ;
                                     
     #if (0u != Bootloader_CMD_VERIFY_FLS_ROW_AVAIL)
-    static uint8 Bootloader_VerifyRow(uint32 flashStart, const uint8* ramStart, uint16 size) \
+    static uint8 Bootloader_VerifyRow(uint32 flashStart, const uint8 ramStart[], uint16 size) \
                 CYSMALL ;                                
     #endif /*(0u != Bootloader_CMD_VERIFY_FLS_ROW_AVAIL)*/            
 
@@ -494,7 +494,7 @@ void Bootloader_InitCallback(Bootloader_callback_type userCallback) \
 *
 * \endinternal 
 *******************************************************************************/
-static uint8 Bootloader_VerifyRow(uint32 flashStart, const uint8* ramStart, uint16 size) \
+static uint8 Bootloader_VerifyRow(uint32 flashStart, const uint8 ramStart[], uint16 size) \
                 CYSMALL 
 {
     uint8 CYDATA result = CYRET_SUCCESS;
@@ -1791,7 +1791,7 @@ void Bootloader_HostLink(uint8 timeOut) CYLARGE
                             #if(CY_PSOC3)
                                 (void) memcpy(&packetBuffer[Bootloader_DATA_ADDR],
                                             ((uint8  CYCODE *) (Bootloader_MD_BASE_ADDR(btldrData))),
-                                            Bootloader_GET_METADATA_RESPONSE_SIZE);
+                                            (int8)Bootloader_GET_METADATA_RESPONSE_SIZE);
                             #else
                                 (void) memcpy(&packetBuffer[Bootloader_DATA_ADDR],
                                             (uint8 *) Bootloader_MD_BASE_ADDR(btldrData),

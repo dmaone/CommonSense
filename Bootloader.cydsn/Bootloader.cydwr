@@ -244,6 +244,7 @@
     <Group key="Pin">
       <Data key="8d318d8b-cf7b-4b6b-b02c-ab1c5c49d0ba" value="Pins" />
       <Data key="18d9ada4-e478-49a4-a229-4677cdd31300/8b77a6c4-10a0-4390-971c-672353e2a49c" value="USB_Dm" />
+      <Data key="18d9ada4-e478-49a4-a229-4677cdd31300/605a40d2-572d-4c7a-818e-3bfd37f14d87" value="USB_VBUS" />
       <Data key="18d9ada4-e478-49a4-a229-4677cdd31300/618a72fc-5ddd-4df5-958f-a3d55102db42" value="USB_Dp" />
       <Data key="e851a3b9-efb8-48be-bbb8-b303b216c393" value="LED" />
     </Group>
@@ -3361,6 +3362,11 @@
     <Group key="18d9ada4-e478-49a4-a229-4677cdd31300/8b77a6c4-10a0-4390-971c-672353e2a49c">
       <Group key="0">
         <Data key="Port Format" value="15,7" />
+      </Group>
+    </Group>
+    <Group key="18d9ada4-e478-49a4-a229-4677cdd31300/605a40d2-572d-4c7a-818e-3bfd37f14d87">
+      <Group key="0">
+        <Data key="Port Format" value="12,5" />
       </Group>
     </Group>
     <Group key="18d9ada4-e478-49a4-a229-4677cdd31300/618a72fc-5ddd-4df5-958f-a3d55102db42">
