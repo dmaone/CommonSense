@@ -42,6 +42,7 @@ void ThresholdEditor::initDisplay() {
   for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
     for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
       QSpinBox *l = new QSpinBox();
+      l->setMaximum(254);
       l->setAlignment(Qt::AlignRight);
       l->setStyleSheet("background-color: #ffffff;");
       display[i][j] = l;

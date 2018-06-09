@@ -144,6 +144,10 @@ void DeviceConfig::_unpack(void) {
   macros.clear();
   while(_eeprom.stash[macro_start] != 0xff) {
     size_t len = _eeprom.stash[macro_start + 2];
+    if (len == 0) {
+      // Most likely fresh ROM
+      break;
+    }
     macros.emplace_back(_eeprom.stash[macro_start],
                         _eeprom.stash[macro_start+1],
                         QByteArray(reinterpret_cast<const char *>(

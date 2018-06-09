@@ -42,6 +42,7 @@ public:
 signals:
   void sendCommand(c2command cmd, uint8_t msg);
   void flipStatusBit(deviceStatus bit);
+  void setStatusBit(deviceStatus bit, bool newValue);
 
 public slots:
   void showKeyMonitor(void);
@@ -80,6 +81,7 @@ private slots:
   void on_setupButton_clicked(void);
   void on_redButton_clicked(void);
   void on_statusRequestButton_clicked(void);
+  void on_reconnectButton_clicked(void);
   void editDelays(void);
   void editExpHeader(void);
 };

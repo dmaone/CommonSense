@@ -21,6 +21,9 @@ bool FirmwareLoader::_checkCompatibility(Bootloader_packet_t *packet) {
   memcpy(&siliconId, &packet->payload[0], 4);
   if (siliconId != firmware->siliconId ||
       packet->payload[4] != firmware->siliconRevision) {
+    qInfo() << "Silicon: " << siliconId << " revision " << packet->payload[4];
+    qInfo() << "Firmware: " << firmware->siliconId
+            << " revision " << firmware->siliconRevision;
     qCritical()
         << "Firmware from incompatible hardware! Please use correct firmware!";
     return true;

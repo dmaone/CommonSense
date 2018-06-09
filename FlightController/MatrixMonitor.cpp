@@ -61,7 +61,7 @@ void MatrixMonitor::initDisplay(void) {
       ll->setSpacing(0);
       w->setLayout(ll);
 
-      QLCDNumber *l = new QLCDNumber(2);
+      QLCDNumber *l = new QLCDNumber(3);
       l->setSegmentStyle(QLCDNumber::Filled);
       l->setMinimumHeight(25);
       display[i][j] = l;

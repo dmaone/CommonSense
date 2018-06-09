@@ -112,6 +112,8 @@ void FlightController::setup(void) {
           SLOT(sendCommand(c2command, uint8_t)));
   connect(this, SIGNAL(flipStatusBit(deviceStatus)), &di,
           SLOT(flipStatusBit(deviceStatus)));
+  connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
+          SLOT(setStatusBit(deviceStatus, bool)));
   connect(&di, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)),
           this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
   lockUI(true);
@@ -285,6 +287,13 @@ void FlightController::on_setupButton_clicked() {
 void FlightController::on_redButton_clicked() {
   ui->redButton->setStyleSheet("color: #ff0000; background-color: #990000");
   emit sendCommand(C2CMD_EWO, 0);
+}
+
+void FlightController::on_reconnectButton_clicked() {
+  qInfo() << "reconnecting..";
+  emit setStatusBit(C2DEVSTATUS_SETUP_MODE, false);
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  di.releaseDevice();
 }
 
 void FlightController::on_statusRequestButton_clicked(void) {

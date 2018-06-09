@@ -28,6 +28,7 @@ public:
   void start(void);
   bool event(QEvent *e);
   device_status_t *getStatus(void);
+  void releaseDevice(void);
   DeviceConfig *config;
   enum DeviceStatus {
     DeviceConnected,
@@ -59,6 +60,7 @@ public slots:
   void sendCommandNow(c2command cmd, uint8_t);
 
   void flipStatusBit(deviceStatus bit);
+  void setStatusBit(deviceStatus bit, bool value);
   void configChanged(void);
   void bootloaderMode(bool bEnable);
 
@@ -86,7 +88,6 @@ private:
 
   void processStatusReply(QByteArray* payload);
   hid_device *acquireDevice(void);
-  void _releaseDevice(void);
   void _initDevice(void);
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);

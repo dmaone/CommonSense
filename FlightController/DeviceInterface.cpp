@@ -28,7 +28,7 @@ DeviceInterface::DeviceInterface(QObject *parent)
   statusTimerId = startTimer(kStatusTimerTick);
 }
 
-DeviceInterface::~DeviceInterface(void) { _releaseDevice(); }
+DeviceInterface::~DeviceInterface(void) { releaseDevice(); }
 
 void DeviceInterface::processStatusReply(QByteArray* payload) {
   if (receivedStatus_ != payload->at(1)) {
@@ -154,17 +154,25 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
     mode = DeviceInterfaceNormal;
   }
   _resetTimer(kDeviceScanTick);
-  _releaseDevice();
+  releaseDevice();
 }
 
 void DeviceInterface::flipStatusBit(deviceStatus bit) {
   auto newStatus = receivedStatus_;
-  auto old_value = newStatus & (1 << bit);
+  auto oldValue = newStatus & (1 << bit);
   newStatus &= ~(1 << bit);
-  if (!old_value) {
+  if (!oldValue) {
     newStatus += (1 << bit);
   }
   sendCommand(C2CMD_EWO, newStatus);
+}
+
+void DeviceInterface::setStatusBit(deviceStatus bit, bool newValue) {
+  auto newStatus = receivedStatus_;
+  auto oldValue = newStatus & (1 << bit);
+  if (oldValue != newValue) {
+    flipStatusBit(bit);
+  }
 }
 
 void DeviceInterface::_resetTimer(int interval) {
@@ -220,7 +228,7 @@ void DeviceInterface::_sendPacket() {
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   if (hid_write(device, outbox, sizeof outbox) == -1) {
     qWarning() << "Error sending to the device, will reconnect..";
-    _releaseDevice();
+    releaseDevice();
   }
 }
 
@@ -229,7 +237,7 @@ void DeviceInterface::_receivePacket(void) {
   int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
   if (bytesRead < 0) {
     qInfo() << "Device went away. Reconnecting..";
-    _releaseDevice();
+    releaseDevice();
     return;
   }
   if (bytesRead == 0)
@@ -266,7 +274,7 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
 }
 
 std::vector<std::string> DeviceInterface::listDevices() {
-  std::vector<std::string> retval;
+  std::vector<std::string> retval {};
   hid_device_info *root = hid_enumerate(0, 0);
   if (!root) {
     qInfo() << "No HID devices on this system?";
@@ -339,7 +347,7 @@ hid_device *DeviceInterface::acquireDevice(void) {
   return retval;
 }
 
-void DeviceInterface::_releaseDevice(void) {
+void DeviceInterface::releaseDevice(void) {
   releaseDevice_ = true;
 }
 
