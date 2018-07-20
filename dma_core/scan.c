@@ -158,7 +158,7 @@ static inline void Drive(uint8 drv) {
   DriveReg0_Write(1 << drv);
 }
 
-static inline void append_scancode(uint8_t scancode) {
+static inline void append_scancode(uint8_t flags, uint8_t scancode) {
   if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
     if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
       // Avoid overflowing counter! Things can get ugly FAST!
@@ -174,8 +174,10 @@ static inline void append_scancode(uint8_t scancode) {
   }
 #endif
   scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
-  scancode_buffer[scancode_buffer_writepos] = scancode;
+  scancode_buffer[scancode_buffer_writepos].flags = flags;
+  scancode_buffer[scancode_buffer_writepos].scancode = scancode;
 }
+
 
 CY_ISR(EoC_ISR) {
 #ifdef DEBUG_INTERRUPTS
@@ -251,11 +253,11 @@ CY_ISR(Result_ISR) {
     if (matrix[keyIndex] == debouncing_posedge &&
         (row_status & (1 << curCol)) == 0) {
       row_status |= (1 << curCol);
-      append_scancode(keyIndex);
+      append_scancode(0, keyIndex);
     } else if (matrix[keyIndex] == debouncing_negedge &&
         (row_status & (1 << curCol))) {
       row_status &= ~(1 << curCol);
-      append_scancode(KEY_UP_MASK | keyIndex);
+      append_scancode(KEY_UP_MASK, keyIndex);
     }
   }
 #if PROFILE_SCAN_PROCESSING == 1
@@ -271,7 +273,7 @@ CY_ISR(Result_ISR) {
       matrix_was_active = true;
     } else if (matrix_was_active) {
       // Signal that last key was released
-      append_scancode(KEY_UP_MASK | COMMONSENSE_NOKEY);
+      append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
       matrix_was_active = false;
     }
   }
@@ -299,7 +301,10 @@ void scan_reset(void) {
     matrix[i] = MAX_MATRIX_VALUE;
 #endif
   }
-  memset(scancode_buffer, COMMONSENSE_NOKEY, sizeof(scancode_buffer));
+  for(uint8_t i = 0; i <= SCANCODE_BUFFER_END; i++) {
+    scancode_buffer[i].flags = 0;
+    scancode_buffer[i].scancode = COMMONSENSE_NOKEY;
+  }
   memset(matrix_status, 0, sizeof(matrix_status));
   scancode_buffer_readpos = 0;
   scancode_buffer_writepos = 0;

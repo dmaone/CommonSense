@@ -10,12 +10,18 @@
 #pragma once
 #include "globals.h"
 
-// IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122
-// with it's 8x16 matrix.
-#define COMMONSENSE_NOKEY 0x7f
+typedef union {
+  struct {
+    uint8_t flags;
+    uint8_t scancode;
+  } __attribute__((packed));
+  uint8_t raw[2];
+} scancode_t;
+
+// IMPORTANT - MUST NOT BE A REAL KEY!
+#define COMMONSENSE_NOKEY 0xff
 
 #define KEY_UP_MASK 0x80
-#define SCANCODE_MASK 0x7f
 
 // Flags enabling debug pulses on exp header
 #define DEBUG_SHOW_KEYPRESSES 0
@@ -57,7 +63,7 @@
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
 #undef MATRIX_LEVELS_DEBUG
-uint8_t scancode_buffer[SCANCODE_BUFFER_END + 1];
+scancode_t scancode_buffer[SCANCODE_BUFFER_END + 1];
 #ifdef MATRIX_LEVELS_DEBUG
 uint8_t level_buffer[SCANCODE_BUFFER_END + 1];
 uint8_t level_buffer_inst[SCANCODE_BUFFER_END + 1];

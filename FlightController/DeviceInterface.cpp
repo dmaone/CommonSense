@@ -76,14 +76,16 @@ bool DeviceInterface::event(QEvent *e) {
       if (!config->bValid) {
         return true;
       }
-      uint8_t scancodeReleased, scancode, row, col;
-      scancodeReleased = 0x80;
-      scancode = payload->at(1);
-      col = (scancode & ~scancodeReleased) % config->numCols;
-      row = ((scancode & ~scancodeReleased) - col) / config->numCols;
+      uint8_t flags, scancode, row, col;
+      uint8_t flagReleased;
+      flagReleased = 0x80;
+      flags = payload->at(1);
+      scancode = payload->at(2);
+      col = scancode % config->numCols;
+      row = (scancode - col) / config->numCols;
       emit scancodeReceived(
-          row, col, (scancode & scancodeReleased) ? KeyReleased : KeyPressed);
-      qInfo().noquote() << QString((scancode & scancodeReleased) ? "+" : " -")
+          row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
+      qInfo().noquote() << QString((flags & flagReleased) ? " r" : "p")
                         << row + 1 << col + 1;
       return true;
     default:

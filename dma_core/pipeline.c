@@ -132,14 +132,22 @@ inline void play_macro(uint_fast16_t macro_start) {
   }
 }
 
-inline uint8_t process_scancode_buffer(void) {
-  if (scancode_buffer_readpos == scancode_buffer_writepos)
-    return COMMONSENSE_NOKEY;
+inline scancode_t process_scancode_buffer(void) {
+  if (scancode_buffer_readpos == scancode_buffer_writepos) {
+    scancode_t result;
+    result.flags = 0;
+    result.scancode = COMMONSENSE_NOKEY;
+    return result;
+  }
   // Skip zeroes that might be there
-  while (scancode_buffer[scancode_buffer_readpos] == COMMONSENSE_NOKEY) {
+  while (scancode_buffer[scancode_buffer_readpos].scancode == COMMONSENSE_NOKEY
+    && !(
+      scancode_buffer[scancode_buffer_readpos].flags & USBQUEUE_RELEASED_MASK
+    )
+  ) {
     scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
   }
-  uint8_t scancode = scancode_buffer[scancode_buffer_readpos];
+  scancode_t scancode = scancode_buffer[scancode_buffer_readpos];
 #ifdef MATRIX_LEVELS_DEBUG
   xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
           scancode & SCANCODE_MASK, systime,
@@ -149,34 +157,32 @@ inline uint8_t process_scancode_buffer(void) {
 // xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK,
 // systime);
 #endif
-  scancode_buffer[scancode_buffer_readpos] = COMMONSENSE_NOKEY;
+  scancode_buffer[scancode_buffer_readpos].scancode = COMMONSENSE_NOKEY;
   return scancode;
 }
 
-inline void push_back_scancode(uint8_t sc) {
-  scancode_buffer[scancode_buffer_readpos] = sc;
+inline void clear_current_scancode_buffer_item() {
+  scancode_buffer[scancode_buffer_readpos].flags = 0;
+  scancode_buffer[scancode_buffer_readpos].scancode = COMMONSENSE_NOKEY;
 }
 
 inline void process_real_key(void) {
-  uint8_t sc, usb_sc;
+  scancode_t sc;
+  uint8_t usb_sc;
   // Real keys are processed there. So modifiers can be processed right away,
   // not buffered.
   sc = process_scancode_buffer();
-  if (sc == COMMONSENSE_NOKEY) {
-    // Nothing to do.
-    return;
-  }
-  if (sc == (COMMONSENSE_NOKEY | KEY_UP_MASK)) {
-    /*
-     * This is "All keys are up" signal, sun keyboard-style.
-     * It is used to deal with stuck keys. Those appear due to layers - suppose
-     * you press the key, then switch layer which has another key at that SC
-     * position. When you release the key - non-existent key release is
-     * generated, which is not that bad, but first key is stuck forever.
-     */
-    if (!USBQUEUE_IS_EMPTY) {
-      push_back_scancode(sc);
-    } else {
+  if (sc.scancode == COMMONSENSE_NOKEY) {
+    if ((sc.flags & KEY_UP_MASK) && USBQUEUE_IS_EMPTY) {
+      // prevent infinite "reset reports" loops!
+      clear_current_scancode_buffer_item();
+      /*
+       * This is "All keys are up" signal, sun keyboard-style.
+       * It is used to deal with stuck keys. Those appear due to layers - suppose
+       * you press the key, then switch layer which has another key at that SC
+       * position. When you release the key - non-existent key release is
+       * generated, which is not that bad, but first key is stuck forever.
+       */
       reset_reports();
       serial_reset_reports();
     }
@@ -184,13 +190,14 @@ inline void process_real_key(void) {
   }
   if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
     outbox.response_type = C2RESPONSE_SCANCODE;
-    outbox.payload[0] = sc;
+    outbox.payload[0] = sc.flags;
+    outbox.payload[1] = sc.scancode;
     usb_send_c2();
     return;
   }
   // Resolve USB keycode using current active layers
   for (uint8_t i = currentLayer; i >= 0; i--) {
-    usb_sc = config.layers[i][sc & SCANCODE_MASK];
+    usb_sc = config.layers[i][sc.scancode];
     if (usb_sc != USBCODE_TRANSPARENT) {
       break;
     }
@@ -201,7 +208,7 @@ inline void process_real_key(void) {
     return;
   }
   if ((usb_sc & 0xf8) == 0xa8) {
-    process_layerMods(sc, usb_sc);
+    process_layerMods(sc.scancode, usb_sc);
     return;
     /*
     TODO resolve problem where pressed mod keys are missing on the new layer.
@@ -209,11 +216,11 @@ inline void process_real_key(void) {
      -> Do they automatically release?
     */
   }
-  uint8_t keyflags = (sc & USBQUEUE_RELEASED_MASK) | USBQUEUE_REAL_KEY_MASK;
+  uint8_t keyflags = sc.flags | USBQUEUE_REAL_KEY_MASK;
   uint_fast16_t macro_ptr = lookup_macro(keyflags, usb_sc);
   bool do_play = (macro_ptr != MACRO_NOT_FOUND);
   bool do_queue = !do_play; // eat the macro-producing code.
-  if (do_play && (sc & USBQUEUE_RELEASED_MASK) &&
+  if (do_play && (sc.flags & USBQUEUE_RELEASED_MASK) &&
       (config.macros[macro_ptr + 1] & MACRO_TYPE_TAP)) {
     // Tap macro. Check if previous event was this key down and it's not too
     // late.
@@ -336,11 +343,11 @@ inline void pipeline_process(void) {
 }
 
 inline bool pipeline_process_wakeup(void) {
-  uint8 sc = process_scancode_buffer();
-  if (sc == COMMONSENSE_NOKEY) {
+  scancode_t sc = process_scancode_buffer();
+  if (sc.scancode == COMMONSENSE_NOKEY) {
     return false;
   }
-  if ((sc & KEY_UP_MASK) == 0) {
+  if ((sc.flags & KEY_UP_MASK) == 0) {
     return true;
   }
   return false;
