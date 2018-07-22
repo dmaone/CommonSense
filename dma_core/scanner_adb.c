@@ -138,7 +138,7 @@ void sync_leds(void) {
 }
 
 void scan_init(uint8_t debouncing_period) {
-  append_scancode(KEY_UP_MASK | COMMONSENSE_NOKEY);
+  append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
   ADB_Data_Write(1);
   CyDelayUs(1000);
   adb_host_init();
@@ -171,7 +171,7 @@ void scan_tick(void) {
         // intentional fallthru
       case 0xff:
         // power key. Subtract one not to clash with COMMONSENSE_NO_KEY
-        append_scancode(codes.key0 - 1);
+        append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK) - 1);
         break;
       default:
         break;
@@ -181,9 +181,9 @@ void scan_tick(void) {
     return;
   } else {
     xprintf("%02x %02x", codes.key0, codes.key1);
-    append_scancode(codes.key1);        
+    append_scancode(codes.key1 & KEY_UP_MASK, (codes.key1 & SCANCODE_MASK));
     if (codes.key0 != 0xFF) {
-      append_scancode(codes.key0);
+      append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK));
     }
   }
   scan_check_matrix();

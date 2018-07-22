@@ -157,13 +157,13 @@ inline scancode_t process_scancode_buffer(void) {
 // xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK,
 // systime);
 #endif
+  scancode_buffer[scancode_buffer_readpos].flags = 0;
   scancode_buffer[scancode_buffer_readpos].scancode = COMMONSENSE_NOKEY;
   return scancode;
 }
 
-inline void clear_current_scancode_buffer_item() {
-  scancode_buffer[scancode_buffer_readpos].flags = 0;
-  scancode_buffer[scancode_buffer_readpos].scancode = COMMONSENSE_NOKEY;
+inline void push_back_scancode(scancode_t sc) {
+  scancode_buffer[scancode_buffer_readpos] = sc;
 }
 
 inline void process_real_key(void) {
@@ -173,18 +173,20 @@ inline void process_real_key(void) {
   // not buffered.
   sc = process_scancode_buffer();
   if (sc.scancode == COMMONSENSE_NOKEY) {
-    if ((sc.flags & KEY_UP_MASK) && USBQUEUE_IS_EMPTY) {
-      // prevent infinite "reset reports" loops!
-      clear_current_scancode_buffer_item();
-      /*
-       * This is "All keys are up" signal, sun keyboard-style.
-       * It is used to deal with stuck keys. Those appear due to layers - suppose
-       * you press the key, then switch layer which has another key at that SC
-       * position. When you release the key - non-existent key release is
-       * generated, which is not that bad, but first key is stuck forever.
-       */
-      reset_reports();
-      serial_reset_reports();
+    if ((sc.flags & KEY_UP_MASK)) {
+      if (!USBQUEUE_IS_EMPTY) {
+        push_back_scancode(sc);
+      } else {
+        /*
+         * This is "All keys are up" signal, sun keyboard-style.
+         * It is used to deal with stuck keys. Those appear due to layers - suppose
+         * you press the key, then switch layer which has another key at that SC
+         * position. When you release the key - non-existent key release is
+         * generated, which is not that bad, but first key is stuck forever.
+         */
+        reset_reports();
+        serial_reset_reports();
+      }
     }
     return;
   }
