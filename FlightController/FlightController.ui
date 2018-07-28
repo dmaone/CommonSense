@@ -358,7 +358,7 @@ STOP</string>
   </widget>
   <action name="action_Open">
    <property name="text">
-    <string>&amp;Open</string>
+    <string>L&amp;oad from file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+O</string>
@@ -366,7 +366,7 @@ STOP</string>
   </action>
   <action name="action_Save">
    <property name="text">
-    <string>&amp;Save</string>
+    <string>&amp;Save to file</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+S</string>
@@ -398,7 +398,7 @@ STOP</string>
   </action>
   <action name="action_Upload">
    <property name="text">
-    <string>&amp;Upload</string>
+    <string>&amp;Upload (try changes)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+U</string>
@@ -406,7 +406,7 @@ STOP</string>
   </action>
   <action name="action_Download">
    <property name="text">
-    <string>&amp;Download</string>
+    <string>&amp;Download (revert last changes)</string>
    </property>
    <property name="shortcut">
     <string>Ctrl+D</string>
@@ -414,12 +414,12 @@ STOP</string>
   </action>
   <action name="action_Commit">
    <property name="text">
-    <string>&amp;Commit</string>
+    <string>&amp;Commit (to EEPROM)</string>
    </property>
   </action>
   <action name="action_Rollback">
    <property name="text">
-    <string>&amp;Rollback</string>
+    <string>&amp;Rollback (to EEPROM config)</string>
    </property>
   </action>
   <action name="action_Update_Firmware">

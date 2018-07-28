@@ -3,8 +3,10 @@
 #include <QMessageBox>
 
 #include "DeviceConfig.h"
+#include "DeviceInterface.h"
 #include "LayerCondition.h"
 #include "settings.h"
+#include "singleton.h"
 
 DeviceConfig::DeviceConfig(QObject *parent)
     : QObject(parent), bValid(false), numRows(0), numCols(0),
@@ -42,8 +44,16 @@ bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)),
  * Fire up the uploader.
  */
 void DeviceConfig::toDevice(void) {
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+    QMessageBox::critical(NULL, "Matrix monitor active",
+                          "Turn off matrix monitor first!");
+    return;
+  }
   if (transferDirection != TransferIdle) {
     qInfo() << "Not a good day to upload config!";
+    QMessageBox::critical(NULL, "Not a good day to upload config",
+                          "Error! Try pressing 'Reconnect' button!");
     return;
   }
   this->_assemble();
@@ -79,10 +89,18 @@ void DeviceConfig::_uploadConfigBlock(void) {
     break;
   default:
     qInfo() << "Not a good day to upload config block!";
+    QMessageBox::critical(NULL, "Not a good day to upload config block",
+                          "Error! Try pressing 'Reconnect' button!");
   }
 }
 
 void DeviceConfig::fromDevice() {
+  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+    QMessageBox::critical(NULL, "Matrix monitor active",
+                          "Turn off matrix monitor first!");
+    return;
+  }
   switch (transferDirection) {
   case TransferIdle:
     transferDirection = TransferDownload;
@@ -94,6 +112,8 @@ void DeviceConfig::fromDevice() {
     break;
   default:
     qInfo() << "Not a good day to download config!";
+    QMessageBox::critical(NULL, "Not a good day to download config",
+                          "Error! Try pressing 'Reconnect' button!");
     return;
   }
   emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
@@ -107,6 +127,8 @@ void DeviceConfig::fromDevice() {
 void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
   if (transferDirection != TransferDownload) {
     qInfo() << "Not a good day to download config block!";
+    QMessageBox::critical(NULL, "Not a good day to download config blockb",
+                          "Error! Try pressing 'Reconnect' button!");
     return;
   }
   if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {

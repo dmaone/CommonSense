@@ -177,6 +177,10 @@ void DeviceInterface::setStatusBit(deviceStatus bit, bool newValue) {
   }
 }
 
+bool DeviceInterface::getStatusBit(deviceStatus bit) {
+  return receivedStatus_ & (1 << bit);
+}
+
 void DeviceInterface::_resetTimer(int interval) {
   if (pollTimerId)
     killTimer(pollTimerId);

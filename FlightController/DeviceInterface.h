@@ -59,8 +59,9 @@ public slots:
   // because timers don't work in close event!
   void sendCommandNow(c2command cmd, uint8_t);
 
-  void flipStatusBit(deviceStatus bit);
+  bool getStatusBit(deviceStatus bit);
   void setStatusBit(deviceStatus bit, bool value);
+  void flipStatusBit(deviceStatus bit);
   void configChanged(void);
   void bootloaderMode(bool bEnable);
 
