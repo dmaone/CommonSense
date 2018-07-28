@@ -82,14 +82,14 @@ enum deviceMode {
 enum expMode {
   EXP_MODE_DISABLED = 0,
 
-  EXP_MODE_SOLENOID,
+  EXP_MODE_SOLENOID_NUMCAPS,
   EXP_MODE_LEDS,
 };
 
 static const char *const expModeNames[] = {
     "Disabled",
 
-    "Solenoid", "Lock LEDs",
+    "Solenoid+Num+Caps", "Lock LEDs",
 };
 
 typedef union {

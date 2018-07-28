@@ -32,7 +32,7 @@ void exp_init(void) {
   mode = config.expMode;
   exp_reset();
   switch (mode) {
-  case EXP_MODE_SOLENOID:
+  case EXP_MODE_SOLENOID_NUMCAPS:
     CyPins_SetPin(EXP_SOLENOID_POWER);
     break;
   case EXP_MODE_LEDS:
@@ -51,10 +51,10 @@ void exp_toggle(void) {
   }
 }
 
-#define EXP_LED(MASK, PIN)                                                     \
-  if (leds & MASK)                                                             \
-    CyPins_SetPin(PIN);                                                        \
-  else                                                                         \
+#define EXP_LED(MASK, PIN) \
+  if (leds & MASK)         \
+    CyPins_SetPin(PIN);    \
+  else                     \
     CyPins_ClearPin(PIN);
 void exp_setLEDs(uint8_t status) {
   leds = status;
@@ -64,6 +64,10 @@ void exp_setLEDs(uint8_t status) {
     EXP_LED(LED_CAPSLOCK_MASK, EXP_CAPSLOCK_PIN);
     EXP_LED(LED_SCRLOCK_MASK, EXP_SCRLOCK_PIN);
     break;
+  case EXP_MODE_SOLENOID_NUMCAPS:
+    EXP_LED(LED_NUMLOCK_MASK, EXP_SOLENOID_NUMLOCK);
+    EXP_LED(LED_CAPSLOCK_MASK, EXP_SOLENOID_CAPSLOCK);
+    break;
   default:
     break;
   }
@@ -71,7 +75,7 @@ void exp_setLEDs(uint8_t status) {
 
 void exp_keypress(__attribute__((unused)) uint8_t keycode) {
   switch (mode) {
-  case EXP_MODE_SOLENOID:
+  case EXP_MODE_SOLENOID_NUMCAPS:
     solenoid_queue++;
     break;
   default:
@@ -81,7 +85,7 @@ void exp_keypress(__attribute__((unused)) uint8_t keycode) {
 
 void exp_tick(uint8_t tick) {
   switch (mode) {
-  case EXP_MODE_SOLENOID:
+  case EXP_MODE_SOLENOID_NUMCAPS:
     if (exp_cooldown > tick) {
       exp_cooldown -= tick;
       return;
