@@ -7,11 +7,12 @@
 <wrkspc_folders />
 <files />
 <projects>
-<v>.\Firmware.cydsn\Firmware.cyprj</v>
 <v>.\Bootloader.cydsn\Bootloader.cyprj</v>
 <v>.\BLE.cydsn\BLE.cyprj</v>
 <v>.\KitProgConverter.cydsn\KitProgConverter.cyprj</v>
 <v>.\CSSK.cydsn\CSSK.cyprj</v>
+<v>.\Firmware.cydsn\Firmware.cyprj</v>
+<v>.\xtant.cydsn\xtant.cyprj</v>
 </projects>
 <workspace_id v="91cbd38c-70df-4bce-aaa4-e322f4eea6a8" />
 <WriteAppVersionLastSavedWith v="4.2.0.641" />

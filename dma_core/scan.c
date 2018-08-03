@@ -220,7 +220,7 @@ CY_ISR(Result_ISR) {
   return;
 // The rest of the code is dead in 100kHz mode.
 #endif
-  uint8_t adc_buffer_pos = ADC_CHANNELS * NUM_ADCs * 4;
+  int8_t adc_buffer_pos = -4;
   // keyIndex - same speed as static global on -O3, faster in -Os
   // having uint16_t* for cell is slower than directly using matrix[keyIndex].
   uint8_t keyIndex = (reading_row + 1) * MATRIX_COLS;
@@ -230,7 +230,7 @@ CY_ISR(Result_ISR) {
   CyPins_SetPin(ExpHdr_1);
 #endif
   for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
-    adc_buffer_pos -= 4;
+    adc_buffer_pos += 4;
     // TEST_BIT is faster than bool inited outside of the loop.
     if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
       // When monitoring matrix we're interested in raw feed.

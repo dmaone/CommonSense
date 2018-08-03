@@ -31,13 +31,14 @@ So, for 16-column keyboard, real columns will be Cols[4] - Cols[11] and Cols[16]
 
 So.
 
-## Recommended pinout
-* D0: P0[3]
-* D1 (if exists): P3[2]
-* Rows: P0[0, 1, 5, 6, 7], P15[3, 4, 5]. Alternatively, P12 can be used to free more analog-capable pins, but watch for ExpHdr pins.
-* Cols: P1[0-7], P2[0, 2-7], P3[0, 1, 3-7], P15[0, 1, 2].
-* P0[2], P0[4] to +5V, P0[3], P3[2] to the ground.
-* ExpHdr (solenoid/LED connector) is configured to blink the kit's LED. Leave it assigned as is, unless you really know what you're doing.
+## Default pinout
+* D0: 0.7. Must be connected to the nearest GND
+* ADC Vref: 0.4. Must be connected to the nearest VDD.
+* Rows: 2.0, 2.3-2.7, 12.7, 12.6
+* Cols: 1.0-1.7, 3.0, 3.1, 3.3-3.7, 15.0-15.5, 0.0, 0.1, 0.5. WARNING to use more than 17 columns, C41, C42 and R5 must be removed from the PCB.
+* ExpHdr (solenoid/LED connector) is configured to blink the kit's LED on keypress. Leave it assigned as is, unless you really know what you're doing. 12.3 would be NumLock LED, 12.4 - CapsLock LED
+
+If you're changing the pinout - rows are top to bottom, columns are left to right.
 
 Whew. Hopefully you're done with soldering now.
 

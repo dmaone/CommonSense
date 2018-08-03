@@ -13,7 +13,7 @@
  *
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
  */
-#define MATRIX_COLS 12
+#define MATRIX_COLS 16
 #define MATRIX_ROWS 8
 #define MATRIX_LAYERS 4
 
