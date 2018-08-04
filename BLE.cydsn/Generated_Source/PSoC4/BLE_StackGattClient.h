@@ -2,7 +2,7 @@
 * \file CyBle_GattClient.h
 * 
 * \file CYBLE_StackGattClient.h
-* \version 3.51
+* \version 3.53
 *
 * \brief
 *  This file contains the GATT Client routines

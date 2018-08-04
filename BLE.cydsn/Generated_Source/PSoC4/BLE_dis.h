@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_dis.h
-* \version 3.51
+* \version 3.53
 * 
 * \brief
 *  Contains the function prototypes and constants for Device Information

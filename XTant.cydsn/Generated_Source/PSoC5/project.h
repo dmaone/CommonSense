@@ -60,6 +60,7 @@
 #include "ADC0_ExtVref_aliases.h"
 #include "ADC0_ExtVref.h"
 #include "ILO_Trim_CorrectionISR.h"
+#include "cy_em_eeprom.h"
 #include "core_cm3_psoc5.h"
 #include "CyDmac.h"
 #include "CyFlash.h"
@@ -68,7 +69,6 @@
 #include "cyPm.h"
 #include "CySpc.h"
 #include "cytypes.h"
-#include "cy_em_eeprom.h"
 
 /*[]*/
 

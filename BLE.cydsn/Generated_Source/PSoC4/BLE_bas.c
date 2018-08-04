@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_bas.c
-* \version 3.51
+* \version 3.53
 * 
 * \brief
 *  Contains the source code for BLE Battery Service.

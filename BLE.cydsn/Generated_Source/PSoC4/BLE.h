@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE.h
-* \version 3.51
+* \version 3.53
 * 
 * \brief
 *  Contains the function prototypes and constants available to the BLE component.

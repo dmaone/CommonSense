@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_gatt.h
-* \version 3.51
+* \version 3.53
 * 
 * \brief
 *  Contains the prototypes and constants used in the BLE GATT profile.

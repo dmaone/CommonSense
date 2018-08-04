@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file cy_em_eeprom.h
-* \version 2.0
+* \version 2.20
 *
 * \brief
 *  This file provides the function prototypes and constants for the Emulated
@@ -381,7 +381,7 @@ uint32 Cy_Em_EEPROM_NumWrites(cy_stc_eeprom_context_t * context);
 #define CY_EM_EEPROM_VERSION_MAJOR                  (2)
 
 /** Library minor version */
-#define CY_EM_EEPROM_VERSION_MINOR                  (0)
+#define CY_EM_EEPROM_VERSION_MINOR                  (20)
 
 /** Defines the maximum data length that can be stored in one flash row */
 #define CY_EM_EEPROM_EEPROM_DATA_LEN                (CY_EM_EEPROM_FLASH_SIZEOF_ROW / 2u)

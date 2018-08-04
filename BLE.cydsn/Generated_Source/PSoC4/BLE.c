@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE.c
-* \version 3.51
+* \version 3.53
 * 
 * \brief
 *  This file contains the source code for the Common APIs of the BLE Component.

@@ -2,7 +2,7 @@
 * \file CyBle_Gap.h
 * 
 * \file CYBLE_StackGap.h
-* \version 3.51
+* \version 3.53
 *
 * \brief
 *  This file contains the GAP APIs of the BLE Host Stack IP

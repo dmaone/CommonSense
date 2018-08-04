@@ -2,7 +2,7 @@
 * \file CyBle_L2cap.h
 *
 * \file CYBLE_StackL2cap.h
-* \version 3.51
+* \version 3.53
 *
 * \brief
 *  This file contains the L2CAP APIs of the BLE Host Stack IP

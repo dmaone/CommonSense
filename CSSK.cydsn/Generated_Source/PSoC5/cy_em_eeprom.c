@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cy_em_eeprom.c
-* \version 2.0
+* \version 2.20
 *
 * \brief
 *  This file provides source code of the API for the Emulated EEPROM library.
@@ -995,9 +995,11 @@ static cy_en_em_eeprom_status_t WriteRow(uint32 rowAddr,
     cy_en_em_eeprom_status_t ret = CY_EM_EEPROM_WRITE_FAIL;
 #if (!CY_PSOC6)
     cystatus rc;
-    uint32 rowId;
     #if ((CY_PSOC3) || (CY_PSOC5))
         uint32 arrayId;
+        uint32 rowId;
+    #else
+        uint32 rowNum;
     #endif /* (CY_PSOC3) */
     
     #if (CY_PSOC3)
@@ -1007,14 +1009,16 @@ static cy_en_em_eeprom_status_t WriteRow(uint32 rowAddr,
         (void)context;          /* To avoid compiler warning generation */
     #endif /* ((CY_PSOC3) */
     
-    /* For non-PSoC 6 devices, the Array ID and Row ID needed to write the row */
-    rowId = (rowAddr / CY_EM_EEPROM_FLASH_SIZEOF_ROW) % CY_EM_EEPROM_ROWS_IN_ARRAY;
-
     /* Write the flash row */
     #if (CY_PSOC4)
-        rc = CySysFlashWriteRow(rowId, (uint8 *)rowData);
+        /* For PSoC 4 devices, the array ID is included in the row number */
+        rowNum = rowAddr / CY_EM_EEPROM_FLASH_SIZEOF_ROW;
+        
+        rc = CySysFlashWriteRow(rowNum, (uint8 *)rowData);
     #else
-
+        /* For PSoC 3/5 devices, the array ID and row ID needed to write the row */
+        rowId = (rowAddr / CY_EM_EEPROM_FLASH_SIZEOF_ROW) % CY_EM_EEPROM_ROWS_IN_ARRAY;
+        
         #ifndef CY_EM_EEPROM_SKIP_TEMP_MEASUREMENT
             (void)CySetTemp();
         #endif /* (CY_EM_EEPROM_SKIP_TEMP_MEASUREMENT) */

@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file BLE_HAL_INT.c
-* \version 3.51
+* \version 3.53
 *
 * \brief
 *  This file contains the source code for the Interrupt Service Routine for the
