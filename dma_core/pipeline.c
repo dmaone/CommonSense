@@ -204,8 +204,11 @@ inline void process_real_key(void) {
       break;
     }
   }
-  // xprintf("SC->KC: %d -> %d", sc & SCANCODE_MASK, usb_sc);
+  // xprintf("SC->KC: %d -> %d", sc, usb_sc);
   if (usb_sc < USBCODE_A) {
+    if (usb_sc == USBCODE_EXP_TOGGLE  && !(sc.flags & USBQUEUE_RELEASED_MASK)) {
+      exp_toggle();
+    }
     // Dead key.
     return;
   }
