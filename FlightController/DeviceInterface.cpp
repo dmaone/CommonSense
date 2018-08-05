@@ -279,8 +279,8 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
   }
 }
 
-std::vector<std::string> DeviceInterface::listDevices() {
-  std::vector<std::string> retval {};
+std::vector<std::pair<QString, std::string>> DeviceInterface::listDevices() {
+  std::vector<std::pair<QString, std::string>> retval {};
   hid_device_info *root = hid_enumerate(0, 0);
   if (!root) {
     qInfo() << "No HID devices on this system?";
@@ -297,13 +297,13 @@ std::vector<std::string> DeviceInterface::listDevices() {
 #else
       if (d->usage_page == 0x6213 && d->usage == 0x88) {
 #endif
-        retval.push_back(d->path);
+        retval.push_back(std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
       }
       break;
     case DeviceInterfaceBootloader:
       if (d->vendor_id == 0x04b4 &&
           (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
-        retval.push_back(d->path);
+        retval.push_back(std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
       }
       break;
     default:
@@ -321,30 +321,34 @@ hid_device *DeviceInterface::acquireDevice(void) {
     qInfo() << "Cannot initialize hidapi!";
     return NULL;
   }
-  auto paths = listDevices();
-  if (paths.size() == 1) {
+  auto deviceList = listDevices();
+  if (deviceList.size() == 1) {
     qInfo() << "Found a node!";
  //   qInfo() << "Trying to use" << paths[0];
-    retval = hid_open_path(paths[0].data());
-  } else if (paths.size() > 1) {
+    retval = hid_open_path(deviceList[0].second.data());
+  } else if (deviceList.size() > 1) {
     // More than one device.
     qInfo() << "Hello, fellow DT member!";
     QStringList items;
-    for (auto it : paths) {
-      items << QString(it.data());
+    for (auto it : deviceList) {
+      items << it.first;
     }
     bool ok;
-    auto device_path = QInputDialog::getItem(
+    auto deviceSerial = QInputDialog::getItem(
         nullptr,
         tr("Please select a device"),
-        tr("Path"),
+        tr("Serial"),
         items,
         0,
         false,
         &ok
     );
     if (ok) {
-      retval = hid_open_path(device_path.toStdString().data());
+      for (auto it : deviceList) {
+        if (it.first == deviceSerial) {
+          retval = hid_open_path(it.second.data());
+        }
+      }
     }
   }
   if (!retval) {

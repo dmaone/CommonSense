@@ -95,7 +95,7 @@ private:
   void _sendPacket(void);
   void _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
-  std::vector<std::string> listDevices();
+  std::vector<std::pair<QString, std::string>> listDevices();
 
 private slots:
   void deviceMessageReceiver(void);
