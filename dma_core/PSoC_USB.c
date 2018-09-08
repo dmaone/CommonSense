@@ -400,10 +400,12 @@ void usb_configure(void) {
     // This never happens. But let's handle it just in case.
     usb_status = USB_STATUS_DISCONNECTED;
     output_direction = OUTPUT_DIRECTION_SERIAL;
+    CyPins_ClearPin(HPWR_0);
   } else {
     usb_status = USB_STATUS_CONNECTED;
     output_direction = OUTPUT_DIRECTION_USB;
     usb_suspend_monitor_start();
+    CyPins_SetPin(HPWR_0);
   }
 }
 
@@ -419,10 +421,12 @@ void usb_tick(void) {
 #ifdef SELF_POWERED
   if (usb_powered()) {
     if (USB_initVar == 0) {
+      CyPins_ClearPin(HPWR_0);
       USB_Start(0u, USB_POWER_MODE);
     }
   } else {
     if (usb_status == USB_STATUS_CONNECTED) {
+      CyPins_ClearPin(HPWR_0);
       USB_Stop();
       usb_status = USB_STATUS_DISCONNECTED;
       output_direction = OUTPUT_DIRECTION_SERIAL;

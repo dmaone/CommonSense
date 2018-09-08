@@ -32,6 +32,10 @@ CY_ISR(Timer_ISR) {
 }
 
 inline void setup() {
+#ifdef EXTERNAL_CORE_POWER
+  // Disable core internal LDOs.
+  CY_PM_PWRSYS_CR0_REG = 0b00110000;
+#endif
   ILO_Trim_Start();
   ILO_Trim_BeginTrimming();
   CyGlobalIntEnable; /* Enable global interrupts. */
