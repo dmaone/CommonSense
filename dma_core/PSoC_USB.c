@@ -478,6 +478,8 @@ void usb_nap(void) {
   wakeup_enabled = USB_RWUEnabled();
   USB_Suspend();
   power_state = DEVSTATE_PREPARING_TO_SLEEP;
+  CyPins_ClearPin(HPWR_0); // Actually, SUSP pin should be used here
+  // But there's no SUSP pin laid out.
 }
 
 void usb_check_power(void) {
