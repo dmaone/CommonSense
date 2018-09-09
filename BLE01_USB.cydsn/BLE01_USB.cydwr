@@ -652,6 +652,7 @@
     </Group>
     <Group key="Pin">
       <Data key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844" value="D1" />
+      <Data key="1f3d3dc4-3122-4f58-813d-8c128c39a03a" value="HPWR" />
       <Data key="2db89e8e-271f-4c05-a06b-250c724f18e8" value="D3" />
       <Data key="02f2cf2c-2c7a-49df-9246-7a3435c21be3" value="SCL_1" />
       <Data key="3acca61d-a42a-470f-98af-f737d6abec51" value="Drive2" />
@@ -3907,6 +3908,11 @@
       </Group>
       <Group key="3">
         <Data key="Port Format" value="15,4" />
+      </Group>
+    </Group>
+    <Group key="1f3d3dc4-3122-4f58-813d-8c128c39a03a">
+      <Group key="0">
+        <Data key="Port Format" value="12,6" />
       </Group>
     </Group>
     <Group key="2db89e8e-271f-4c05-a06b-250c724f18e8">
