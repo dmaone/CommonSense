@@ -18,30 +18,31 @@
 uint8_t pipeline_prev_usbkey;
 uint32_t pipeline_prev_usbkey_time;
 
-inline void process_layerMods(uint8_t sc, uint8_t keycode) {
-  // codes A8-AB - momentary selection, AC-AF - permanent
+inline void process_layerMods(uint8_t flags, uint8_t keycode) {
+  // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
   if (keycode & 0x04) {
-    if ((sc & KEY_UP_MASK) == 0) {
-      // Press
-      currentLayer = keycode & 0x03;
+    // LLck. Keydown flips the bit, keyup is ignored.
+    if (flags & KEY_UP_MASK) {
+      return;
     }
-    // Release is ignored
+    FLIP_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
+  } else if ((flags & KEY_UP_MASK) == 0) {
+    // Fn Press
+    SET_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
   } else {
-    if ((sc & KEY_UP_MASK) == 0) {
-      // Press
-      layerMods |= (1 << ((keycode & 0x03) + LAYER_MODS_SHIFT));
-    } else {
-      // Release
-      layerMods &= ~(1 << ((keycode & 0x03) + LAYER_MODS_SHIFT));
-    }
-    // Figure layer condition
-    for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
-      if (layerMods == (config.layerConditions[i] & 0xf0)) {
-        currentLayer = (config.layerConditions[i] & 0x0f);
-        break;
-      }
+    // Fn Release
+    CLEAR_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
+  }
+  // Figure layer condition
+  for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
+    if (layerMods == (config.layerConditions[i] & 0xf0)) {
+      currentLayer = config.layerConditions[i] & 0x0f;
+      break;
     }
   }
+#ifdef DEBUG_PIPELINE
+  xprintf("L@%d: %02x %02x -> %d", systime, flags, keycode, currentLayer);
+#endif
 }
 
 /*
