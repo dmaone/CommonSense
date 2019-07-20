@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file CYBLE_gatt.h
-* \version 3.53
+* \version 3.61
 * 
 * \brief
 *  Contains the prototypes and constants used in the BLE GATT profile.
 * 
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -305,8 +305,9 @@ extern CYBLE_GATT_ATTR_HANDLE_RANGE_T cyBle_gattcDiscoveryRange;
 #define CYBLE_UUID_CGM_SERVICE                       (0x181Fu)
 #define CYBLE_UUID_INTERNET_PROTOCOL_SUPPORT_SERVICE (0x1820u)
 #define CYBLE_UUID_IPS_SERVICE                       (0x1821u)
-#define CYBLE_UUID_PLX_SERVICE                      (0x1822u)
+#define CYBLE_UUID_PLX_SERVICE                       (0x1822u)
 #define CYBLE_UUID_HTTP_PROXY_SERVICE                (0x1823u)
+#define CYBLE_UUID_OTS_SERVICE                       (0x1825u)
 #define CYBLE_UUID_FIND_ME_SERVICE                   (0x18A3u)
 #define CYBLE_UUID_WIRELESS_POWER_TRANSFER_SERVICE   (0xFFFEu)
 
@@ -564,6 +565,19 @@ extern CYBLE_GATT_ATTR_HANDLE_RANGE_T cyBle_gattcDiscoveryRange;
 #define CYBLE_UUID_CHAR_HTTP_STATUS_CODE             (0x2AB8u)
 #define CYBLE_UUID_CHAR_HTTPS_SECURITY               (0x2ABBu)
 
+/* OTS Characteristics defines */
+#define CYBLE_UUID_CHAR_OBJECT_FEATURE               (0x2ABDu)
+#define CYBLE_UUID_CHAR_OBJECT_NAME                  (0x2ABEu)
+#define CYBLE_UUID_CHAR_OBJECT_TYPE                  (0x2ABFu)
+#define CYBLE_UUID_CHAR_OBJECT_SIZE                  (0x2AC0u)
+#define CYBLE_UUID_CHAR_OBJECT_FIRST_CREATED         (0x2AC1u)
+#define CYBLE_UUID_CHAR_OBJECT_LAST_MODIFIED         (0x2AC2u)
+#define CYBLE_UUID_CHAR_OBJECT_ID                    (0x2AC3u)
+#define CYBLE_UUID_CHAR_OBJECT_PROPERTIES            (0x2AC4u)
+#define CYBLE_UUID_CHAR_OBJECT_ACTION_CONTROL_POINT  (0x2AC5u)
+#define CYBLE_UUID_CHAR_OBJECT_LIST_CONTROL_POINT    (0x2AC6u)
+#define CYBLE_UUID_CHAR_OBJECT_LIST_FILTER           (0x2AC7u)
+#define CYBLE_UUID_CHAR_OBJECT_CHANGED               (0x2AC8u)
 
 /* GATT Characteristic Properties bit field */
 #define CYBLE_CHAR_PROP_BROADCAST                    (0x01u)

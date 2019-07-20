@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_STACK_PVT.h
-* \version 3.53
+* \version 3.61
 *
 * \brief
 *  Contains the function prototypes and constants for the HAL section
@@ -10,7 +10,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -62,9 +62,10 @@ void CyBLE_BlessDeviceConfig(void);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_lr_confirming_handler(void *param);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_lr_confirming_handler(void *param);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_dhkey_generate_complete(void* param);
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_local_P256_public_key(uint8 param);
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_DHkey(void  * param1, void  * param2);
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_local_P256_public_key(uint8 param);
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_DHkey(void  * param1, void  * param2);
     CYBLE_API_RESULT_T CyBle_Hal_se_smp_sc_user_passkey_handler(void *param1, void *param2);
+    CYBLE_API_RESULT_T CyBle_Hal_mapping_validate_p256_pub_key_pair(void *param1);
 #else
     CYBLE_API_RESULT_T CyBle_Hal_pairing_local_public_key_handler(void *param CYBLE_UNUSED_ATTR);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_remote_key_handler(void *param CYBLE_UNUSED_ATTR);
@@ -75,11 +76,13 @@ void CyBLE_BlessDeviceConfig(void);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_confirm_handler(void *param CYBLE_UNUSED_ATTR);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_lr_confirming_handler(void *param CYBLE_UNUSED_ATTR);
     CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_dhkey_generate_complete(void* param CYBLE_UNUSED_ATTR);
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_local_P256_public_key(uint8 param CYBLE_UNUSED_ATTR);
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_DHkey(void * param1 CYBLE_UNUSED_ATTR,
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_local_P256_public_key(uint8 param CYBLE_UNUSED_ATTR);
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_DHkey(void * param1 CYBLE_UNUSED_ATTR,
                                                                void * param2 CYBLE_UNUSED_ATTR);
     CYBLE_API_RESULT_T CyBle_Hal_se_smp_sc_user_passkey_handler(void *param1 CYBLE_UNUSED_ATTR, 
                                                                 void *param2 CYBLE_UNUSED_ATTR);
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_validate_p256_pub_key_pair (void *param1 CYBLE_UNUSED_ATTR);                                                                
+                                                                
 #endif /* (CYBLE_SECURE_CONN_FEATURE_ENABLED) */
 #endif  /* CYBLE_MODE_PROFILE */
 

@@ -2,7 +2,7 @@
 * \file CyBle_Gap.h
 * 
 * \file CYBLE_StackGap.h
-* \version 3.53
+* \version 3.61
 *
 * \brief
 *  This file contains the GAP APIs of the BLE Host Stack IP
@@ -12,7 +12,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -2689,10 +2689,17 @@ CYBLE_API_RESULT_T CyBle_GapSetSecureConnectionsOnlyMode(uint8 state);
 * Function Name: CyBle_GapGenerateLocalP256Keys
 ***************************************************************************//**
 *
-* This API function is used to generate P-256 Public-Private key pair to be used during LE Secure connection 
-* pairing procedure. Application may choose to generate P-256 public-private key pair before pairing 
-* process starts. If this API function is not called before pairing process starts, BLE Stack will use default
-* public-private key pair.
+* This API function is used to generate P-256 Public-Private key pair to be used 
+* during LE Secure connection pairing procedure. Application may choose to generate 
+* P-256 public-private key pair before pairing process starts. If this API function 
+* is not called before pairing process starts, BLE Stack will use default public-private
+* key pair.
+*
+* For robust security Cypress recommends that, the application may change the local 
+* public-private key pair after every pairing (successful or failed) attempt.
+*
+* For details, refer to Bluetooth core specification 4.2, Volume 3, part H, section 2.3.6.
+*
 * On the Completion of key generation, new keys will be set in the BLE Stack for SC pairing procedure 
 * and application receives CYBLE_EVT_GAP_SMP_LOC_P256_KEYS_GEN_AND_SET_COMPLETE event.
 *
@@ -2720,6 +2727,11 @@ CYBLE_API_RESULT_T CyBle_GapGenerateLocalP256Keys(void);
 * public-private key pair. This API function is not expected to be called when pairing procedure is in progress.
 * Application can generate P-256 Public-Private key pair using API function CyBle_GapGenerateLocalP256Keys()
 * and can set the generated key pair using this API function.
+*
+* For robust security Cypress recommends that, the application may change the local 
+* public-private key pair after every pairing (successful or failed) attempt.
+*
+* For details, refer to Bluetooth core specification 4.2, Volume 3, part H, section 2.3.6.
 *
 * \param localP256Keys: Pointer to structure CYBLE_GAP_SMP_LOCAL_P256_KEYS, that has
 *                       fields for local P-256 public-private key pair.

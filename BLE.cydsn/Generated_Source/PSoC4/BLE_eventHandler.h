@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_eventHandler.h
-* \version 3.53
+* \version 3.61
 * 
 * \brief
 *  Contains the prototypes and constants used in the Event Handler State Machine
@@ -8,7 +8,7 @@
 * 
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -100,6 +100,9 @@
 #ifdef CYBLE_NDCS
     #include "BLE_ndcs.h"
 #endif /* CYBLE_NDCS */
+#ifdef CYBLE_OTS
+    #include "BLE_ots.h"
+#endif /* CYBLE_OTS */
 #ifdef CYBLE_PASS
     #include "BLE_pass.h"
 #endif /* CYBLE_PASS */
@@ -1585,6 +1588,81 @@ typedef enum
     */
     CYBLE_EVT_NDCSC_READ_CHAR_RESPONSE,
     
+     /****************************************
+     OTS Service Events
+     ***************************************/
+    
+    /** OTS Server - Indication for Object Transfer Service Characteristic
+        was enabled. The parameter of this event is a structure 
+        of CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSS_INDICATION_ENABLED,
+
+    /** OTSS Server - Indication for Object Transfer Service Characteristic
+        was disabled. The parameter of this event is a structure 
+        of CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSS_INDICATION_DISABLED,
+    
+    /** OTS Server - Object Transfer Service Characteristic
+        Indication was confirmed. The parameter of this event
+        is a structure of CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSS_INDICATION_CONFIRMED,
+    
+    /** OTS Server - Write Request for Object Transfer Service Characteristic 
+        was received. The parameter of this event is a structure
+        of CYBLE_OTS_CHAR_VALUE_T type.
+    */  
+    CYBLE_EVT_OTSS_WRITE_CHAR,
+    
+    /** OTSS Server - Write Request for Object Transfer Service 
+        Characteristic Descriptor was received. The parameter of this event is a structure of
+        CYBLE_OTSS_DESCR_VALUE_T type.
+    */    
+    CYBLE_EVT_OTSS_WRITE_DESCR,
+    
+    /** OTS Client -  Object Transfer Service Characteristic
+        Indication was received. The parameter of this event
+        is a structure of CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_INDICATION,
+    
+    /** OTS Client - Read Response for Read Request for Object Transfer Service Characteristic
+        Value. The parameter of this event is a structure of 
+        CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_READ_CHAR_RESPONSE,
+    
+    /** OTS Client - Read Response for Long Read Request of Object Transfer
+        Service Characteristic value. The parameter of this event
+        is a structure of CYBLE_IPS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_READ_BLOB_RSP,
+    
+    /** OTS Client - Write Response for Write Request for Object Transfer Service
+        Characteristic Value. The parameter of this event is a structure of 
+        CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_WRITE_CHAR_RESPONSE,
+    
+    /** OTS Client - Read Response for Read Request for Object Transfer Service
+        Characteristic Descriptor Read Request. The parameter of this event is a
+        structure of CYBLE_OTS_DESCR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_READ_DESCR_RESPONSE,
+
+    /** OTS Client - Write Response for Write Request for Object Transfer Service
+        Client Characteristic Configuration Descriptor Value. The parameter of
+        this event is a structure of CYBLE_OTS_DESCR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_WRITE_DESCR_RESPONSE,
+    
+    /** OTS Client - Error Response for Write Request for Object Transfer Service
+        Characteristic Value. The parameter of this event is a structure of 
+        CYBLE_OTS_CHAR_VALUE_T type.
+    */
+    CYBLE_EVT_OTSC_ERROR_RESPONSE,
     
     /****************************************
      Phone Alert Status Service Events
@@ -2290,6 +2368,9 @@ typedef enum
 #ifdef CYBLE_PLXS_CLIENT
     CYBLE_SRVI_PLXS,
 #endif /* CYBLE_PLXS_CLIENT */
+#ifdef CYBLE_OTS_CLIENT
+    CYBLE_SRVI_OTS,
+#endif /* CYBLE_OTS_CLIENT */
 #ifdef CYBLE_RSCS_CLIENT
     CYBLE_SRVI_RSCS,
 #endif /* CYBLE_RSCS_CLIENT */
@@ -2419,6 +2500,24 @@ typedef enum
     CYBLE_SCDI_LNS_CP,                                      /**< L&N Control Point characteristic index */
     CYBLE_SCDI_LNS_NV,                                      /**< Navigation characteristic index */
 #endif /* CYBLE_LNS_CLIENT */
+
+#ifdef CYBLE_OTS_CLIENT
+    CYBLE_SCDI_OTS_FEATURE,                                  /**< Exposes which optional features are supported by the Server implementation.*/
+    CYBLE_SCDI_OTS_OBJECT_NAME,                              /**< The name of the Current Object. */
+    CYBLE_SCDI_OTS_OBJECT_TYPE,                              /**< The type of the Current Object, identifying the object type by UUID. */
+    CYBLE_SCDI_OTS_OBJECT_SIZE,                              /**< The current size as well as the allocated size of the Current Object. */
+    CYBLE_SCDI_OTS_OBJECT_FIRST_CREATED,                     /**< Date and time when the object contents were first created. */
+    CYBLE_SCDI_OTS_OBJECT_LAST_MODIFIED,                     /**< Date and time when the object content was last modified. */
+    CYBLE_SCDI_OTS_OBJECT_ID,                                /**< The Object ID of the Current Object. The Object ID is a LUID (Locally Unique Identifier). */
+    CYBLE_SCDI_OTS_OBJECT_PROPERTIES,                        /**< The properties of the Current Object. */
+    CYBLE_SCDI_OBJECT_ACTION_CONTROL_POINT,                  /**< Is used by a Client to control certain behaviors of the Server. */
+    CYBLE_SCDI_OBJECT_LIST_CONTROL_POINT,                    /**< Provides a mechanism for the Client to find the desired object and to designate it as the Current Object. */
+    CYBLE_SCDI_OBJECT_LIST_FILTER_1,                         /**< The filter conditions determines which objects are included in or excluded from the list of objects.*/
+    CYBLE_SCDI_OBJECT_LIST_FILTER_2,                         /**< The filter conditions determines which objects are included in or excluded from the list of objects.*/
+    CYBLE_SCDI_OBJECT_LIST_FILTER_3,                         /**< The filter conditions determines which objects are included in or excluded from the list of objects.*/
+    CYBLE_SCDI_OTS_OBJECT_CHANGED,                           /**< Enables a Client to receive an indication if the contents and/or metadata of one or more objects are changed.*/
+#endif /* CYBLE_OTS_CLIENT */
+
 #ifdef CYBLE_PASS_CLIENT
     CYBLE_SCDI_PASS_AS,                                     /**< Alert Status characteristic index */
     CYBLE_SCDI_PASS_RS,                                     /**< Ringer Settings characteristic index */

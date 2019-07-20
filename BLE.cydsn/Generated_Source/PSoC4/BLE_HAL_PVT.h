@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_HAL_PVT.h
-* \version 3.53
+* \version 3.61
 *
 * \brief
 *  Contains the function prototypes and constants for the HAL section
@@ -10,7 +10,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -153,11 +153,13 @@ cystatus CyBLE_Nvram_Erase (const uint8 *varFlash, uint16 length);
     CYBLE_API_RESULT_T CyBle_Hal_mapping_pairing_lr_confirming_handler(void *param);
     void CyBle_Hal_mapping_tbx_dhkey_generate_complete(void *param);
     void CyBle_Hal_mapping_tbx_local_pubkey_generate_complete(void);
-    CYBLE_API_RESULT_T CyBle_Hal_mapping_tbx_generate_local_P256_public_key(uint8 param);
-    CYBLE_API_RESULT_T CyBle_Hal_mapping_tbx_generate_DHkey(void  *param1, void  *param2);
+    CYBLE_API_RESULT_T CyBle_Hal_mapping_generate_local_P256_public_key(uint8 param);
+    CYBLE_API_RESULT_T CyBle_Hal_mapping_generate_DHkey(void  *param1, void  *param2);
     void CyBle_Hal_Mapping_smp_sc_cmac_complete(void);
     CYBLE_API_RESULT_T CyBle_Hal_mapping_se_smp_sc_user_passkey_handler(void *param,void *param2);
     void CyBle_Hal_Mapping_EccPointMult(void);
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_validate_p256_pub_key_pair (void *param1);
+
 #endif /* (CYBLE_SECURE_CONN_FEATURE_ENABLED) && (CYBLE_MODE_PROFILE) */
         
 #if(CYBLE_SECURE_CONN_FEATURE_ENABLED)

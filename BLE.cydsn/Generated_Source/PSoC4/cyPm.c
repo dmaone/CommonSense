@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cyPm.c
-* \version 5.70
+* \version 5.80
 *
 * \brief Provides an API for the power management.
 *
@@ -71,6 +71,10 @@ void CySysPmDeepSleep(void)
     #if(CY_IP_ECO_SRSSLT)
         volatile uint32 pllResoreFlag = 0u;
     #endif /* (CY_IP_ECO_SRSSLT) */
+
+    #if (CY_IP_IMO_TRIMMABLE_BY_WCO)
+        uint32 regTmp = 0u;
+    #endif /* (CY_IP_IMO_TRIMMABLE_BY_WCO) */
     
     interruptState = CyEnterCriticalSection();
 
@@ -92,6 +96,16 @@ void CySysPmDeepSleep(void)
     #if (CY_IP_CPUSS && CY_IP_SRSSV2)
         CY_PM_CPUSS_CONFIG_REG |= CY_PM_CPUSS_CONFIG_FLSH_ACC_BYPASS;
     #endif /* (CY_IP_CPUSS && CY_IP_SRSSV2) */
+    
+    #if (CY_IP_IMO_TRIMMABLE_BY_WCO)
+        if (0u != (CY_SYS_CLK_WCO_CONFIG_REG & CY_SYS_CLK_WCO_CONFIG_DPLL_ENABLE))
+        {
+            regTmp  = CY_SYS_CLK_WCO_DPLL_REG & ~(CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MASK);
+            CY_SYS_CLK_WCO_DPLL_REG = (regTmp | (((CY_SYS_CLK_IMO_TRIM1_REG + CY_PM_WCO_DPLL_LF_LIMIT_TEMP_DRIFT) & 
+                                                  CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX) << 
+                                                 CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT));
+        }
+    #endif /* (CY_IP_IMO_TRIMMABLE_BY_WCO) */
 
     /* Adjust delay to wait for references to settle on wakeup from Deep Sleep */
     CY_PM_PWR_KEY_DELAY_REG = CY_SFLASH_DPSLP_KEY_DELAY_REG;
@@ -114,6 +128,16 @@ void CySysPmDeepSleep(void)
         /* Restore system clock configuration */
         CY_SYS_CLK_SELECT_REG = clkSelectReg;
     #endif /* (CY_IP_SRSSV2) */
+
+    #if (CY_IP_IMO_TRIMMABLE_BY_WCO)
+        if (0u != (CY_SYS_CLK_WCO_CONFIG_REG & CY_SYS_CLK_WCO_CONFIG_DPLL_ENABLE))
+        {
+            CyDelayUs(CY_PM_WCO_DPLL_WAKEUP_DELAY);
+            regTmp  = CY_SYS_CLK_WCO_DPLL_REG & ~(CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MASK);
+            CY_SYS_CLK_WCO_DPLL_REG = (regTmp | (CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX << 
+                                                 CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT));
+        }
+    #endif /* (CY_IP_IMO_TRIMMABLE_BY_WCO) */    
     
     #if (CY_IP_CPUSS && CY_IP_SRSSV2)
         CY_PM_CPUSS_CONFIG_REG &= (uint32) (~CY_PM_CPUSS_CONFIG_FLSH_ACC_BYPASS);

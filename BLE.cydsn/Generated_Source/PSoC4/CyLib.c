@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyLib.c
-* \version 5.70
+* \version 5.80
 *
 * \brief Provides a system API for the Clocking, Interrupts, SysTick, and
 * Voltage Detect.
@@ -71,17 +71,6 @@ uint32 CySysTickInitVar = 0u;
             /* 47 MHz */ 0x34u,  /* 48 MHz */ 0x35u };
 #endif /* (CY_IP_SRSSV2) */
 
-#if (CY_IP_IMO_TRIMMABLE_BY_WCO)
-        /* Conversion between IMO frequency and WCO DPLL max offset steps */
-        const uint8 cyImoFreqMhz2DpllOffset[CY_SYS_CLK_IMO_FREQ_WCO_DPLL_TABLE_SIZE] = {
-            /* 26 MHz */  238u, /* 27 MHz */  219u, /* 28 MHz */  201u, /* 29 MHz */  185u,
-            /* 30 MHz */  170u, /* 31 MHz */  155u, /* 32 MHz */  142u, /* 33 MHz */  130u,
-            /* 34 MHz */  118u, /* 35 MHz */  107u, /* 36 MHz */   96u, /* 37 MHz */  86u,
-            /* 38 MHz */   77u, /* 39 MHz */   68u, /* 40 MHz */   59u, /* 41 MHz */  51u,
-            /* 42 MHz */   44u, /* 43 MHz */   36u, /* 44 MHz */   29u, /* 45 MHz */  23u,
-            /* 46 MHz */   16u, /* 47 MHz */   10u, /* 48 MHz */   4u };
-#endif /* (CY_IP_IMO_TRIMMABLE_BY_WCO) */
-
 /* Stored CY_SYS_CLK_IMO_TRIM4_REG when modified for USB lock */
 #if (CY_IP_IMO_TRIMMABLE_BY_USB && CY_IP_SRSSV2)
     uint32 CySysClkImoTrim4 = 0u;
@@ -90,6 +79,7 @@ uint32 CySysTickInitVar = 0u;
 
 /* Stored PUMP_SEL configuration during disable (IMO output by default) */
 uint32 CySysClkPumpConfig = CY_SYS_CLK_PUMP_ENABLE;
+
 
 /*******************************************************************************
 * Function Name: CySysClkImoStart
@@ -220,7 +210,9 @@ void CySysClkImoStop(void)
                 #endif  /* (CY_IP_SRSSLT) */
 
             #endif  /* (CY_IP_SRSSV2) */
-
+            
+            CY_SYS_CLK_IMO_TRIM1_REG = 0;
+            
             /* For the WCO locking mode, the IMO gain needs to be CY_SYS_CLK_IMO_TRIM4_GAIN */
             #if(CY_IP_SRSSV2)
                 if ((CY_SYS_CLK_IMO_TRIM4_REG & CY_SYS_CLK_IMO_TRIM4_GAIN_MASK) == 0u)
@@ -241,28 +233,25 @@ void CySysClkImoStop(void)
             /* Set DPLL Loop Filter Integral and Proportional Gains Setting */
             regTmp |= (CY_SYS_CLK_WCO_CONFIG_DPLL_LF_IGAIN | CY_SYS_CLK_WCO_CONFIG_DPLL_LF_PGAIN);
 
-            /* Set maximum allowed IMO offset */
-            if (freq < CY_SYS_CLK_IMO_FREQ_WCO_DPLL_SAFE_POINT)
-            {
-                regTmp |= (CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX << CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT);
-            }
-            else
-            {
-                lfLimit = (uint32) CY_SFLASH_IMO_TRIM_REG(freq - CY_SYS_CLK_IMO_MIN_FREQ_MHZ) +
-                    cyImoFreqMhz2DpllOffset[freq - CY_SYS_CLK_IMO_FREQ_WCO_DPLL_TABLE_OFFSET];
-
-                lfLimit = (lfLimit > CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX) ?
-                    CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX : lfLimit;
-
-                regTmp |= (lfLimit << CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT);
-            }
-
             CY_SYS_CLK_WCO_DPLL_REG = regTmp;
-
+            
             flashCtlReg = CY_FLASH_CTL_REG;
             CySysFlashSetWaitCycles(CY_SYS_CLK_IMO_MAX_FREQ_MHZ);
             CY_SYS_CLK_WCO_CONFIG_REG |= CY_SYS_CLK_WCO_CONFIG_DPLL_ENABLE;
-            CyDelay(CY_SYS_CLK_WCO_IMO_TIMEOUT_MS);
+
+            regTmp  = CY_SYS_CLK_WCO_DPLL_REG & ~(CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MASK);
+            
+            while (lfLimit < (CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX - CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_STEP))
+            {
+                CyDelay(CY_SYS_CLK_WCO_DPLL_TIMEOUT_MS);
+                lfLimit += CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_STEP;
+                CY_SYS_CLK_WCO_DPLL_REG = (regTmp | (lfLimit << CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT));
+            }
+
+            CyDelay(CY_SYS_CLK_WCO_DPLL_TIMEOUT_MS);
+            CY_SYS_CLK_WCO_DPLL_REG = (regTmp | (CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX << 
+                                                 CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_SHIFT));
+
             CY_FLASH_CTL_REG = flashCtlReg;
 
             CyExitCriticalSection(interruptState);
@@ -285,7 +274,44 @@ void CySysClkImoStop(void)
     *******************************************************************************/
     void CySysClkImoDisableWcoLock(void)
     {
+        #if(CY_IP_SRSSV2)
+            uint32 i;
+        #endif  /* (CY_IP_SRSSV2) */
+
+        uint32 freq;
+        
+        /* Get current IMO frequency based on the register value */
+        #if(CY_IP_SRSSV2)
+            freq = CY_SYS_CLK_IMO_MIN_FREQ_MHZ;
+            for(i = 0u; i < CY_SYS_CLK_IMO_FREQ_TABLE_SIZE; i++)
+            {
+                if ((uint8) (CY_SYS_CLK_IMO_TRIM2_REG & CY_SYS_CLK_IMO_FREQ_BITS_MASK) == cyImoFreqMhz2Reg[i])
+                {
+                    freq = i + CY_SYS_CLK_IMO_FREQ_TABLE_OFFSET;
+                    break;
+                }
+            }
+        #else
+            /* Calculate frequency by shifting register field value and adding constant. */
+            #if(CY_IP_SRSSLT)
+                freq = (((uint32) ((CY_SYS_CLK_IMO_SELECT_REG & ((uint32) CY_SYS_CLK_IMO_SELECT_FREQ_MASK)) << 
+                                    CY_SYS_CLK_IMO_SELECT_FREQ_SHIFT) + CY_SYS_CLK_IMO_MIN_FREQ_MHZ) >> 
+                                  ((CY_SYS_CLK_SELECT_REG >> CY_SYS_CLK_SELECT_HFCLK_DIV_SHIFT) & 
+                                   (uint32) CY_SYS_CLK_SELECT_HFCLK_DIV_MASK));
+            #else
+                freq = ((uint32) ((CY_SYS_CLK_IMO_SELECT_REG & ((uint32) CY_SYS_CLK_IMO_SELECT_FREQ_MASK)) <<
+                                   CY_SYS_CLK_IMO_SELECT_FREQ_SHIFT) + CY_SYS_CLK_IMO_MIN_FREQ_MHZ);
+            #endif  /* (CY_IP_SRSSLT) */
+
+        #endif  /* (CY_IP_SRSSV2) */
+
         CY_SYS_CLK_WCO_CONFIG_REG &= (uint32) ~CY_SYS_CLK_WCO_CONFIG_DPLL_ENABLE;
+        
+        #if(CY_IP_SRSSLT)
+            CY_SYS_CLK_IMO_TRIM1_REG = CY_SFLASH_IMO_TRIM_REG(freq - CY_SYS_CLK_IMO_MIN_FREQ_MHZ);
+        #else
+            CY_SYS_CLK_IMO_TRIM1_REG = CY_SFLASH_IMO_TRIM_REG(freq - CY_SYS_CLK_IMO_FREQ_TABLE_OFFSET);
+        #endif
     }
 
 

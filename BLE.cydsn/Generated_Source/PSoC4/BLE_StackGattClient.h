@@ -2,7 +2,7 @@
 * \file CyBle_GattClient.h
 * 
 * \file CYBLE_StackGattClient.h
-* \version 3.53
+* \version 3.61
 *
 * \brief
 *  This file contains the GATT Client routines
@@ -12,7 +12,7 @@
 * 
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.

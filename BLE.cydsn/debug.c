@@ -23,14 +23,14 @@
 /* For GCC compiler revise _write() function for printf functionality */
 int _write(int file, char *ptr, int len)
 {
-    LED_GRN_Write(LED_ON);
+//    LED_GRN_Write(LED_ON);
     int i;
     file = file;
     for (i = 0; i < len; i++)
     {
         UART_DEB_UartPutChar(*ptr++);
     }
-    LED_GRN_Write(LED_OFF);
+//    LED_GRN_Write(LED_OFF);
     return len;
 }
 
@@ -65,9 +65,9 @@ void Set32ByPtr(uint8 ptr[], uint32 value)
 *******************************************************************************/
 void ShowError(void)
 {
-    LED_RED_Write(LED_ON);
-    LED_GRN_Write(LED_ON);
-    LED_BLU_Write(LED_ON);
+//    LED_RED_Write(LED_ON);
+//    LED_GRN_Write(LED_ON);
+//    LED_BLU_Write(LED_ON);
     /* Halt CPU in Debug mode */
     CYASSERT(0u != 0u);
 }

@@ -28,13 +28,13 @@ INCLUDE cycodeshareimport.ld
 
 MEMORY
 {
-    rom (rx) : ORIGIN = 0x0, LENGTH = 262144
-    ram (rwx) : ORIGIN = 0x20000000, LENGTH = 32768
+    rom (rx) : ORIGIN = 0x0, LENGTH = 131072
+    ram (rwx) : ORIGIN = 0x20000000, LENGTH = 16384
 }
 
 
 CY_APPL_ORIGIN                  = 0;
-CY_FLASH_ROW_SIZE               = 256;
+CY_FLASH_ROW_SIZE               = 128;
 CY_APPL_NUM                     = 1;
 CY_APPL_MAX                     = 1;
 CY_METADATA_SIZE                = 64;

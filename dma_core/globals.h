@@ -26,10 +26,12 @@
 #define BUCKLING_SPRING 1
 #define ADB 2
 #define SUN 3
+#define CORTRON 4
 
 #define SCANNER_CS 0
 #define SCANNER_ADB 1
 #define SCANNER_SUN 2
+#define SCANNER_CORTRON 3
 // Do not touch above definitions. To change switch type change config.h
 
 #include "config.h"
@@ -144,6 +146,9 @@ void xprintf(const char *format_p, ...);
 #elif SWITCH_TYPE == SUN
 #define SCANNER_TYPE SCANNER_SUN
 #define NORMALLY_LOW 0
+#elif SWITCH_TYPE == CORTRON
+#define SCANNER_TYPE CORTRON
+#define NORMALLY_LOW 1
 #else
 #error "Unknown switch type"
 #endif

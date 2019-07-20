@@ -47,12 +47,6 @@
 #include "UART_DEB_SPI_UART_PVT.h"
 #include "UART_DEB_PVT.h"
 #include "UART_DEB_BOOT.h"
-#include "LED_BLU.h"
-#include "LED_BLU_aliases.h"
-#include "LED_RED.h"
-#include "LED_RED_aliases.h"
-#include "LED_GRN.h"
-#include "LED_GRN_aliases.h"
 #include "Wakeup_Interrupt.h"
 #include "SW2.h"
 #include "SW2_aliases.h"
@@ -75,7 +69,6 @@
 #include "cyPm.h"
 #include "cytypes.h"
 #include "cypins.h"
-#include "CyDMA.h"
 #include "CyLFClk.h"
 
 /*[]*/

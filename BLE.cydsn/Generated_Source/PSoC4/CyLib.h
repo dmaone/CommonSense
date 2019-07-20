@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyLib.h
-* \version 5.70
+* \version 5.80
 *
 * \brief Provides a system API for the clocking, and interrupts.
 *
@@ -744,11 +744,9 @@ extern uint32 CySysTickInitVar;
     #define CY_SYS_CLK_WCO_CONFIG_DPLL_LF_PGAIN             (( uint32 )(( uint32 ) 2u << CY_SYS_CLK_WCO_CONFIG_DPLL_LF_PGAIN_SHIFT))
 
     #define CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_MAX         ((uint32) 0xFFu)
+    #define CY_SYS_CLK_WCO_CONFIG_DPLL_LF_LIMIT_STEP        ((uint32) 16u)
     #define CY_SYS_CLK_WCO_IMO_TIMEOUT_MS                   ((uint32) 20u)
-
-    #define CY_SYS_CLK_IMO_FREQ_WCO_DPLL_SAFE_POINT         (26u)
-    #define CY_SYS_CLK_IMO_FREQ_WCO_DPLL_TABLE_SIZE         (23u)
-    #define CY_SYS_CLK_IMO_FREQ_WCO_DPLL_TABLE_OFFSET       (26u)
+    #define CY_SYS_CLK_WCO_DPLL_TIMEOUT_MS                  ((uint32) 1u)
 
 #endif /* (CY_IP_IMO_TRIMMABLE_BY_WCO) */
 

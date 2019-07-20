@@ -190,8 +190,8 @@ void AppCallBack(uint32 event, void* eventParam)
                  * mode (Hibernate mode) and wait for an external
                  * user event to wake up the device again */
                 DBG_PRINTF("Hibernate \r\n");
-                LED_RED_Write(LED_OFF);
-                LED_GRN_Write(LED_ON);
+//                LED_RED_Write(LED_OFF);
+//                LED_GRN_Write(LED_ON);
                 SW2_ClearInterrupt();
                 Wakeup_Interrupt_ClearPending();
                 Wakeup_Interrupt_Start();
@@ -204,7 +204,7 @@ void AppCallBack(uint32 event, void* eventParam)
             break;
         case CYBLE_EVT_GAP_DEVICE_CONNECTED:
             DBG_PRINTF("CYBLE_EVT_GAP_DEVICE_CONNECTED \r\n");
-            LED_RED_Write(LED_OFF);
+//            LED_RED_Write(LED_OFF);
             break;
         case CYBLE_EVT_GAP_DEVICE_DISCONNECTED:
             DBG_PRINTF("CYBLE_EVT_GAP_DEVICE_DISCONNECTED\r\n");
@@ -438,7 +438,7 @@ void process_i2c() {
   Sup_Pdu_t i2c_inbox;
   uint8_t buf;
   uint32_t result = SCB_I2CMasterReadBuf(8, &buf, 1, SCB_I2C_MODE_COMPLETE_XFER);
-  LED_RED_Write(LED_ON);
+//  LED_RED_Write(LED_ON);
   if (0 == (result & SCB_I2C_MSTR_NOT_READY)) {
     uint16 i2c_counter = 0;
     while (--i2c_counter && 0 == (SCB_I2CMasterStatus() & SCB_I2C_MSTAT_RD_CMPLT)) {}
@@ -482,9 +482,9 @@ int main()
 
     UART_DEB_Start();
     DBG_PRINTF("CS BLE Project \r\n");
-    LED_RED_Write(LED_OFF);
-    LED_GRN_Write(LED_OFF);
-    LED_BLU_Write(LED_OFF);
+//    LED_RED_Write(LED_OFF);
+//    LED_GRN_Write(LED_OFF);
+//    LED_BLU_Write(LED_OFF);
 
     /* Start CYBLE component and register generic event handler */
     CyBle_Start(AppCallBack);
@@ -494,7 +494,7 @@ int main()
         /* CyBle_ProcessEvents() allows BLE stack to process pending events */
       CyBle_ProcessEvents();
       process_i2c();
-      LED_RED_Write(LED_OFF);
+//      LED_RED_Write(LED_OFF);
         /* To achieve low power in the device */
         LowPowerImplementation();
 

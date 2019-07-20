@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file CYBLE_HAL_PVT.c
-* \version 3.53
+* \version 3.61
 *
 * \brief
 *  This file contains the source code for the HAL section of the BLE component
 *
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -560,14 +560,14 @@ uint32 CyBLE_GetIpBlockVersion(void)
         return (CYBLE_ERROR_OK);
     }
 
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_local_P256_public_key(uint8 param)
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_local_P256_public_key(uint8 param)
     {
-        return (CyBle_Hal_mapping_tbx_generate_local_P256_public_key(param));
+        return (CyBle_Hal_mapping_generate_local_P256_public_key(param));
     }
 
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_DHkey(void  * param1, void  * param2)
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_DHkey(void  * param1, void  * param2)
     {
-        return (CyBle_Hal_mapping_tbx_generate_DHkey(param1, param2));
+        return (CyBle_Hal_mapping_generate_DHkey(param1, param2));
     }
 
     void CyBle_Hal_smp_sc_cmac_complete(void)
@@ -584,6 +584,12 @@ uint32 CyBLE_GetIpBlockVersion(void)
     {
         CyBle_Hal_Mapping_EccPointMult();
     }
+    
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_validate_p256_pub_key_pair (void *param1)
+    {
+        return (CyBle_Hal_mapping_validate_p256_pub_key_pair(param1));
+    }
+    
     
 #else     /* If feature is not required, return error. */
     
@@ -637,12 +643,12 @@ uint32 CyBLE_GetIpBlockVersion(void)
         return (CYBLE_ERROR_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE);
     }
 
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_local_P256_public_key(uint8 param CYBLE_UNUSED_ATTR)
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_local_P256_public_key(uint8 param CYBLE_UNUSED_ATTR)
     {
         return (CYBLE_ERROR_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE);
     }
 
-    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_tbx_generate_DHkey(void  * param1 CYBLE_UNUSED_ATTR,
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_generate_DHkey(void  * param1 CYBLE_UNUSED_ATTR,
                                                                void  * param2 CYBLE_UNUSED_ATTR)
     {
         return (CYBLE_ERROR_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE);
@@ -660,6 +666,11 @@ uint32 CyBLE_GetIpBlockVersion(void)
 
     void CyBle_Hal_EccPointMult(void)
     {
+    }
+    
+    CYBLE_API_RESULT_T CyBle_Hal_pairing_sc_validate_p256_pub_key_pair (void *param1 CYBLE_UNUSED_ATTR)
+    {
+        return (CYBLE_ERROR_UNSUPPORTED_FEATURE_OR_PARAMETER_VALUE);
     }
     
 #endif /* (CYBLE_SECURE_CONN_FEATURE_ENABLED) */

@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file CYBLE.c
-* \version 3.53
+* \version 3.61
 * 
 * \brief
 *  This file contains the source code for the Common APIs of the BLE Component.
 * 
 ********************************************************************************
 * \copyright
-* Copyright 2014-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -308,6 +308,10 @@ void CyBle_ServiceInit(void)
         CyBle_NdcsInit();
     #endif /* CYBLE_NDCS */
     
+    #ifdef CYBLE_OTS
+        CyBle_OtsInit();
+    #endif /* CYBLE_OTS */
+        
     #ifdef CYBLE_PASS
         CyBle_PassInit();
     #endif /* CYBLE_PASS */
