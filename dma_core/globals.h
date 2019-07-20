@@ -7,7 +7,20 @@
  * published by the Free Software Foundation.
  */
 
+/*
+ * NO USER-SERVICEABLE PARTS INSIDE. You want config.h!
+ */
 #pragma once
+
+// #define DEBUG_STATE_MACHINE
+
+// #define DEBUG_PIPELINE
+
+// ExpHdr0 used to signal interrupt start and end
+// #define DEBUG_INTERRUPTS
+
+// ExpHdr0 is set for 1us for keypress, 2us for release
+// #define DEBUG_SHOW_KEYPRESSES
 
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
@@ -36,14 +49,6 @@
 
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
-
-//#define DEBUG_STATE_MACHINE
-
-// ExpHdr0 used to signal interrupt start and end
-//#define DEBUG_INTERRUPTS
-
-// ExpHdr0 is set for 1us for keypress, 2us for release
-//#define DEBUG_SHOW_KEYPRESSES
 
 #define DEVICE_VER_MAJOR 0x00
 #define DEVICE_VER_MINOR 0x01
