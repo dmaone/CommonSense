@@ -25,11 +25,12 @@
 #define NOT_A_KEYBOARD 0
 
 // LIB.H!!!
-#define TEST_BIT(VAR, BN) (VAR & (1 << BN))
+#define TEST_BIT(VAR, BN) (VAR & (1 << (BN)))
 //#define CLEAR_BIT(VAR, BN) {xprintf("CLR %d %d", VAR, BN); VAR &= !(1 << BN); }
 //#define SET_BIT(VAR, BN) {xprintf("SET %d %d", VAR, BN); VAR |= (1 << BN); }
-#define CLEAR_BIT(VAR, BN) VAR &= ~(1 << BN)
-#define SET_BIT(VAR, BN) VAR |= (1 << BN)
+#define CLEAR_BIT(VAR, BN) VAR &= ~(1 << (BN))
+#define SET_BIT(VAR, BN) VAR |= (1 << (BN))
+#define FLIP_BIT(VAR, BN) VAR ^= (1 << (BN))
 #define FORCE_BIT(VAR, BN, TO) { CLEAR_BIT(VAR, BN); if (TO) SET_BIT(VAR, BN); }
 // /LIB.H!!!
 
