@@ -66,7 +66,7 @@ void init_sensor(uint8_t debouncing_period) {
   DischargeDelay_Start();
   DischargeDelay_WritePeriod(config.dischargeDelay);
   debouncing_mask = MAX_MATRIX_VALUE << debouncing_period;
-  debouncing_negedge = 1 << (debouncing_period - 1);
+  debouncing_negedge = MAX_MATRIX_VALUE << (debouncing_period - 1);
   debouncing_posedge = ~debouncing_negedge | debouncing_mask;
   debouncing_negedge |= debouncing_mask;
   scan_reset();

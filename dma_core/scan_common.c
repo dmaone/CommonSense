@@ -7,8 +7,9 @@
  * published by the Free Software Foundation.
  */
 #include "scan_common.h"
+#include <project.h>
 
-uint32_t matrix_status[MATRIX_ROWS];
+static uint32_t matrix_status[MATRIX_ROWS];
 bool matrix_was_active;
 
 inline void append_scancode(uint8_t flags, uint8_t scancode) {
@@ -49,9 +50,16 @@ inline void scan_check_matrix(void) {
   }
 }
 
-void init_scancode_buffer() {
-  for(uint8_t i = 0; i <= SCANCODE_BUFFER_END; i++) {
-    scancode_buffer[i].flags = 0;
-    scancode_buffer[i].scancode = COMMONSENSE_NOKEY;
+inline uint32_t scan_is_key_pressed(uint8_t keyIndex) {
+  return matrix_status[keyIndex >> 5] & (1 << (keyIndex & 0x1f));
+}
+
+void init_scan_common() {
+  for(uint8_t i = 0; i <= SCANCODES_END; i++) {
+    scancodes[i].flags = 0;
+    scancodes[i].scancode = COMMONSENSE_NOKEY;
   }
+  memset(matrix_status, 0, sizeof(matrix_status));
+  scancodes_rpos = 0;
+  scancodes_wpos = 0;
 }

@@ -32,12 +32,12 @@ void scan_init(uint8_t debouncing_period) {
 
 void scan_start(void) {
   sync_leds();
-  init_scancode_buffer();
+  init_scancodes();
 }
 
 void scan_reset(void) {
   sync_leds();
-  init_scancode_buffer();
+  init_scancodes();
 }
 
 void scan_tick(void) {

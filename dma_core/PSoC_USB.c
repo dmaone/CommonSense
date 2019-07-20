@@ -400,12 +400,16 @@ void usb_configure(void) {
     // This never happens. But let's handle it just in case.
     usb_status = USB_STATUS_DISCONNECTED;
     output_direction = OUTPUT_DIRECTION_SERIAL;
+#ifdef SELF_POWERED
     CyPins_ClearPin(HPWR_0);
+#endif
   } else {
     usb_status = USB_STATUS_CONNECTED;
     output_direction = OUTPUT_DIRECTION_USB;
     usb_suspend_monitor_start();
+#ifdef SELF_POWERED
     CyPins_SetPin(HPWR_0);
+#endif
   }
 }
 
@@ -478,7 +482,9 @@ void usb_nap(void) {
   wakeup_enabled = USB_RWUEnabled();
   USB_Suspend();
   power_state = DEVSTATE_PREPARING_TO_SLEEP;
+#ifdef SELF_POWERED
   CyPins_ClearPin(HPWR_0); // Actually, SUSP pin should be used here
+#endif
   // But there's no SUSP pin laid out.
 }
 

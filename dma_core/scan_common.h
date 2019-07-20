@@ -40,4 +40,5 @@ uint8_t scancodes_rpos;
 
 void append_scancode(uint8_t flags, uint8_t scancode);
 void scan_check_matrix();
-void init_scancode_buffer();
+uint32_t scan_is_key_pressed(uint8_t keyIndex);
+void init_scan_common();

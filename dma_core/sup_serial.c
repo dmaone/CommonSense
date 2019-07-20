@@ -27,24 +27,33 @@ inline void queue_ble_command(Sup_Pdu_t *cmd) {
 }
 
 void serial_init(void) {
+#ifdef HAS_EXTIF
   Sup_I2C_SlaveInitReadBuf(i2c_outbox.raw, sizeof(i2c_outbox));
   Sup_I2C_SlaveInitWriteBuf(i2c_inbox.raw, sizeof(i2c_inbox));
   Sup_I2C_Start();
+#endif
 }
 
 void serial_nap(void) {
+#ifdef HAS_EXTIF
   Sup_I2C_Sleep();
+#endif
 }
 
 void serial_wake(void) {
+#ifdef HAS_EXTIF
   Sup_I2C_Wakeup();
+#endif
 }
 
 void serial_send(Sup_Pdu_t* packet) {
+#ifdef HAS_EXTIF
   queue_ble_command(packet);
+#endif
 }
 
 void serial_tick(void) {
+#ifdef HAS_EXTIF
   if (Sup_I2C_SlaveStatus() & Sup_I2C_SSTAT_WR_CMPLT) {
     if (Sup_I2C_SlaveGetWriteBufSize() == sizeof(i2c_inbox)) {
       uint8_t enableInterrupts = CyEnterCriticalSection();
@@ -71,20 +80,25 @@ void serial_tick(void) {
       }
     }
   }
+#endif
 }
 
 void update_serial_keyboard_report(queuedScancode *key) {
+#ifdef HAS_EXTIF
   Sup_Pdu_t buffer;
   buffer.command =
       (key->flags & USBQUEUE_RELEASED_MASK) ? SUP_CMD_KEYUP : SUP_CMD_KEYDOWN;
   buffer.data = key->keycode;
   queue_ble_command(&buffer);
   //xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
+#endif
 }
 
 void serial_reset_reports() {
+#ifdef HAS_EXTIF
   Sup_Pdu_t buffer;
   buffer.command = SUP_CMD_CLEAR;
   buffer.data = 0;
   queue_ble_command(&buffer);
+#endif
 }
