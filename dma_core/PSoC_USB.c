@@ -27,12 +27,12 @@ typedef struct {
   uint8_t data[64];
 } UsbPdu_t;
 
-#define USB_BUFFER_END 3
+#define USB_BUFFER_END 15
 #define USB_BUFFER_NEXT(X) ((X + 1) & USB_BUFFER_END)
 #define USB_BUFFER_PREV(X) ((X + USB_BUFFER_END) & USB_BUFFER_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
-UsbPdu_t usbSendingQueue[4];
+UsbPdu_t usbSendingQueue[USB_BUFFER_END + 1];
 uint8_t usbSendingReadPos = 0;
 uint8_t usbSendingWritePos = 0;
 
