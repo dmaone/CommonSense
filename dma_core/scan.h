@@ -58,18 +58,18 @@ typedef union {
 // PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
 #undef COMMONSENSE_100KHZ_MODE
 
-#define SCANCODE_BUFFER_END 31
-#define SCANCODE_BUFFER_NEXT(X) ((X + 1) & SCANCODE_BUFFER_END)
+#define SCANCODES_END 31
+#define SCANCODES_NEXT(X) ((X + 1) & SCANCODES_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
 #undef MATRIX_LEVELS_DEBUG
-scancode_t scancode_buffer[SCANCODE_BUFFER_END + 1];
+scancode_t scancodes[SCANCODES_END + 1];
 #ifdef MATRIX_LEVELS_DEBUG
-uint8_t level_buffer[SCANCODE_BUFFER_END + 1];
-uint8_t level_buffer_inst[SCANCODE_BUFFER_END + 1];
+uint8_t level_buffer[SCANCODES_END + 1];
+uint8_t level_buffer_inst[SCANCODES_END + 1];
 #endif
-uint8_t scancode_buffer_writepos;
-uint8_t scancode_buffer_readpos;
+uint8_t scancodes_wpos;
+uint8_t scancodes_rpos;
 
 void scan_init(uint8_t);
 void scan_start(void);

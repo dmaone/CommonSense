@@ -173,9 +173,9 @@ static inline void append_scancode(uint8_t flags, uint8_t scancode) {
     PIN_DEBUG(1, 2)
   }
 #endif
-  scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
-  scancode_buffer[scancode_buffer_writepos].flags = flags;
-  scancode_buffer[scancode_buffer_writepos].scancode = scancode;
+  scancodes_wpos = SCANCODES_NEXT(scancodes_wpos);
+  scancodes[scancodes_wpos].flags = flags;
+  scancodes[scancodes_wpos].scancode = scancode;
 }
 
 
@@ -301,13 +301,13 @@ void scan_reset(void) {
     matrix[i] = MAX_MATRIX_VALUE;
 #endif
   }
-  for(uint8_t i = 0; i <= SCANCODE_BUFFER_END; i++) {
-    scancode_buffer[i].flags = 0;
-    scancode_buffer[i].scancode = COMMONSENSE_NOKEY;
+  for(uint8_t i = 0; i <= SCANCODES_END; i++) {
+    scancodes[i].flags = 0;
+    scancodes[i].scancode = COMMONSENSE_NOKEY;
   }
   memset(matrix_status, 0, sizeof(matrix_status));
-  scancode_buffer_readpos = 0;
-  scancode_buffer_writepos = 0;
+  scancodes_rpos = 0;
+  scancodes_wpos = 0;
   CyExitCriticalSection(enableInterrupts);
 }
 

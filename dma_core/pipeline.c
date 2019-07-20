@@ -15,8 +15,9 @@
 #include "PSoC_USB.h"
 #include "sup_serial.h"
 
-uint8_t pipeline_prev_usbkey;
-uint32_t pipeline_prev_usbkey_time;
+uint8_t tap_usb_sc;
+uint32_t tap_deadline;
+uint_fast16_t saved_macro_ptr;
 
 inline void process_layerMods(uint8_t flags, uint8_t keycode) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
@@ -69,20 +70,23 @@ inline uint_fast16_t lookup_macro(uint8_t flags, uint8_t keycode) {
 inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   // Trick - even if current buffer position is empty, write to the next one.
   // It may be empty because reader already processed it.
-  USBQueue_writepos = KEYCODE_BUFFER_NEXT(USBQueue_writepos);
+  USBQueue_wpos = KEYCODE_BUFFER_NEXT(USBQueue_wpos);
   // Make sure not to overwrite pending events - TODO think how not to fall into
   // infinite loop if buffer full.
-  while (USBQueue[USBQueue_writepos].keycode != USBCODE_NOEVENT) {
-    USBQueue_writepos = KEYCODE_BUFFER_NEXT(USBQueue_writepos);
+  while (USBQueue[USBQueue_wpos].keycode != USBCODE_NOEVENT) {
+    USBQueue_wpos = KEYCODE_BUFFER_NEXT(USBQueue_wpos);
   }
-  USBQueue[USBQueue_writepos].sysTime = time;
-  USBQueue[USBQueue_writepos].flags = flags;
-  USBQueue[USBQueue_writepos].keycode = keycode;
+  USBQueue[USBQueue_wpos].sysTime = time;
+  USBQueue[USBQueue_wpos].flags = flags;
+  USBQueue[USBQueue_wpos].keycode = keycode;
 }
 
-inline void play_macro(uint_fast16_t macro_start) {
-  uint8_t *mptr = &config.macros[macro_start] + 3;
-  uint8_t *macro_end = mptr + config.macros[macro_start + 2];
+inline void play_macro(uint_fast16_t start) {
+  uint8_t *mptr = &config.macros[start] + 3;
+  uint8_t *macro_end = mptr + config.macros[start + 2];
+#ifdef DEBUG_PIPELINE
+  xprintf("PM@%d: %d, sz: %d", systime, start, config.macros[start + 2]);
+#endif
   uint32_t now = systime;
   uint_fast16_t delay;
   uint8_t keyflags;
@@ -133,39 +137,33 @@ inline void play_macro(uint_fast16_t macro_start) {
   }
 }
 
-inline scancode_t process_scancode_buffer(void) {
-  if (scancode_buffer_readpos == scancode_buffer_writepos) {
+inline scancode_t read_scancode(void) {
+  if (scancodes_rpos == scancodes_wpos) {
+    // Nothing to read. Return empty value AKA "Pressed nokey".
     scancode_t result;
     result.flags = 0;
     result.scancode = COMMONSENSE_NOKEY;
     return result;
   }
-  // Skip zeroes that might be there
-  while (scancode_buffer[scancode_buffer_readpos].scancode == COMMONSENSE_NOKEY
-    && !(
-      scancode_buffer[scancode_buffer_readpos].flags & USBQUEUE_RELEASED_MASK
-    )
+  // Skip empty elements that might be there
+  while (scancodes[scancodes_rpos].scancode == COMMONSENSE_NOKEY &&
+        (scancodes[scancodes_rpos].flags & USBQUEUE_RELEASED_MASK) == 0
   ) {
-    scancode_buffer_readpos = SCANCODE_BUFFER_NEXT(scancode_buffer_readpos);
+    scancodes_rpos = SCANCODES_NEXT(scancodes_rpos);
   }
-  scancode_t scancode = scancode_buffer[scancode_buffer_readpos];
+  // MOVE the value from ring buffer to output buffer. Mark source as empty.
+  scancode_t scancode = scancodes[scancodes_rpos];
+  scancodes[scancodes_rpos].flags = 0;
+  scancodes[scancodes_rpos].scancode = COMMONSENSE_NOKEY;
 #ifdef MATRIX_LEVELS_DEBUG
   xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
           scancode & SCANCODE_MASK, systime,
-          level_buffer[scancode_buffer_readpos],
-          level_buffer_inst[scancode_buffer_readpos]);
-#else
-// xprintf("sc: %d %d @ %d ms", scancode & KEY_UP_MASK, scancode &SCANCODE_MASK,
-// systime);
+          level_buffer[scancodes_rpos],
+          level_buffer_inst[scancodes_rpos]);
 #endif
-  scancode_buffer[scancode_buffer_readpos].flags = 0;
-  scancode_buffer[scancode_buffer_readpos].scancode = COMMONSENSE_NOKEY;
   return scancode;
 }
 
-inline void push_back_scancode(scancode_t sc) {
-  scancode_buffer[scancode_buffer_readpos] = sc;
-}
 
 inline void process_real_key(void) {
   scancode_t sc;
@@ -276,11 +274,11 @@ inline void update_reports(void) {
   // If there's change - find first non-empty buffer cell.
   // This results in infinite loop on empty buffer - must take care not to queue
   // NOEVENTs.
-  while (USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT) {
-    USBQueue_readpos = KEYCODE_BUFFER_NEXT(USBQueue_readpos);
+  while (USBQueue[USBQueue_rpos].keycode == USBCODE_NOEVENT) {
+    USBQueue_rpos = KEYCODE_BUFFER_NEXT(USBQueue_rpos);
   }
-  // xprintf("USB queue %d - %d", USBQueue_readpos, USBQueue_writepos);
-  uint8_t pos = USBQueue_readpos;
+  // xprintf("USB queue %d - %d", USBQueue_rpos, USBQueue_wpos);
+  uint8_t pos = USBQueue_rpos;
   do {
     if (USBQueue[pos].keycode != USBCODE_NOEVENT &&
         USBQueue[pos].sysTime <= systime) {
@@ -321,15 +319,15 @@ inline void update_reports(void) {
             USBQueue[pos].keycode); // Let the downstream filter by keycode
       }
       USBQueue[pos].keycode = USBCODE_NOEVENT;
-      if (pos == USBQueue_readpos && pos != USBQueue_writepos) {
+      if (pos == USBQueue_rpos && pos != USBQueue_wpos) {
         // Only if we're at first position. Previous cells may contain future
         // actions otherwise! Also if not the last item - we don't want to
         // overrun the buffer.
-        USBQueue_readpos = KEYCODE_BUFFER_NEXT(pos);
+        USBQueue_rpos = KEYCODE_BUFFER_NEXT(pos);
       }
       break;
     }
-  } while (pos != USBQueue_writepos);
+  } while (pos != USBQueue_wpos);
 }
 
 inline void pipeline_process(void) {
@@ -363,8 +361,8 @@ void pipeline_init(void) {
   // Pipeline is worked on in main loop only, no point disabling IRQs to avoid
   // preemption.
   scan_reset();
-  USBQueue_readpos = 0;
-  USBQueue_writepos = 0;
+  USBQueue_rpos = 0;
+  USBQueue_wpos = 0;
   cooldown_timer = 0;
   memset(USBQueue, USBCODE_NOEVENT, sizeof USBQueue);
 }

@@ -30,13 +30,13 @@ typedef union {
 #define DEBUG_SHOW_MATRIX_EVENTS 0
 #define PROFILE_SCAN_PROCESSING 0
 
-#define SCANCODE_BUFFER_END 31
-#define SCANCODE_BUFFER_NEXT(X) ((X + 1) & SCANCODE_BUFFER_END)
+#define SCANCODES_END 31
+#define SCANCODES_NEXT(X) ((X + 1) & SCANCODES_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
-scancode_t scancode_buffer[SCANCODE_BUFFER_END + 1];
-uint8_t scancode_buffer_writepos;
-uint8_t scancode_buffer_readpos;
+scancode_t scancodes[SCANCODES_END + 1];
+uint8_t scancodes_wpos;
+uint8_t scancodes_rpos;
 
 void append_scancode(uint8_t flags, uint8_t scancode);
 void scan_check_matrix();

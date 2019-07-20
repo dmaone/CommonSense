@@ -38,11 +38,10 @@ typedef union {
 #define MACRO_KEY_UPDOWN_RELEASE 0x02
 
 queuedScancode USBQueue[KEYCODE_BUFFER_END + 1];
-uint8_t USBQueue_readpos;
-uint8_t USBQueue_writepos;
-#define USBQUEUE_IS_EMPTY                                                      \
-  (USBQueue_readpos == USBQueue_writepos &&                                    \
-   USBQueue[USBQueue_readpos].keycode == USBCODE_NOEVENT)
+uint8_t USBQueue_rpos;
+uint8_t USBQueue_wpos;
+#define USBQUEUE_IS_EMPTY (USBQueue_rpos == USBQueue_wpos &&                   \
+                           USBQueue[USBQueue_rpos].keycode == USBCODE_NOEVENT)
 
 uint8_t mods;
 uint8_t layerMods;

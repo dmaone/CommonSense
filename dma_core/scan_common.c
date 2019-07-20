@@ -19,9 +19,9 @@ inline void append_scancode(uint8_t flags, uint8_t scancode) {
     PIN_DEBUG(1, 2)
   }
 #endif
-  scancode_buffer_writepos = SCANCODE_BUFFER_NEXT(scancode_buffer_writepos);
-  scancode_buffer[scancode_buffer_writepos].flags = flags;
-  scancode_buffer[scancode_buffer_writepos].scancode = scancode;
+  scancodes_wpos = SCANCODES_NEXT(scancodes_wpos);
+  scancodes[scancodes_wpos].flags = flags;
+  scancodes[scancodes_wpos].scancode = scancode;
   uint8_t row = scancode >> 5; // uint32 holds 32 values
   uint8_t col = scancode & 0x1f; // 0 to 31
   if (flags & KEY_UP_MASK) {
