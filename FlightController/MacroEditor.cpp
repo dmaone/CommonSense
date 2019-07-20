@@ -186,7 +186,10 @@ void MacroEditor::on_addButton_clicked() {
   if (existingMacro) {
     ui->macroListCombo->setItemText(pos, newMacro.fullName());
   } else {
-    deviceConfig->macros.push_back(newMacro);
+    // Must insert tap macros first, firmware depends on that order
+    auto it = std::lower_bound(
+        deviceConfig->macros.cbegin(), deviceConfig->macros.cend(), newMacro);
+    deviceConfig->macros.insert(it, newMacro);
 
     ui->macroListCombo->removeItem(pos);
     ui->macroListCombo->addItem(newMacro.fullName());
