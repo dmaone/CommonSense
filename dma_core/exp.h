@@ -14,14 +14,14 @@
 #define LED_CAPSLOCK_MASK 0x02
 #define LED_SCRLOCK_MASK 0x04
 
-#define EXP_NUMLOCK_PIN ExpHdr_0
-#define EXP_CAPSLOCK_PIN ExpHdr_1
+#define EXP_CAPSLOCK_PIN ExpHdr_3
+#define EXP_NUMLOCK_PIN ExpHdr_1
 #define EXP_SCRLOCK_PIN ExpHdr_2
 
 #define EXP_SOLENOID_POWER ExpHdr_0
 #define EXP_SOLENOID_CONTROL ExpHdr_2
-#define EXP_SOLENOID_NUMLOCK ExpHdr_1
 #define EXP_SOLENOID_CAPSLOCK ExpHdr_3
+#define EXP_SOLENOID_NUMLOCK ExpHdr_1
 
 void exp_init(void);
 void exp_toggle(void);
