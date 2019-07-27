@@ -29,9 +29,10 @@ int main(int argc, char *argv[]) {
   logger = NULL;
   old_logger = NULL;
   QApplication a(argc, argv);
-  QCoreApplication::setOrganizationDomain("jwbh.ru");
+  QCoreApplication::setOrganizationDomain("none.exists");
   QCoreApplication::setOrganizationName("DMA Labs");
   QCoreApplication::setApplicationName("FlightController");
+  QCoreApplication::setApplicationVersion("1.0.0.0");
   FlightController w;
   logger = w.getLogViewport();
   old_logger = qInstallMessageHandler(logToViewport);

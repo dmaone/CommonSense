@@ -21,6 +21,7 @@ constexpr size_t kBlinkTimerTick = 100;
 FlightController::FlightController(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::FlightController) {
   ui->setupUi(this);
+  ui->swVersionLabel->setText(QCoreApplication::applicationVersion());
 
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
 
@@ -148,7 +149,8 @@ void FlightController::timerEvent(QTimerEvent * timer) {
 
 void FlightController::updateStatus(void) {
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
-  ui->versionLabel->setText(di.firmwareVersion);
+  ui->fwVersionLabel->setText(di.firmwareVersion);
+  ui->tempGauge->setText(di.dieTemp);
   if (di.scanEnabled) {
     ui->scanButton
         ->setStyleSheet("color: #000000; background-color: #00ff00");

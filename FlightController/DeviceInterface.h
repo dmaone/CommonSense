@@ -48,6 +48,7 @@ public:
   bool rx {false};
   bool tx {false};
   QString firmwareVersion;
+  QString dieTemp;
 
 public slots:
   void sendCommand(c2command, uint8_t *);

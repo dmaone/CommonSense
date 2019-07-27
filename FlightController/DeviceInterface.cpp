@@ -40,8 +40,10 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
   setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
   matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR);
   controllerInsane = payload->at(1) & (1 << C2DEVSTATUS_INSANE);
-  firmwareVersion = QString("v%1.%2")
+  firmwareVersion = QString("%1.%2")
       .arg((uint8_t)payload->at(2)).arg((uint8_t)payload->at(3));
+  dieTemp = QString("%1%2")
+      .arg((payload->at(4) == 1 ? '+' : '-')).arg((uint8_t)payload->at(5));
   if (matrixMonitor) {
     setupMode = false;
   }
@@ -50,9 +52,8 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
     return;
   }
   printableStatus = false;
-  qInfo().nospace().noquote() << "CommonSense " << firmwareVersion
-                    << ", die temp " << (payload->at(4) == 1 ? '+' : '-')
-                    << (uint8_t)payload->at(5) << "C";
+  qInfo().nospace().noquote() << "CommonSense v" << firmwareVersion
+                    << ", die temp: " << dieTemp << "℃";
   qInfo().nospace() << "Scan: " << scanEnabled
       << ", Output: " << outputEnabled
       << ", Monitor: " << matrixMonitor
@@ -85,8 +86,10 @@ bool DeviceInterface::event(QEvent *e) {
       row = (scancode - col) / config->numCols;
       emit scancodeReceived(
           row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
-      qInfo().noquote() << QString((flags & flagReleased) ? " r" : "p")
-                        << row + 1 << col + 1;
+      qInfo().noquote() <<
+          QString((flags & flagReleased) ? "· %1 %2" : "# %1 %2")
+          .arg(row + 1, 2)
+          .arg(col + 1, 2);
       return true;
     default:
       qInfo() << payload->constData();
@@ -233,7 +236,7 @@ void DeviceInterface::_sendPacket() {
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   if (hid_write(device, outbox, sizeof outbox) == -1) {
-    qWarning() << "Error sending to the device, will reconnect..";
+    qWarning() << "Error sending to the device, will reconnect";
     releaseDevice();
   }
 }
@@ -242,7 +245,7 @@ void DeviceInterface::_receivePacket(void) {
   memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
   int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
   if (bytesRead < 0) {
-    qInfo() << "Device went away. Reconnecting..";
+    qInfo() << "Device went away. Reconnecting";
     releaseDevice();
     return;
   }
@@ -362,6 +365,6 @@ void DeviceInterface::releaseDevice(void) {
 }
 
 void DeviceInterface::start(void) {
-  qInfo() << "Acquiring device..";
+  qInfo() << "Acquiring device";
   _resetTimer(kNormalOperationTick);
 }
