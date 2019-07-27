@@ -13,12 +13,15 @@
 class LogViewer : public QPlainTextEdit {
   Q_OBJECT
 
-public:
+ public:
   LogViewer(QWidget *parent = NULL);
 
-public slots:
+ public slots:
   void clearButtonClick(void);
   void copyAllButtonClick(void);
   void logMessage(QString msg);
   void continueMessage(QString msg);
+
+ private:
+  uint32_t progress_{0}; // for progress indicators
 };

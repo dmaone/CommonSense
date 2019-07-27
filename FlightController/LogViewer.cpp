@@ -7,6 +7,7 @@
  * published by the Free Software Foundation.
  */
 #include "LogViewer.h"
+#include <QDateTime>
 #include <QMessageBox>
 
 LogViewer::LogViewer(QWidget *parent) : QPlainTextEdit(parent) {
@@ -14,14 +15,26 @@ LogViewer::LogViewer(QWidget *parent) : QPlainTextEdit(parent) {
 }
 
 void LogViewer::logMessage(QString msg) {
-  this->appendPlainText(msg);
-  repaint();
+  this->appendPlainText(QDateTime::currentDateTime().toString("hh:mm:ss.zzz "));
+  this->insertPlainText(msg.replace("\n", "\n--:--:--.--- "));
+  progress_ = 0;
+  this->moveCursor(QTextCursor::End);
 }
 
 void LogViewer::continueMessage(QString msg) {
-  this->moveCursor(QTextCursor::End);
-  this->insertPlainText(msg);
-  this->moveCursor(QTextCursor::End);
+  if (msg != ".") {
+    this->insertPlainText(msg);
+    this->moveCursor(QTextCursor::End);
+  } else {
+    if (progress_ == 0) {
+      this->insertPlainText(".. [0]");
+    }
+    // Progress indicator
+    this->moveCursor(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+    this->moveCursor(QTextCursor::PreviousWord, QTextCursor::KeepAnchor);
+    this->moveCursor(QTextCursor::PreviousCharacter, QTextCursor::KeepAnchor);
+    this->insertPlainText(QString("[%1]").arg(progress_++));
+  }
   repaint();
 }
 

@@ -60,7 +60,7 @@ void DeviceConfig::toDevice(void) {
   emit sendCommand(C2CMD_EWO, (1 << C2DEVSTATUS_SETUP_MODE));
   this->transferDirection = TransferUpload;
   this->currentBlock = 0;
-  qInfo() << "Uploading config..";
+  qInfo() << "Uploading config";
   this->_uploadConfigBlock();
 }
 
@@ -105,7 +105,8 @@ void DeviceConfig::fromDevice() {
   case TransferIdle:
     transferDirection = TransferDownload;
     currentBlock = 0;
-    qInfo() << "Downloading config..";
+    qInfo() << "Downloading config";
+    qInfo() << ".";
     break;
   case TransferDownload:
     qInfo() << "Already downloading! Re-requesting current block just in case";
@@ -131,13 +132,13 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
+  qInfo(".");
   if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
     transferDirection = TransferIdle;
     qInfo() << "done, unpacking...";
     _unpack();
     return;
   }
-  qInfo(".");
   memcpy(this->_eeprom.raw +
              (CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)),
          payload->data() + 1 + CONFIG_BLOCK_DATA_OFFSET,
