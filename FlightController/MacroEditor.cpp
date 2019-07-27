@@ -92,7 +92,7 @@ void MacroEditor::populateSteps(QByteArray &bytes) {
   changed = false;
 }
 
-QByteArray MacroEditor::encodeSteps(int macro_row) {
+QByteArray MacroEditor::encodeSteps(int /* macro_row */) {
   QByteArray retval;
   for (int row = 0; row < ui->bodyTable->rowCount() - 1; row++) {
     auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
@@ -302,7 +302,7 @@ void MacroEditor::fillCommandParameters(int row, int command) {
   }
 }
 
-void MacroEditor::cmdIndexChanged(int idx) {
+void MacroEditor::cmdIndexChanged(int /* idx */) {
   auto *cb = qobject_cast<QComboBox *>(QObject::sender());
   if (!cb) {
     return;

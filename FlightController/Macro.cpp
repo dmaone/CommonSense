@@ -1,7 +1,6 @@
 #include "Macro.h"
 
 #include <QDebug>
-#include "../../c2/c2_protocol.h"
 
 #include "ScancodeList.h"
 
