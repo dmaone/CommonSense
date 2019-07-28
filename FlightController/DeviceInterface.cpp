@@ -147,11 +147,10 @@ void DeviceInterface::sendCommand(OUT_c2packet_t cmd) {
   _enqueueCommand(cmd);
 }
 
-void DeviceInterface::sendCommand(Bootloader_packet_t *packet) {
+void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
   OUT_c2packet_t outbox;
-  uint8_t wire_length =
-      packet->length + 7; // marker+cmd+len16+checksum16+marker
-  memcpy(outbox.raw, packet->raw, wire_length);
+  // Structure is marker+[payload]+len16+checksum16+marker
+  memcpy(outbox.raw, packet.raw, packet.length + 7);
   qDebug() << "SendCmdPacketPtr queueLock";
   _enqueueCommand(outbox);
 }

@@ -51,8 +51,8 @@ FlightController::FlightController(QWidget *parent)
   // Must be last in chain to intercept all packets!
   loader = new FirmwareLoader();
   connect(loader, SIGNAL(switchMode(bool)), &di, SLOT(bootloaderMode(bool)));
-  connect(loader, SIGNAL(sendPacket(Bootloader_packet_t *)), &di,
-          SLOT(sendCommand(Bootloader_packet_t *)));
+  connect(loader, SIGNAL(sendPacket(Bootloader_packet_t)), &di,
+          SLOT(sendCommand(Bootloader_packet_t)));
   blinkTimerId = startTimer(kBlinkTimerTick);
 }
 

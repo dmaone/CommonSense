@@ -12,10 +12,11 @@
 class DeviceMessage : public QEvent {
 public:
   static const QEvent::Type ET;
-  DeviceMessage(const unsigned char *buf);
-  ~DeviceMessage(void);
-  QByteArray *getPayload();
+  QByteArray payload;
 
-private:
-  QByteArray *payload;
+  DeviceMessage(const unsigned char *buf);
+
+  QByteArray* getPayload() {
+    return &payload;
+  }
 };

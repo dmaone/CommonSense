@@ -59,7 +59,7 @@ public slots:
 
 signals:
   void switchMode(bool bEnable);
-  void sendPacket(Bootloader_packet_t *packet);
+  void sendPacket(Bootloader_packet_t packet); // Yes, copy.
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
@@ -73,10 +73,10 @@ private:
   bool _loadFirmwareFile(void);
   void _sendCommand(BootloaderVerb command);
   void _sendPacket(BootloaderVerb command, QByteArray &data);
-  bool _responseValid(Bootloader_packet_t *data);
-  uint16_t _packetChecksum(Bootloader_packet_t *packet);
-  bool _checkCompatibility(Bootloader_packet_t *packet);
-  bool _checkFlashSize(Bootloader_packet_t *packet);
+  bool _responseValid(const Bootloader_packet_t& data);
+  uint16_t _packetChecksum(const Bootloader_packet_t& packet);
+  bool _checkCompatibility(const Bootloader_packet_t& packet);
+  bool _checkFlashSize(const Bootloader_packet_t& packet);
   bool _upload_row();
 };
 

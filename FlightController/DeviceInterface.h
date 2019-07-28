@@ -57,7 +57,7 @@ public slots:
   void sendCommand(c2command, uint8_t *);
   void sendCommand(c2command, uint8_t);
   void sendCommand(OUT_c2packet_t);
-  void sendCommand(Bootloader_packet_t *);
+  void sendCommand(Bootloader_packet_t);
 
   // NEVER use this function - it's only for sending packet in close event
   // because timers don't work in close event!

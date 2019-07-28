@@ -16,12 +16,12 @@ FirmwareLoader::FirmwareLoader(QObject *parent)
   di.installEventFilter(this);
 }
 
-bool FirmwareLoader::_checkCompatibility(Bootloader_packet_t *packet) {
+bool FirmwareLoader::_checkCompatibility(const Bootloader_packet_t& packet) {
   uint32_t siliconId;
-  memcpy(&siliconId, &packet->payload[0], 4);
+  memcpy(&siliconId, &packet.payload[0], 4);
   if (siliconId != firmware->siliconId ||
-      packet->payload[4] != firmware->siliconRevision) {
-    qInfo() << "Silicon: " << siliconId << " revision " << packet->payload[4];
+      packet.payload[4] != firmware->siliconRevision) {
+    qInfo() << "Silicon: " << siliconId << " revision " << packet.payload[4];
     qInfo() << "Firmware: " << firmware->siliconId
             << " revision " << firmware->siliconRevision;
     qCritical()
@@ -29,9 +29,9 @@ bool FirmwareLoader::_checkCompatibility(Bootloader_packet_t *packet) {
     return true;
   }
   qInfo().nospace() << "Remote bootloader version "
-                    << (uint8_t)packet->payload[5] << "."
-                    << (uint8_t)packet->payload[6] << "."
-                    << (uint8_t)packet->payload[7];
+                    << (uint8_t)packet.payload[5] << "."
+                    << (uint8_t)packet.payload[6] << "."
+                    << (uint8_t)packet.payload[7];
   // MAYBE FLASH SIZE CHECK
   // Checking flash size gets ERR_DATA, so some other day. We check for
   // siliconId already, oughtta be enough. Let's just upload the row instead.
@@ -44,11 +44,11 @@ bool FirmwareLoader::_checkCompatibility(Bootloader_packet_t *packet) {
 
 /* MAYBE FLASH SIZE CHECK
 
-bool FirmwareLoader::_checkFlashSize(Bootloader_packet_t *packet)
+bool FirmwareLoader::_checkFlashSize(const Bootloader_packet_t& packet)
 {
     qInfo() << "Checking flash size..";
     uint16_t boundaries[2];
-    memcpy(boundaries, &packet->payload[0], 4);
+    memcpy(boundaries, &packet.payload[0], 4);
 
     for(auto & el : firmware->data)
     {
@@ -76,7 +76,7 @@ bool FirmwareLoader::_upload_row(void) {
     firmware = NULL;
     emit switchMode(bootloaderMode);
   } else if (lastRow->data.size() <= BOOTLOADER_MAX_PACKET_LENGTH) {
-    //qInfo() << "Programming array" << lastRow->array << "row" << lastRow->row;
+    qDebug() << "Programming array" << lastRow->array << "row" << lastRow->row;
     qInfo() << ".";
     lastRow->data.push_front((uint8_t)(lastRow->row >> 8));
     lastRow->data.push_front((uint8_t)(lastRow->row & 0xff));
@@ -92,33 +92,27 @@ bool FirmwareLoader::_upload_row(void) {
   return true;
 }
 
-bool FirmwareLoader::eventFilter(QObject *obj __attribute__((unused)),
-                                 QEvent *event) {
-  if (!(bootloaderMode && event->type() == DeviceMessage::ET))
+bool FirmwareLoader::eventFilter(QObject* /* obj */, QEvent* event) {
+  if (!bootloaderMode || event->type() != DeviceMessage::ET) {
+    // Not our message
     return false;
-  QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-  Bootloader_packet_t *packet = (Bootloader_packet_t *)pl->constData();
-  //    qInfo().noquote() << QString::number(packet->raw[0], 16) <<
-  //    QString::number(packet->raw[1], 16) << QString::number(packet->raw[2],
-  //    16) << QString::number(packet->raw[3], 16)
-  //            << QString::number(packet->raw[4], 16) <<
-  //            QString::number(packet->raw[5], 16) <<
-  //            QString::number(packet->raw[6], 16) <<
-  //            QString::number(packet->raw[7], 16)
-  //            << QString::number(packet->raw[8], 16) <<
-  //            QString::number(packet->raw[9], 16) <<
-  //            QString::number(packet->raw[10], 16) <<
-  //            QString::number(packet->raw[11], 16)
-  //            << QString::number(packet->raw[12], 16) <<
-  //            QString::number(packet->raw[13], 16) <<
-  //            QString::number(packet->raw[14], 16) <<
-  //            QString::number(packet->raw[15], 16);
+  }
+  auto pl = static_cast<DeviceMessage *>(event)->payload;
+  Bootloader_packet_t packet{};
+  memcpy(packet.raw, pl.constData(), pl.length());
+  qDebug("Rcv: "
+      "%02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x",
+      packet.raw[1], packet.raw[2], packet.raw[3], packet.raw[4],
+      packet.raw[5], packet.raw[6], packet.raw[7], packet.raw[8],
+      packet.raw[9], packet.raw[10], packet.raw[11], packet.raw[12],
+      packet.raw[13], packet.raw[14], packet.raw[15], packet.raw[16]);
+
   if (!_responseValid(packet)) {
     qCritical() << "Invalid packet received from bootloader!";
     return true;
   }
-  if (packet->command != BR_CYRET_SUCCESS) {
-    qCritical() << "Error received:" << (BootloaderVerb)packet->command;
+  if (packet.command != BR_CYRET_SUCCESS) {
+    qCritical() << "Error received:" << (BootloaderVerb)packet.command;
     return true;
   }
   switch (lastCommand) {
@@ -136,7 +130,7 @@ bool FirmwareLoader::eventFilter(QObject *obj __attribute__((unused)),
     // Not acknowledged! Device reloads on receipt of ExitBootloader!
     break;
   default:
-    qInfo() << "Received response" << (BootloaderVerb)packet->command
+    qInfo() << "Received response" << (BootloaderVerb)packet.command
             << "for command" << lastCommand;
   }
 
@@ -171,7 +165,9 @@ void FirmwareLoader::start(void) {
   }
   if (bootloaderMode) {
     qInfo("Already in firmware update mode!");
-    return;
+    // Turns out sometimes device misses the mode switch.
+    // So returning here just forces you to restart FC for no good reason.
+    //return;
   }
   QMessageBox::StandardButton result = QMessageBox::question(
       NULL, "Are you sure?",
@@ -189,6 +185,7 @@ void FirmwareLoader::load(void) {
     qInfo() << "Invalid firmware file! cannot proceed!";
     return;
   }
+  qInfo() << "Trying to talk to bootloader";
   _sendCommand(BCMD_EnterBootloader);
 }
 
@@ -212,10 +209,10 @@ bool FirmwareLoader::_loadFirmwareFile(void) {
   return true;
 }
 
-uint16_t FirmwareLoader::_packetChecksum(Bootloader_packet_t *packet) {
+uint16_t FirmwareLoader::_packetChecksum(const Bootloader_packet_t& packet) {
   uint16_t checksum = 0;
-  for (uint8_t i = 0; i < sizeof *packet; i++)
-    checksum += packet->raw[i];
+  for (uint8_t i = 0; i < sizeof(packet); i++)
+    checksum += packet.raw[i];
   return ~checksum + 1; // 2's complement
 }
 
@@ -225,53 +222,45 @@ void FirmwareLoader::_sendCommand(BootloaderVerb command) {
 }
 
 void FirmwareLoader::_sendPacket(BootloaderVerb command, QByteArray &data) {
-  // qInfo() << "Sending" << command;
   lastCommand = command;
 
-  Bootloader_packet_t *packet = new Bootloader_packet_t();
-  packet->sop = BOOTLOADER_SOP_MARKER;
-  packet->command = command;
-  packet->length = data.length();
-  memcpy(packet->payload, data.constData(), packet->length);
+  Bootloader_packet_t packet{};
+  packet.sop = BOOTLOADER_SOP_MARKER;
+  packet.command = command;
+  packet.length = data.length();
+  memcpy(packet.payload, data.constData(), packet.length);
 
-  Bootloader_packet_trailer_t *trailer =
-      (Bootloader_packet_trailer_t *)&packet->payload[packet->length];
+  auto trailer = reinterpret_cast<Bootloader_packet_trailer_t *>(
+      &packet.payload[packet.length]);
   trailer->checksum = _packetChecksum(packet);
   trailer->eop = BOOTLOADER_EOP_MARKER;
-  //    qInfo().noquote() << QString::number(packet->raw[0], 16) <<
-  //    QString::number(packet->raw[1], 16) << QString::number(packet->raw[2],
-  //    16) << QString::number(packet->raw[3], 16)
-  //            << QString::number(packet->raw[4], 16) <<
-  //            QString::number(packet->raw[5], 16) <<
-  //            QString::number(packet->raw[6], 16) <<
-  //            QString::number(packet->raw[7], 16)
-  //            << QString::number(packet->raw[8], 16) <<
-  //            QString::number(packet->raw[9], 16) <<
-  //            QString::number(packet->raw[10], 16) <<
-  //            QString::number(packet->raw[11], 16)
-  //            << QString::number(packet->raw[12], 16) <<
-  //            QString::number(packet->raw[13], 16) <<
-  //            QString::number(packet->raw[14], 16) <<
-  //            QString::number(packet->raw[15], 16);
+  qDebug() << command;
+  qDebug(
+      "%02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x %02x%02x",
+      packet.raw[1], packet.raw[2], packet.raw[3], packet.raw[4],
+      packet.raw[5], packet.raw[6], packet.raw[7], packet.raw[8],
+      packet.raw[9], packet.raw[10], packet.raw[11], packet.raw[12],
+      packet.raw[13], packet.raw[14], packet.raw[15], packet.raw[16]);
   emit sendPacket(packet);
-  delete packet;
 }
 
-bool FirmwareLoader::_responseValid(Bootloader_packet_t *packet) {
-  if (packet->sop != BOOTLOADER_SOP_MARKER)
+bool FirmwareLoader::_responseValid(const Bootloader_packet_t& packet) {
+  if (packet.sop != BOOTLOADER_SOP_MARKER)
     return false;
 
-  if (packet->length > BOOTLOADER_MAX_PACKET_LENGTH)
+  if (packet.length > BOOTLOADER_MAX_PACKET_LENGTH)
     return false;
 
-  Bootloader_packet_trailer_t *trailer =
-      (Bootloader_packet_trailer_t *)&packet->payload[packet->length];
+  auto trailer = reinterpret_cast<const Bootloader_packet_trailer_t *>(
+      &packet.payload[packet.length]);
   uint16_t checksum = trailer->checksum;
 
   if (trailer->eop != BOOTLOADER_EOP_MARKER)
     return false;
 
   // Clear rest of the packet
-  memset((void *)trailer, 0, sizeof(packet->payload) - packet->length);
+  // This is blatant const violation, but let's pretent it's not there.
+  // Bootloader_packet_t is fixed size, and if checksum fails - things abort.
+  memset((void *)trailer, 0, sizeof(packet.payload) - packet.length);
   return _packetChecksum(packet) == checksum;
 }
