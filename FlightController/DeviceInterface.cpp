@@ -109,35 +109,51 @@ void DeviceInterface::sendCommandNow(c2command cmd, uint8_t msg) {
   auto outbox = OUT_c2packet_t();
   outbox.command = cmd;
   outbox.payload[0] = msg;
-  commandQueue_.enqueue(outbox);
+  {
+    qDebug() << "SendNow queueLock";
+    std::lock_guard<std::mutex> lock{queueLock_};
+    commandQueue_.enqueue(outbox);
+  }
   cts_.store(true); // Force it
   _sendPacket();
 }
 
+void DeviceInterface::_enqueueCommand(OUT_c2packet_t outbox) {
+  {
+    std::lock_guard<std::mutex> lock{queueLock_};
+    commandQueue_.enqueue(outbox);
+  }
+  _resetTimer(kHaveDataTickMs);
+}
+
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
-  auto outbox = OUT_c2packet_t();
+  OUT_c2packet_t outbox;
   outbox.command = cmd;
   memcpy(outbox.payload, msg, 63);
-  commandQueue_.enqueue(outbox);
+  qDebug() << "SendCmdMsgPtr queueLock";
+  _enqueueCommand(outbox);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t msg) {
-  auto outbox = OUT_c2packet_t();
+  OUT_c2packet_t outbox;
   outbox.command = cmd;
   outbox.payload[0] = msg;
-  commandQueue_.enqueue(outbox);
+  qDebug() << "SendCmdMsg queueLock";
+  _enqueueCommand(outbox);
 }
 
 void DeviceInterface::sendCommand(OUT_c2packet_t cmd) {
-  commandQueue_.enqueue(cmd);
+  qDebug() << "SendCmd queueLock";
+  _enqueueCommand(cmd);
 }
 
 void DeviceInterface::sendCommand(Bootloader_packet_t *packet) {
-  auto outbox = OUT_c2packet_t();
+  OUT_c2packet_t outbox;
   uint8_t wire_length =
       packet->length + 7; // marker+cmd+len16+checksum16+marker
   memcpy(outbox.raw, packet->raw, wire_length);
-  commandQueue_.enqueue(outbox);
+  qDebug() << "SendCmdPacketPtr queueLock";
+  _enqueueCommand(outbox);
 }
 
 void DeviceInterface::configChanged(void) {
@@ -204,8 +220,9 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
   _sendPacket();
   _receivePacket();
   if (releaseDevice_.exchange(false)) {
-    if (device)
-      qInfo("Releasing device.");
+    if (device) {
+      qInfo() << "Releasing device.";
+    }
     _updateDeviceStatus(DeviceDisconnected);
     hid_close(device);
     device = NULL;
@@ -215,20 +232,26 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
 }
 
 void DeviceInterface::_sendPacket() {
-  if (!device && !commandQueue_.empty()) {
-    commandQueue_.clear();
-    qInfo() << "Device went away on send";
-  }
-  if (commandQueue_.empty()) {
-    return;
-  }
-  if (!cts_.exchange(false) && noCtsDelay_) {
-    --noCtsDelay_;
-    return;
-  }
-  noCtsDelay_ = kNoCtsDelay; // reset timer
   unsigned char outbox[65];
-  auto cmd = commandQueue_.dequeue();
+  OUT_c2packet_t cmd;
+  {
+    qDebug() << "_sendPacket queueLock";
+    std::lock_guard<std::mutex> lock{queueLock_};
+    if (commandQueue_.empty()) {
+      _resetTimer(kNormalOperationTick); // Go back to slow mode.
+      return;
+    }
+    if (!device) {
+      commandQueue_.clear();
+      qWarning() << "Device went away on send";
+      return;
+    }
+    if (!cts_.exchange(false) && --noCtsDelay_ > 0) {
+      return;
+    }
+    noCtsDelay_ = kNoCtsDelay; // reset timer
+    cmd = commandQueue_.dequeue();
+  }
   outbox[0] = 0x00; // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
@@ -327,7 +350,7 @@ hid_device *DeviceInterface::acquireDevice(void) {
   auto deviceList = listDevices();
   if (deviceList.size() == 1) {
     qInfo() << "Found a node!";
- //   qInfo() << "Trying to use" << paths[0];
+    qDebug() << "Trying to use" << deviceList[0].second.data();
     retval = hid_open_path(deviceList[0].second.data());
   } else if (deviceList.size() > 1) {
     // More than one device.

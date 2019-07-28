@@ -8,13 +8,16 @@
  */
 
 #pragma once
-#include "../c2/c2_protocol.h"
+
+#include <mutex>
+#include <QObject>
+#include <QQueue>
+#include <hidapi/hidapi.h>
+#include <../c2/c2_protocol.h>
+
 #include "DeviceConfig.h"
 #include "Events.h"
 #include "LogViewer.h"
-#include "hidapi/hidapi.h"
-#include <QObject>
-#include <QQueue>
 
 class DeviceInterface : public QObject {
   Q_OBJECT
@@ -91,12 +94,14 @@ private:
   void processStatusReply(QByteArray* payload);
   hid_device *acquireDevice(void);
   void _initDevice(void);
+  void _enqueueCommand(OUT_c2packet_t outbox);
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);
   void _sendPacket(void);
   void _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
   std::vector<std::pair<QString, std::string>> listDevices();
+  std::mutex queueLock_{};
 
 private slots:
   void deviceMessageReceiver(void);

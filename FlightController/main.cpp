@@ -33,7 +33,9 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setOrganizationName("DMA Labs");
   QCoreApplication::setApplicationName("FlightController");
   QCoreApplication::setApplicationVersion("1.0.0.0");
+  qInfo() << "Start start!";
   FlightController w;
+  qInfo() << "Switching to LogViewer..";
   logger = w.getLogViewport();
   old_logger = qInstallMessageHandler(logToViewport);
   w.setOldLogger(&old_logger);
