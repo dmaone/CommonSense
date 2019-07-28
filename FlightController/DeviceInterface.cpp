@@ -53,7 +53,7 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
   }
   printableStatus = false;
   qInfo().nospace().noquote() << "CommonSense v" << firmwareVersion
-                    << ", die temp: " << dieTemp << "℃";
+                    << ", die temp: " << dieTemp << "°C";
   qInfo().nospace() << "Scan: " << scanEnabled
       << ", Output: " << outputEnabled
       << ", Monitor: " << matrixMonitor

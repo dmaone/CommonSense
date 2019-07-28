@@ -194,6 +194,7 @@ void FlightController::show(void) {
 }
 
 void FlightController::closeEvent(QCloseEvent *event) {
+  qInstallMessageHandler(*_oldLogger);
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
   di.sendCommandNow(C2CMD_SET_MODE, C2DEVMODE_NORMAL);
   QApplication::quit();
