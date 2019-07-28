@@ -11,6 +11,8 @@ TEMPLATE = app
 
 CONFIG += static c++14
 
+CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
+
 # Not needed for linux, but doesn't hurt.
 INCLUDEPATH += ../../hidapi
 
