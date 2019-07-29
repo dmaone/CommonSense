@@ -16,7 +16,7 @@
 #include "DeviceInterface.h"
 #include "singleton.h"
 
-constexpr size_t kBlinkTimerTick = 100;
+constexpr size_t kBlinkTimerTick = 20;
 
 FlightController::FlightController(QWidget *parent)
     : QMainWindow(parent), ui(new Ui::FlightController) {
@@ -124,21 +124,21 @@ void FlightController::setup(void) {
 void FlightController::blinkLights() {
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
   if (di.tx) {
+    di.tx = false;
     ui->txLabel
         ->setStyleSheet("color: #000000; background-color: #00ff00");
   } else {
     ui->txLabel
         ->setStyleSheet("color: #000000; background-color: #dddddd");
   }
-  di.tx = false;
   if (di.rx) {
+    di.rx = false;
     ui->rxLabel
         ->setStyleSheet("color: #000000; background-color: #00ff00");
   } else {
     ui->rxLabel
         ->setStyleSheet("color: #000000; background-color: #dddddd");
   }
-  di.rx = false;
 }
 
 void FlightController::timerEvent(QTimerEvent * timer) {
