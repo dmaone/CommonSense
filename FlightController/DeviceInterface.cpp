@@ -218,6 +218,8 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
       antiLagTimer_ = kAntiLagTicks;
     }
   }
+  qDebug() << "Main timer deviceLock";
+  std::lock_guard<std::mutex> lock{deviceLock_};
   if (releaseDevice_.exchange(false)) {
     if (device) {
       qInfo() << "Releasing device.";
@@ -228,6 +230,7 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
     if (hid_exit())
       qWarning("warning: error during hid_exit");
   }
+  qDebug() << "Timer2 deviceUnlock";
 }
 
 bool DeviceInterface::_sendPacket() {
@@ -257,6 +260,8 @@ bool DeviceInterface::_sendPacket() {
     lastSend_ = QDateTime::currentMSecsSinceEpoch();
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
+  qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
+  std::lock_guard<std::mutex> lock{deviceLock_};
   if (hid_write(device, outbox, sizeof outbox) == -1) {
     qWarning() << "Error sending to the device, will reconnect";
     releaseDevice();
@@ -266,7 +271,12 @@ bool DeviceInterface::_sendPacket() {
 
 bool DeviceInterface::_receivePacket(void) {
   memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
-  int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
+  int bytesRead;
+  {
+    qDebug() << "receivePacket deviceLock";
+    std::lock_guard<std::mutex> lock{deviceLock_};
+    bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
+  }
   if (bytesRead == 0) {
     return false;
   } else if (bytesRead < 0) {
@@ -289,6 +299,8 @@ bool DeviceInterface::_receivePacket(void) {
 }
 
 void DeviceInterface::_initDevice(void) {
+  qDebug() << "InitDevice deviceLock";
+  std::lock_guard<std::mutex> lock{deviceLock_};
   device = acquireDevice();
   if (!device) {
     qInfo() << ".";
