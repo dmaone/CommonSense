@@ -6,12 +6,12 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+#include "pipeline.h"
+
 #include <project.h>
-#include <string.h>
 
 #include "exp.h"
-#include "scan.h"
-#include "pipeline.h"
+#include "scan_common.h"
 #include "PSoC_USB.h"
 #include "sup_serial.h"
 

@@ -7,12 +7,15 @@
  * published by the Free Software Foundation.
  */
 #include "core.h"
+
+#include <project.h>
+
 #include "exp.h"
 #include "globals.h"
-#include "PSoC_USB.h"
 #include "pipeline.h"
+#include "PSoC_USB.h"
+#include "scan_common.h"
 #include "sup_serial.h"
-#include <project.h>
 
 #if SCANNER_TYPE == SCANNER_SUN
 #include "scanner_sun.h"

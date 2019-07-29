@@ -18,6 +18,10 @@ typedef union {
   uint8_t raw[2];
 } scancode_t;
 
+// number of ticks to check for spam after scan starts
+#define SANITY_CHECK_DURATION 1000
+#define SCANNER_INSANITY_THRESHOLD 3
+
 // IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122
 // with it's 8x16 matrix.
 #define COMMONSENSE_NOKEY 0xff
@@ -39,6 +43,21 @@ uint8_t scancodes_wpos;
 uint8_t scancodes_rpos;
 
 void append_scancode(uint8_t flags, uint8_t scancode);
+void append_debounced(uint8_t flags, uint8_t scancode);
+void scan_set_matrix_value(uint8_t keyIndex, uint16_t value);
+void report_matrix_readouts();
+
 void scan_check_matrix();
-uint32_t scan_is_key_pressed(uint8_t keyIndex);
-void init_scan_common();
+bool scan_is_key_down(uint8_t keyIndex);
+void scan_sanity_check();
+
+// Basic initialization - constants, essentially
+void scan_common_init(uint8_t debounce_period);
+
+// reset things - initialize matrix and buffers.
+// If you use ISRs - don't forget to disable interrupts.
+void scan_common_reset();
+
+// Primes sensor sanity check.
+// If you use ISRs - don't forget to disable interrupts.
+void scan_common_start();

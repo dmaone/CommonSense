@@ -6,11 +6,11 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+#include "scan.h"
+
 #include <project.h>
 
-#include "PSoC_USB.h"
-
-#include "scan.h"
+#include "scan_common.h"
 
 CY_ISR_PROTO(EoC_ISR);
 CY_ISR_PROTO(Result_ISR);
@@ -25,17 +25,8 @@ uint8_t Results[ADC_CHANNELS * 4 * NUM_ADCs];
 
 uint8_t reading_row, driving_row;
 bool scan_in_progress;
-uint32_t matrix_status[MATRIX_ROWS];
-bool matrix_was_active;
 
-#define MAX_MATRIX_VALUE 0xffff
-uint16_t matrix[COMMONSENSE_MATRIX_SIZE];
-uint16_t debouncing_mask;
-uint16_t debouncing_posedge;
-uint16_t debouncing_negedge;
-uint8_t scancodes_while_output_disabled = 0;
-
-void init_sensor(uint8_t debouncing_period) {
+void init_sensor() {
   // Init DMA, each burst requires a request
   Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
                      (uint16)(HI16(CYDEV_SRAM_BASE)));
@@ -65,11 +56,6 @@ void init_sensor(uint8_t debouncing_period) {
   ChargeDelay_WritePeriod(config.chargeDelay);
   DischargeDelay_Start();
   DischargeDelay_WritePeriod(config.dischargeDelay);
-  debouncing_mask = MAX_MATRIX_VALUE << debouncing_period;
-  debouncing_negedge = MAX_MATRIX_VALUE << (debouncing_period - 1);
-  debouncing_posedge = ~debouncing_negedge | debouncing_mask;
-  debouncing_negedge |= debouncing_mask;
-  scan_reset();
 }
 
 void sensor_nap(void) {
@@ -158,27 +144,6 @@ static inline void Drive(uint8 drv) {
   DriveReg0_Write(1 << drv);
 }
 
-static inline void append_scancode(uint8_t flags, uint8_t scancode) {
-  if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
-    if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
-      // Avoid overflowing counter! Things can get ugly FAST!
-      ++scancodes_while_output_disabled;
-    }
-    return;
-  }
-#if DEBUG_SHOW_KEYPRESSES == 1
-  if ((scancode & KEY_UP_MASK)) {
-    PIN_DEBUG(1, 1)
-  } else {
-    PIN_DEBUG(1, 2)
-  }
-#endif
-  scancodes_wpos = SCANCODES_NEXT(scancodes_wpos);
-  scancodes[scancodes_wpos].flags = flags;
-  scancodes[scancodes_wpos].scancode = scancode;
-}
-
-
 CY_ISR(EoC_ISR) {
 #ifdef DEBUG_INTERRUPTS
   PIN_DEBUG(1, 1)
@@ -224,8 +189,7 @@ CY_ISR(Result_ISR) {
   // keyIndex - same speed as static global on -O3, faster in -Os
   // having uint16_t* for cell is slower than directly using matrix[keyIndex].
   uint8_t keyIndex = (reading_row + 1) * MATRIX_COLS;
-  // caching row status is faster than direct array access
-  uint32_t row_status = matrix_status[reading_row];
+  // caching row status is faster than direct access, but common functions..
 #if PROFILE_SCAN_PROCESSING == 1
   CyPins_SetPin(ExpHdr_1);
 #endif
@@ -234,48 +198,27 @@ CY_ISR(Result_ISR) {
     // TEST_BIT is faster than bool inited outside of the loop.
     if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
       // When monitoring matrix we're interested in raw feed.
-      matrix[--keyIndex] = Results[adc_buffer_pos];
+      scan_set_matrix_value(--keyIndex, Results[adc_buffer_pos]);
       continue;
 #if NORMALLY_LOW == 1
     } else if (Results[adc_buffer_pos] > config.thresholds[--keyIndex]) {
 #else
     } else if (Results[adc_buffer_pos] < config.thresholds[--keyIndex]) {
 #endif
-      // Key pressed
-      matrix[keyIndex] = ((matrix[keyIndex] << 1) | debouncing_mask) + 1;
+      append_debounced(0, keyIndex);
 #if DEBUG_SHOW_MATRIX_EVENTS == 1
       PIN_DEBUG(4, 1);
 #endif
     } else {
-      matrix[keyIndex] = ((matrix[keyIndex] << 1) | debouncing_mask);
-    }
-
-    if (matrix[keyIndex] == debouncing_posedge &&
-        (row_status & (1 << curCol)) == 0) {
-      row_status |= (1 << curCol);
-      append_scancode(0, keyIndex);
-    } else if (matrix[keyIndex] == debouncing_negedge &&
-        (row_status & (1 << curCol))) {
-      row_status &= ~(1 << curCol);
-      append_scancode(KEY_UP_MASK, keyIndex);
+      append_debounced(KEY_UP_MASK, keyIndex);
     }
   }
 #if PROFILE_SCAN_PROCESSING == 1
   CyPins_ClearPin(ExpHdr_1);
 #endif
-  matrix_status[reading_row] = row_status;
   if (reading_row == 0) {
     // End of matrix reading cycle.
-    for (uint8_t i = MATRIX_ROWS - 1; i > 0; --i) {
-      row_status |= matrix_status[i];
-    }
-    if (row_status) {
-      matrix_was_active = true;
-    } else if (matrix_was_active) {
-      // Signal that last key was released
-      append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
-      matrix_was_active = false;
-    }
+    scan_check_matrix();
   }
 }
 
@@ -283,43 +226,23 @@ void scan_start(void) {
   if (scan_in_progress) {
     return;
   }
-  sanity_check_timer = SANITY_CHECK_DURATION;
-  scancodes_while_output_disabled = 0;
-  SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
+  scan_common_start();
   driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
   Drive(driving_row);
   scan_in_progress = true;
 }
 
-void scan_reset(void) {
+void scan_reset() {
   uint8_t enableInterrupts = CyEnterCriticalSection();
-  for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; i++) {
-#if NORMALLY_LOW == 1
-    matrix[i] = 0;
-#else
-    matrix[i] = MAX_MATRIX_VALUE;
-#endif
-  }
-  for(uint8_t i = 0; i <= SCANCODES_END; i++) {
-    scancodes[i].flags = 0;
-    scancodes[i].scancode = COMMONSENSE_NOKEY;
-  }
-  memset(matrix_status, 0, sizeof(matrix_status));
-  scancodes_rpos = 0;
-  scancodes_wpos = 0;
+  scan_common_reset();
   CyExitCriticalSection(enableInterrupts);
 }
 
 void scan_init(uint8_t debouncing_period) {
-  /* What I'm doing here:
-   * All status values are invalid when scan is reinitialized.
-   * BUT
-   * I don't want to fuck up the setup mode if we're in setup mode. SO.
-   */
   status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
   while (scan_in_progress) {}; // Make sure scan is stopped.
-  init_sensor(debouncing_period);
+  scan_common_init(debouncing_period);
+  init_sensor();
   enable_sensor();
 }
 
@@ -333,29 +256,3 @@ void scan_wake(void) {
 }
 
 inline void scan_tick() {};
-
-void scan_sanity_check(void) {
-  --sanity_check_timer;
-  if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
-    // Keyboard is insane. Disable it.
-    status_register &= (1 << C2DEVSTATUS_SETUP_MODE); // Keep setup mode.
-    SET_BIT(status_register, C2DEVSTATUS_INSANE);
-    xprintf("Scan module has gone insane and had to be shot!");
-    sanity_check_timer = 0;
-  } else if (0 == sanity_check_timer) {
-    SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
-  }
-}
-
-void report_matrix_readouts(void) {
-  uint8_t idx = 0;
-  for (uint8 i = 0; i < MATRIX_ROWS; i++) {
-    outbox.response_type = C2RESPONSE_MATRIX_ROW;
-    outbox.payload[0] = i;
-    outbox.payload[1] = MATRIX_COLS;
-    for (uint8_t j = 0; j < MATRIX_COLS; j++) {
-      outbox.payload[2 + j] = matrix[idx++] & 0xff;
-    }
-    usb_send_c2_blocking();
-  }
-}

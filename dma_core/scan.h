@@ -10,28 +10,6 @@
 #pragma once
 #include "globals.h"
 
-typedef union {
-  struct {
-    uint8_t flags;
-    uint8_t scancode;
-  } __attribute__((packed));
-  uint8_t raw[2];
-} scancode_t;
-
-// IMPORTANT - MUST NOT BE A REAL KEY!
-#define COMMONSENSE_NOKEY 0xff
-
-#define KEY_UP_MASK 0x80
-
-// Flags enabling debug pulses on exp header
-#define DEBUG_SHOW_KEYPRESSES 0
-#define DEBUG_SHOW_MATRIX_EVENTS 0
-#define PROFILE_SCAN_PROCESSING 0
-
-// number of ticks to check for spam after scan starts
-#define SANITY_CHECK_DURATION 1000
-#define SCANNER_INSANITY_THRESHOLD 3
-
 // This is to ease calculations, there are things hardcoded in buffer
 // management!! For 1 and 2 ADCs, that is.
 #define NUM_ADCs 1
@@ -58,24 +36,9 @@ typedef union {
 // PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
 #undef COMMONSENSE_100KHZ_MODE
 
-#define SCANCODES_END 31
-#define SCANCODES_NEXT(X) ((X + 1) & SCANCODES_END)
-// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
-
-#undef MATRIX_LEVELS_DEBUG
-scancode_t scancodes[SCANCODES_END + 1];
-#ifdef MATRIX_LEVELS_DEBUG
-uint8_t level_buffer[SCANCODES_END + 1];
-uint8_t level_buffer_inst[SCANCODES_END + 1];
-#endif
-uint8_t scancodes_wpos;
-uint8_t scancodes_rpos;
-
 void scan_init(uint8_t);
-void scan_start(void);
 void scan_reset(void);
+void scan_start(void);
 void scan_nap(void);
 void scan_wake(void);
 void scan_tick(void);
-void scan_sanity_check(void);
-void report_matrix_readouts(void);
