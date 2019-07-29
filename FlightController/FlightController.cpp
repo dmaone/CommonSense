@@ -139,6 +139,10 @@ void FlightController::blinkLights() {
     ui->rxLabel
         ->setStyleSheet("color: #000000; background-color: #dddddd");
   }
+  if (di.latencyMs.size() > 0) {
+    ui->latencyLabel->setText(di.latencyMs);
+    di.latencyMs.clear();
+  }
 }
 
 void FlightController::timerEvent(QTimerEvent * timer) {

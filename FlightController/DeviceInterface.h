@@ -10,6 +10,7 @@
 #pragma once
 
 #include <mutex>
+#include <QDateTime>
 #include <QObject>
 #include <QQueue>
 #include <hidapi/hidapi.h>
@@ -52,6 +53,7 @@ public:
   bool tx {false};
   QString firmwareVersion;
   QString dieTemp;
+  QString latencyMs;
 
 public slots:
   void sendCommand(c2command, uint8_t *);
@@ -85,6 +87,7 @@ private:
   QQueue<OUT_c2packet_t> commandQueue_;
   std::atomic<bool> cts_ {true};
   size_t noCtsDelay_;
+  size_t antiLagTimer_;
   std::atomic<bool> releaseDevice_ {false};
 
   void processStatusReply(QByteArray* payload);
@@ -93,11 +96,12 @@ private:
   void _enqueueCommand(OUT_c2packet_t outbox);
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);
-  void _sendPacket(void);
-  void _receivePacket(void);
+  bool _sendPacket(void);
+  bool _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
   std::vector<std::pair<QString, std::string>> listDevices();
   std::mutex queueLock_{};
+  qint64 lastSend_;
 
 private slots:
   void deviceMessageReceiver(void);

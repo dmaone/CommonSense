@@ -1,4 +1,5 @@
 #include "DeviceInterface.h"
+
 #include <QCoreApplication>
 #include <QDebug>
 #include <QInputDialog>
@@ -7,10 +8,11 @@
 #include <string>
 
 constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
-constexpr size_t kNormalOperationTick = 0;
-constexpr size_t kDeviceScanTick = 1000;
-constexpr size_t kStatusTimerTick = 200;
-
+constexpr size_t kNormalOperationTick{100}; // ms
+constexpr size_t kDeviceScanTick{1000}; // ms connect retry
+constexpr size_t kStatusTimerTick{200}; // ms between status updates
+constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
+constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
 DeviceInterface::DeviceInterface(QObject *parent)
     : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
       mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected) {
@@ -185,15 +187,18 @@ bool DeviceInterface::getStatusBit(deviceStatus bit) {
 }
 
 void DeviceInterface::_resetTimer(int interval) {
-  if (pollTimerId)
+  if (pollTimerId) {
     killTimer(pollTimerId);
+  }
+  qDebug() << "Reset timer to " << interval;
   pollTimerId = startTimer(interval);
 }
 
 void DeviceInterface::timerEvent(QTimerEvent * timer) {
   if (timer->timerId() == statusTimerId) {
     if (mode == DeviceInterfaceNormal && currentStatus == DeviceConnected) {
-        emit sendCommand(C2CMD_GET_STATUS, 1);
+      // request status, so you see actual status.
+      emit sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
   } else if (timer->timerId() != pollTimerId) {
@@ -201,8 +206,18 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
   }
   if (!device)
     return _initDevice();
-  _sendPacket();
-  _receivePacket();
+  const auto receivedThings = _receivePacket();
+  const auto sentThings = _sendPacket();
+  if (receivedThings || sentThings || mode == DeviceInterfaceBootloader) {
+    antiLagTimer_ = kAntiLagTicks;
+  } else {
+    // Go back to slow mode if idle and not bootloader.
+    if (--antiLagTimer_ == 0) {
+      qDebug("Idle. Slowing down to save CPU");
+      _resetTimer(kNormalOperationTick);
+      antiLagTimer_ = kAntiLagTicks;
+    }
+  }
   if (releaseDevice_.exchange(false)) {
     if (device) {
       qInfo() << "Releasing device.";
@@ -215,54 +230,62 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
   }
 }
 
-void DeviceInterface::_sendPacket() {
+bool DeviceInterface::_sendPacket() {
   unsigned char outbox[65];
   OUT_c2packet_t cmd;
   {
     qDebug() << "_sendPacket queueLock";
     std::lock_guard<std::mutex> lock{queueLock_};
     if (commandQueue_.empty()) {
-      _resetTimer(kNormalOperationTick); // Go back to slow mode.
-      return;
+      return false;
     }
     if (!device) {
       commandQueue_.clear();
       qWarning() << "Device went away on send";
-      return;
+      return true;
     }
-    if (!cts_.exchange(false) && --noCtsDelay_ > 0) {
-      return;
+    if (cts_.exchange(false) == false && --noCtsDelay_ > 0) {
+      return true; // Do not slow down, may receive reply anytime soon!
     }
     noCtsDelay_ = kNoCtsDelay; // reset timer
     cmd = commandQueue_.dequeue();
   }
   outbox[0] = 0x00; // ReportID is not used.
-  if (cmd.command != C2CMD_GET_STATUS) {
+  if (printableStatus || cmd.command != C2CMD_GET_STATUS) {
     tx = true;
     emit deviceStatusNotification(StatusUpdated); // Blink the TX light
+    lastSend_ = QDateTime::currentMSecsSinceEpoch();
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   if (hid_write(device, outbox, sizeof outbox) == -1) {
     qWarning() << "Error sending to the device, will reconnect";
     releaseDevice();
   }
+  return true;
 }
 
-void DeviceInterface::_receivePacket(void) {
+bool DeviceInterface::_receivePacket(void) {
   memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
   int bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
-  if (bytesRead < 0) {
-    qInfo() << "Device went away. Reconnecting";
+  if (bytesRead == 0) {
+    return false;
+  } else if (bytesRead < 0) {
+    qWarning() << "Device went away. Reconnecting";
     releaseDevice();
-    return;
+    return true;
   }
-  if (bytesRead == 0)
-    return;
-  cts_ = true;
-  if (bytesFromDevice[0] != C2RESPONSE_STATUS) {
+  qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)bytesFromDevice[1];
+  cts_.store(true);
+  if (printableStatus || bytesFromDevice[0] != C2RESPONSE_STATUS) {
     rx = true;
+    if (lastSend_ > 0) {
+      latencyMs = QString("%1 ms ").arg(
+          QDateTime::currentMSecsSinceEpoch() - lastSend_);
+      lastSend_ = 0;
+    }
   }
   QCoreApplication::postEvent(this, new DeviceMessage(bytesFromDevice));
+  return rx;
 }
 
 void DeviceInterface::_initDevice(void) {
@@ -272,13 +295,14 @@ void DeviceInterface::_initDevice(void) {
     _resetTimer(kDeviceScanTick);
     return;
   }
-  cts_ = true;
   hid_set_nonblocking(device, 1);
+
+  cts_.store(true); // Not expecting anything from device - clear to send.
   _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
   QByteArray tmp(5, (char)0);
   processStatusReply(&tmp);
-  _resetTimer(kNormalOperationTick);
+  // No need to change timer rate - loading config will switch it.
   return;
 }
 
