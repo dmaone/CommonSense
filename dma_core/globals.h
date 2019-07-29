@@ -39,6 +39,10 @@
 // Main safety switch
 #define NOT_A_KEYBOARD 0
 
+// If FlightController stops polling us - return to normal mode after X ticks.
+#define SETUP_TIMEOUT 2000
+#define LARGE_ENOUGH_32 (1 << 30);
+
 // LIB.H!!!
 #define TEST_BIT(VAR, BN) (VAR & (1 << (BN)))
 //#define CLEAR_BIT(VAR, BN) {xprintf("CLR %d %d", VAR, BN); VAR &= !(1 << BN); }

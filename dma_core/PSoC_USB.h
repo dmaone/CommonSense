@@ -37,6 +37,8 @@ uint8_t keyboard_report_usage;
 uint16_t consumer_report[CONSUMER_KRO_LIMIT];
 uint8_t system_report[OUTBOX_SIZE(SYSTEM_OUTBOX)];
 
+volatile int32_t ticksToAutonomy;
+
 void usb_init(void);
 void usb_configure(void);
 void usb_tick(void);

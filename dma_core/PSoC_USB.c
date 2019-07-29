@@ -60,7 +60,7 @@ void report_status(void) {
 
 void process_ewo(OUT_c2packet_t *inbox) {
   status_register = inbox->payload[0];
-  //xprintf("EWO signal received: %d", inbox->payload[0]);
+  report_status();
   if (TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
     scan_start();
   }
@@ -160,7 +160,9 @@ void save_config(void) {
 }
 
 void usb_receive(OUT_c2packet_t *inbox) {
+  ticksToAutonomy = SETUP_TIMEOUT;
   memset(outbox.raw, 0x00, sizeof(outbox));
+  // ALL COMMANDS MUST GENERATE A RESPONSE OVER USB!
   switch (inbox->command) {
   case C2CMD_EWO:
     process_ewo(inbox);
@@ -565,6 +567,10 @@ void USB_DP_ISR_EntryCallback(void) {
 }
 
 void xprintf(const char *format_p, ...) {
+  if (ticksToAutonomy > SETUP_TIMEOUT) {
+    // Essentially, "If FlightController isn't trying to talk to us".
+    return;
+  }
   va_list va;
   va_start(va, format_p);
   vsnprintf((char *)outbox.raw, sizeof(outbox), format_p, va);

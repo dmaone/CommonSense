@@ -59,10 +59,6 @@ public slots:
   void sendCommand(OUT_c2packet_t);
   void sendCommand(Bootloader_packet_t);
 
-  // NEVER use this function - it's only for sending packet in close event
-  // because timers don't work in close event!
-  void sendCommandNow(c2command cmd, uint8_t);
-
   bool getStatusBit(deviceStatus bit);
   void setStatusBit(deviceStatus bit, bool value);
   void flipStatusBit(deviceStatus bit);

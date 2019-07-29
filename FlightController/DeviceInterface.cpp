@@ -103,21 +103,6 @@ void DeviceInterface::deviceMessageReceiver(void) {
   qInfo() << "Message received";
 }
 
-// NEVER use this function - it's only for sending packet in close event
-// because timers don't work in close event!
-void DeviceInterface::sendCommandNow(c2command cmd, uint8_t msg) {
-  auto outbox = OUT_c2packet_t();
-  outbox.command = cmd;
-  outbox.payload[0] = msg;
-  {
-    qDebug() << "SendNow queueLock";
-    std::lock_guard<std::mutex> lock{queueLock_};
-    commandQueue_.enqueue(outbox);
-  }
-  cts_.store(true); // Force it
-  _sendPacket();
-}
-
 void DeviceInterface::_enqueueCommand(OUT_c2packet_t outbox) {
   {
     std::lock_guard<std::mutex> lock{queueLock_};
