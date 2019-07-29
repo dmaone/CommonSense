@@ -62,19 +62,8 @@ Except if you see very unstable readings (matrix monitor over 15 seconds with no
 
 
 # Flashing "default" firmware
-If you plan to change anything (and I recommend at least bringing number of rows and columns in sync with your matrix) - skip this section.
-
-**IF** you plan to use vanilla firmware (which will have **8x24** matrix, **default pinout** and will expect **buckling spring** switches) - you can get away with smaller download. You will still need a Windows machine though (see next section for "Windows machine" notes).
-
-* Download [PSoC Programmer](https://www.cypress.com/documentation/software-and-drivers/psoc-programmer-archive) and install it.
-* Plug the KitProg side in.
-* Open "CommonSense/8x24.cydsn/Compiled/8x24.hex".
-* IF the "Program" button is grayed out - go to "Utilities", click "Update Firmware". It usually takes ~30 seconds to update. After update, something like "KitProg/xxxxxxxxxxxxxxx" will appear in "Port Selection" window and the button will become blue.
-* Click "Program". Takes about a minute to flash.
-
-From now on, you _can_ update firmware using FlightController. Flightcontroller uses .cyacd files, which will be in the same directory as .hex
-
-Skip to [FlightController](#FlightController) as you don't need to build anything.
+This section is removed to stop causing stupid questions.
+You MUST build. Deal with it.
 
 
 # Building custom firmware
@@ -134,6 +123,7 @@ With empty EEPROM, keyboard won't work. You need to initialize it. There are con
 To load it into device, run FlightController, Config->Open, Config->Upload. BEWARE, thresholds may be set absolutely wrong! If they are - you will likely see red "UNSAFE" button in bottom right corner.
 
 ## Hardware configuration hints
+* If you're using Linux and can't connect - run as root OR fix your device permissions. No, I don't find fucking with your udev enjoyable, thank you very much.
 * If key monitor only shows zeroes, no matter which keys you press - set ADC resolution higher.
 * If even at 12 bits it still doesn't work - increase charge delay. Recommended setting is 18.
 * If you see double actuations on keypress - increase debouncing steps.

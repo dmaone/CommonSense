@@ -331,13 +331,15 @@ std::vector<std::pair<QString, std::string>> DeviceInterface::listDevices() {
 #else
       if (d->usage_page == 0x6213 && d->usage == 0x88) {
 #endif
-        retval.push_back(std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
+        retval.push_back(
+            std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
       }
       break;
     case DeviceInterfaceBootloader:
       if (d->vendor_id == 0x04b4 &&
           (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
-        retval.push_back(std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
+        retval.push_back(std::make_pair(
+            QString::fromWCharArray(d->serial_number), d->path));
       }
       break;
     default:
@@ -384,9 +386,6 @@ hid_device *DeviceInterface::acquireDevice(void) {
         }
       }
     }
-  }
-  if (!retval) {
-    qInfo() << "Cannot open device. Linux permissions problem?";
   }
   return retval;
 }
