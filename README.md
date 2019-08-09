@@ -14,9 +14,13 @@ If you want to add tap dance macros, or RGB LED support, or "port it to QMK" - b
 
 There are two exceptions to the above, but you know who you are, because I explicitly promised you.
 
+
 # Planning: pinouts
+
+* YOU MUST SET YOUR MATRIX SIZE to your physical matrix size. You can get away not doing it IF your switch is NORMALLY_LOW (flippers are by default in the air, Model F style). If it's not - you MUST do it.
+* YOU MUST USE CONTIGUOUS ROWS/COLUMNS, STARTING FROM ZERO.
 * Pins on the board are marked `0.0`, on envelope - `P0_0`, and in PSoC Creator - `P0[0]`. All 3 refer to the same pin. `2.3`-`2.7` means "2.3 to 2.7, including".
-* Effort is made to make pins continuous, but that's not always possible, so pay attention.
+* Effort is made to make pins contiguous, but that's not always possible, so pay attention.
 
 ### If you're changing the pinout
 * You'll need 35 pins. That's not much more than the kit has - so choose the layout wisely.
@@ -28,10 +32,12 @@ There are two exceptions to the above, but you know who you are, because I expli
 
 ### Default pinout: Project "8x24"
 ![default pinout](docs/8x24_pinout.png)
-**WARNING** to use column 24, **R5** (between `0.1` and `12.6`) MUST be removed. If you don't - column will always read zeroes.
+**WARNING** to use column 24, **R5** (between `0.1` and `12.6`) MUST be removed.
+
+If you don't - column will always read zeroes. Which is, for a NORMALLY_HIGH switch like Beamspring, means they will appear **PRESSED ALL THE TIME**.
 
 * D0: `0.2`. Must be connected to the nearest `GND`.
-* Guard: `0.3`. Must be connected to the nearest `GND` **BY A SEPARATE WIRE**
+* Guard: `0.3`. Must be connected to the nearest `GND`. Separate wire is **HIGHLY RECOMMENDED**
 * ADC Vref: `0.4`. Must be connected to the nearest `VDD`.
 * Rows: `2.0`, `2.3`-`2.7`, `12.7`, `12.6`
 * Cols: `1.0`-`1.7`, `3.0`, `3.1`, `3.3`-`3.7`, `15.0`, `15.1`, `15.5`, `0.0`, `0.1`, `0.5`-`0.7`, `15.4`.
@@ -56,9 +62,13 @@ It's in CAPS because I was stupid enough to solder it chip (and LED) facing back
 ### Grounding considerations
 Ground. Does. Not. Matter.
 
-As long as you connected ALL the metal parts adjacent to PCB and PCB ground with ANY of the GND pins of the kit - you are fine. Stop worrying about it.
+As long as you connected ALL the metal parts adjacent to PCB **and** PCB ground with ANY of the GND pins of the kit - you are fine. Stop worrying about it.
+
+If your PCB doesn't have any vias - MAKE SURE YOU CONNECTED ALL GROUND TRACES ON BOTH SIDES OF THE PCB to controller ground. Floating traces are bad, mmkay.
 
 Except if you see very unstable readings (matrix monitor over 15 seconds with no keypresses shows something like 1/50/255). Then you _probably_ have a ground quality issue.
+
+When in doubt - use star ground. That is, connect all the things that must be grounded (basically, ALL THE THINGS except rows and columns) to a single point, using different wires.
 
 
 # Flashing "default" firmware
@@ -119,11 +129,15 @@ Luckly, in a fit of philantropy I have built versions for Windows and OS X in th
 
 # Configure keyboard
 
-With empty EEPROM, keyboard won't work. You need to initialize it. There are config files in misc/ directory which should be a good starting point.
+With empty EEPROM, keyboard won't work. You need to initialize it. There are config files in misc/ directory, they are supposed to work, but no guarantees.
+
 To load it into device, run FlightController, Config->Open, Config->Upload. BEWARE, thresholds may be set absolutely wrong! If they are - you will likely see red "UNSAFE" button in bottom right corner.
+
+There are some reports that matrix size is weird after loading the config - restart FC or just hit that "Reconnect" button. It _should_ take care of that. But see the top of the file.
 
 ## Hardware configuration hints
 * If you're using Linux and can't connect - run as root OR fix your device permissions. No, I don't find fucking with your udev enjoyable, thank you very much.
+* If you see the red UNSAFE in the bottom right corner and what to know why - see "Debugging the matrix" below.
 * If key monitor only shows zeroes, no matter which keys you press - set ADC resolution higher.
 * If even at 12 bits it still doesn't work - increase charge delay. Recommended setting is 18.
 * If you see double actuations on keypress - increase debouncing steps.
@@ -149,9 +163,15 @@ Thresholds should be set ~2x higher than most of the matrix settles on. For beam
 **TEST SETTINGS BEFORE COMMITTING**. If you get thresholds wrong - there will be a red "UNSAFE" light in the status bar and keyboard will refuse to produce output. It's supposed to retest settings after you upload. If it doesn't - click "Scan", it will try to restart scanning.
 
 ### Debugging the matrix
-If something is wrong - you can still use matrix monitor using the following trick: open matrix monitor, click "Start!", go to main window, click "Scan". **WARNING** exit this mode in the reverse order (or by pulling out the USB plug), otherwise you'll have to reboot.
+If something is wrong - you can still use matrix monitor using the following trick:
+* open matrix monitor,
+* click "Start!",
+* go to main window,
+* click "Scan".
 
-This is mostly useful for beamsprings - because all keys are down in beamspring by default. Model F is much easier - everything is up and you can just press a key to observe the effect. So, recommended debugging strategy - pull out the PCB, lay it down over grounded conductive surface, start matrix monitor, put one flipper (or a small coin) over the PCB and observe the changes. If several rows/columns change at the same time - you have a short between those, find it. If readings are normal  but assembled keyboard is unstable - it's likely a ground problem.
+**WARNING** exit this mode in the reverse order (or by pulling out the USB plug), otherwise you'll likely have to reboot.
+
+This is mostly useful for beamsprings - because all keys are down in beamspring by default. Model F is much easier - everything is up and you can just press a key to observe the effect. So, recommended debugging strategy - pull out the PCB, lay it down over grounded conductive surface, start matrix monitor, put one flipper (or a small coin) over the PCB and observe the changes. If several rows/columns change at the same time - you have a short between those, find it. If readings are normal but assembled keyboard is unstable - it's likely a ground problem.
 
 ## Configuring layouts
 Pretty straightforward. If thresholds are configured, pressed keys will be highlighted by "yellow highlighter" color and focused on. If you have another keyboard - pressing a letter there will change combo box value to that letter, allowing for VERY quick layout generation.

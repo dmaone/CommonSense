@@ -1,18 +1,13 @@
 /*
  *
- * Copyright (C) 2018 DMA <dma@ya.ru>
+ * Copyright (C) 2018-present DMA <dma@ya.ru>
  *
  * This program is free software; you can redistribute it and/or modify
- * it under the terms of the GNU General Public License version 2 as
+ * it under the terms of the GNU General Public License version 3 as
  * published by the Free Software Foundation.
  */
 
-/*
- * pin assignment: direct order, aligned to the right of ADC.
- * for dual ADCs it means column X..11, X+12..23
- *
- * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
- */
+// MUST MATCH PHYSICAL MATRIX SIZE, DOUBLE MUST for BEAMSPRING.
 #define MATRIX_COLS 16
 #define MATRIX_ROWS 8
 #define MATRIX_LAYERS 4

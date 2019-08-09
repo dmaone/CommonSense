@@ -652,6 +652,7 @@
     </Group>
     <Group key="Pin">
       <Data key="0ae0c5d7-b0fa-4d3c-9dc6-cb5f4cd3e844" value="D1" />
+      <Data key="1f3d3dc4-3122-4f58-813d-8c128c39a03a" value="HPWR" />
       <Data key="2db89e8e-271f-4c05-a06b-250c724f18e8" value="D3" />
       <Data key="02f2cf2c-2c7a-49df-9246-7a3435c21be3" value="SCL_1" />
       <Data key="3acca61d-a42a-470f-98af-f737d6abec51" value="Drive2" />
@@ -3909,6 +3910,11 @@
         <Data key="Port Format" value="15,4" />
       </Group>
     </Group>
+    <Group key="1f3d3dc4-3122-4f58-813d-8c128c39a03a">
+      <Group key="0">
+        <Data key="Port Format" value="0,3" />
+      </Group>
+    </Group>
     <Group key="2db89e8e-271f-4c05-a06b-250c724f18e8">
       <Group key="0">
         <Data key="Port Format" value="3,7" />
@@ -3967,7 +3973,7 @@
     </Group>
     <Group key="14f470b7-5aaf-40a1-b4bd-9b2bdc04b8ea">
       <Group key="0">
-        <Data key="Port Format" value="0,7" />
+        <Data key="Port Format" value="0,2" />
       </Group>
     </Group>
     <Group key="82abd659-c6e6-4159-ac54-73b6be653ba6/7e0d1a6c-1235-4546-a71b-ea6e528924f8">
@@ -4307,25 +4313,25 @@
         <Data key="Port Format" value="15,1" />
       </Group>
       <Group key="17">
-        <Data key="Port Format" value="15,2" />
-      </Group>
-      <Group key="18">
-        <Data key="Port Format" value="15,3" />
-      </Group>
-      <Group key="19">
-        <Data key="Port Format" value="15,4" />
-      </Group>
-      <Group key="20">
         <Data key="Port Format" value="15,5" />
       </Group>
-      <Group key="21">
+      <Group key="18">
         <Data key="Port Format" value="0,0" />
       </Group>
-      <Group key="22">
+      <Group key="19">
         <Data key="Port Format" value="0,1" />
       </Group>
-      <Group key="23">
+      <Group key="20">
         <Data key="Port Format" value="0,5" />
+      </Group>
+      <Group key="21">
+        <Data key="Port Format" value="0,6" />
+      </Group>
+      <Group key="22">
+        <Data key="Port Format" value="0,7" />
+      </Group>
+      <Group key="23">
+        <Data key="Port Format" value="15,4" />
       </Group>
     </Group>
     <Group key="UnAssigned Pins">

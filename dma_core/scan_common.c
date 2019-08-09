@@ -147,7 +147,7 @@ void scan_common_start() {
   // Sanity check - start scanning with no output, if spam is read out, STAHP.
   CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  sanity_check_timer = SANITY_CHECK_DURATION;
+  //sanity_check_timer = SANITY_CHECK_DURATION;
   scancodes_while_output_disabled = 0;
 }
 
