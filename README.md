@@ -180,5 +180,7 @@ Pretty straightforward. If thresholds are configured, pressed keys will be highl
 
 "Import" and "Export" will load and save to file. Format is compatible with xwhatsit layout files.
 
+IF you see keypresses in setup mode, but not in normal - check out global.h, #define NOT_A_KEYBOARD. If it's 1 - change back to zero.
+
 ## Macros and delays
 Figure it out yourself, please. It's not that hard. Delays are the _library_ of delays which will be used in macros.

@@ -37,7 +37,7 @@
 #include "config.h"
 
 // Main safety switch
-#define NOT_A_KEYBOARD 1
+#define NOT_A_KEYBOARD 0
 
 // If FlightController stops polling us - return to normal mode after X ticks.
 #define SETUP_TIMEOUT 2000
