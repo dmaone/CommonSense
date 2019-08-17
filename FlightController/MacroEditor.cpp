@@ -15,7 +15,7 @@ namespace {
 }
 
 MacroEditor::MacroEditor(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent), ui(new Ui::MacroEditor) {
+    : QFrame(parent, Qt::Tool), ui(new Ui::MacroEditor) {
   ui->setupUi(this);
   deviceConfig = config;
   ScancodeList scanCodes;

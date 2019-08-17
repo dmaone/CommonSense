@@ -13,7 +13,7 @@ void DelayWatcher::changed(int delay_ms) {
 }
 
 Delays::Delays(DeviceConfig *config, QWidget *parent)
-    : QWidget(parent), _config(config) {
+    : QWidget(parent, Qt::Tool), _config(config) {
   _grid = new QGridLayout;
   setWindowTitle("Delays");
   setMinimumWidth(150);

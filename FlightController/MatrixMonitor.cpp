@@ -17,7 +17,7 @@
 #include "ui_MatrixMonitor.h"
 
 MatrixMonitor::MatrixMonitor(QWidget *parent)
-    : QFrame(parent), ui(new Ui::MatrixMonitor), debug(0),
+    : QFrame(parent, Qt::Tool), ui(new Ui::MatrixMonitor), debug(0),
       displayMode(DisplayNow), grid(new QGridLayout()),
       _warmupRows(ABSOLUTE_MAX_ROWS) {
   ui->setupUi(this);

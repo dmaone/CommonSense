@@ -2,7 +2,7 @@
 #include "ui_Hardware.h"
 
 Hardware::Hardware(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent), ui(new Ui::Hardware), _config(config) {
+    : QFrame(parent, Qt::Tool), ui(new Ui::Hardware), _config(config) {
   ui->setupUi(this);
   for (uint8_t i = 0; i < (sizeof expModeNames / sizeof expModeNames[0]); i++) {
     ui->modeBox->addItem(expModeNames[i]);

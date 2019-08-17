@@ -2,7 +2,7 @@
 #include "ui_DeviceSelector.h"
 
 DeviceSelector::DeviceSelector(QWidget *parent) :
-  QWidget(parent),
+  QWidget(parent, Qt::Tool),
   ui(new Ui::DeviceSelector)
 {
   ui->setupUi(this);

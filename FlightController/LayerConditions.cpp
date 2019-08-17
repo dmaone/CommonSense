@@ -28,7 +28,7 @@ void LayerConditionWatcher::changed(void) {
 }
 
 LayerConditions::LayerConditions(DeviceConfig *config, QWidget *parent)
-    : QWidget(parent), config(config) {
+    : QWidget(parent, Qt::Tool), config(config) {
   grid = new QGridLayout;
   setLayout(grid);
   init();

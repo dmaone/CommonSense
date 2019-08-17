@@ -32,7 +32,7 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setOrganizationDomain("none.exists");
   QCoreApplication::setOrganizationName("DMA Labs");
   QCoreApplication::setApplicationName("FlightController");
-  QCoreApplication::setApplicationVersion("1.0.0.1");
+  QCoreApplication::setApplicationVersion("1.0.0.2");
   qInfo() << "Start start!";
   FlightController w;
   qInfo() << "Switching to LogViewer..";

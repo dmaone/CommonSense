@@ -12,7 +12,7 @@
 #include "ui_LayoutEditor.h"
 
 LayoutEditor::LayoutEditor(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent), ui(new Ui::LayoutEditor), grid(new QGridLayout()),
+    : QFrame(parent, Qt::Tool), ui(new Ui::LayoutEditor), grid(new QGridLayout()),
       currentLayer(0) {
   ui->setupUi(this);
   deviceConfig = config;

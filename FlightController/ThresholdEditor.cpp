@@ -9,7 +9,7 @@
 #include "ui_ThresholdEditor.h"
 
 ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent), ui(new Ui::ThresholdEditor), grid(new QGridLayout()) {
+    : QFrame(parent, Qt::Tool), ui(new Ui::ThresholdEditor), grid(new QGridLayout()) {
   ui->setupUi(this);
   deviceConfig = config;
   initDisplay();
