@@ -37,11 +37,15 @@ NS: ~____~~~
 IN: ~~___~~~
 ```
 
-Comparator (not amplifier as in patent! LM319N in this case) generates an extremely short (and very unstable because of power sag: ([SHOCK VIDEO](https://www.instagram.com/p/B0Ef6aLliQX/)) pulse - ~150ns. PFN (another half of 74LS00N) takes care of it, presenting MCU with the signal depicted as IN: on previous diagram - from the "ON" of positive strobe to the "OFF" of negative one.
+Comparator (not amplifier as in patent! LM319N in this case) generates an extremely short (and very unstable because of power sag:
+ ([SHOCK VIDEO](https://www.instagram.com/p/B0Ef6aLliQX/)) pulse - ~150ns. Latch (another half of 74LS00N) takes care of it,
+presenting MCU with the signal depicted as IN: on previous diagram - from the "ON" of positive strobe to the "OFF" of negative one.
+
 ![Strobe, sense line, comparator output](OriginalTimings/Strobe_and_sense_200ns.png)
 
 ## Direct drive experiments
-All driving is performed with strong drive, via 1kΩ current-limited resistor. Note that datasheet specifies max. source current for PSoC5 LP GPIO at 4mA, so if you want to repeat this and reduce this resistor - consult your datasheet and don't overload your GPIOs.
+All driving is performed with strong drive, via 1kΩ current-limited resistor. Note that datasheet specifies max. source current
+for PSoC5 LP GPIO at 4mA, so if you want to repeat this and reduce this resistor - consult your datasheet and don't fry your GPIOs.
 
 ### No load
 ![No load, released](DirectDrive/No_Load_Released.png)
@@ -50,3 +54,25 @@ All driving is performed with strong drive, via 1kΩ current-limited resistor. N
 ### 1000pF load
 ![No load, released](DirectDrive/No_Load_Released.png)
 ![No load, pressed](DirectDrive/No_Load_Pressed.png)
+
+## First prototype
+79.5MHz main clock (12.5ns/tick), strong drive, "slow" slew rate, no current-limiting resistors.
+Not sure if can get away with that long-term (worried about GPIOs being fried in a year of such use) - 
+but 330R drops the pulse height to ~5mV. Comparator - somewhat surprisingly - triggers on that with VDACs set to "1"
+(supposedly 4mV) when trimmed (Trim seems to be ~1mV/click). But with no resistors it's ~50mV, so 10 or even 15 still triggers.
+
+So, with 4 CLK pulse length things look like this:
+![released](DirectDrive/4_clk_pulse_pressed.png)
+![released](DirectDrive/4_clk_pulse_released.png)
+The dip in the driving pulse is caused by slew rate limiter. If it's not there - voltage spikes to almost 5V, and readouts become VERY noisy.
+
+Duty cycle is extremely small - hopefully that will be enough to not shorten GPIOs life.
+![released](DirectDrive/4_clk_pulse_pressed_overview.png)
+
+Just for the reference - 20 CLK pulses. Things start to discharge in about 60ns, and signal is gone in 200ns, so ADCing that is not feasible.
+![released](DirectDrive/20_clk_pulse_pressed.png)
+![released](DirectDrive/20_clk_pulse_released.png)
+
+A bit longer window:
+![released](DirectDrive/20_clk_pulse_pressed_zoomed_out.png)
+![released](DirectDrive/20_clk_pulse_released_zoomed_out.png)
