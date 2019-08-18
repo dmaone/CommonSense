@@ -26,50 +26,6 @@ uint8_t Results[ADC_CHANNELS * 4 * NUM_ADCs];
 uint8_t reading_row, driving_row;
 bool scan_in_progress;
 
-void init_sensor() {
-  // Init DMA, each burst requires a request
-  Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
-                     (uint16)(HI16(CYDEV_SRAM_BASE)));
-#if NUM_ADCs > 1
-  Buf1_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
-                     (uint16)(HI16(CYDEV_SRAM_BASE)));
-#endif
-  // 1 request per ADC, get the whole ADC buffer (skip grounded channels which
-  // are at the end).
-  FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs,
-                         (uint16)(HI16(CYDEV_SRAM_BASE)),
-                         (uint16)(HI16(CYDEV_SRAM_BASE)));
-  uint8 enableInterrupts = CyEnterCriticalSection();
-  (*(reg8 *)PTK_ChannelCounter__PERIOD_REG) =
-      (PTK_CHANNELS -
-       1); // Load number of channels. See Count7/WritePeriod for details.
-  (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |=
-      (uint8)0x20u; // Init count7
-  CyExitCriticalSection(enableInterrupts);
-  ADC0_Start();
-  ADC0_SetResolution(config.adcBits);
-#if NUM_ADCs > 1
-  ADC1_Start();
-  ADC1_SetResolution(config.adcBits);
-#endif
-  ChargeDelay_Start();
-  ChargeDelay_WritePeriod(config.chargeDelay);
-  DischargeDelay_Start();
-  DischargeDelay_WritePeriod(config.dischargeDelay);
-}
-
-void sensor_nap(void) {
-  ChargeDelay_Sleep();
-  DischargeDelay_Sleep();
-  ADC0_Sleep();
-}
-
-void sensor_wake(void) {
-  ADC0_Wakeup();
-  DischargeDelay_Wakeup();
-  ChargeDelay_Wakeup();
-}
-
 void BufferSetup(uint8 chan, uint8 *td, uint8 channel_config,
                         uint32 src_addr, uint32 dst_addr) {
   (void)CyDmaClearPendingDrq(chan);
@@ -116,7 +72,37 @@ void ResultBufferSetup(void) {
   CyDmaChEnable(FinalBuf_DmaHandle, 1);
 }
 
-void enable_sensor(void) {
+void sensor_init() {
+  // Init DMA, each burst requires a request
+  Buf0_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
+                     (uint16)(HI16(CYDEV_SRAM_BASE)));
+#if NUM_ADCs > 1
+  Buf1_DmaInitialize(sizeof BufMem[0], 1, (uint16)(HI16(CYDEV_PERIPH_BASE)),
+                     (uint16)(HI16(CYDEV_SRAM_BASE)));
+#endif
+  // 1 request per ADC, get the whole ADC buffer (skip grounded channels which
+  // are at the end).
+  FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs,
+                         (uint16)(HI16(CYDEV_SRAM_BASE)),
+                         (uint16)(HI16(CYDEV_SRAM_BASE)));
+  uint8 enableInterrupts = CyEnterCriticalSection();
+  (*(reg8 *)PTK_ChannelCounter__PERIOD_REG) =
+      (PTK_CHANNELS -
+       1); // Load number of channels. See Count7/WritePeriod for details.
+  (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |=
+      (uint8)0x20u; // Init count7
+  CyExitCriticalSection(enableInterrupts);
+  ADC0_Start();
+  ADC0_SetResolution(config.adcBits);
+#if NUM_ADCs > 1
+  ADC1_Start();
+  ADC1_SetResolution(config.adcBits);
+#endif
+  ChargeDelay_Start();
+  ChargeDelay_WritePeriod(config.chargeDelay);
+  DischargeDelay_Start();
+  DischargeDelay_WritePeriod(config.dischargeDelay);
+
   BufferSetup(Buf0_DmaHandle, &Buf0TD, Buf0__TD_TERMOUT_EN,
               (uint32)ADC0_ADC_SAR__WRK0, (uint32)BufMem);
 #if NUM_ADCs > 1
@@ -131,6 +117,18 @@ void enable_sensor(void) {
   // one.
   ResultIRQ_StartEx(Result_ISR);
   EoCIRQ_StartEx(EoC_ISR);
+}
+
+void sensor_nap(void) {
+  ChargeDelay_Sleep();
+  DischargeDelay_Sleep();
+  ADC0_Sleep();
+}
+
+void sensor_wake(void) {
+  ADC0_Wakeup();
+  DischargeDelay_Wakeup();
+  ChargeDelay_Wakeup();
 }
 
 static inline void Drive(uint8 drv) {
@@ -222,14 +220,11 @@ CY_ISR(Result_ISR) {
   }
 }
 
-void scan_start(void) {
-  if (scan_in_progress) {
-    return;
-  }
-  scan_common_start();
-  driving_row = MATRIX_ROWS - 1; // Zero-based! Adjust!
-  Drive(driving_row);
-  scan_in_progress = true;
+void scan_init(uint8_t debouncing_period) {
+  status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
+  while (scan_in_progress) {}; // Make sure scan is stopped.
+  scan_common_init(debouncing_period);
+  sensor_init();
 }
 
 void scan_reset() {
@@ -238,16 +233,20 @@ void scan_reset() {
   CyExitCriticalSection(enableInterrupts);
 }
 
-void scan_init(uint8_t debouncing_period) {
-  status_register &= (1 << C2DEVSTATUS_SETUP_MODE);
-  while (scan_in_progress) {}; // Make sure scan is stopped.
-  scan_common_init(debouncing_period);
-  init_sensor();
-  enable_sensor();
+void scan_start(void) {
+  if (scan_in_progress) {
+    return;
+  }
+  scan_common_start();
+  // Set things into "end of the cycle" position, then let magic happen.
+  // Will cause a random first readout - but debouncing will take care of that.
+  driving_row = MATRIX_ROWS - 1;
+  Drive(driving_row);
+  scan_in_progress = true;
 }
 
 void scan_nap(void) {
-  while (scan_in_progress) {}
+  while (scan_in_progress) {} // Unsafe to proceed with interrupts flying around
   sensor_nap();
 }
 

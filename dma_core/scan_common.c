@@ -96,14 +96,13 @@ inline bool scan_is_key_down(uint8_t keyIndex) {
 }
 
 void scan_sanity_check() {
-  --sanity_check_timer;
   if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
     // Keyboard is insane. Disable it.
     status_register &= (1 << C2DEVSTATUS_SETUP_MODE); // Keep setup mode.
     SET_BIT(status_register, C2DEVSTATUS_INSANE);
     xprintf("Scan module has gone insane and had to be shot!");
     sanity_check_timer = 0;
-  } else if (0 == sanity_check_timer) {
+  } else if (0 == --sanity_check_timer) {
     SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   }
 }
@@ -147,7 +146,7 @@ void scan_common_start() {
   // Sanity check - start scanning with no output, if spam is read out, STAHP.
   CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  //sanity_check_timer = SANITY_CHECK_DURATION;
+  sanity_check_timer = SANITY_CHECK_DURATION;
   scancodes_while_output_disabled = 0;
 }
 
