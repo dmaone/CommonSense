@@ -1,3 +1,12 @@
+# CURIOSITY REQUIRED TO PROCEED
+If you're not curious how this all works and "just want to convert your beamspring" - turn around now.
+
+Nothing but sheer frustration lays on this path for you. This firmware/hardware is not for you, sorry about that.
+
+Find someone how is curious about how things work or walked this path before and entice them to do it for you.
+
+You have been warned.
+
 # This software is provided "as-is".
 There's neither a warranty of merchantability, nor warranty of fitness for any purpose.
 
@@ -165,9 +174,12 @@ Thresholds should be set ~2x higher than most of the matrix settles on. For beam
 ### Debugging the matrix
 If something is wrong - you can still use matrix monitor using the following trick:
 * open matrix monitor,
-* click "Start!",
-* go to main window,
-* click "Scan".
+* make sure the mode is "Now"
+* click "Start!"
+* go to main window
+* click "Scan"
+
+The numbers under the "LCD" numbers are min/avg/max since last reset. Looking at those will tell you A LOT about what controller sees - but not everything, because in normal mode controller processes about 30 thousand rows per second and there is no way to transmit that amount of data over USB 2.0.
 
 **WARNING** exit this mode in the reverse order (or by pulling out the USB plug), otherwise you'll likely have to reboot.
 
