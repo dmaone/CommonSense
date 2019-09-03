@@ -97,11 +97,6 @@ CY_ISR(Result_ISR) {
   append_debounced(TEST_BIT(status, 1) ? 0 : KEY_UP_MASK, --key_index);
   append_debounced(TEST_BIT(status, 0) ? 0 : KEY_UP_MASK, --key_index);
 
-  VDAC3_SetValue(config.thresholds[key_index - 1]);
-  VDAC2_SetValue(config.thresholds[key_index - 2]);
-  VDAC1_SetValue(config.thresholds[key_index - 3]);
-  VDAC0_SetValue(config.thresholds[key_index - 4]);
-
   if (mux_position == 0) {
     mux_position = MATRIX_COLS / 4;
     if (current_row == 0) {
@@ -116,8 +111,20 @@ CY_ISR(Result_ISR) {
     key_index = current_row * MATRIX_COLS;
     current_row--;
     // Set up the row - this doesn't trigger anything yet. Also not reset ever.
-    DriveReg0_Write(1 << current_row);
+    if (current_row < 8) {
+      DriveReg0_Write(1 << current_row);
+      DriveReg1_Write(0);
+    } else {
+      DriveReg0_Write(0);
+      DriveReg1_Write(1 << (current_row - 8));
+    }
   }
+
+  VDAC3_SetValue(config.thresholds[key_index - 1]);
+  VDAC2_SetValue(config.thresholds[key_index - 2]);
+  VDAC1_SetValue(config.thresholds[key_index - 3]);
+  VDAC0_SetValue(config.thresholds[key_index - 4]);
+
   SensorReg_Write((1 << (--mux_position)) + SCAN_TRIGGER);
 }
 

@@ -14,11 +14,11 @@
  * ODD NUMBER OF COLUMNS DO NOT MIX WITH DUAL ADCs!!! See scan.c!
  */
 #define MATRIX_COLS 16
-#define MATRIX_ROWS 8
+#define MATRIX_ROWS 10
 #define MATRIX_LAYERS 4
 
 // Switch type: BUCKLING_SPRING or BEAMSPRING
-#define SWITCH_TYPE BUCKLING_SPRING
+#define SWITCH_TYPE CORTRON
 
 /*
  * if SELF_POWERED is defined - the device is self/battery-powered.
