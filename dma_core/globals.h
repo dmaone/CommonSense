@@ -143,16 +143,26 @@ void xprintf(const char *format_p, ...);
 #define NORMALLY_LOW 0
 #elif SWITCH_TYPE == BUCKLING_SPRING
 #define SCANNER_TYPE SCANNER_CS
-#define NORMALLY_LOW 1
 #elif SWITCH_TYPE == ADB
 #define SCANNER_TYPE SCANNER_ADB
-#define NORMALLY_LOW 0
 #elif SWITCH_TYPE == SUN
 #define SCANNER_TYPE SCANNER_SUN
-#define NORMALLY_LOW 0
 #elif SWITCH_TYPE == CORTRON
 #define SCANNER_TYPE CORTRON
-#define NORMALLY_LOW 1
+#define MIN_CHARGE_DELAY 20
+#define MIN_DISCHARGE_DELAY 4
 #else
 #error "Unknown switch type"
+#endif
+
+// Defaults
+#ifndef NORMALLY_LOW
+#define NORMALLY_LOW 1
+#endif
+#ifndef MIN_CHARGE_DELAY
+#define MIN_CHARGE_DELAY 2
+#endif
+
+#ifndef MIN_DISCHARGE_DELAY
+#define MIN_DISCHARGE_DELAY 2
 #endif

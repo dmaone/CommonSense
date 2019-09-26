@@ -103,11 +103,11 @@ void set_hardware_parameters(void) {
     default:
       config.adcBits = 8;
   };
-  if (config.chargeDelay < 2) {
-    config.chargeDelay = 2;
+  if (config.chargeDelay < MIN_CHARGE_DELAY) {
+    config.chargeDelay = MIN_CHARGE_DELAY;
   };
-  if (config.dischargeDelay < 2) {
-    config.dischargeDelay = 2;
+  if (config.dischargeDelay < MIN_DISCHARGE_DELAY) {
+    config.dischargeDelay = MIN_DISCHARGE_DELAY;
   }
   if (config.debouncingTicks < 1) {
     config.debouncingTicks = 1;
