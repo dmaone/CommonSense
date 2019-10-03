@@ -122,7 +122,7 @@ void DeviceConfig::fromDevice() {
 
 /**
  * @brief DeviceInterface::_downloadConfigBlock
- * Receives one block from device, writes it to local config.
+ * Receives one block from device, writes it to local config.F
  * @param payload - packet payload
  */
 void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
@@ -151,6 +151,7 @@ void DeviceConfig::_unpack(void) {
   numCols = _eeprom.matrixCols;
   numLayers = _eeprom.matrixLayers;
   bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
+  switchType = std::min(_eeprom.switchType, switchTypeCount);
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
   uint8_t tableSize = numRows * numCols;

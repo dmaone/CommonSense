@@ -15,7 +15,8 @@ ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
   initDisplay();
   connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyThresholds()));
   connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
-  connect(ui->adjustButton, SIGNAL(clicked()), this, SLOT(adjustThresholds()));
+  connect(ui->incButton, SIGNAL(clicked()), this, SLOT(increaseThresholds()));
+  connect(ui->decButton, SIGNAL(clicked()), this, SLOT(decreaseThresholds()));
 }
 
 void ThresholdEditor::show(void) {
@@ -67,13 +68,20 @@ void ThresholdEditor::updateDisplaySize(uint8_t rows, uint8_t cols) {
   adjustSize();
 }
 
-void ThresholdEditor::adjustThresholds() {
+void ThresholdEditor::adjustThresholds(size_t delta) {
   for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
     for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
-      display[i][j]->setValue(display[i][j]->value() +
-                              ui->adjustSpinbox->value());
+      display[i][j]->setValue(display[i][j]->value() + delta);
     }
   }
+}
+
+void ThresholdEditor::increaseThresholds() {
+  adjustThresholds(ui->adjustSpinbox->value());
+}
+
+void ThresholdEditor::decreaseThresholds() {
+  adjustThresholds(0 - ui->adjustSpinbox->value());
 }
 
 void ThresholdEditor::applyThresholds() {

@@ -23,7 +23,8 @@ public:
 public slots:
   void applyThresholds(void);
   void resetThresholds(void);
-  void adjustThresholds(void);
+  void increaseThresholds(void);
+  void decreaseThresholds(void);
   void receiveScancode(uint8_t row, uint8_t col,
                        DeviceInterface::KeyStatus status);
 
@@ -34,6 +35,7 @@ private:
   DeviceConfig *deviceConfig;
   void initDisplay();
   void updateDisplaySize(uint8_t, uint8_t);
+  void adjustThresholds(size_t delta);
 
 private slots:
   void on_closeButton_clicked(void);

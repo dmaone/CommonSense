@@ -235,6 +235,7 @@ void FlightController::deviceStatusNotification(
     layerConditions->init();
     _delays->init();
     _hardware->init();
+    ui->typeLabel->setText(DeviceInterface::getInstance().switchType);
     lockUI(false);
     break;
   case DeviceInterface::BootloaderConnected:

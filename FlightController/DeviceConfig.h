@@ -27,12 +27,11 @@ public:
   enum TransferDirection { TransferIdle, TransferUpload, TransferDownload };
   uint8_t numRows;
   uint8_t numCols;
+  uint8_t switchType;
   uint8_t numLayers;
   uint8_t numLayerConditions;
   uint8_t numDelays;
   bool bNormallyLow;
-  uint8_t guardHi;
-  uint8_t guardLo;
   uint8_t thresholds[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   std::vector<Macro> macros;

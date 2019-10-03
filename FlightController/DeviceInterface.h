@@ -20,6 +20,7 @@
 #include "DeviceSelector.h"
 #include "Events.h"
 #include "LogViewer.h"
+#include "singleton.h"
 
 class DeviceInterface : public QObject {
   Q_OBJECT
@@ -28,6 +29,9 @@ class DeviceInterface : public QObject {
   Q_ENUMS(Mode)
 
 public:
+  static DeviceInterface& getInstance() {
+    return Singleton<DeviceInterface>::instance();
+  }
   DeviceInterface(QObject *parent = 0);
   ~DeviceInterface();
   void start(void);
@@ -52,9 +56,10 @@ public:
   bool printableStatus {false};
   bool rx {false};
   bool tx {false};
-  QString firmwareVersion;
-  QString dieTemp;
-  QString latencyMs;
+  QString switchType{};
+  QString firmwareVersion{};
+  QString dieTemp{};
+  QString latencyMs{};
 
 public slots:
   void sendCommand(c2command, uint8_t *);

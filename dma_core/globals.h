@@ -22,6 +22,7 @@
 // ExpHdr0 is set for 1us for keypress, 2us for release
 // #define DEBUG_SHOW_KEYPRESSES
 
+// MUST BE KEPT IN SYNC WITH c2_protocol.h for names!
 #define BEAMSPRING 0
 #define BUCKLING_SPRING 1
 #define ADB 2

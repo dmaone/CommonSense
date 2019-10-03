@@ -92,6 +92,11 @@ static const char *const expModeNames[] = {
     "Solenoid+Num+Caps", "Lock LEDs",
 };
 
+static const char *const switchTypeNames[] = {
+  "Beamspring", "Buckling Spring", "ADB", "Sun", "MagValve", "OTHER"
+};
+static const uint8_t switchTypeCount{5};
+
 typedef union {
   struct {
     uint8_t status;
