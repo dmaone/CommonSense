@@ -17,6 +17,7 @@
 #include <../c2/c2_protocol.h>
 
 #include "DeviceConfig.h"
+#include "DeviceSelector.h"
 #include "Events.h"
 #include "LogViewer.h"
 
@@ -99,7 +100,7 @@ private:
   bool _sendPacket(void);
   bool _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
-  std::vector<std::pair<QString, std::string>> listDevices();
+  DeviceList listDevices();
   std::mutex deviceLock_{};
   std::mutex queueLock_{};
   qint64 lastSend_;

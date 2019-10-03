@@ -325,7 +325,7 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
   }
 }
 
-std::vector<std::pair<QString, std::string>> DeviceInterface::listDevices() {
+DeviceList DeviceInterface::listDevices() {
   std::vector<std::pair<QString, std::string>> retval {};
   hid_device_info *root = hid_enumerate(0, 0);
   if (!root) {
@@ -377,25 +377,13 @@ hid_device *DeviceInterface::acquireDevice(void) {
   } else if (deviceList.size() > 1) {
     // More than one device.
     qInfo() << "Hello, fellow DT member!";
-    QStringList items;
+    DeviceSelector selector{deviceList};
+    selector.exec();
+    auto deviceSerial = selector.getResult();
+    qInfo().noquote() << "Connecting to s/n" << deviceSerial;
     for (auto it : deviceList) {
-      items << it.first;
-    }
-    bool ok;
-    auto deviceSerial = QInputDialog::getItem(
-        nullptr,
-        tr("Please select a device"),
-        tr("Serial"),
-        items,
-        0,
-        false,
-        &ok
-    );
-    if (ok) {
-      for (auto it : deviceList) {
-        if (it.first == deviceSerial) {
-          retval = hid_open_path(it.second.data());
-        }
+      if (it.first == deviceSerial) {
+        retval = hid_open_path(it.second.data());
       }
     }
   }
