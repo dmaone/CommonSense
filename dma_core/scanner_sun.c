@@ -9,8 +9,8 @@
 #include <project.h>
 
 #include "scanner_sun.h"
-
 #include "scan_common.h"
+
 uint8_t local_led_status;
 
 void sync_leds(void) {
@@ -24,20 +24,24 @@ void sync_leds(void) {
 }
 
 void scan_init(uint8_t debouncing_period) {
+  scan_common_init(debouncing_period);
   N_UART_Start();
+}
+
+void scan_reset() {
+  scan_common_reset();
   N_UART_PutChar(0x01);
-  SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
-  SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
 }
 
 void scan_start(void) {
-  sync_leds();
-  init_scancodes();
+  scan_common_start(1); // No point sanity-checking.
+  N_UART_PutChar(0x01);
 }
 
-void scan_reset(void) {
-  sync_leds();
-  init_scancodes();
+void scan_nap(void) {
+}
+
+void scan_wake(void) {
 }
 
 void scan_tick(void) {
@@ -71,16 +75,4 @@ void scan_tick(void) {
   // Uncomment below for click
   // N_UART_PutChar(0x0A);
 
-}
-
-void scan_nap(void) {
-}
-
-void scan_wake(void) {
-}
-
-void scan_sanity_check(void) {
-}
-
-void report_matrix_readouts(void) {
 }

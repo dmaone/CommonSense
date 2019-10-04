@@ -145,7 +145,7 @@ void scan_start(void) {
   if (scan_in_progress) {
     return;
   }
-  scan_common_start();
+  scan_common_start(SANITY_CHECK_DURATION);
 
   // Set things into "end of the cycle" position, then let magic happen.
   // Should cause zeroes in first readout because of trigger value below.

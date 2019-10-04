@@ -17,6 +17,4 @@ void scan_tick(void);
 void scan_reset(void);
 void scan_nap(void);
 void scan_wake(void);
-void scan_sanity_check(void);
-void report_matrix_readouts(void);
 void sync_leds(void);

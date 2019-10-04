@@ -237,7 +237,7 @@ void scan_start(void) {
   if (scan_in_progress) {
     return;
   }
-  scan_common_start();
+  scan_common_start(SANITY_CHECK_DURATION);
   // Set things into "end of the cycle" position, then let magic happen.
   // Will cause a random first readout - but debouncing will take care of that.
   driving_row = MATRIX_ROWS - 1;

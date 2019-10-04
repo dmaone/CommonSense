@@ -142,11 +142,11 @@ void scan_common_reset() {
   memset(matrix_status, 0, sizeof(matrix_status));
 }
 
-void scan_common_start() {
+void scan_common_start(uint16_t sanity_check_duration) {
   // Sanity check - start scanning with no output, if spam is read out, STAHP.
   CLEAR_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  sanity_check_timer = SANITY_CHECK_DURATION;
+  sanity_check_timer = sanity_check_duration;
   scancodes_while_output_disabled = 0;
 }
 

@@ -60,4 +60,4 @@ void scan_common_reset();
 
 // Primes sensor sanity check.
 // If you use ISRs - don't forget to disable interrupts.
-void scan_common_start();
+void scan_common_start(uint16_t sanity_check_duration);
