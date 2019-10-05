@@ -8,8 +8,7 @@
  */
 #include <project.h>
 
-#include "scanner_magvalve.h"
-#include "scan_common.h"
+#include "scan.h"
 
 CY_ISR_PROTO(Result_ISR);
 

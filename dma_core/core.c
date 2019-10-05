@@ -14,16 +14,8 @@
 #include "globals.h"
 #include "pipeline.h"
 #include "PSoC_USB.h"
-#include "scan_common.h"
-#include "sup_serial.h"
-
-#if SCANNER_TYPE == SCANNER_SUN
-#include "scanner_sun.h"
-#elif SCANNER_TYPE == SCANNER_ADB
-#include "scanner_adb.h"
-#else
 #include "scan.h"
-#endif
+#include "sup_serial.h"
 
 CY_ISR(BootIRQ_ISR) {
   Boot_Load();

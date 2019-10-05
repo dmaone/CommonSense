@@ -97,6 +97,15 @@ static const char *const switchTypeNames[] = {
 };
 static const uint8_t switchTypeCount = 5;
 
+enum switchType {
+  ST_BEAMSPRING = 0,
+  ST_BUCKLING_SPRING,
+  ST_ADB,
+  ST_SUN,
+  ST_MAGVALVE,
+  ST_UNKNOWN,
+};
+
 typedef union {
   struct {
     uint8_t status;

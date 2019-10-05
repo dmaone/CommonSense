@@ -11,7 +11,7 @@
 #include <project.h>
 
 #include "exp.h"
-#include "scan_common.h"
+#include "scan.h"
 #include "PSoC_USB.h"
 #include "sup_serial.h"
 

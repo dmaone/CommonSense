@@ -1,6 +1,6 @@
 /*
  *
- * Copyright (C) 2016-2017 DMA <dma@ya.ru>
+ * Copyright (C) 2018 DMA <dma@ya.ru>
  *
  * This program is free software; you can redistribute it and/or modify
  * it under the terms of the GNU General Public License version 2 as
@@ -10,35 +10,74 @@
 #pragma once
 #include "globals.h"
 
-// This is to ease calculations, there are things hardcoded in buffer
-// management!! For 1 and 2 ADCs, that is.
-#define NUM_ADCs 1
+typedef union {
+  struct {
+    uint8_t flags;
+    uint8_t scancode;
+  } __attribute__((packed));
+  uint8_t raw[2];
+} scancode_t;
 
-#define ADC_CHANNELS (MATRIX_COLS / NUM_ADCs)
+// number of ticks to check for spam after scan starts
+#define SANITY_CHECK_DURATION 1000
+#define SCANNER_INSANITY_THRESHOLD 3
 
-// Should be [number of columns per ADC + 1] * 2 + 1 - so 19 for MF, 27 for BS
-// TRICKY PART: Count7(which is part of PTK) counts down.
-// So column 0 must be connected to highest input on the MUX
-// MUX input 0 must be connected to ground - we use it to discharge ADC sampling
-// cap. So, scan sequence code sees is ch0-ch1-ch0-ch2-ch0-ch3-ch0..
-#define PTK_CHANNELS (2 * ADC_CHANNELS + 3)
+// IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122
+// with it's 8x16 matrix.
+#define COMMONSENSE_NOKEY 0xff
 
-// For even values of the above - both offsets need to be updated!
-#define ADC_BUF_INITIAL_OFFSET 1
-#define ADC_BUF_INTER_ROW_GAP 3
+#define KEY_UP_MASK 0x80
+#define SCANCODE_MASK 0x7f
 
-// Below is per ADC.
-#define ADC_BUFFER_BYTESIZE (PTK_CHANNELS * 2)
+// Flags enabling debug pulses on exp header
+#define DEBUG_SHOW_KEYPRESSES 0
+#define DEBUG_SHOW_MATRIX_EVENTS 0
+#define PROFILE_SCAN_PROCESSING 0
 
-// Don't forget to set PTK to 5 channels for 100kHz mode!
-// 3 channels is too low - pulse reset logic activates at ch2 selection
-// Not good, 2 being the first channel in 3-channel config!
-// PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
-#undef COMMONSENSE_100KHZ_MODE
+#define SCANCODES_END 31
+#define SCANCODES_NEXT(X) ((X + 1) & SCANCODES_END)
+// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
-void scan_init(uint8_t);
+scancode_t scancodes[SCANCODES_END + 1];
+uint8_t scancodes_wpos;
+uint8_t scancodes_rpos;
+
+void append_scancode(uint8_t flags, uint8_t scancode);
+void append_debounced(uint8_t flags, uint8_t scancode);
+void scan_set_matrix_value(uint8_t keyIndex, uint16_t value);
+void report_matrix_readouts();
+
+void scan_check_matrix();
+bool scan_is_key_down(uint8_t keyIndex);
+void scan_sanity_check();
+
+// Basic initialization - constants, essentially
+void scan_common_init(uint8_t debounce_period);
+
+// reset things - initialize matrix and buffers.
+// If you use ISRs - don't forget to disable interrupts.
+void scan_common_reset();
+
+// Primes sensor sanity check.
+// If you use ISRs - don't forget to disable interrupts.
+void scan_common_start(uint16_t sanity_check_duration);
+
+// To be implemented by a particular scanner
+
+// Power-on
+void scan_init(uint8_t debouncing_period);
+
+// Bring scanner into initial state
 void scan_reset(void);
+
+// Start operations
 void scan_start(void);
+
+// Just before USB suspend
 void scan_nap(void);
+
+// Coming out of USB suspend
 void scan_wake(void);
+
+// Called every millisecond (or more) as a part of main loop.
 void scan_tick(void);

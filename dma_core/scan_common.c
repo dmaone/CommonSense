@@ -6,7 +6,7 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "scan_common.h"
+#include "scan.h"
 
 #include <project.h>
 

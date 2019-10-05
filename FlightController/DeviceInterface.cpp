@@ -13,10 +13,13 @@ constexpr size_t kDeviceScanTick{1000}; // ms connect retry
 constexpr size_t kStatusTimerTick{200}; // ms between status updates
 constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
 constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
+
+DeviceConfig* DeviceInterface::config{nullptr};
+
 DeviceInterface::DeviceInterface(QObject *parent)
     : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
       mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected) {
-  config = new DeviceConfig();
+  config = &config_;
   installEventFilter(config);
 
   connect(config, SIGNAL(changed()), this, SLOT(configChanged()));

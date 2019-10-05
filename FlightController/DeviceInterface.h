@@ -32,13 +32,13 @@ public:
   static DeviceInterface& getInstance() {
     return Singleton<DeviceInterface>::instance();
   }
+  static DeviceConfig* config;
   DeviceInterface(QObject *parent = 0);
   ~DeviceInterface();
   void start(void);
   bool event(QEvent *e);
   device_status_t *getStatus(void);
   void releaseDevice(void);
-  DeviceConfig *config;
   enum DeviceStatus {
     DeviceConnected,
     DeviceDisconnected,
@@ -106,6 +106,7 @@ private:
   bool _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
   DeviceList listDevices();
+  DeviceConfig config_{};
   std::mutex deviceLock_{};
   std::mutex queueLock_{};
   qint64 lastSend_;

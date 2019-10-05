@@ -8,8 +8,7 @@
  */
 #include <project.h>
 
-#include "scanner_sun.h"
-#include "scan_common.h"
+#include "scan.h"
 
 uint8_t local_led_status;
 
@@ -30,7 +29,6 @@ void scan_init(uint8_t debouncing_period) {
 
 void scan_reset() {
   scan_common_reset();
-  N_UART_PutChar(0x01);
 }
 
 void scan_start(void) {

@@ -8,9 +8,17 @@
  */
 #include <project.h>
 
-#include "scanner_adb.h"
+#include "scan.h"
 
-#include "scan_common.h"
+#define ADDR_KEYBOARD 0x20
+
+typedef union {
+  struct {
+    uint8_t key0;
+    uint8_t key1;
+  };
+  uint16_t raw;
+} adb_pdu_t;
 
 uint8_t local_led_status;
 
@@ -138,7 +146,7 @@ void sync_leds(void) {
 }
 
 void scan_init(uint8_t debouncing_period) {
-  append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
+  scan_common_init(debouncing_period);
   ADB_Data_Write(1);
   CyDelayUs(1000);
   adb_host_init();
@@ -148,17 +156,20 @@ void scan_init(uint8_t debouncing_period) {
   // upper byte: reserved bits 0000, device address 0010
   // lower byte: device handler 00000011
   adb_host_listen(0x2B,0x02,0x03);
-  SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
-  SET_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED);
-  sync_leds();
+}
+
+void scan_reset(void) {
+  scan_common_reset();
 }
 
 void scan_start(void) {
   sync_leds();
 }
 
-void scan_reset(void) {
-  sync_leds();
+void scan_nap(void) {
+}
+
+void scan_wake(void) {
 }
 
 void scan_tick(void) {
@@ -190,16 +201,4 @@ void scan_tick(void) {
   if (local_led_status != led_status) {
     sync_leds();
   }
-}
-
-void scan_nap(void) {
-}
-
-void scan_wake(void) {
-}
-
-void scan_sanity_check(void) {
-}
-
-void report_matrix_readouts(void) {
 }
