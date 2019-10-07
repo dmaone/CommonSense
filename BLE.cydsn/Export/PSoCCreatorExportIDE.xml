@@ -142,6 +142,8 @@
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\UART_DEB_rx.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\UART_DEB_rx_aliases.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\UART_DEB_rx_PM.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cy_em_eeprom.c</File>
+          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cy_em_eeprom.h</File>
           <File BuildType="BUILD" Toolchain="ARM GCC Generic">Generated_Source\PSoC4\cm0gcc.ld</File>
           <File BuildType="BUILD" Toolchain="ARM MDK Generic">Generated_Source\PSoC4\Cm0RealView.scat</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\Cm0Start.c</File>
@@ -167,8 +169,6 @@
           <File BuildType="BUILD" Toolchain="ARM GCC Generic">Generated_Source\PSoC4\CyBootAsmGnu.s</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\CyLFClk.c</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\CyLFClk.h</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cy_em_eeprom.c</File>
-          <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cy_em_eeprom.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\project.h</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cycodeshareimport.ld</File>
           <File BuildType="BUILD" Toolchain="">Generated_Source\PSoC4\cycodeshareexport.ld</File>
