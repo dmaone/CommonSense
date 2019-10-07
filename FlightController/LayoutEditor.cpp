@@ -12,8 +12,7 @@
 #include "ui_LayoutEditor.h"
 
 LayoutEditor::LayoutEditor(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent, Qt::Tool), ui(new Ui::LayoutEditor), grid(new QGridLayout()),
-      currentLayer(0) {
+    : QFrame(parent, Qt::Tool), ui(new Ui::LayoutEditor), grid(new QGridLayout()) {
   ui->setupUi(this);
   deviceConfig = config;
   initDisplay();
@@ -73,7 +72,6 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols) {
       if (!display[i][j]) {
         QComboBox *l = new QComboBox();
         l->addItems(scancodes.list);
-        l->setStyleSheet("background-color: #ffffff;");
         display[i][j] = l;
         grid->addWidget(l, i + 1, j + 1, 1, 1);
         if (j == 0) {
@@ -181,10 +179,10 @@ void LayoutEditor::receiveScancode(uint8_t row, uint8_t col,
   if (!display[row][col])
     return;
   if (status == DeviceInterface::KeyPressed) {
-    display[row][col]->setStyleSheet("background-color: #ffff33;");
+    display[row][col]->setStyleSheet("color: black; background-color: #ffff33;");
     display[row][col]->setFocus();
   } else {
-    display[row][col]->setStyleSheet("background-color: #ffffff;");
+    display[row][col]->setStyleSheet("");
   }
 }
 

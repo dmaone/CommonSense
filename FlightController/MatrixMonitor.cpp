@@ -113,9 +113,9 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
            level > deviceConfig->thresholds[row][i]) ||
           (deviceConfig->bNormallyLow &&
            level < deviceConfig->thresholds[row][i])) {
-        cell->setStyleSheet("background-color: #ffffff;");
+        cell->setStyleSheet("");
       } else {
-        cell->setStyleSheet("background-color: #ffff33;");
+        cell->setStyleSheet("color: black; background-color: #33ff33;");
       }
       _updateStatCell(row, i, level);
       switch (displayMode) {
@@ -139,6 +139,15 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
     return true;
   }
   return false;
+}
+
+void MatrixMonitor::receiveScancode(uint8_t row, uint8_t col,
+                                      DeviceInterface::KeyStatus status) {
+  if (status == DeviceInterface::KeyPressed) {
+    display[row][col]->setStyleSheet("color: black; background-color: #ffff33");
+  } else {
+    display[row][col]->setStyleSheet("");
+  }
 }
 
 void MatrixMonitor::enableTelemetry(uint8_t m) {

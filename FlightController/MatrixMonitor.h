@@ -2,6 +2,7 @@
 
 #include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
+#include "DeviceInterface.h"
 #include "Events.h"
 #include <QGridLayout>
 #include <QLCDNumber>
@@ -30,6 +31,10 @@ public:
   void show(void);
   enum DisplayMode { DisplayNow, DisplayMin, DisplayMax, DisplayAvg };
   Q_ENUM(DisplayMode);
+
+public slots:
+  void receiveScancode(uint8_t row, uint8_t col,
+                       DeviceInterface::KeyStatus status);
 
 signals:
   void sendCommand(c2command, uint8_t);

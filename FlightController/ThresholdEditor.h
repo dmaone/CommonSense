@@ -1,5 +1,4 @@
-#ifndef THRESHOLDEDITOR_H
-#define THRESHOLDEDITOR_H
+#pragma once
 
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
@@ -40,5 +39,3 @@ private:
 private slots:
   void on_closeButton_clicked(void);
 };
-
-#endif // THRESHOLDEDITOR_H

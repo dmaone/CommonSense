@@ -87,13 +87,13 @@ private:
   int statusTimerId;
   unsigned char bytesFromDevice[65];
   device_status_t status;
-  uint8_t mode;
+  uint8_t mode{0};
   DeviceStatus currentStatus;
-  uint8_t receivedStatus_;
+  uint8_t receivedStatus_{0};
   QQueue<OUT_c2packet_t> commandQueue_;
   std::atomic<bool> cts_ {true};
-  size_t noCtsDelay_;
-  size_t antiLagTimer_;
+  size_t noCtsDelay_{0};
+  size_t antiLagTimer_{0};
   std::atomic<bool> releaseDevice_ {false};
 
   void processStatusReply(QByteArray* payload);

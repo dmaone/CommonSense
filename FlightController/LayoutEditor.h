@@ -36,7 +36,8 @@ private:
   QGridLayout *grid;
   QComboBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   DeviceConfig *deviceConfig;
-  uint8_t currentLayer;
+  uint8_t currentLayer{0};
+  QString defaultCss_{};
   void initDisplay(void);
   void sizeDisplay(uint8_t, uint8_t);
   void setDisplay();

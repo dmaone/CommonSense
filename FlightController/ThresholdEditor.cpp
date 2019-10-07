@@ -46,7 +46,7 @@ void ThresholdEditor::initDisplay() {
       QSpinBox *l = new QSpinBox();
       l->setMaximum(254);
       l->setAlignment(Qt::AlignRight);
-      l->setStyleSheet("background-color: #ffffff;");
+//      l->setStyleSheet("background-color: #ffffff;");
       display[i][j] = l;
       grid->addWidget(l, i + 1, j + 1, 1, 1);
     }
@@ -104,9 +104,9 @@ void ThresholdEditor::resetThresholds() {
 void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col,
                                       DeviceInterface::KeyStatus status) {
   if (status == DeviceInterface::KeyPressed) {
-    display[row][col]->setStyleSheet("background-color: #ffff33;");
+    display[row][col]->setStyleSheet("color: black; background-color: #ffff33");
   } else {
-    display[row][col]->setStyleSheet("background-color: #ffffff;");
+    display[row][col]->setStyleSheet("");
   }
 }
 

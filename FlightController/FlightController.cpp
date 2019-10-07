@@ -26,6 +26,12 @@ FlightController::FlightController(QWidget *parent)
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
 
   matrixMonitor = new MatrixMonitor();
+  connect(
+      &di,
+      SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+      matrixMonitor,
+      SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+
   layoutEditor = new LayoutEditor(di.config);
   connect(
       &di,
