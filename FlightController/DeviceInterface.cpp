@@ -147,7 +147,7 @@ void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
 
 void DeviceInterface::configChanged(void) {
   qInfo() << "Configuration changed.";
-  switchType = QString(switchTypeNames[config->switchType]);
+  switchType = QString(switchTypeNames[config->switchType].data());
   if (currentStatus == DeviceConnected) {
     emit deviceStatusNotification(DeviceConfigChanged);
   }

@@ -49,7 +49,7 @@ SOURCES += main.cpp \
     DeviceSelector.cpp
 
 HEADERS  += \
-    ../c2/c2_protocol.h \
+    ../c2/c2_protocol_hostside.h \
     ../c2/nvram.h \
     call_once.h \
     singleton.h \
@@ -71,7 +71,8 @@ HEADERS  += \
     Delays.h \
     Hardware.h \
     Macro.h \
-    DeviceSelector.h
+    DeviceSelector.h \
+    ../c2/c2_protocol.h
 
 FORMS    += \
     FlightController.ui \

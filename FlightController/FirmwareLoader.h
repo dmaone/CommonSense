@@ -3,7 +3,7 @@
 #include <QObject>
 #include <QString>
 
-#include "../c2/c2_protocol.h"
+#include "../c2/c2_protocol_hostside.h"
 #include "CyACD.h"
 
 #define BOOTLOADER_SOP_MARKER 0x01

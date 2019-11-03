@@ -11,6 +11,15 @@
 
 #include <stdint.h>
 
+/*
+ *** CAUTION *** VORSICHT *** ATTENTION *** berhati-hati
+ * This include is for firmware side. C99 only.
+ * All constants MUST be #defines, no constexprs.
+ * String dictionaries, hostname limits like number of switch types
+ * are all belong to c2_protocol_hostside.h
+ *** CAUTION *** VORSICHT *** ATTENTION *** berhati-hati
+ */
+
 #define ABSOLUTE_MAX_ROWS 16
 #define ABSOLUTE_MAX_COLS 24
 #define ABSOLUTE_MAX_LAYERS 8
@@ -85,17 +94,6 @@ enum expMode {
   EXP_MODE_SOLENOID_NUMCAPS,
   EXP_MODE_LEDS,
 };
-
-static const char *const expModeNames[] = {
-    "Disabled",
-
-    "Solenoid+Num+Caps", "Lock LEDs",
-};
-
-static const char *const switchTypeNames[] = {
-  "Beamspring", "Buckling Spring", "ADB", "Sun", "MagValve", "UNKNOWN"
-};
-static const uint8_t switchTypeCount = 5;
 
 enum switchType {
   ST_BEAMSPRING = 0,
