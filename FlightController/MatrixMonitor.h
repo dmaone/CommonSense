@@ -37,6 +37,7 @@ public slots:
 
 signals:
   void sendCommand(c2command, uint8_t);
+  void setStatusBit(deviceStatus, bool);
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);

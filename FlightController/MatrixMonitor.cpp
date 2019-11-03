@@ -25,6 +25,8 @@ MatrixMonitor::MatrixMonitor(QWidget *parent)
   DeviceInterface &di = Singleton<DeviceInterface>::instance();
   connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
           SLOT(sendCommand(c2command, uint8_t)));
+  connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
+          SLOT(setStatusBit(deviceStatus, bool)));
   di.installEventFilter(this);
   deviceConfig = di.config;
 }
@@ -154,7 +156,10 @@ void MatrixMonitor::receiveScancode(uint8_t row, uint8_t col,
 
 void MatrixMonitor::enableTelemetry(uint8_t m) {
   ui->runButton->setText(m ? "Stop!" : "Start!");
+  // TODO feed commands slowly, so they won't be lost.
+  // emit setStatusBit(C2DEVSTATUS_OUTPUT_ENABLED, false);
   emit sendCommand(C2CMD_GET_MATRIX_STATE, m);
+  emit setStatusBit(C2DEVSTATUS_SCAN_ENABLED, true);
 }
 
 void MatrixMonitor::on_runButton_clicked() {
