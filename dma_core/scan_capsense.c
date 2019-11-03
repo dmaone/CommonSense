@@ -221,12 +221,18 @@ CY_ISR(Result_ISR) {
     // TEST_BIT is faster than bool inited outside of the loop.
     if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
       // When monitoring matrix we're interested in raw feed.
+      // We also want to see all the keys, even ignored ones.
       scan_set_matrix_value(--keyIndex, Results[adc_buffer_pos]);
       continue;
+    }
+    const uint8_t threshold = config.thresholds[--keyIndex];
+    if (threshold == K_IGNORE_KEY) {
+      continue; // As if nothing happened!
+    }
 #if NORMALLY_LOW == 1
-    } else if (Results[adc_buffer_pos] > config.thresholds[--keyIndex]) {
+    if (Results[adc_buffer_pos] > threshold) {
 #else
-    } else if (Results[adc_buffer_pos] < config.thresholds[--keyIndex]) {
+    if (Results[adc_buffer_pos] < threshold) {
 #endif
       append_debounced(0, keyIndex);
 #if DEBUG_SHOW_MATRIX_EVENTS == 1

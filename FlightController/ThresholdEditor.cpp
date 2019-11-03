@@ -45,7 +45,8 @@ void ThresholdEditor::initDisplay() {
       QSpinBox *l = new QSpinBox();
       l->setMaximum(254);
       l->setAlignment(Qt::AlignRight);
-//      l->setStyleSheet("background-color: #ffffff;");
+      connect(l, QOverload<int>::of(&QSpinBox::valueChanged),
+          [this, l](int){ paintCell(l); });
       display[i][j] = l;
       grid->addWidget(l, i + 1, j + 1, 1, 1);
     }
@@ -75,6 +76,14 @@ void ThresholdEditor::adjustThresholds(size_t delta) {
   }
 }
 
+void ThresholdEditor::paintCell(QSpinBox *cell) {
+  if (cell->value() == K_IGNORE_KEY) {
+    cell->setStyleSheet("background-color: #999999");
+  } else {
+    cell->setStyleSheet("");
+  }
+}
+
 void ThresholdEditor::increaseThresholds() {
   adjustThresholds(ui->adjustSpinbox->value());
 }
@@ -95,6 +104,7 @@ void ThresholdEditor::resetThresholds() {
   for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
     for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
       display[i][j]->setValue(deviceConfig->thresholds[i][j]);
+      paintCell(display[i][j]);
     }
   }
   qInfo() << "Loaded threshold map";
@@ -105,8 +115,10 @@ void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col,
   if (status == DeviceInterface::KeyPressed) {
     display[row][col]->setStyleSheet("color: black; background-color: #ffff33");
   } else {
-    display[row][col]->setStyleSheet("");
+    paintCell(display[row][col]);
   }
 }
 
 void ThresholdEditor::on_closeButton_clicked() { this->close(); }
+
+

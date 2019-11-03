@@ -56,7 +56,8 @@ void LayoutEditor::initDisplay(void) {
 
 void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols) {
   ui->layerCombo->clear();
-  for (uint8_t i = 0; i < deviceConfig->numLayers; i++) {
+  ui->layerCombo->addItem(QString("Base Layer"));
+  for (uint8_t i = 1; i < deviceConfig->numLayers; i++) {
     ui->layerCombo->addItem(QString("Layer %1").arg(i));
   }
   ui->layerCombo->setCurrentIndex(currentLayer);
@@ -67,8 +68,8 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols) {
     }
   }
   ScancodeList scancodes;
-  for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
-    for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
+  for (uint8_t i = 0; i < rows; i++) {
+    for (uint8_t j = 0; j < cols; j++) {
       if (!display[i][j]) {
         QComboBox *l = new QComboBox();
         l->addItems(scancodes.list);
@@ -160,6 +161,7 @@ void LayoutEditor::setDisplay() {
   for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
     for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
       display[i][j]->setCurrentIndex(deviceConfig->layouts[currentLayer][i][j]);
+      display[i][j]->setEnabled(deviceConfig->thresholds[i][j] != K_IGNORE_KEY);
     }
   }
 }

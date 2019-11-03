@@ -35,6 +35,7 @@ private:
   void initDisplay();
   void updateDisplaySize(uint8_t, uint8_t);
   void adjustThresholds(size_t delta);
+  void paintCell(QSpinBox *cell);
 
 private slots:
   void on_closeButton_clicked(void);

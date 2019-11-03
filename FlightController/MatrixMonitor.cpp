@@ -108,13 +108,16 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
     for (uint8_t i = 0; i < max_cols; i++) {
       QLCDNumber *cell = display[row][i];
       uint8_t level = pl->constData()[3 + i];
-      if ((!deviceConfig->bNormallyLow &&
-           level > deviceConfig->thresholds[row][i]) ||
-          (deviceConfig->bNormallyLow &&
-           level < deviceConfig->thresholds[row][i])) {
-        cell->setStyleSheet("");
-      } else {
+      const auto thr = deviceConfig->thresholds[row][i];
+      if (thr == K_IGNORE_KEY) {
+        cell->setStyleSheet("background-color: #999999;");
+      } else if (
+          (deviceConfig->bNormallyLow && level > thr) ||
+          (!deviceConfig->bNormallyLow && level < thr)
+      ) {
         cell->setStyleSheet("color: black; background-color: #33ff33;");
+      } else {
+        cell->setStyleSheet("");
       }
       _updateStatCell(row, i, level);
       switch (displayMode) {

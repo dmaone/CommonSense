@@ -161,6 +161,8 @@ typedef union {
 #define DELAYS_EVENT 0
 #define DELAYS_TAP 1
 
+#define K_IGNORE_KEY 0
+
 // serial stuff
 enum supervisory_command {
   SUP_CMD_NOOP = 0,
