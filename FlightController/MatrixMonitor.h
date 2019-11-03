@@ -1,6 +1,5 @@
 #pragma once
 
-#include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 #include "Events.h"

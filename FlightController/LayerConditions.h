@@ -1,5 +1,4 @@
-#ifndef LAYERCONDITIONS_H
-#define LAYERCONDITIONS_H
+#pragma once
 
 #include "DeviceConfig.h"
 #include "LayerCondition.h"
@@ -48,5 +47,3 @@ private:
   DeviceConfig *config;
   QGridLayout *grid;
 };
-
-#endif // LAYERCONDITIONS_H

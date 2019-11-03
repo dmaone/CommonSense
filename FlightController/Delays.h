@@ -1,5 +1,4 @@
-#ifndef DELAYS_H
-#define DELAYS_H
+#pragma once
 
 #include <QGridLayout>
 #include <QSpinBox>
@@ -40,5 +39,3 @@ private:
   QGridLayout *_grid;
   void _deinit(void);
 };
-
-#endif // DELAYS_H

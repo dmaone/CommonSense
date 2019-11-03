@@ -1,12 +1,10 @@
-#ifndef LAYOUTEDITOR_H
-#define LAYOUTEDITOR_H
+#pragma once
 
 #include <QComboBox>
 #include <QFrame>
 #include <QGridLayout>
 #include <stdint.h>
 
-#include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 
@@ -45,5 +43,3 @@ private:
 private slots:
   void on_closeButton_clicked(void);
 };
-
-#endif // LAYOUTEDITOR_H

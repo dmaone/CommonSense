@@ -10,8 +10,6 @@
 
 #include <QMainWindow>
 
-#include "../c2/c2_protocol.h"
-
 #include "Delays.h"
 #include "DeviceInterface.h"
 #include "Hardware.h"

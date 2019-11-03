@@ -1,5 +1,4 @@
-#ifndef CYACD_H
-#define CYACD_H
+#pragma once
 
 #include <QString>
 #include <QTextStream>
@@ -32,5 +31,3 @@ private:
   void _calculateChecksum(void);
   void _verifyChecksum(CyACD_row *row);
 };
-
-#endif // CYACD_H

@@ -8,7 +8,6 @@
 #include <QMessageBox>
 #include <QTextStream>
 
-#include "../c2/c2_protocol.h"
 #include "DeviceInterface.h"
 #include "Events.h"
 #include "MatrixMonitor.h"

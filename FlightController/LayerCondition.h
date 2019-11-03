@@ -1,5 +1,4 @@
-#ifndef LAYERCONDITION_H
-#define LAYERCONDITION_H
+#pragma once
 
 class LayerCondition {
 public:
@@ -24,5 +23,3 @@ private:
   unsigned char fnKeys;
   unsigned char layer_;
 };
-
-#endif // LAYERCONDITION_H

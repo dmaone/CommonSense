@@ -1,5 +1,4 @@
-#ifndef FIRMWARLOADER_H
-#define FIRMWARLOADER_H
+#pragma once
 
 #include <QObject>
 #include <QString>
@@ -79,5 +78,3 @@ private:
   bool _checkFlashSize(const Bootloader_packet_t& packet);
   bool _upload_row();
 };
-
-#endif // FIRMWARLOADER_H

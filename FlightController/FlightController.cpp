@@ -10,7 +10,6 @@
 #include "ui_FlightController.h"
 #include <QMessageBox>
 
-#include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
