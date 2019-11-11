@@ -1,12 +1,12 @@
+#include "FirmwareLoader.h"
+
 #include <QFileDialog>
 #include <QMessageBox>
 
 #include "singleton.h"
 
-#include "CyACD.h"
 #include "DeviceInterface.h"
 #include "Events.h"
-#include "FirmwareLoader.h"
 #include "settings.h"
 
 FirmwareLoader::FirmwareLoader(QObject *parent)

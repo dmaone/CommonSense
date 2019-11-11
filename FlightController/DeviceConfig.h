@@ -1,6 +1,7 @@
 #pragma once
 
 #include <QObject>
+#include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 
 #include "Events.h"
@@ -15,6 +16,14 @@ struct HardwareConfig {
   uint8_t expHdrMode;
   uint8_t expHdrParam1;
   uint8_t expHdrParam2;
+};
+
+struct SwitchTypeCapabilities {
+  SwitchTypeCapabilities(const bool t, const bool m):
+    hasThresholds(t),
+    hasMatrixMonitor(m) {}
+  bool hasThresholds{false};
+  bool hasMatrixMonitor{false};
 };
 
 class DeviceConfig : public QObject {
@@ -42,6 +51,9 @@ public:
   void setDelay(int delayIdx, uint16_t delay_ms);
   HardwareConfig getHardwareConfig(void);
   void setHardwareConfig(HardwareConfig config);
+  const std::vector<std::string> getExpModeNames();
+  const std::string& getSwitchTypeName();
+  const SwitchTypeCapabilities getSwitchCapabilities(SwitchType type);
 
 signals:
   void changed(void);

@@ -8,6 +8,16 @@
 #include "settings.h"
 #include "singleton.h"
 
+const std::vector<std::string> expModeNames_{
+  "Disabled",
+
+  "Solenoid+Num+Caps", "Lock LEDs",
+};
+
+const std::vector<std::string> switchTypeNames_ {
+  "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "UNKNOWN"
+};
+
 DeviceConfig::DeviceConfig(QObject *parent)
     : QObject(parent), bValid(false), numRows(0), numCols(0),
       numLayers(ABSOLUTE_MAX_LAYERS), numLayerConditions(NUM_LAYER_CONDITIONS),
@@ -151,7 +161,7 @@ void DeviceConfig::_unpack(void) {
   numCols = _eeprom.matrixCols;
   numLayers = _eeprom.matrixLayers;
   bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
-  switchType = std::min(_eeprom.switchType, switchTypeCount);
+  switchType = std::min(_eeprom.switchType, (uint8_t)switchTypeNames_.size());
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
   uint8_t tableSize = numRows * numCols;
@@ -322,4 +332,17 @@ void DeviceConfig::setHardwareConfig(HardwareConfig config) {
   _eeprom.expMode = config.expHdrMode;
   _eeprom.expParam1 = config.expHdrParam1;
   _eeprom.expParam2 = config.expHdrParam2;
+}
+
+const std::vector<std::string> DeviceConfig::getExpModeNames() {
+  return expModeNames_;
+}
+
+const std::string& DeviceConfig::getSwitchTypeName() {
+  return switchTypeNames_.at(switchType);
+}
+
+const SwitchTypeCapabilities DeviceConfig::getSwitchCapabilities(SwitchType type) {
+  return {true, true};
+
 }

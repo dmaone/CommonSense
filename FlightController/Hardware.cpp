@@ -4,7 +4,7 @@
 Hardware::Hardware(DeviceConfig *config, QWidget *parent)
     : QFrame(parent, Qt::Tool), ui(new Ui::Hardware), _config(config) {
   ui->setupUi(this);
-  for (const auto& it: expModeNames) {
+  for (const auto& it: _config->getExpModeNames()) {
     ui->modeBox->addItem(it.data());
   }
 }

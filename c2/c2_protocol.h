@@ -95,7 +95,7 @@ enum expMode {
   EXP_MODE_LEDS,
 };
 
-enum switchType {
+enum SwitchType {
   ST_BEAMSPRING = 0,
   ST_BUCKLING_SPRING,
   ST_ADB,

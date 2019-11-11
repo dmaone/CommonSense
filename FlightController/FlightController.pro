@@ -49,7 +49,6 @@ SOURCES += main.cpp \
     DeviceSelector.cpp
 
 HEADERS  += \
-    ../c2/c2_protocol_hostside.h \
     ../c2/nvram.h \
     call_once.h \
     singleton.h \

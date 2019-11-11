@@ -14,7 +14,6 @@
 #include <QObject>
 #include <QQueue>
 #include <hidapi/hidapi.h>
-#include <../c2/c2_protocol_hostside.h>
 
 #include "DeviceConfig.h"
 #include "DeviceSelector.h"

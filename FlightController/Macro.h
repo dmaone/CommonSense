@@ -3,8 +3,7 @@
 #include <stdint.h>
 #include <QByteArray>
 
-#include "../c2/c2_protocol_hostside.h"
-
+#include "../c2/c2_protocol.h"
 
 class Macro
 {

@@ -258,7 +258,7 @@ void FlightController::deviceStatusNotification(
 void FlightController::lockUI(bool lock) {
   _uiLocked = lock;
   ui->statusRequestButton->setDisabled(lock);
-  if (DeviceInterface::config->switchType == switchType::ST_MAGVALVE) {
+  if (DeviceInterface::config->switchType == SwitchType::ST_MAGVALVE) {
     ui->MatrixMonitorButton->setDisabled(true);
   } else {
     ui->MatrixMonitorButton->setDisabled(lock);
