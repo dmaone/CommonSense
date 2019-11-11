@@ -37,7 +37,7 @@ inline void setup() {
   BootIRQ_StartEx(BootIRQ_ISR);
   SysTimer_Start();
   TimerIRQ_StartEx(Timer_ISR);
-  
+
   load_config();
 
   power_state = DEVSTATE_FULL_THROTTLE;
