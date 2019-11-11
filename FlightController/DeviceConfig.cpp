@@ -2,6 +2,7 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
+#include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 #include "LayerCondition.h"
@@ -342,7 +343,16 @@ const std::string& DeviceConfig::getSwitchTypeName() {
   return switchTypeNames_.at(switchType);
 }
 
-const SwitchTypeCapabilities DeviceConfig::getSwitchCapabilities(SwitchType type) {
-  return {true, true};
-
+const
+SwitchTypeCapabilities DeviceConfig::getSwitchCapabilities() {
+  switch(switchType) {
+    case SwitchType::ST_ADB:
+    case SwitchType::ST_SUN:
+      // has threshold, matrix monitorable, delays configurable
+      return {false, false, false};
+    case SwitchType::ST_MAGVALVE:
+      return {true, false, true};
+    default:
+      return {true, true, true};
+  }
 }

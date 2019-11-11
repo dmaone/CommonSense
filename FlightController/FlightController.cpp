@@ -258,17 +258,23 @@ void FlightController::deviceStatusNotification(
 void FlightController::lockUI(bool lock) {
   _uiLocked = lock;
   ui->statusRequestButton->setDisabled(lock);
-  if (DeviceInterface::config->switchType == SwitchType::ST_MAGVALVE) {
-    ui->MatrixMonitorButton->setDisabled(true);
-  } else {
-    ui->MatrixMonitorButton->setDisabled(lock);
-  }
+  ui->MatrixMonitorButton->setDisabled(lock);
   ui->thresholdsButton->setDisabled(lock);
   ui->macrosButton->setDisabled(lock);
   ui->layoutButton->setDisabled(lock);
   ui->layerModsButton->setDisabled(lock);
   ui->delaysButton->setDisabled(lock);
   ui->hwButton->setDisabled(lock);
+  if (lock) {
+    return;
+  }
+  auto caps = DeviceInterface::config->getSwitchCapabilities();
+  if (!caps.hasThresholds) {
+    ui->thresholdsButton->setDisabled(true);
+  }
+  if (!caps.hasMatrixMonitor) {
+    ui->MatrixMonitorButton->setDisabled(true);
+  }
 }
 
 void FlightController::editLayoutClick(void) {

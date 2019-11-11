@@ -30,6 +30,12 @@ void Hardware::init() {
   ui->chargeDelay->setValue(config.chargeDelay);
   ui->dischargeDelay->setValue(config.dischargeDelay);
   ui->debouncingTicks->setValue(config.debouncingTicks);
+
+  auto caps = _config->getSwitchCapabilities();
+  ui->adcBits->setEnabled(caps.hasMatrixMonitor);
+  ui->chargeDelay->setEnabled(caps.hasDelays);
+  ui->dischargeDelay->setEnabled(caps.hasDelays);
+
   ui->modeBox->setCurrentIndex(config.expHdrMode);
   ui->Param1->setValue(config.expHdrParam1);
   ui->Param2->setValue(config.expHdrParam2);
