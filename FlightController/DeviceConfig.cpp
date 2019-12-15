@@ -16,7 +16,7 @@ const std::vector<std::string> expModeNames_{
 };
 
 const std::vector<std::string> switchTypeNames_ {
-  "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "UNKNOWN"
+  "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "Microswitch", "UNKNOWN"
 };
 
 DeviceConfig::DeviceConfig(QObject *parent)
@@ -348,6 +348,7 @@ SwitchTypeCapabilities DeviceConfig::getSwitchCapabilities() {
   switch(switchType) {
     case SwitchType::ST_ADB:
     case SwitchType::ST_SUN:
+    case SwitchType::ST_MICROSWITCH:
       // has threshold, matrix monitorable, delays configurable
       return {false, false, false};
     case SwitchType::ST_MAGVALVE:

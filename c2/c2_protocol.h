@@ -101,6 +101,7 @@ enum SwitchType {
   ST_ADB,
   ST_SUN,
   ST_MAGVALVE,
+  ST_MICROSWITCH,
   ST_UNKNOWN,
 };
 
