@@ -28,11 +28,7 @@
 #define ADB 2
 #define SUN 3
 #define CORTRON 4
-
-#define SCANNER_CS 0
-#define SCANNER_ADB 1
-#define SCANNER_SUN 2
-#define SCANNER_CORTRON 3
+#define MICROSWITCH 5
 // Do not touch above definitions. To change switch type change config.h
 
 #include "config.h"
@@ -140,18 +136,18 @@ enum outputDirection {
 void xprintf(const char *format_p, ...);
 
 #if SWITCH_TYPE == BEAMSPRING
-#define SCANNER_TYPE SCANNER_CS
 #define NORMALLY_LOW 0
 #elif SWITCH_TYPE == BUCKLING_SPRING
-#define SCANNER_TYPE SCANNER_CS
+#define NORMALLY_LOW 1
 #elif SWITCH_TYPE == ADB
-#define SCANNER_TYPE SCANNER_ADB
+// Nothing, really
 #elif SWITCH_TYPE == SUN
-#define SCANNER_TYPE SCANNER_SUN
+// Nothing, really
 #elif SWITCH_TYPE == CORTRON
-#define SCANNER_TYPE CORTRON
 #define MIN_CHARGE_DELAY 20
 #define MIN_DISCHARGE_DELAY 4
+#elif SWITCH_TYPE == MICROSWITCH
+// Nothing, really
 #else
 #error "Unknown switch type"
 #endif
