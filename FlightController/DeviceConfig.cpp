@@ -165,11 +165,12 @@ void DeviceConfig::_unpack(void) {
   switchType = std::min(_eeprom.switchType, (uint8_t)switchTypeNames_.size());
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
+  auto caps = getSwitchCapabilities();
   uint8_t tableSize = numRows * numCols;
   for (uint8_t i = 0; i < numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
-      this->thresholds[i][j] = _eeprom.stash[offset];
+      this->thresholds[i][j] = caps.hasThresholds ? _eeprom.stash[offset] : 1;
       for (uint8_t k = 0; k < numLayers; k++) {
         layouts[k][i][j] = _eeprom.stash[tableSize * (k + 1) + offset];
       }
@@ -200,10 +201,13 @@ void DeviceConfig::_assemble(void) {
   memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
   memset(_eeprom._RESERVED1, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED1));
   uint8_t tableSize = numRows * numCols;
+  auto caps = getSwitchCapabilities();
   for (uint8_t i = 0; i < this->numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
-      _eeprom.stash[offset] = thresholds[i][j];
+      if (caps.hasThresholds) {
+        _eeprom.stash[offset] = thresholds[i][j];
+      }
       for (uint8_t k = 0; k < numLayers; k++) {
         this->_eeprom.stash[tableSize * (k + 1) + offset] =
             this->layouts[k][i][j];
