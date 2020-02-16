@@ -42,21 +42,7 @@ void Hardware::init() {
 }
 
 void Hardware::_updateParamVisibility() {
-  if (ui->modeBox->currentText().contains("Solenoid")) {
-    ui->Param1Label->setText("Drive time, ms");
-    ui->Param1Label->setEnabled(true);
-    ui->Param2Label->setText("Cooldown time, ms");
-    ui->Param2Label->setEnabled(true);
-    ui->Param1->setEnabled(true);
-    ui->Param2->setEnabled(true);
-  } else {
-    ui->Param1Label->setText("Unused");
-    ui->Param1Label->setEnabled(false);
-    ui->Param2Label->setText("Unused");
-    ui->Param2Label->setEnabled(false);
-    ui->Param1->setEnabled(false);
-    ui->Param2->setEnabled(false);
-  }
+  // Nothing - both modes blink something on keypress now.
 }
 
 void Hardware::on_modeBox_currentIndexChanged(int idx) {

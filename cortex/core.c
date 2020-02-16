@@ -69,6 +69,7 @@ inline void main_loop() {
           ticksToAutonomy = LARGE_ENOUGH_32;
           CLEAR_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
           // Should reapply config - but firmware seems to crash if I do.
+          pipeline_init();
           // apply_config();
         }
         if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {

@@ -12,15 +12,17 @@
 
 #include "exp.h"
 
-static uint8_t leds;
-static uint8_t solenoid_queue;
-static bool solenoid_on;
-static uint8_t exp_cooldown;
 static uint8_t mode;
 
+static uint8_t leds;
+
+static bool solenoid_on;
+static uint8_t solenoid_queue;
+static uint8_t exp_cooldown;
+
 void exp_reset(void) {
+  solenoid_on = false;
   solenoid_queue = 0;
-  solenoid_on = 0;
   exp_cooldown = 0;
   CyPins_ClearPin(ExpHdr_0);
   CyPins_ClearPin(ExpHdr_1);
@@ -51,59 +53,44 @@ void exp_toggle(void) {
   }
 }
 
-#define EXP_LED(MASK, PIN) \
+#define SYNC_LED(MASK, PIN) \
   if (leds & MASK)         \
     CyPins_SetPin(PIN);    \
   else                     \
     CyPins_ClearPin(PIN);
+
 void exp_setLEDs(uint8_t status) {
   leds = status;
-  switch (mode) {
-  case EXP_MODE_LEDS:
-    EXP_LED(LED_NUMLOCK_MASK, EXP_NUMLOCK_PIN);
-    EXP_LED(LED_CAPSLOCK_MASK, EXP_CAPSLOCK_PIN);
-    EXP_LED(LED_SCRLOCK_MASK, EXP_SCRLOCK_PIN);
-    break;
-  case EXP_MODE_SOLENOID_NUMCAPS:
-    EXP_LED(LED_NUMLOCK_MASK, EXP_SOLENOID_NUMLOCK);
-    EXP_LED(LED_CAPSLOCK_MASK, EXP_SOLENOID_CAPSLOCK);
-    break;
-  default:
-    break;
+  SYNC_LED(LED_NUMLOCK_MASK, EXP_NUMLOCK_PIN);
+  SYNC_LED(LED_CAPSLOCK_MASK, EXP_CAPSLOCK_PIN);
+  if (mode == EXP_MODE_LEDS) {
+    SYNC_LED(LED_SCRLOCK_MASK, EXP_SCRLOCK_PIN);
   }
 }
 
 void exp_keypress(__attribute__((unused)) uint8_t keycode) {
-  switch (mode) {
-  case EXP_MODE_SOLENOID_NUMCAPS:
-    solenoid_queue++;
-    break;
-  default:
-    break;
-  }
+  solenoid_queue++;
 }
 
 void exp_tick(uint8_t tick) {
-  switch (mode) {
-  case EXP_MODE_SOLENOID_NUMCAPS:
-    if (exp_cooldown > tick) {
-      exp_cooldown -= tick;
-      return;
-    }
-    if (solenoid_on) {
-      exp_cooldown = config.expParam2;
-      CyPins_ClearPin(EXP_SOLENOID_CONTROL);
-      solenoid_on = false;
-    } else if (solenoid_queue > 0) {
-      exp_cooldown = config.expParam1;
-      CyPins_SetPin(EXP_SOLENOID_CONTROL);
-      solenoid_on = true;
-      solenoid_queue--;
-    } else {
-      exp_cooldown = 0;
-    }
-    break;
-  default:
-    break;
+  if (mode == EXP_MODE_DISABLED) {
+    return;
+  }
+
+  if (exp_cooldown > tick) {
+    exp_cooldown -= tick;
+    return;
+  }
+  if (solenoid_on) {
+    exp_cooldown = config.expParam2;
+    CyPins_ClearPin(EXP_ACTUATION_PIN);
+    solenoid_on = false;
+  } else if (solenoid_queue > 0) {
+    exp_cooldown = config.expParam1;
+    CyPins_SetPin(EXP_ACTUATION_PIN);
+    solenoid_on = true;
+    solenoid_queue--;
+  } else {
+    exp_cooldown = 0;
   }
 }

@@ -16,12 +16,13 @@
 
 #define EXP_CAPSLOCK_PIN ExpHdr_3
 #define EXP_NUMLOCK_PIN ExpHdr_1
-#define EXP_SCRLOCK_PIN ExpHdr_2
+#define EXP_SCRLOCK_PIN ExpHdr_0
 
+// Comes on briefly when a key is pressed
+#define EXP_ACTUATION_PIN ExpHdr_2
+
+// Provides solenoid enable signal, for xwhatsit solenoid board compatibility.
 #define EXP_SOLENOID_POWER ExpHdr_0
-#define EXP_SOLENOID_CONTROL ExpHdr_2
-#define EXP_SOLENOID_CAPSLOCK ExpHdr_3
-#define EXP_SOLENOID_NUMLOCK ExpHdr_1
 
 void exp_init(void);
 void exp_toggle(void);

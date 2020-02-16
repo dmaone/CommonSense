@@ -13,7 +13,7 @@
 #pragma once
 
 // xprintf is no-op outside of setup mode. This switch overrides that.
-#define XPRINTF_ALWAYS_ENABLED
+// #define XPRINTF_ALWAYS_ENABLED
 
 // #define DEBUG_STATE_MACHINE
 
@@ -59,7 +59,7 @@
 #include "../c2/nvram.h"
 
 #define DEVICE_VER_MAJOR 0x01
-#define DEVICE_VER_MINOR 0x00
+#define DEVICE_VER_MINOR 0x01
 
 /* Devices may append additional data to these boot reports,
  * but the first 8 bytes of keyboard reports
