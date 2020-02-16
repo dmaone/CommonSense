@@ -160,8 +160,13 @@ void LayoutEditor::applyLayout() {
 void LayoutEditor::setDisplay() {
   for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
     for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
-      display[i][j]->setCurrentIndex(deviceConfig->layouts[currentLayer][i][j]);
-      display[i][j]->setEnabled(deviceConfig->thresholds[i][j] != K_IGNORE_KEY);
+      if (deviceConfig->thresholds[i][j] == K_IGNORE_KEY) {
+        display[i][j]->setCurrentIndex(0);
+        display[i][j]->setEnabled(false);
+      } else {
+        display[i][j]->setCurrentIndex(deviceConfig->layouts[currentLayer][i][j]);
+        display[i][j]->setEnabled(true);
+      }
     }
   }
 }

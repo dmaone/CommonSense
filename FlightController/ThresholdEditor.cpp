@@ -69,9 +69,19 @@ void ThresholdEditor::updateDisplaySize(uint8_t rows, uint8_t cols) {
 }
 
 void ThresholdEditor::adjustThresholds(size_t delta) {
+  size_t nonZeroes{0};
   for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
     for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
-      display[i][j]->setValue(display[i][j]->value() + delta);
+      nonZeroes += display[i][j]->value();
+    }
+  }
+  for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
+    for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
+      auto threshold = display[i][j]->value();
+      if (threshold == 0 && nonZeroes > 0) {
+        continue;
+      }
+      display[i][j]->setValue(threshold + delta);
     }
   }
 }

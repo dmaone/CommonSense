@@ -92,7 +92,7 @@ bool DeviceInterface::event(QEvent *e) {
       emit scancodeReceived(
           row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
       qInfo().noquote() <<
-          QString((flags & flagReleased) ? "· %1 %2" : "# %1 %2")
+          QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
           .arg(row + 1, 2)
           .arg(col + 1, 2);
       return true;
