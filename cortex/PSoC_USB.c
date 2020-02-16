@@ -568,10 +568,11 @@ void USB_DP_ISR_EntryCallback(void) {
 }
 
 void xprintf(const char *format_p, ...) {
-  if (ticksToAutonomy > SETUP_TIMEOUT) {
-    // Essentially, "If FlightController isn't trying to talk to us".
+#ifndef XPRINTF_ALWAYS_ENABLED
+  if (BIT_IS_CLEAR(status_register, C2DEVSTATUS_SETUP_MODE)) {
     return;
   }
+#endif
   va_list va;
   va_start(va, format_p);
   vsnprintf((char *)outbox.raw, sizeof(outbox), format_p, va);

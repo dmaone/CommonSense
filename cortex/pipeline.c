@@ -84,6 +84,7 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
       // Exp header toggles on keyDown. keyUp is ignored so not to toggle twice.
       exp_toggle();
     }
+    return;
   } else if ((keycode & 0xf8) == 0xa8) {
     // Layer mod. The "layer mod key not mapped in upper layers" solved
     // by USB keycode lookup, as long as upper layers not mapped Fn key to
@@ -245,12 +246,20 @@ inline void process_real_key(void) {
   // OK, we're done with special cases. General scancode processing starts here.
 
   // Resolve USB keycode using current active layers - drop down until defined.
-  uint8_t usb_sc;
-  for (uint8_t i = currentLayer; i >= 0; i--) {
+  uint8_t usb_sc = USBCODE_TRANSPARENT;
+  for (int8_t i = currentLayer; i >= 0; --i) {
     usb_sc = config.layers[i][sc.scancode];
+#ifdef DEBUG_PIPELINE
+    xprintf("Lookup@%d: %02x %02x@L%d -> %d",
+            systime, sc.flags, sc.scancode, i, usb_sc);
+#endif
     if (usb_sc != USBCODE_TRANSPARENT) {
       break;
     }
+  }
+  if (usb_sc == USBCODE_TRANSPARENT) {
+    // Empty key in layout from current layer down to base. Fuck no, DON'T EVER.
+    return;
   }
 #ifdef DEBUG_PIPELINE
   xprintf("SC@%d: %02x %02x@L%d -> %d",

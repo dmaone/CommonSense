@@ -66,7 +66,7 @@ inline void main_loop() {
         scan_tick();
         if (--ticksToAutonomy < 0) {
           // If FlightController doesn't poll us anymore - go to normal mode.
-          ticksToAutonomy = LARGE_ENOUGH_32; // also disables xprintf!
+          ticksToAutonomy = LARGE_ENOUGH_32;
           CLEAR_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
           // Should reapply config - but firmware seems to crash if I do.
           // apply_config();

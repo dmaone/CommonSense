@@ -12,6 +12,9 @@
  */
 #pragma once
 
+// xprintf is no-op outside of setup mode. This switch overrides that.
+#define XPRINTF_ALWAYS_ENABLED
+
 // #define DEBUG_STATE_MACHINE
 
 // #define DEBUG_PIPELINE
@@ -42,6 +45,8 @@
 
 // LIB.H!!!
 #define TEST_BIT(VAR, BN) (VAR & (1 << (BN)))
+#define BIT_IS_SET(VAR, BN) (VAR & (1 << (BN)))
+#define BIT_IS_CLEAR(VAR, BN) ((VAR & (1 << (BN))) == 0)
 //#define CLEAR_BIT(VAR, BN) {xprintf("CLR %d %d", VAR, BN); VAR &= !(1 << BN); }
 //#define SET_BIT(VAR, BN) {xprintf("SET %d %d", VAR, BN); VAR |= (1 << BN); }
 #define CLEAR_BIT(VAR, BN) VAR &= ~(1 << (BN))
