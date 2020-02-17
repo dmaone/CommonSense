@@ -387,6 +387,7 @@ void usb_suspend_monitor_stop(void) {
 }
 
 void usb_init(void) {
+  pipeline_init();
   memset(keyboard_report.raw, 0, sizeof keyboard_report.raw);
   keyboard_report_usage = 0;
   memset(consumer_report, 0, sizeof consumer_report);

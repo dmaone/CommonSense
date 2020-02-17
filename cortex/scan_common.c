@@ -150,6 +150,11 @@ void scan_common_start(uint16_t sanity_check_duration) {
   scancodes_while_output_disabled = 0;
 }
 
+void scan_common_tick() {
+  scan_check_matrix();
+}
+
+
 void report_matrix_readouts(void) {
   uint8_t idx = 0;
   for (uint8 i = 0; i < MATRIX_ROWS; i++) {

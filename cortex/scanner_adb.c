@@ -197,8 +197,8 @@ void scan_tick(void) {
       append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK));
     }
   }
-  scan_check_matrix();
   if (local_led_status != led_status) {
     sync_leds();
   }
+  scan_common_tick();
 }

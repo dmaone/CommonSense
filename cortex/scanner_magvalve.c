@@ -164,4 +164,6 @@ void scan_wake(void) {
   sensor_wake();
 }
 
-inline void scan_tick(void) {}
+void scan_tick() {
+  scan_common_tick();
+};

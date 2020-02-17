@@ -245,10 +245,6 @@ CY_ISR(Result_ISR) {
 #if PROFILE_SCAN_PROCESSING == 1
   CyPins_ClearPin(ExpHdr_1);
 #endif
-  if (reading_row == 0) {
-    // End of matrix reading cycle.
-    scan_check_matrix();
-  }
 }
 
 void scan_init(uint8_t debouncing_period) {
@@ -285,4 +281,6 @@ void scan_wake(void) {
   sensor_wake();
 }
 
-inline void scan_tick() {};
+void scan_tick() {
+  scan_common_tick();
+};

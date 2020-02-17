@@ -62,6 +62,9 @@ void scan_common_reset();
 // If you use ISRs - don't forget to disable interrupts.
 void scan_common_start(uint16_t sanity_check_duration);
 
+// Generates "all keys released" signal.
+void scan_common_tick();
+
 // To be implemented by a particular scanner
 
 // Power-on

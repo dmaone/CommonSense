@@ -72,5 +72,6 @@ void scan_tick(void) {
   }
   // Uncomment below for click
   // N_UART_PutChar(0x0A);
+  scan_common_tick(); // Not needed as sun keyboad signals "all up" itself, but..
 
 }
