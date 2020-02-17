@@ -27,6 +27,9 @@ public slots:
   void receiveScancode(uint8_t row, uint8_t col,
                        DeviceInterface::KeyStatus status);
 
+protected:
+  bool eventFilter(QObject *obj, QEvent *event);
+
 private:
   Ui::ThresholdEditor *ui;
   QGridLayout *grid;

@@ -75,6 +75,8 @@ bool DeviceInterface::event(QEvent *e) {
   if (e->type() == DeviceMessage::ET) {
     QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
     switch (payload->at(0)) {
+    case C2RESPONSE_MATRIX_ROW:
+        return true; // We are not interested in this, but it has >1 subscribers
     case C2RESPONSE_STATUS:
       processStatusReply(payload);
       return true;

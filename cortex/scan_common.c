@@ -23,10 +23,15 @@ uint16_t debouncing_negedge;
 uint8_t scancodes_while_output_disabled = 0;
 
 inline void append_scancode(uint8_t flags, uint8_t scancode) {
+  uint8_t row = scancode / MATRIX_COLS;
+  uint8_t col = scancode % MATRIX_COLS;
   if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
     if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
       // Avoid overflowing counter! Things can get ugly FAST!
       ++scancodes_while_output_disabled;
+
+      // Mark the key as noisy
+      SET_BIT(matrix_status[row], col);
     }
     return;
   }
@@ -41,8 +46,6 @@ inline void append_scancode(uint8_t flags, uint8_t scancode) {
   scancodes_wpos = SCANCODES_NEXT(scancodes_wpos);
   scancodes[scancodes_wpos].flags = flags;
   scancodes[scancodes_wpos].scancode = scancode;
-  uint8_t row = scancode >> 5; // uint32 holds 32 values
-  uint8_t col = scancode & 0x1f; // 0 to 31
   if (flags & KEY_UP_MASK) {
     CLEAR_BIT(matrix_status[row], col);
   } else {
@@ -92,18 +95,21 @@ inline void scan_check_matrix(void) {
 }
 
 inline bool scan_is_key_down(uint8_t keyIndex) {
-  return matrix_status[keyIndex >> 5] & (1 << (keyIndex & 0x1f));
+  return BIT_IS_SET(matrix_status[keyIndex / MATRIX_COLS], keyIndex % MATRIX_COLS);
 }
 
 void scan_sanity_check() {
-  if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
+  if (0 == --sanity_check_timer) {
+    // We're out of the woods.
+    scan_common_reset();
+    pipeline_init();
+    SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
+  } else if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
     // Keyboard is insane. Disable it.
     status_register &= (1 << C2DEVSTATUS_SETUP_MODE); // Keep setup mode.
     SET_BIT(status_register, C2DEVSTATUS_INSANE);
     xprintf("Scan module has gone insane and had to be shot!");
     sanity_check_timer = 0;
-  } else if (0 == --sanity_check_timer) {
-    SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   }
 }
 
@@ -139,7 +145,6 @@ void scan_common_reset() {
     matrix[i] = MAX_MATRIX_VALUE;
 #endif
   }
-  memset(matrix_status, 0, sizeof(matrix_status));
 }
 
 void scan_common_start(uint16_t sanity_check_duration) {
@@ -166,4 +171,23 @@ void report_matrix_readouts(void) {
     }
     usb_send_c2_blocking();
   }
+}
+
+void scan_report_insanity() {
+  static uint8_t cur_row = 0;
+  if (cur_row == 0) {
+    cur_row = MATRIX_ROWS;
+  }
+  --cur_row;
+  outbox.response_type = C2RESPONSE_MATRIX_ROW;
+  outbox.payload[0] = cur_row;
+  outbox.payload[1] = MATRIX_COLS;
+  for (uint8_t i = 0; i < MATRIX_COLS; i++) {
+    if (TEST_BIT(matrix_status[cur_row], i)) {
+      outbox.payload[2 + i] = 1;
+    } else {
+      outbox.payload[2 + i] = 0;
+    }
+  }
+  usb_send_c2_blocking();
 }

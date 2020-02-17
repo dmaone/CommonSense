@@ -16,6 +16,8 @@ ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
   connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
   connect(ui->incButton, SIGNAL(clicked()), this, SLOT(increaseThresholds()));
   connect(ui->decButton, SIGNAL(clicked()), this, SLOT(decreaseThresholds()));
+  auto& di = Singleton<DeviceInterface>::instance();
+  di.installEventFilter(this);
 }
 
 void ThresholdEditor::show(void) {
@@ -118,6 +120,35 @@ void ThresholdEditor::resetThresholds() {
     }
   }
   qInfo() << "Loaded threshold map";
+}
+
+bool ThresholdEditor::eventFilter(QObject *obj __attribute__((unused)),
+                                QEvent *event) {
+  if (event->type() == DeviceMessage::ET) {
+    QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
+    auto& di = Singleton<DeviceInterface>::instance();
+    if (pl->at(0) != C2RESPONSE_MATRIX_ROW) {
+      return false;
+    }
+    if (!di.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
+      return false;
+    }
+    uint8_t row = pl->at(1);
+    uint8_t max_cols = pl->at(2);
+    for (uint8_t i = 0; i < max_cols; i++) {
+      const auto thr = deviceConfig->thresholds[row][i];
+      qDebug() << row << " " << i << " " << thr << " = " << pl->constData()[3 + i];
+      if (thr == K_IGNORE_KEY) {
+        display[row][i]->setStyleSheet("background-color: #999999;");
+      } else if (pl->constData()[3 + i] > 0) {
+        display[row][i]->setStyleSheet("color: black; background-color: #ff3333;");
+      } else {
+        display[row][i]->setStyleSheet("");
+      }
+    }
+    return false;
+  }
+  return false;
 }
 
 void ThresholdEditor::receiveScancode(uint8_t row, uint8_t col,

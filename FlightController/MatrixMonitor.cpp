@@ -22,7 +22,7 @@ MatrixMonitor::MatrixMonitor(QWidget *parent)
   ui->setupUi(this);
 
   initDisplay();
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  auto& di = Singleton<DeviceInterface>::instance();
   connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
           SLOT(sendCommand(c2command, uint8_t)));
   connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
@@ -105,6 +105,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
       _warmupRows--;
       return true;
     }
+    auto& di = Singleton<DeviceInterface>::instance();
     uint8_t row = pl->at(1);
     uint8_t max_cols = pl->at(2);
     for (uint8_t i = 0; i < max_cols; i++) {
@@ -113,13 +114,21 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
       const auto thr = deviceConfig->thresholds[row][i];
       if (thr == K_IGNORE_KEY) {
         cell->setStyleSheet("background-color: #999999;");
-      } else if (
+      } else if (di.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
+        if (level > 0) {
+          cell->setStyleSheet("color: black; background-color: #ff3333;");
+        } else {
+          cell->setStyleSheet("");
+        }
+      } else {
+        if (
           (deviceConfig->bNormallyLow && level > thr) ||
           (!deviceConfig->bNormallyLow && level < thr)
-      ) {
-        cell->setStyleSheet("color: black; background-color: #33ff33;");
-      } else {
-        cell->setStyleSheet("");
+        ) {
+          cell->setStyleSheet("color: black; background-color: #33ff33;");
+        } else {
+          cell->setStyleSheet("");
+        }
       }
       _updateStatCell(row, i, level);
       switch (displayMode) {
@@ -140,7 +149,6 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
         close();
       }
     }
-    return true;
   }
   return false;
 }

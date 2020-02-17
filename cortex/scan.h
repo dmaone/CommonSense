@@ -84,3 +84,6 @@ void scan_wake(void);
 
 // Called every millisecond (or more) as a part of main loop.
 void scan_tick(void);
+
+// Report keys that tripped sanity check
+void scan_report_insanity();

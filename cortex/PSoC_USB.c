@@ -169,6 +169,9 @@ void usb_receive(OUT_c2packet_t *inbox) {
     process_ewo(inbox);
     break;
   case C2CMD_GET_STATUS:
+    if (TEST_BIT(status_register, C2DEVSTATUS_INSANE)) {
+      scan_report_insanity();
+    }
     report_status();
     break;
   case C2CMD_SET_MODE:
