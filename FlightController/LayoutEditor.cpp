@@ -8,7 +8,6 @@
 #include "LayoutEditor.h"
 #include "ScancodeList.h"
 #include "settings.h"
-#include "singleton.h"
 #include "ui_LayoutEditor.h"
 
 LayoutEditor::LayoutEditor(DeviceConfig *config, QWidget *parent)

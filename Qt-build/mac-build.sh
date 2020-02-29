@@ -1,6 +1,5 @@
 #!/bin/bash
 
-QT_VERSION=5.9
 BUILD_DIR=build-macx
 
 QT_PACKAGE=qt

@@ -19,7 +19,6 @@
 #include "DeviceSelector.h"
 #include "Events.h"
 #include "LogViewer.h"
-#include "singleton.h"
 
 class DeviceInterface : public QObject {
   Q_OBJECT
@@ -28,11 +27,12 @@ class DeviceInterface : public QObject {
   Q_ENUMS(Mode)
 
 public:
-  static DeviceInterface& getInstance() {
-    return Singleton<DeviceInterface>::instance();
+  static DeviceInterface& get() {
+    static DeviceInterface instance{};
+    return instance;
   }
   static DeviceConfig* config;
-  DeviceInterface(QObject *parent = 0);
+  DeviceInterface(QObject *parent = nullptr);
   ~DeviceInterface();
   void start(void);
   bool event(QEvent *e);

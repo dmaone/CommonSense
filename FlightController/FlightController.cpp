@@ -13,7 +13,6 @@
 #include "../c2/nvram.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
-#include "singleton.h"
 
 constexpr size_t kBlinkTimerTick = 20;
 
@@ -22,7 +21,7 @@ FlightController::FlightController(QWidget *parent)
   ui->setupUi(this);
   ui->swVersionLabel->setText(QCoreApplication::applicationVersion());
 
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
 
   matrixMonitor = new MatrixMonitor();
   connect(
@@ -62,7 +61,7 @@ FlightController::FlightController(QWidget *parent)
 }
 
 void FlightController::setup(void) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
 
   connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport,
           SLOT(clearButtonClick()));
@@ -127,7 +126,7 @@ void FlightController::setup(void) {
 }
 
 void FlightController::blinkLights() {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   if (di.tx) {
     di.tx = false;
     ui->txLabel
@@ -157,7 +156,7 @@ void FlightController::timerEvent(QTimerEvent * timer) {
 }
 
 void FlightController::updateStatus(void) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   ui->fwVersionLabel->setText(di.firmwareVersion);
   ui->tempGauge->setText(di.dieTemp);
   if (di.scanEnabled) {
@@ -240,7 +239,7 @@ void FlightController::deviceStatusNotification(
     layerConditions->init();
     _delays->init();
     _hardware->init();
-    ui->typeLabel->setText(DeviceInterface::getInstance().switchType);
+    ui->typeLabel->setText(DeviceInterface::get().switchType);
     lockUI(false);
     break;
   case DeviceInterface::BootloaderConnected:
@@ -325,11 +324,11 @@ void FlightController::on_redButton_clicked() {
 void FlightController::on_reconnectButton_clicked() {
   qInfo() << "reconnecting..";
   emit setStatusBit(C2DEVSTATUS_SETUP_MODE, false);
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   di.releaseDevice();
 }
 
 void FlightController::on_statusRequestButton_clicked(void) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   di.printableStatus = true;
 }

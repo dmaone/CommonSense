@@ -12,7 +12,7 @@
 
 #include "PSoC_USB.h"
 
-static uint32_t matrix_status[MATRIX_ROWS];
+static uint32_t matrix_status[ABSOLUTE_MAX_ROWS];
 bool matrix_was_active;
 
 #define MAX_MATRIX_VALUE 0xffff

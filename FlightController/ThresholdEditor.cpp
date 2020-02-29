@@ -4,7 +4,6 @@
 
 #include "DeviceInterface.h"
 #include "ThresholdEditor.h"
-#include "singleton.h"
 #include "ui_ThresholdEditor.h"
 
 ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
@@ -16,7 +15,7 @@ ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
   connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
   connect(ui->incButton, SIGNAL(clicked()), this, SLOT(increaseThresholds()));
   connect(ui->decButton, SIGNAL(clicked()), this, SLOT(decreaseThresholds()));
-  auto& di = Singleton<DeviceInterface>::instance();
+  auto& di = DeviceInterface::get();
   di.installEventFilter(this);
 }
 
@@ -126,7 +125,7 @@ bool ThresholdEditor::eventFilter(QObject *obj __attribute__((unused)),
                                 QEvent *event) {
   if (event->type() == DeviceMessage::ET) {
     QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-    auto& di = Singleton<DeviceInterface>::instance();
+    auto& di = DeviceInterface::get();
     if (pl->at(0) != C2RESPONSE_MATRIX_ROW) {
       return false;
     }

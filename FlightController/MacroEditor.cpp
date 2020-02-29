@@ -5,7 +5,6 @@
 
 #include "DeviceInterface.h"
 #include "MacroEditor.h"
-#include "singleton.h"
 #include "ScancodeList.h"
 #include "ui_MacroEditor.h"
 

@@ -7,7 +7,6 @@
 #include "DeviceInterface.h"
 #include "LayerCondition.h"
 #include "settings.h"
-#include "singleton.h"
 
 const std::vector<std::string> expModeNames_{
   "Disabled",
@@ -55,7 +54,7 @@ bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)),
  * Fire up the uploader.
  */
 void DeviceConfig::toDevice(void) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
     QMessageBox::critical(NULL, "Matrix monitor active",
                           "Turn off matrix monitor first!");
@@ -106,7 +105,7 @@ void DeviceConfig::_uploadConfigBlock(void) {
 }
 
 void DeviceConfig::fromDevice() {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
     QMessageBox::critical(NULL, "Matrix monitor active",
                           "Turn off matrix monitor first!");

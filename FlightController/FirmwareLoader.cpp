@@ -3,8 +3,6 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "singleton.h"
-
 #include "DeviceInterface.h"
 #include "Events.h"
 #include "settings.h"
@@ -12,7 +10,7 @@
 FirmwareLoader::FirmwareLoader(QObject *parent)
     : QObject(parent), bootloaderMode(false), firmware(NULL),
       lastCommand(BR_CYRET_SUCCESS) {
-  DeviceInterface &di = Singleton<DeviceInterface>::instance();
+  DeviceInterface &di = DeviceInterface::get();
   di.installEventFilter(this);
 }
 

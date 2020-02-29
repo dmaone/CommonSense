@@ -12,7 +12,6 @@
 #include "Events.h"
 #include "MatrixMonitor.h"
 #include "settings.h"
-#include "singleton.h"
 #include "ui_MatrixMonitor.h"
 
 MatrixMonitor::MatrixMonitor(QWidget *parent)
@@ -22,7 +21,7 @@ MatrixMonitor::MatrixMonitor(QWidget *parent)
   ui->setupUi(this);
 
   initDisplay();
-  auto& di = Singleton<DeviceInterface>::instance();
+  auto& di = DeviceInterface::get();
   connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
           SLOT(sendCommand(c2command, uint8_t)));
   connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
@@ -105,7 +104,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
       _warmupRows--;
       return true;
     }
-    auto& di = Singleton<DeviceInterface>::instance();
+    auto& di = DeviceInterface::get();
     uint8_t row = pl->at(1);
     uint8_t max_cols = pl->at(2);
     for (uint8_t i = 0; i < max_cols; i++) {

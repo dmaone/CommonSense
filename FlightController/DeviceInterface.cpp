@@ -39,6 +39,10 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
   if (receivedStatus_ != payload->at(1)) {
     rx = true;
   }
+  if (payload->size() < 6) {
+    qInfo() << "Received status packet runt, length: " << payload->size();
+    return;
+  }
   receivedStatus_ = payload->at(1);
   scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
   outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
@@ -318,7 +322,7 @@ void DeviceInterface::_initDevice(void) {
   cts_.store(true); // Not expecting anything from device - clear to send.
   _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
-  QByteArray tmp(5, (char)0);
+  QByteArray tmp(64, (char)0);
   processStatusReply(&tmp);
   // No need to change timer rate - loading config will switch it.
   return;

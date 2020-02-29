@@ -50,8 +50,6 @@ SOURCES += main.cpp \
 
 HEADERS  += \
     ../c2/nvram.h \
-    call_once.h \
-    singleton.h \
     settings.h \
     FlightController.h \
     LogViewer.h \
