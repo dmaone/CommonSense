@@ -12,6 +12,8 @@
 
 #define ADDR_KEYBOARD 0x20
 
+#define SCANCODE_MASK 0x7f
+
 typedef union {
   struct {
     uint8_t key0;
@@ -191,7 +193,9 @@ void scan_tick(void) {
     xprintf("ADB Error: received %x", codes.raw);
     return;
   } else {
-    xprintf("%02x %02x", codes.key0, codes.key1);
+    // xprintf("%02x %02x", codes.key0, codes.key1);
+    // A bit of clowntown - this abuses the fact that high bit is "released"
+    // in ADB protocol and this matches CS key released flag
     append_scancode(codes.key1 & KEY_UP_MASK, (codes.key1 & SCANCODE_MASK));
     if (codes.key0 != 0xFF) {
       append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK));

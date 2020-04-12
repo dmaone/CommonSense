@@ -181,7 +181,7 @@ inline scancode_t read_scancode(void) {
   scancodes[scancodes_rpos].scancode = COMMONSENSE_NOKEY;
 #ifdef MATRIX_LEVELS_DEBUG
   xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
-          scancode & SCANCODE_MASK, systime,
+          scancode, systime,
           level_buffer[scancodes_rpos],
           level_buffer_inst[scancodes_rpos]);
 #endif

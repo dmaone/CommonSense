@@ -36,6 +36,11 @@
 // PTK calibration: 5 = 114kHz, 7 - 92kHz, 15 - 52kHz
 #undef COMMONSENSE_100KHZ_MODE
 
+#if NORMALLY_LOW == 1
+#define ADC_CMP_OP >
+#else
+#define ADC_CMP_OP <
+#endif
 
 CY_ISR_PROTO(EoC_ISR);
 CY_ISR_PROTO(Result_ISR);
@@ -229,11 +234,7 @@ CY_ISR(Result_ISR) {
     if (threshold == K_IGNORE_KEY) {
       continue; // As if nothing happened!
     }
-#if NORMALLY_LOW == 1
-    if (Results[adc_buffer_pos] > threshold) {
-#else
-    if (Results[adc_buffer_pos] < threshold) {
-#endif
+    if (Results[adc_buffer_pos] ADC_CMP_OP threshold) {
       append_debounced(0, keyIndex);
 #if DEBUG_SHOW_MATRIX_EVENTS == 1
       PIN_DEBUG(4, 1);

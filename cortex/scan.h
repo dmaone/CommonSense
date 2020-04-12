@@ -27,7 +27,6 @@ typedef union {
 #define COMMONSENSE_NOKEY 0xff
 
 #define KEY_UP_MASK 0x80
-#define SCANCODE_MASK 0x7f
 
 // Flags enabling debug pulses on exp header
 #define DEBUG_SHOW_KEYPRESSES 0
@@ -44,11 +43,10 @@ uint8_t scancodes_rpos;
 
 void append_scancode(uint8_t flags, uint8_t scancode);
 void append_debounced(uint8_t flags, uint8_t scancode);
-void scan_set_matrix_value(uint8_t keyIndex, uint16_t value);
+void scan_set_matrix_value(uint8_t keyIndex, int8_t value);
 void report_matrix_readouts();
 
 void scan_check_matrix();
-bool scan_is_key_down(uint8_t keyIndex);
 void scan_sanity_check();
 
 // Basic initialization - constants, essentially

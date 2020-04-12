@@ -10,6 +10,8 @@
 
 #include "scan.h"
 
+#define SCANCODE_MASK 0x7f
+
 uint8_t local_led_status;
 
 void sync_leds(void) {
@@ -68,6 +70,8 @@ void scan_tick(void) {
           append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
           return;
       default:
+        // A bit of clowntown - this abuses the fact that high bit is "released"
+        // in original sun serial protocol and this matches CS key released flag
         append_scancode((code & KEY_UP_MASK), (code & SCANCODE_MASK));
   }
   // Uncomment below for click

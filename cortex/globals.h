@@ -59,7 +59,7 @@
 #include "../c2/nvram.h"
 
 #define DEVICE_VER_MAJOR 0x01
-#define DEVICE_VER_MINOR 0x01
+#define DEVICE_VER_MINOR 0x02
 
 /* Devices may append additional data to these boot reports,
  * but the first 8 bytes of keyboard reports
