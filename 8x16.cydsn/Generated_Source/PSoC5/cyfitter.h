@@ -1983,7 +1983,7 @@
 #define BCLK__BUS_CLK__HZ 36000000U
 #define BCLK__BUS_CLK__KHZ 36000U
 #define BCLK__BUS_CLK__MHZ 36U
-#define CY_PROJECT_NAME "Firmware"
+#define CY_PROJECT_NAME "8x16"
 #define CY_VERSION "PSoC Creator  4.2"
 #define CYDEV_CHIP_DIE_LEOPARD 1u
 #define CYDEV_CHIP_DIE_PSOC4A 18u
