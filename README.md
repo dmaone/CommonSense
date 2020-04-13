@@ -40,6 +40,8 @@ There are two exceptions to the above, but you know who you are, because I expli
 
 
 ### Default pinout: Project "8x24"
+**WARNING** other projects use different pinouts!
+
 ![default pinout](docs/8x24_pinout.png)
 **WARNING** to use column 24, **R5** (between `0.1` and `12.6`) MUST be removed.
 
