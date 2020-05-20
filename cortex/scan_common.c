@@ -75,6 +75,7 @@ inline void append_debounced(uint8_t flags, uint8_t keyIndex) {
     }
   } else if (key > 0) { // Pressed, no change. Reset the streak counter.
     key = 1;
+    matrix_activity_detector |= 0x01;
   } else { // Known pressed, was released. Bump the streak counter.
     if (--key <= press_threshold) { // Long enough. Press the key.
       key = 1;

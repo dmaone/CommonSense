@@ -92,6 +92,10 @@ void send_config_block(OUT_c2packet_t *inbox) {
 
 void set_hardware_parameters(void) {
   FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
+  if (config.matrixRows != MATRIX_ROWS || config.matrixCols != MATRIX_COLS) {
+    // Yeehaw, a virgin EEPROM (or a different matrix size reflash)
+    memset(config.thresholds, 0, sizeof(config.thresholds));
+  }
   config.matrixRows = MATRIX_ROWS;
   config.matrixCols = MATRIX_COLS;
   config.matrixLayers = MATRIX_LAYERS;
@@ -102,7 +106,10 @@ void set_hardware_parameters(void) {
     case 12:
       break;
     default:
-      config.adcBits = 8;
+      // People don't read docs hence can't find this setting. 12 bit usually 
+      // not enough to go overboard, so let's default to 12 bits and deal with
+      // possible "help I'm gone 3-digit" if those ever happen.
+      config.adcBits = 12; 
   };
   if (config.chargeDelay < MIN_CHARGE_DELAY) {
     config.chargeDelay = MIN_CHARGE_DELAY;
