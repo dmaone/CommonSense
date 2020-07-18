@@ -3,7 +3,7 @@
 ScancodeList::ScancodeList() : list() {
   list << "----"; // 0x00
   list << "DEAD";
-  list << "DNU";
+  list << "BootLdr";// 0x02
   list << "ExpTgl"; // 0x03
   list << "A";      // 0x04
   list << "B";

@@ -180,8 +180,11 @@ void FirmwareLoader::start(void) {
 
 void FirmwareLoader::load(void) {
   if (!firmware) {
-    qInfo() << "Invalid firmware file! cannot proceed!";
-    return;
+    if (!_loadFirmwareFile()) {
+      qInfo() << "Invalid firmware file! cannot proceed!";
+      return;
+    }
+    bootloaderMode = true;
   }
   qInfo() << "Trying to talk to bootloader";
   _sendCommand(BCMD_EnterBootloader);
@@ -203,7 +206,7 @@ bool FirmwareLoader::_loadFirmwareFile(void) {
     qCritical() << msg;
     return false;
   }
-  qInfo() << "Firmware file loaded";
+  qInfo() << "Successfully loaded firmware from " << fn;
   return true;
 }
 

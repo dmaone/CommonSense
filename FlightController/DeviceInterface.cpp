@@ -4,6 +4,7 @@
 #include <QDebug>
 #include <QInputDialog>
 #include <QMessageBox>
+#include <QThread>
 #include <algorithm>
 #include <string>
 
@@ -13,7 +14,6 @@ constexpr size_t kDeviceScanTick{1000}; // ms connect retry
 constexpr size_t kStatusTimerTick{200}; // ms between status updates
 constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
 constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
-
 DeviceConfig* DeviceInterface::config{nullptr};
 
 DeviceInterface::DeviceInterface(QObject *parent)
@@ -278,7 +278,8 @@ bool DeviceInterface::_sendPacket() {
   qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
   std::lock_guard<std::mutex> lock{deviceLock_};
   if (hid_write(device, outbox, sizeof outbox) == -1) {
-    qWarning() << "Error sending to the device, will reconnect";
+    qWarning() << "Error sending to the device, will reconnect in 1 second";
+    QThread::sleep(1);
     releaseDevice();
   }
   return true;
@@ -340,8 +341,8 @@ void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
   }
 }
 
-DeviceList DeviceInterface::listDevices() {
-  std::vector<std::pair<QString, std::string>> retval {};
+DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
+  DetectedDevices retval{};
   hid_device_info *root = hid_enumerate(0, 0);
   if (!root) {
     qInfo() << "No HID devices on this system?";
@@ -349,28 +350,19 @@ DeviceList DeviceInterface::listDevices() {
   }
   hid_device_info *d = root;
   while (d) {
-    switch (mode) {
-    case DeviceInterfaceNormal:
 //        qInfo() << d->path << d->vendor_id << d->product_id;
 // Usage and usage page are win and mac only :(
 #ifdef __linux__
-      if (d->vendor_id == 0x4114 && d->interface_number == 1) {
+    if (d->vendor_id == 0x4114 && d->interface_number == 1) {
 #else
-      if (d->usage_page == 0x6213 && d->usage == 0x88) {
+    if (d->usage_page == 0x6213 && d->usage == 0x88) {
 #endif
-        retval.push_back(
-            std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
-      }
-      break;
-    case DeviceInterfaceBootloader:
-      if (d->vendor_id == 0x04b4 &&
+      retval.keyboards.push_back(
+          std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
+    } else if (d->vendor_id == 0x04b4 &&
           (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
-        retval.push_back(std::make_pair(
-            QString::fromWCharArray(d->serial_number), d->path));
-      }
-      break;
-    default:
-      break;
+      retval.bootloaders.push_back(std::make_pair(
+          QString::fromWCharArray(d->serial_number), d->path));
     }
     d = d->next;
   }
@@ -384,19 +376,33 @@ hid_device *DeviceInterface::acquireDevice(void) {
     qInfo() << "Cannot initialize hidapi!";
     return NULL;
   }
-  auto deviceList = listDevices();
-  if (deviceList.size() == 1) {
+  auto devices = listDevices();
+  if (mode == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
+    QMessageBox::StandardButton result =
+        QMessageBox::question(NULL, "Bootloader detected!",
+                              "Detected an active bootloader. "
+                              "Do you want to update that device's firmware?",
+                              QMessageBox::Yes | QMessageBox::No);
+    if (result == QMessageBox::Yes) {
+      mode = DeviceInterfaceBootloader;
+    }
+  }
+
+  DeviceList* what = mode == DeviceInterfaceNormal ? &devices.keyboards
+                                                   : &devices.bootloaders;
+
+  if (what->size() == 1) {
     qInfo() << "Found a node!";
-    qDebug() << "Trying to use" << deviceList[0].second.data();
-    retval = hid_open_path(deviceList[0].second.data());
-  } else if (deviceList.size() > 1) {
+    qDebug() << "Trying to use" << what->at(0).second.data();
+    retval = hid_open_path(what->at(0).second.data());
+  } else if (what->size() > 1) {
     // More than one device.
     qInfo() << "Hello, fellow DT member!";
-    DeviceSelector selector{deviceList};
+    DeviceSelector selector{*what};
     selector.exec();
     auto deviceSerial = selector.getResult();
     qInfo().noquote() << "Connecting to s/n" << deviceSerial;
-    for (auto it : deviceList) {
+    for (auto it : *what) {
       if (it.first == deviceSerial) {
         retval = hid_open_path(it.second.data());
       }

@@ -23,6 +23,7 @@ typedef union {
 #define USBCODE_TRANSPARENT 0
 #define USBCODE_NOEVENT 1
 #define USBCODE_ERO 1
+#define USBCODE_BOOTLDR 2
 #define USBCODE_EXP_TOGGLE 3
 #define USBCODE_A 4
 

@@ -81,6 +81,11 @@ protected:
   virtual void timerEvent(QTimerEvent *);
 
 private:
+  struct DetectedDevices {
+    DeviceList keyboards{};
+    DeviceList bootloaders{};
+  };
+
   hid_device *device;
   int pollTimerId;
   int statusTimerId;
@@ -104,7 +109,7 @@ private:
   bool _sendPacket(void);
   bool _receivePacket(void);
   void _updateDeviceStatus(DeviceStatus);
-  DeviceList listDevices();
+  DetectedDevices listDevices();
   DeviceConfig config_{};
   std::mutex deviceLock_{};
   std::mutex queueLock_{};

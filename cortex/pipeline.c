@@ -86,12 +86,19 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   // Special keycodes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
   if (keycode < USBCODE_A) {
-    // Special keycodes - see HID docs.
-    // Hijacked for Nefarious Purposes - but only ExpToggle is used for now.
+    // Special keycodes - see HID docs. Hijacked for Nefarious Purposes.
     // These keys are special - they CANNOT be used as macro triggers.
-    if (keycode == USBCODE_EXP_TOGGLE  && !(flags & USBQUEUE_RELEASED_MASK)) {
-      // Exp header toggles on keyDown. keyUp is ignored so not to toggle twice.
-      exp_toggle();
+    if (flags & USBQUEUE_RELEASED_MASK) {
+      return; // keyUp is ignored so not to toggle twice.
+    }
+    switch (keycode) {
+      case USBCODE_BOOTLDR:
+        Boot_Load(); // Does not return, no need for break
+      case USBCODE_EXP_TOGGLE:
+        exp_toggle();
+        break;
+      default:
+        break;
     }
     return;
   } else if ((keycode & 0xf8) == 0xa8) {
