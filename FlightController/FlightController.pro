@@ -9,7 +9,7 @@ QT       += core gui widgets
 TARGET = FlightController
 TEMPLATE = app
 
-CONFIG += static c++14
+CONFIG += static c++17
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
