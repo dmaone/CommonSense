@@ -45,7 +45,9 @@ void ThresholdEditor::initDisplay() {
     for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
       QSpinBox *l = new QSpinBox();
       l->setMaximum(254);
+      l->setMinimum(0);
       l->setAlignment(Qt::AlignRight);
+      l->setMaximumWidth(80);
       connect(l, QOverload<int>::of(&QSpinBox::valueChanged),
           [this, l](int){ paintCell(l); });
       display[i][j] = l;
