@@ -18,9 +18,7 @@
 #define SCAN_COL_MASK 0x1f
 uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
 
-
-uint8_t matrix_activity_detector = 0; // see scan_matrix_check for details.
-
+bool matrix_was_active = 0;
 
 int8_t matrix[COMMONSENSE_MATRIX_SIZE];
 int8_t press_threshold;
@@ -75,12 +73,11 @@ inline void append_debounced(uint8_t flags, uint8_t keyIndex) {
     }
   } else if (key > 0) { // Pressed, no change. Reset the streak counter.
     key = 1;
-    matrix_activity_detector |= 0x01;
   } else { // Known pressed, was released. Bump the streak counter.
     if (--key <= press_threshold) { // Long enough. Press the key.
       key = 1;
       append_scancode(0, keyIndex);
-      matrix_activity_detector |= 0x01;
+      matrix_was_active = true;
     }
   }
   matrix[keyIndex] = key;
@@ -98,14 +95,18 @@ inline void scan_set_matrix_value(uint8_t keyIndex, int8_t value) {
  * Longer delays achievable with shifts and bitmask, but not necessary.
  */
 inline void scan_check_matrix(void) {
-  if (!matrix_activity_detector) { // idle -> idle
+  if (!matrix_was_active) { // idle -> idle
     return;
   }
-  if (matrix_activity_detector == 0x02) { // active -> idle
+  matrix_was_active = false; // Covers "key pressed while counting" scenario
+  for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; ++i) {
+    if (matrix[i] > 0) {
+      matrix_was_active = true;
+      break;
+    }
+  }
+  if (!matrix_was_active) { // was active, no longer is.
     append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
-    matrix_activity_detector = 0; // set idle to make future comparisons easier.
-  } else {
-    matrix_activity_detector = 0x02; // set "active previous cycle"
   }
 }
 
