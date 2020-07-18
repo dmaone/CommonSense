@@ -29,8 +29,10 @@ typedef union {
 #define USBQUEUE_RELEASED_MASK 0x80
 #define USBQUEUE_REAL_KEY_MASK 0x40
 
+// These are USB codes. Matrix codes are "scancodes" and live in scan.h
 #define KEYCODE_BUFFER_END 63
 #define KEYCODE_BUFFER_NEXT(X) ((X + 1) & KEYCODE_BUFFER_END)
+#define KEYCODE_BUFFER_STEP(Y) Y = KEYCODE_BUFFER_NEXT(Y)
 #define KEYCODE_BUFFER_PREV(X) ((X + KEYCODE_BUFFER_END) & KEYCODE_BUFFER_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 

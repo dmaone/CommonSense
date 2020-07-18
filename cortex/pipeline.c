@@ -19,6 +19,15 @@ uint8_t tap_usb_sc;
 uint32_t tap_deadline;
 uint_fast16_t saved_macro_ptr;
 
+inline bool empty_keycode_at(uint8_t pos) {
+  return USBQueue[pos].keycode == USBCODE_NOEVENT;
+}
+
+inline bool valid_actionable_keycode_at(uint8_t pos) {
+  return USBQueue[pos].keycode != USBCODE_NOEVENT &&
+      USBQueue[pos].sysTime <= systime;
+}
+
 inline void process_layerMods(uint8_t flags, uint8_t keycode) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
   if (keycode & 0x04) {
@@ -97,8 +106,8 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   USBQueue_wpos = KEYCODE_BUFFER_NEXT(USBQueue_wpos);
   // Make sure not to overwrite pending events - TODO think how not to fall into
   // infinite loop if buffer full.
-  while (USBQueue[USBQueue_wpos].keycode != USBCODE_NOEVENT) {
-    USBQueue_wpos = KEYCODE_BUFFER_NEXT(USBQueue_wpos);
+  while (!empty_keycode_at(USBQueue_wpos)) {
+    KEYCODE_BUFFER_STEP(USBQueue_wpos);
   }
   USBQueue[USBQueue_wpos].sysTime = time;
   USBQueue[USBQueue_wpos].flags = flags;
@@ -330,15 +339,17 @@ inline void process_real_key(void) {
   queue_usbcode(systime, keyflags, usb_sc);
 }
 
-#define NO_COOLDOWN USBQueue[pos].flags |= USBQUEUE_RELEASED_MASK;
 /*
-    Idea: not move readpos until keycode after it is processed.
-    So, readpos to writepos would be the working area.
+ * Due to macros there might be future AND out-of-order scancodes.
+ * Main Idea: pin readpos until scancode under it is retired.
+ * So, rpos to wpos would be the working area containing pending scancodes.
+ * This can (and, in macros world, will) lead to gaps in the working area.
+ * This Is Fine.
+ * Current implementation just eats up all the empty positions before starting,
+ * so technically nothing is pinned, it's just sparkling garbage collection.
 
-    TODO: maintain bitmap of currently pressed keys to release them on reset and
-   for better KRO handling.
-    TODO: implement out of order key release?
-    NOTE ^ ^^ very rare situations where this is needed.
+ * TODO: implement out of order key release?
+ * NOTE ^ very rare situations where this is needed.
  */
 inline void update_reports(void) {
   if (cooldown_timer > 0) {
@@ -348,66 +359,52 @@ inline void update_reports(void) {
     cooldown_timer--;
     return;
   }
-  if (USBQUEUE_IS_EMPTY) {
-    return;
+  // Eating up all the processed scancodes
+  while (USBQueue_rpos != USBQueue_wpos && empty_keycode_at(USBQueue_rpos)) {
+    KEYCODE_BUFFER_STEP(USBQueue_rpos); // Consuming real buffer!
   }
-  // If there's change - find first non-empty buffer cell.
-  // This results in infinite loop on empty buffer - must take care not to queue
-  // NOEVENTs.
-  while (USBQueue[USBQueue_rpos].keycode == USBCODE_NOEVENT) {
-    USBQueue_rpos = KEYCODE_BUFFER_NEXT(USBQueue_rpos);
-  }
-  // xprintf("USB queue %d - %d", USBQueue_rpos, USBQueue_wpos);
-  uint8_t pos = USBQueue_rpos;
-  do {
-    if (USBQueue[pos].keycode != USBCODE_NOEVENT &&
-        USBQueue[pos].sysTime <= systime) {
-      if (USBQueue[pos].keycode < USBCODE_A) {
-        // side effect - key transparent till the bottom will toggle exp. header
-        // But it should not ever be put on queue!
-        exp_toggle();
-        NO_COOLDOWN
-      }
-      // Codes you want filtered from reports MUST BE ABOVE THIS LINE!
-      // -> Think of special code for collectively settings mods!
-      else if (USBQueue[pos].keycode >= 0xe8) {
-        update_consumer_report(&USBQueue[pos]);
-      } else if (USBQueue[pos].keycode >= 0xa5 &&
-                 USBQueue[pos].keycode <= 0xa7) {
-        update_system_report(&USBQueue[pos]);
-      } else {
-        switch (output_direction) {
-          case OUTPUT_DIRECTION_USB:
-            update_keyboard_report(&USBQueue[pos]);
-            break;
-          case OUTPUT_DIRECTION_SERIAL:
-            update_serial_keyboard_report(&USBQueue[pos]);
-            break;
-          default:
-            break;
-        }
+  // We might have hit wpos here already. Not much point specialcasing tho -
+  // there might be an actionable scancode at the very tail..
 
-      }
-      if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
-        // We only throttle keypresses. Key release doesn't slow us down -
-        // minimum duration is guaranteed by fact that key release goes after
-        // key press and keypress triggers cooldown.
-        cooldown_timer = config.delayLib[DELAYS_EVENT]; // Actual update
-                                                        // happened - reset
-                                                        // cooldown.
-        exp_keypress(
-            USBQueue[pos].keycode); // Let the downstream filter by keycode
-      }
-      USBQueue[pos].keycode = USBCODE_NOEVENT;
-      if (pos == USBQueue_rpos && pos != USBQueue_wpos) {
-        // Only if we're at first position. Previous cells may contain future
-        // actions otherwise! Also if not the last item - we don't want to
-        // overrun the buffer.
-        USBQueue_rpos = KEYCODE_BUFFER_NEXT(pos);
-      }
-      break;
+  uint8_t pos = USBQueue_rpos;
+  while (pos != USBQueue_wpos && !valid_actionable_keycode_at(pos)) {
+    KEYCODE_BUFFER_STEP(pos); // Not consuming - just peeking!
+  }
+  if (!valid_actionable_keycode_at(pos)) { // Can only fail at rpos == wpos
+    return; // We'll return here on the next tick, hopefully passing.
+  }
+
+  if (USBQueue[pos].keycode < USBCODE_A) {
+    // Clowntown: fully "transparent" will toggle exp. header
+    // But it should not ever be put on queue!
+    exp_toggle();
+    USBQueue[pos].flags |= USBQUEUE_RELEASED_MASK; // skip-cooldown trick.
+    // ALL codes you want filtered from reports MUST BE ABOVE THIS LINE!
+  } else if (USBQueue[pos].keycode >= 0xe8) {
+    update_consumer_report(&USBQueue[pos]);
+  } else if (USBQueue[pos].keycode >= 0xa5 &&
+             USBQueue[pos].keycode <= 0xa7) {
+    update_system_report(&USBQueue[pos]);
+  } else {
+    switch (output_direction) {
+      case OUTPUT_DIRECTION_USB:
+        update_keyboard_report(&USBQueue[pos]);
+        break;
+      case OUTPUT_DIRECTION_SERIAL:
+        update_serial_keyboard_report(&USBQueue[pos]);
+        break;
+      default:
+        break;
     }
-  } while (pos != USBQueue_wpos);
+  }
+  if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
+    // We only throttle keypresses. Key release doesn't slow us down -
+    // minimum duration is guaranteed by fact that key release goes after
+    // key press and keypress triggers cooldown.
+    cooldown_timer = config.delayLib[DELAYS_EVENT];
+    exp_keypress(USBQueue[pos].keycode); // allow ExpHdr to see the scancode
+  }
+  USBQueue[pos].keycode = USBCODE_NOEVENT; // Done, rpos will move next cycle.
 }
 
 inline void pipeline_process(void) {
