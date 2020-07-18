@@ -228,6 +228,17 @@ inline void process_real_key(void) {
     }
   }
   scancode_t sc = read_scancode();
+  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
+    if (!(sc.flags & KEY_UP_MASK) && sc.scancode == COMMONSENSE_NOKEY) {
+      return; // All keys up needs to be printed, "no key" doesn't.
+    }
+    // In setup mode all scancodes(not USB!) go up the control channel, not HID.
+    outbox.response_type = C2RESPONSE_SCANCODE;
+    outbox.payload[0] = sc.flags;
+    outbox.payload[1] = sc.scancode;
+    usb_send_c2();
+    return;
+  }
   if (sc.scancode == COMMONSENSE_NOKEY) {
     // An empty value. Likely because nothing was pressed last tick, but..
     if (sc.flags & KEY_UP_MASK) {
@@ -243,15 +254,6 @@ inline void process_real_key(void) {
       return;
     }
   }
-  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
-    // In setup mode all scancodes(not USB!) go up the control channel, not HID.
-    outbox.response_type = C2RESPONSE_SCANCODE;
-    outbox.payload[0] = sc.flags;
-    outbox.payload[1] = sc.scancode;
-    usb_send_c2();
-    return;
-  }
-
   // OK, we're done with special cases. General scancode processing starts here.
 
   // Resolve USB keycode using current active layers - drop down until defined.

@@ -97,10 +97,15 @@ bool DeviceInterface::event(QEvent *e) {
       row = (scancode - col) / config->numCols;
       emit scancodeReceived(
           row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
-      qInfo().noquote() <<
-          QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
-          .arg(row + 1, 2)
-          .arg(col + 1, 2);
+      if (row == 15 && col == 15) {
+        // "All keys released"
+        qInfo() << "· ----------";
+      } else {
+        qInfo().noquote() <<
+            QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
+            .arg(row + 1, 2)
+            .arg(col + 1, 2);
+      }
       return true;
     default:
       qInfo() << payload->constData();
