@@ -161,7 +161,8 @@ void DeviceConfig::_unpack(void) {
   numCols = _eeprom.matrixCols;
   numLayers = _eeprom.matrixLayers;
   bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
-  switchType = std::min(_eeprom.switchType, (uint8_t)switchTypeNames_.size());
+  uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
+  switchType = std::min(_eeprom.switchType, maxSwitchIndex);
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
   auto caps = getSwitchCapabilities();
