@@ -283,7 +283,10 @@ void FlightController::editLayoutClick(void) {
 
 void FlightController::editMacrosClick(void) { macroEditor->show(); }
 
-void FlightController::editThresholdsClick(void) { thresholdEditor->show(); }
+void FlightController::editThresholdsClick(void) {
+  thresholdEditor->show();
+  thresholdEditor->raise();
+}
 
 void FlightController::showLayerConditions(void) {
   layerConditions->show();
