@@ -261,9 +261,9 @@ inline void keyboard_press(uint8_t keycode) {
       return;
     } else if (keyboard_report.keys[cur_pos] == 0) {
       keyboard_report.keys[cur_pos] = keycode;
-      keyboard_report_usage = cur_pos + 1;
+      keys_pressed = cur_pos + 1;
       // xprintf("Pressed %d pos %d, usage %d", keycode, cur_pos,
-      // keyboard_report_usage);
+      // keys_pressed);
       return;
     }
   }
@@ -275,19 +275,14 @@ inline void keyboard_release(uint8_t keycode) {
     keyboard_report.mods &= ~(1 << (keycode & 0x07));
     return;
   }
-  bool move = false;
   for (uint8_t cur_pos = 0; cur_pos < sizeof keyboard_report.keys; cur_pos++) {
-    if (move) {
-      keyboard_report.keys[cur_pos - 1] = keyboard_report.keys[cur_pos];
-    } else if (keyboard_report.keys[cur_pos] == keycode) {
-      move = true;
+    if (keyboard_report.keys[cur_pos] == keycode) {
+      // Key was, in fact, pressed.
+      keyboard_report.keys[cur_pos] = keyboard_report.keys[--keys_pressed];
+      keyboard_report.keys[keys_pressed] = 0;
+      // xprintf("Released %d, usage %d", keycode, keys_pressed);
+      return;
     }
-  }
-  if (move) {
-    // Key was, in fact, pressed.
-    keyboard_report.keys[sizeof keyboard_report.keys - 1] = 0;
-    keyboard_report_usage--;
-    // xprintf("Released %d, usage %d", keycode, keyboard_report_usage);
   }
 }
 
@@ -299,7 +294,7 @@ void update_keyboard_report(queuedScancode *key) {
     keyboard_release(key->keycode);
   }
   memcpy(KBD_OUTBOX, keyboard_report.raw, OUTBOX_SIZE(KBD_OUTBOX));
-  if (keyboard_report_usage > KBD_KRO_LIMIT) {
+  if (keys_pressed > KBD_KRO_LIMIT) {
     // on rollover error ALL keys must report ERO.
     memset(KBD_OUTBOX + 2, USBCODE_ERO, KBD_KRO_LIMIT);
     xprintf("Keyboard rollover error");
@@ -341,7 +336,6 @@ static inline void consumer_press(uint16_t keycode) {
   // xprintf("C_Pressing %d", keycode);
 }
 
-// Very similar to keyboard_release, but keycode there is uint8_t :(
 static inline void consumer_release(uint16_t keycode) {
   uint8_t cur_pos;
   bool move = false;
@@ -399,7 +393,7 @@ void usb_suspend_monitor_stop(void) {
 void usb_init(void) {
   pipeline_init();
   memset(keyboard_report.raw, 0, sizeof keyboard_report.raw);
-  keyboard_report_usage = 0;
+  keys_pressed = 0;
   memset(consumer_report, 0, sizeof consumer_report);
 #ifndef SELF_POWERED
   USB_Start(0u, USB_5V_OPERATION);
@@ -482,7 +476,7 @@ void usb_tick(void) {
  */
 void reset_reports(void) {
   RESET_SINGLE(keyboard_report.raw, KBD)
-  keyboard_report_usage = 0;
+  keys_pressed = 0;
   RESET_SINGLE(consumer_report, CONSUMER)
   RESET_SINGLE(system_report, SYSTEM)
   // xprintf("reports reset");

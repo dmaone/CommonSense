@@ -31,7 +31,7 @@ union {
   } __attribute__((packed));
   uint8_t raw[MAX_KEYS + 2];
 } keyboard_report;
-uint8_t keyboard_report_usage;
+uint8_t keys_pressed;
 
 // Consumer or system reports are not expected to be tested to KRO limit.
 uint16_t consumer_report[CONSUMER_KRO_LIMIT];
