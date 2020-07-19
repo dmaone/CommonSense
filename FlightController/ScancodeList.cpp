@@ -1,11 +1,12 @@
 #include "ScancodeList.h"
 
-ScancodeList::ScancodeList() : list() {
-  list << "----"; // 0x00
-  list << "DEAD";
-  list << "BootLdr";// 0x02
+QStringList _populateScancodeList(void) {
+  QStringList list{};
+  list << "----";      // 0x00
+  list << "DEAD";     // 0x01
+  list << "FwLdr";   // 0x02
   list << "ExpTgl"; // 0x03
-  list << "A";      // 0x04
+  list << "A";     // 0x04
   list << "B";
   list << "C";
   list << "D";
@@ -80,9 +81,9 @@ ScancodeList::ScancodeList() : list() {
   list << "Del";
   list << "End";
   list << "PgDn";
-  list << "→"; // right
-  list << "←"; // left
-  list << "↓"; // down
+  list << "→";    // right
+  list << "←";   // left
+  list << "↓";  // down
   list << "↑"; // up
   list << "NumLk";
   list << "KP/";
@@ -139,17 +140,17 @@ ScancodeList::ScancodeList() : list() {
   list << "BR/?";
   list << "かな";
   list << "¥";
-  list << "XFER"; // 変換 = conversion, henkan
-  list << "NFER"; // 無変換 = no conversion, muhenkan
+  list << "変換";     // henkan, "conversion", JP kbd
+  list << "無変換";  // muhenkan, "no conversion", JP kbd
   list << "AX";
   list << "WChr";
   list << "INT8";
   list << "INT9";
-  list << "한/영";    // Hangul, KR kbd
-  list << "漢字";     // Hanja, KR kbd
-  list << "カタカナ"; // カタカナ Katakana, JP
-  list << "ひらがな"; // ひらがな Hiragana, JP
-  list << "半/全";    // 半角/全角 half/full AKA hankaku/zenkaku
+  list << "한/영";     // Han/Yeong (Hangul/English), KR kbd
+  list << "漢字";     // Hanja (Hangul -> Chinese), KR kbd
+  list << "カタカナ";  // カタカナ Katakana, JP kbd
+  list << "ひらがな"; // ひらがな Hiragana, JP kbd
+  list << "半/全"; // 半角/全角 half/full AKA hankaku/zenkaku, JP kbd
   list << "LNG6";
   list << "LNG7";
   list << "LNG8";
@@ -166,7 +167,7 @@ ScancodeList::ScancodeList() : list() {
   list << "Cl/Agn";
   list << "CrSel";
   list << "ExSel";
-  list << "Power"; // 0xa5-7 reserved range, remapped
+  list << "Power";  // 0xa5-7 reserved range, remapped
   list << "Sleep";
   list << "Wake";
   list << "Fn1"; // 0xa8 - reserved, remapped to layer manipulations
@@ -232,7 +233,7 @@ ScancodeList::ScancodeList() : list() {
   list << "RCtrl";
   list << "RShft";
   list << "RAlt";
-  list << "RGUI"; // 0xe7, below is reserved range mapped to media
+  list << "RGUI";  // 0xe7, below is reserved range mapped to media
   list << ">/||"; // Play/Pause
   list << "Mute";
   list << "Vol++";
@@ -257,4 +258,11 @@ ScancodeList::ScancodeList() : list() {
   list << "-r-D";
   list << "-r-E";
   list << "-r-F";
+
+  return list;
+}
+
+/* static */ QStringList* ScancodeList::_getScancodeList() {
+  static QStringList list = _populateScancodeList();
+  return &list;
 }

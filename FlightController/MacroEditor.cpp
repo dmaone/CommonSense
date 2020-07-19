@@ -17,7 +17,7 @@ MacroEditor::MacroEditor(DeviceConfig *config, QWidget *parent)
   ui->setupUi(this);
   deviceConfig = config;
   ScancodeList scanCodes;
-  ui->scanCode->addItems(scanCodes.list);
+  ui->scanCode->addItems(*scanCodes.list);
   connect(ui->scanCode, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
   connect(ui->triggerEvent,
       SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
@@ -227,7 +227,7 @@ void MacroEditor::addStep(int row) {
     SLOT(showContextMenu(QPoint)));
   ui->bodyTable->setCellWidget(row, 1, delay);
   QComboBox *sc = new QComboBox();
-  sc->addItems(ScancodeList().list);
+  sc->addItems(*ScancodeList().list);
   connect(sc, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
   sc->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(sc, SIGNAL(customContextMenuRequested(QPoint)),

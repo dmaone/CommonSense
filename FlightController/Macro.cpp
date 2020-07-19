@@ -35,7 +35,7 @@ QByteArray Macro::toBin() {
 
 QString Macro::fullName() {
   ScancodeList scancodeList;
-  QString fullName{scancodeList.list[keyCode]};
+  QString fullName{scancodeList.list->at(keyCode)};
   fullName.append(" (");
   fullName.append(getTriggerEventText());
   fullName.append(")");

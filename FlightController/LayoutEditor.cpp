@@ -71,7 +71,10 @@ void LayoutEditor::sizeDisplay(uint8_t rows, uint8_t cols) {
     for (uint8_t j = 0; j < cols; j++) {
       if (!display[i][j]) {
         QComboBox *l = new QComboBox();
-        l->addItems(scancodes.list);
+        l->setEditable(false);
+        l->addItems(*scancodes.list);
+        l->setMinimumContentsLength(scancodes.width);
+        l->setSizeAdjustPolicy(QComboBox::AdjustToMinimumContentsLengthWithIcon);
         display[i][j] = l;
         grid->addWidget(l, i + 1, j + 1, 1, 1);
         if (j == 0) {
