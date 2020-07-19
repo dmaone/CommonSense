@@ -1,13 +1,13 @@
 /***************************************************************************//**
 * \file CYBLE_gatt.h
-* \version 3.61
+* \version 3.65
 * 
 * \brief
 *  Contains the prototypes and constants used in the BLE GATT profile.
 * 
 ********************************************************************************
 * \copyright
-* Copyright 2014-2019, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2014-2020, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.

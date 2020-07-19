@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyLib.c
-* \version 5.80
+* \version 5.90
 *
 * \brief Provides a system API for the clocking, interrupts and watchdog timer.
 *

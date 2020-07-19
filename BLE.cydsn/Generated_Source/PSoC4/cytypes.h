@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cytypes.h
-* \version 5.80
+* \version 5.90
 *
 * \brief CyTypes provides register access macros and approved types for use in
 * firmware.
@@ -166,6 +166,12 @@
     #define CY_PSOC4_4100MS (0u != 0u)
     #define CY_PSOC4_4100MS (0u != 0u)
 #endif  /* CYDEV_CHIP_MEMBER_4V */
+
+#ifdef CYDEV_CHIP_MEMBER_4AB
+    #define CY_PSOC4_4500 (CYDEV_CHIP_MEMBER_USED == CYDEV_CHIP_MEMBER_4AB)
+#else
+    #define CY_PSOC4_4500 (0u != 0u)
+#endif  /* CYDEV_CHIP_MEMBER_4AB */
 
 #define CY_IP_HOBTO_DEVICE      (!(0 == 1))
 
@@ -333,9 +339,20 @@
 
     /* External Crystal Oscillator is present (high frequency) */
     #if (CY_IP_HOBTO_DEVICE)
+        #if defined (CYIPBLOCK_m0s8exco_VERSION)
+            #if (CYIPBLOCK_m0s8exco_VERSION == 2)
+                #define CY_IP_EXCO_IP_V2    (0 == 0)
+            #else
+                #define CY_IP_EXCO_IP_V2    (0 != 0)
+            #endif
+        #else
+            #define CY_IP_EXCO_IP_V2    (0 != 0)
+        #endif  /* CYIPBLOCK_m0s8exco_VERSION */
+
         #if (CY_IP_BLESS)
             #define CY_IP_ECO_SRSSV2        (0 != 0)
             #define CY_IP_ECO_SRSSLT        (0 != 0)
+            #define CY_IP_ECOV2_SRSSLT      (0 != 0)
             
             #if (CY_IP_BLESSV3)
                 #define CY_IP_ECO_BLESS     (0 != 0)
@@ -349,15 +366,17 @@
             #define CY_IP_ECO_BLESSV3       (0 != 0)
             #define CY_IP_ECO_SRSSV2        (0 == 1)
             #define CY_IP_ECO_SRSSLT        ((0 != 0) && (0 != 0))
+            #define CY_IP_ECOV2_SRSSLT      (CY_IP_ECO_SRSSLT && CY_IP_EXCO_IP_V2)
         #endif  /* (CY_IP_BLESS) */
     #else
         #define CY_IP_ECO_BLESS             (0 != 0)
         #define CY_IP_ECO_BLESSV3           (0 != 0)
         #define CY_IP_ECO_SRSSV2            (0 != 0)
         #define CY_IP_ECO_SRSSLT            (0 != 0)
+        #define CY_IP_ECOV2_SRSSLT          (0 != 0)
     #endif  /* (CY_IP_HOBTO_DEVICE) */
 
-    #define CY_IP_ECO   (CY_IP_ECO_BLESS || CY_IP_ECO_SRSSV2 || CY_IP_ECO_BLESSV3 || CY_IP_ECO_SRSSLT)
+    #define CY_IP_ECO   (CY_IP_ECO_BLESS || CY_IP_ECO_SRSSV2 || CY_IP_ECO_BLESSV3 || CY_IP_ECO_SRSSLT || CY_IP_ECOV2_SRSSLT)
 
     /* PLL is present */
     #if (CY_IP_HOBTO_DEVICE)
@@ -432,7 +451,7 @@
     #endif  /* (CY_IP_HOBTO_DEVICE) */
 
     #if (CY_IP_HOBTO_DEVICE)
-        #define CY_IP_PASS                  (0 == 1)
+        #define CY_IP_PASS                  (0 >= 1)
     #else
         #define CY_IP_PASS                  (0 != 0)
     #endif  /* (CY_IP_HOBTO_DEVICE) */

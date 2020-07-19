@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file core_cm0_psoc4.h
-* \version 5.80
+* \version 5.90
 *
 * \brief Provides important type information for the  PSOC4 device family.
 * This includes types necessary for core_cm0.h.

@@ -1,6 +1,6 @@
 /*******************************************************************************
 * \file cypins.h
-* \version 5.80
+* \version 5.90
 *
 * \brief This file contains the function prototypes and constants used for
 * port/pin in access and control.
