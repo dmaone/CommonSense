@@ -9,8 +9,8 @@
 #include "ui_MacroEditor.h"
 
 namespace {
-  const QString kNew{"-new-"};
-}
+  static const QString kNew{"-new-"};
+} // namespace
 
 MacroEditor::MacroEditor(DeviceConfig *config, QWidget *parent)
     : QFrame(parent, Qt::Tool), ui(new Ui::MacroEditor) {
@@ -23,7 +23,7 @@ MacroEditor::MacroEditor(DeviceConfig *config, QWidget *parent)
       SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
 }
 
-void MacroEditor::show(void) {
+void MacroEditor::show() {
   ui->macroListCombo->clear();
   for (auto& m : deviceConfig->macros) {
     ui->macroListCombo->addItem(m.fullName());
@@ -170,7 +170,7 @@ void MacroEditor::on_addButton_clicked() {
     existingMacro = true;
   }
   size_t cur_pos = 0;
-  for (auto m : deviceConfig->macros) {
+  for (const auto& m : deviceConfig->macros) {
     if (pos == cur_pos++) {
       continue;
     }

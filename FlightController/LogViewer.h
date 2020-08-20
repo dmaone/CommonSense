@@ -17,8 +17,8 @@ class LogViewer : public QPlainTextEdit {
   LogViewer(QWidget *parent = NULL);
 
  public slots:
-  void clearButtonClick(void);
-  void copyAllButtonClick(void);
+  void clearButtonClick();
+  void copyAllButtonClick();
   void logMessage(QString msg);
   void continueMessage(QString msg);
 

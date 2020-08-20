@@ -12,22 +12,22 @@ typedef struct {
 } CyACD_row;
 
 class CyACD {
-public:
-  CyACD(QString filename);
+ public:
+  CyACD(const QString& filename);
   ~CyACD();
   bool loaded;
   uint32_t siliconId;
   uint8_t siliconRevision;
   std::vector<CyACD_row *> data;
 
-private:
+ private:
   uint8_t _checksumType;
   uint8_t _readByte(QTextStream &ts);
   uint16_t _readUInt16(QTextStream &ts);
-  uint16_t checksum;
-  uint16_t _checksum;
+  uint16_t checksum{0};
+  uint16_t _checksum{0};
   void _readRow(QTextStream &ts);
-  void _resetChecksum(void);
-  void _calculateChecksum(void);
+  void _resetChecksum();
+  void _calculateChecksum();
   void _verifyChecksum(CyACD_row *row);
 };

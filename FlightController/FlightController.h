@@ -26,14 +26,13 @@ class FlightController;
 
 class FlightController : public QMainWindow {
   Q_OBJECT
-  Q_ENUMS(StatusPosition)
 
 public:
   explicit FlightController(QWidget *parent = 0);
   ~FlightController();
-  void setup(void);
-  void show(void);
-  LogViewer *getLogViewport(void);
+  void setup();
+  void show();
+  LogViewer *getLogViewport();
   void setOldLogger(QtMessageHandler *logger);
   void logToViewport(const QString &);
 
@@ -43,11 +42,11 @@ signals:
   void setStatusBit(deviceStatus bit, bool newValue);
 
 public slots:
-  void showKeyMonitor(void);
-  void editLayoutClick(void);
-  void editMacrosClick(void);
-  void editThresholdsClick(void);
-  void showLayerConditions(void);
+  void showKeyMonitor();
+  void editLayoutClick();
+  void editMacrosClick();
+  void editThresholdsClick();
+  void showLayerConditions();
   void deviceStatusNotification(DeviceInterface::DeviceStatus);
 
 protected:
@@ -68,18 +67,18 @@ private:
   int blinkTimerId;
 
   void lockUI(bool lock);
-  void updateStatus(void);
+  void updateStatus();
   void timerEvent(QTimerEvent * timer);
-  void blinkLights(void);
+  void blinkLights();
 
 private slots:
   void on_action_Setup_mode_triggered(bool bMode);
-  void on_scanButton_clicked(void);
-  void on_outputButton_clicked(void);
-  void on_setupButton_clicked(void);
-  void on_redButton_clicked(void);
-  void on_statusRequestButton_clicked(void);
-  void on_reconnectButton_clicked(void);
-  void editDelays(void);
-  void editHardware(void);
+  void on_scanButton_clicked();
+  void on_outputButton_clicked();
+  void on_setupButton_clicked();
+  void on_redButton_clicked();
+  void on_statusRequestButton_clicked();
+  void on_reconnectButton_clicked();
+  void editDelays();
+  void editHardware();
 };

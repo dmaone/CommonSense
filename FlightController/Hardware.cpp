@@ -50,7 +50,7 @@ void Hardware::on_modeBox_currentIndexChanged(int idx) {
   _updateParamVisibility();
 }
 
-void Hardware::on_applyButton_clicked(void) {
+void Hardware::on_applyButton_clicked() {
   std::vector<uint8_t> adcBitMap {8, 10, 12};
   HardwareConfig config;
   config.adcBits = adcBitMap[ui->adcBits->currentIndex()];
@@ -63,6 +63,6 @@ void Hardware::on_applyButton_clicked(void) {
   _config->setHardwareConfig(config);
 }
 
-void Hardware::on_revertButton_clicked(void) {
+void Hardware::on_revertButton_clicked() {
   init();
 }

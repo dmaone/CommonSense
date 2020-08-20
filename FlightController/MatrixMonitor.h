@@ -18,7 +18,7 @@ typedef struct {
   uint8_t min;
   uint8_t max;
   uint32_t sum;
-  uint32_t sampleCount;
+  uint32_t count;
 } MonitoredCell;
 
 class MatrixMonitor : public QFrame {
@@ -27,7 +27,7 @@ class MatrixMonitor : public QFrame {
 public:
   explicit MatrixMonitor(QWidget *parent = 0);
   ~MatrixMonitor();
-  void show(void);
+  void show();
   enum DisplayMode { DisplayNow, DisplayMin, DisplayMax, DisplayAvg };
   Q_ENUM(DisplayMode);
 
@@ -54,7 +54,7 @@ private:
   DeviceConfig *deviceConfig;
   uint8_t _warmupRows;
 
-  void initDisplay(void);
+  void initDisplay();
   void updateDisplaySize(uint8_t, uint8_t);
   void enableTelemetry(uint8_t);
   void _resetCells();
@@ -62,10 +62,10 @@ private:
   void _updateStatCellDisplay(uint8_t row, uint8_t col);
 
 private slots:
-  void on_runButton_clicked(void);
-  void on_closeButton_clicked(void);
-  void on_setThresholdsButton_clicked(void);
+  void on_runButton_clicked();
+  void on_closeButton_clicked();
+  void on_setThresholdsButton_clicked();
   void on_modeBox_currentTextChanged(QString newValue);
-  void on_resetButton_clicked(void);
-  void on_exportButton_clicked(void);
+  void on_resetButton_clicked();
+  void on_exportButton_clicked();
 };

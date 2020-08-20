@@ -8,15 +8,17 @@
 #include "LayerCondition.h"
 #include "settings.h"
 
-const std::vector<std::string> expModeNames_{
+namespace {
+static const std::vector<std::string> expModeNames_{
   "Disabled",
 
   "Solenoid+Num+Caps", "Lock LEDs",
 };
 
-const std::vector<std::string> switchTypeNames_ {
+static const std::vector<std::string> switchTypeNames_ {
   "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "Microswitch", "UNKNOWN"
 };
+} //namespace
 
 DeviceConfig::DeviceConfig(QObject *parent)
     : QObject(parent), bValid(false), numRows(0), numCols(0),
@@ -26,7 +28,7 @@ DeviceConfig::DeviceConfig(QObject *parent)
   memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
 }
 
-bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)),
+bool DeviceConfig::eventFilter(QObject* /* obj */,
                                QEvent *event) {
   if (event->type() != DeviceMessage::ET)
     return false;
@@ -53,7 +55,7 @@ bool DeviceConfig::eventFilter(QObject *obj __attribute__((unused)),
  * @brief DeviceInterface::uploadConfig
  * Fire up the uploader.
  */
-void DeviceConfig::toDevice(void) {
+void DeviceConfig::toDevice() {
   DeviceInterface &di = DeviceInterface::get();
   if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
     QMessageBox::critical(NULL, "Matrix monitor active",
@@ -77,9 +79,9 @@ void DeviceConfig::toDevice(void) {
 /**
  * @brief DeviceInterface::uploadConfigBlock
  * Upload one block to device.
- * We don't really care about the input packet here, hence (void)
+ * We don't really care about the input packet here
  */
-void DeviceConfig::_uploadConfigBlock(void) {
+void DeviceConfig::_uploadConfigBlock() {
   switch (transferDirection) {
   case TransferUpload:
     if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
@@ -95,7 +97,7 @@ void DeviceConfig::_uploadConfigBlock(void) {
     memcpy(msg.payload + CONFIG_BLOCK_DATA_OFFSET,
            this->_eeprom.raw + (CONFIG_TRANSFER_BLOCK_SIZE * currentBlock),
            CONFIG_TRANSFER_BLOCK_SIZE);
-    emit(uploadBlock(msg));
+    emit uploadBlock(msg);
     break;
   default:
     qInfo() << "Not a good day to upload config block!";
@@ -127,7 +129,7 @@ void DeviceConfig::fromDevice() {
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
-  emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
+  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock);
 }
 
 /**
@@ -153,10 +155,10 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
              (CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)),
          payload->data() + 1 + CONFIG_BLOCK_DATA_OFFSET,
          CONFIG_TRANSFER_BLOCK_SIZE);
-  emit(downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock));
+  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock);
 }
 
-void DeviceConfig::_unpack(void) {
+void DeviceConfig::_unpack() {
   numRows = _eeprom.matrixRows;
   numCols = _eeprom.matrixCols;
   numLayers = _eeprom.matrixLayers;
@@ -191,11 +193,11 @@ void DeviceConfig::_unpack(void) {
     macro_start += len + 3;
   }
   this->bValid = true;
-  emit(changed());
+  emit changed();
   return;
 }
 
-void DeviceConfig::_assemble(void) {
+void DeviceConfig::_assemble() {
   _eeprom.configVersion = 2;
   memset(_eeprom.stash, EMPTY_FLASH_BYTE, sizeof(_eeprom.stash));
   memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
@@ -266,7 +268,7 @@ void DeviceConfig::toFile() {
   }
 }
 
-void DeviceConfig::commit(void) {
+void DeviceConfig::commit() {
   QMessageBox::StandardButton result = QMessageBox::question(
       NULL, "Saving EEPROM!",
       "Do you want to write the config that is now in the device, to "
@@ -277,7 +279,7 @@ void DeviceConfig::commit(void) {
     emit sendCommand(C2CMD_COMMIT, 1u);
 }
 
-void DeviceConfig::rollback(void) {
+void DeviceConfig::rollback() {
   QMessageBox::StandardButton result =
       QMessageBox::question(NULL, "Resetting device!",
                             "Device will be reset, config will be restored "
@@ -287,7 +289,7 @@ void DeviceConfig::rollback(void) {
     emit sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
-std::vector<LayerCondition> DeviceConfig::loadLayerConditions(void) {
+std::vector<LayerCondition> DeviceConfig::loadLayerConditions() {
   std::vector<LayerCondition> cnds(numLayerConditions);
   for (uint8_t i = 0; i < numLayerConditions; i++) {
     cnds[i] = LayerCondition(_eeprom.layerConditions[i]);
@@ -305,7 +307,7 @@ void DeviceConfig::setLayerConditions(std::vector<LayerCondition> lcs) {
     setLayerCondition(i, lcs[i]);
 }
 
-std::vector<uint16_t> DeviceConfig::delays(void) {
+std::vector<uint16_t> DeviceConfig::delays() {
   std::vector<uint16_t> retval(numDelays);
   for (uint8_t i = 0; i < numDelays; i++) {
     retval[i] = _eeprom.delayLib[i];
@@ -317,7 +319,7 @@ void DeviceConfig::setDelay(int delayIdx, uint16_t delay_ms) {
   _eeprom.delayLib[delayIdx] = delay_ms;
 }
 
-HardwareConfig DeviceConfig::getHardwareConfig(void) {
+HardwareConfig DeviceConfig::getHardwareConfig() {
   HardwareConfig retval;
   retval.adcBits = _eeprom.adcBits;
   retval.chargeDelay = _eeprom.chargeDelay;

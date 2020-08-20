@@ -17,7 +17,7 @@ class MacroEditor : public QFrame {
 public:
   explicit MacroEditor(DeviceConfig *config, QWidget *parent = 0);
   ~MacroEditor();
-  void show(void);
+  void show();
   int findWidgetRow(QWidget *w);
   void fillCommandParameters(int row, int command);
 

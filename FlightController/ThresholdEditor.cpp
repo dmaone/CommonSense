@@ -19,7 +19,7 @@ ThresholdEditor::ThresholdEditor(DeviceConfig *config, QWidget *parent)
   di.installEventFilter(this);
 }
 
-void ThresholdEditor::show(void) {
+void ThresholdEditor::show() {
   if (deviceConfig->bValid) {
     updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
     resetThresholds();
@@ -30,7 +30,9 @@ void ThresholdEditor::show(void) {
   }
 }
 
-ThresholdEditor::~ThresholdEditor() { delete ui; }
+ThresholdEditor::~ThresholdEditor() {
+  delete ui;
+}
 
 void ThresholdEditor::initDisplay() {
   for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
@@ -123,8 +125,7 @@ void ThresholdEditor::resetThresholds() {
   qInfo() << "Loaded threshold map";
 }
 
-bool ThresholdEditor::eventFilter(QObject *obj __attribute__((unused)),
-                                QEvent *event) {
+bool ThresholdEditor::eventFilter(QObject* /* obj */, QEvent* event) {
   if (event->type() == DeviceMessage::ET) {
     QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
     auto& di = DeviceInterface::get();

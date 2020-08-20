@@ -3,7 +3,7 @@
 
 #include "CyACD.h"
 
-CyACD::CyACD(QString filename) {
+CyACD::CyACD(const QString& filename) {
   loaded = false;
   QFile f(filename);
   f.open(QIODevice::ReadOnly);
@@ -20,7 +20,7 @@ CyACD::CyACD(QString filename) {
   f.close();
 }
 
-CyACD::~CyACD(void) { data.clear(); }
+CyACD::~CyACD() { data.clear(); }
 
 uint8_t CyACD::_readByte(QTextStream &ts) {
   QString buf = ts.read(2);
@@ -58,12 +58,12 @@ void CyACD::_readRow(QTextStream &ts) {
   }
 }
 
-void CyACD::_resetChecksum(void) {
+void CyACD::_resetChecksum() {
   checksum = 0;
   _checksum = 0;
 }
 
-void CyACD::_calculateChecksum(void) {
+void CyACD::_calculateChecksum() {
   _checksum = (1 + ~checksum) & 0xff; // 2's complement
 }
 

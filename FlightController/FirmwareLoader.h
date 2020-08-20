@@ -50,11 +50,11 @@ public:
   Q_ENUM(BootloaderVerb)
 
   explicit FirmwareLoader(QObject *parent = 0);
-  void load(void);
+  void load();
 
 public slots:
-  void start(void);
-  bool selectFile(void);
+  void start();
+  bool selectFile();
 
 signals:
   void switchMode(bool bEnable);
@@ -69,7 +69,7 @@ private:
   BootloaderVerb lastCommand;
   CyACD_row *lastRow;
 
-  bool _loadFirmwareFile(void);
+  bool _loadFirmwareFile();
   void _sendCommand(BootloaderVerb command);
   void _sendPacket(BootloaderVerb command, QByteArray &data);
   bool _responseValid(const Bootloader_packet_t& data);

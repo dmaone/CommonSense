@@ -28,12 +28,12 @@ struct SwitchTypeCapabilities {
 
 class DeviceConfig : public QObject {
   Q_OBJECT
-  Q_ENUMS(TransferDirection)
 
-public:
+ public:
   explicit DeviceConfig(QObject *parent = 0);
   bool bValid;
   enum TransferDirection { TransferIdle, TransferUpload, TransferDownload };
+  Q_ENUM(TransferDirection)
   uint8_t numRows;
   uint8_t numCols;
   uint8_t switchType;
@@ -47,38 +47,38 @@ public:
   std::vector<LayerCondition> loadLayerConditions();
   void setLayerCondition(int conditionIdx, LayerCondition cnd);
   void setLayerConditions(std::vector<LayerCondition> lcs);
-  std::vector<uint16_t> delays(void);
+  std::vector<uint16_t> delays();
   void setDelay(int delayIdx, uint16_t delay_ms);
-  HardwareConfig getHardwareConfig(void);
+  HardwareConfig getHardwareConfig();
   void setHardwareConfig(HardwareConfig config);
   const std::vector<std::string> getExpModeNames();
   const std::string& getSwitchTypeName();
   const SwitchTypeCapabilities getSwitchCapabilities();
 
-signals:
-  void changed(void);
+ signals:
+  void changed();
   void uploadBlock(OUT_c2packet_t);
   void downloadBlock(c2command, uint8_t);
   void sendCommand(c2command, uint8_t);
 
-public slots:
-  void fromDevice(void);
-  void toDevice(void);
-  void fromFile(void);
-  void toFile(void);
-  void commit(void);
-  void rollback(void);
+ public slots:
+  void fromDevice();
+  void toDevice();
+  void fromFile();
+  void toFile();
+  void commit();
+  void rollback();
 
-protected:
+ protected:
   bool eventFilter(QObject *obj, QEvent *event);
 
-private:
+ private:
   psoc_eeprom_t _eeprom;
   enum TransferDirection transferDirection;
   uint8_t currentBlock;
-  void _uploadConfigBlock(void);
+  void _uploadConfigBlock();
   void _receiveConfigBlock(QByteArray *);
-  void _unpack(void);
-  void _assemble(void);
+  void _unpack();
+  void _assemble();
 };
 

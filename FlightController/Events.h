@@ -10,7 +10,7 @@
 #include <QtCore>
 
 class DeviceMessage : public QEvent {
-public:
+ public:
   static const QEvent::Type ET;
   QByteArray payload;
 

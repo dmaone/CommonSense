@@ -18,14 +18,14 @@ class LayoutEditor : public QFrame {
 public:
   explicit LayoutEditor(DeviceConfig *config, QWidget *parent = 0);
   ~LayoutEditor();
-  void show(void);
+  void show();
 
 public slots:
-  void importLayout(void);
-  void exportLayout(void);
-  void applyLayout(void);
-  void resetLayout(void);
-  void switchLayer(void);
+  void importLayout();
+  void exportLayout();
+  void applyLayout();
+  void resetLayout();
+  void switchLayer();
   void receiveScancode(uint8_t row, uint8_t col,
                        DeviceInterface::KeyStatus status);
 
@@ -36,10 +36,10 @@ private:
   DeviceConfig *deviceConfig;
   uint8_t currentLayer{0};
   QString defaultCss_{};
-  void initDisplay(void);
+  void initDisplay();
   void sizeDisplay(uint8_t, uint8_t);
   void setDisplay();
 
 private slots:
-  void on_closeButton_clicked(void);
+  void on_closeButton_clicked();
 };

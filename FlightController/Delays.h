@@ -9,33 +9,31 @@
 class DelayWatcher : public QObject {
   Q_OBJECT
 
-public:
+ public:
   DelayWatcher(DeviceConfig *config, int delayIndex, QSpinBox *box,
                QObject *parent = NULL);
-  uint16_t getValue(void);
+  uint16_t getValue();
 
-private:
+ private:
   DeviceConfig *config;
   int delayIndex;
   QSpinBox *box;
 
-private slots:
+ private slots:
   void changed(int delay_ms);
 };
 
 class Delays : public QWidget {
   Q_OBJECT
-public:
+ public:
   std::vector<DelayWatcher *> delayWatchers;
   explicit Delays(DeviceConfig *config, QWidget *parent = 0);
   ~Delays();
-  void init(void);
+  void init();
 
 signals:
-
-public slots:
-private:
+ private:
   DeviceConfig *_config;
   QGridLayout *_grid;
-  void _deinit(void);
+  void _deinit();
 };

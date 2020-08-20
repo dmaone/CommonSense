@@ -10,20 +10,20 @@ LayerConditionWatcher::LayerConditionWatcher(
     : QObject(parent), config(config), conditionIndex(conditionIndex),
       fn1Check(fn1Check), fn2Check(fn2Check), fn3Check(fn3Check),
       fn4Check(fn4Check), layerCombo(layerCombo) {
-  connect(fn1Check, SIGNAL(toggled(bool)), SLOT(changed(void)));
-  connect(fn2Check, SIGNAL(toggled(bool)), SLOT(changed(void)));
-  connect(fn3Check, SIGNAL(toggled(bool)), SLOT(changed(void)));
-  connect(fn4Check, SIGNAL(toggled(bool)), SLOT(changed(void)));
-  connect(layerCombo, SIGNAL(currentIndexChanged(int)), SLOT(changed(void)));
+  connect(fn1Check, SIGNAL(toggled(bool)), SLOT(changed()));
+  connect(fn2Check, SIGNAL(toggled(bool)), SLOT(changed()));
+  connect(fn3Check, SIGNAL(toggled(bool)), SLOT(changed()));
+  connect(fn4Check, SIGNAL(toggled(bool)), SLOT(changed()));
+  connect(layerCombo, SIGNAL(currentIndexChanged(int)), SLOT(changed()));
 }
 
-LayerCondition LayerConditionWatcher::toLayerCondition(void) {
+LayerCondition LayerConditionWatcher::toLayerCondition() {
   return LayerCondition(fn1Check->isChecked(), fn2Check->isChecked(),
                         fn3Check->isChecked(), fn4Check->isChecked(),
                         layerCombo->currentIndex());
 }
 
-void LayerConditionWatcher::changed(void) {
+void LayerConditionWatcher::changed() {
   config->setLayerCondition(conditionIndex, toLayerCondition());
 }
 
@@ -34,7 +34,7 @@ LayerConditions::LayerConditions(DeviceConfig *config, QWidget *parent)
   init();
 }
 
-void LayerConditions::init(void) {
+void LayerConditions::init() {
   std::vector<LayerCondition> cnds = config->loadLayerConditions();
   // Destroy
   QLayoutItem *item;

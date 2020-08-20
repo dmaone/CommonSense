@@ -1,6 +1,6 @@
 #include "ScancodeList.h"
 
-QStringList _populateScancodeList(void) {
+QStringList _populateScancodeList() {
   QStringList list{};
   list << "----";      // 0x00
   list << "DEAD";     // 0x01

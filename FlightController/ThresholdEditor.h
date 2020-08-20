@@ -17,13 +17,13 @@ class ThresholdEditor : public QFrame {
 public:
   explicit ThresholdEditor(DeviceConfig *config, QWidget *parent = 0);
   ~ThresholdEditor();
-  void show(void);
+  void show();
 
 public slots:
-  void applyThresholds(void);
-  void resetThresholds(void);
-  void increaseThresholds(void);
-  void decreaseThresholds(void);
+  void applyThresholds();
+  void resetThresholds();
+  void increaseThresholds();
+  void decreaseThresholds();
   void receiveScancode(uint8_t row, uint8_t col,
                        DeviceInterface::KeyStatus status);
 
@@ -41,5 +41,5 @@ private:
   void paintCell(QSpinBox *cell);
 
 private slots:
-  void on_closeButton_clicked(void);
+  void on_closeButton_clicked();
 };

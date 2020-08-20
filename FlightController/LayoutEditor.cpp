@@ -17,7 +17,7 @@ LayoutEditor::LayoutEditor(DeviceConfig *config, QWidget *parent)
   initDisplay();
 }
 
-void LayoutEditor::show(void) {
+void LayoutEditor::show() {
   if (deviceConfig->bValid) {
     qInfo() << "Loading layer editor, please wait..";
     sizeDisplay(deviceConfig->numRows, deviceConfig->numCols);
@@ -35,7 +35,7 @@ void LayoutEditor::show(void) {
 
 LayoutEditor::~LayoutEditor() { delete ui; }
 
-void LayoutEditor::initDisplay(void) {
+void LayoutEditor::initDisplay() {
   ui->Dashboard->setLayout(grid);
   for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
     grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1,
@@ -134,7 +134,6 @@ void LayoutEditor::exportLayout() {
     ts.setPadChar('0');
     for (uint8_t l = 0; l < deviceConfig->numLayers; l++) {
       for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
-        QByteArray buf;
         for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
           ts << qSetFieldWidth(1) << (j ? ' ' : '\n');
           ts << "0x";

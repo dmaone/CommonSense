@@ -17,7 +17,7 @@ public:
                         QCheckBox *fn1Check, QCheckBox *fn2Check,
                         QCheckBox *fn3Check, QCheckBox *fn4Check,
                         QComboBox *layerCombo, QObject *parent = NULL);
-  LayerCondition toLayerCondition(void);
+  LayerCondition toLayerCondition();
 
 private:
   DeviceConfig *config;
@@ -29,7 +29,7 @@ private:
   QComboBox *layerCombo;
 
 private slots:
-  void changed(void);
+  void changed();
 };
 
 class LayerConditions : public QWidget {
@@ -37,7 +37,7 @@ class LayerConditions : public QWidget {
 public:
   std::vector<LayerConditionWatcher *> layerConditionWatchers;
   LayerConditions(DeviceConfig *config, QWidget *parent = 0);
-  void init(void);
+  void init();
 
 signals:
 

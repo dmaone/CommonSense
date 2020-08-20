@@ -65,7 +65,7 @@ bool FirmwareLoader::_checkFlashSize(const Bootloader_packet_t& packet)
 }
 */
 
-bool FirmwareLoader::_upload_row(void) {
+bool FirmwareLoader::_upload_row() {
   if (lastRow == NULL) {
     _sendCommand(BCMD_ExitBootloader);
     qInfo() << "Firmware uploaded!";
@@ -135,7 +135,7 @@ bool FirmwareLoader::eventFilter(QObject* /* obj */, QEvent* event) {
   return true;
 }
 
-bool FirmwareLoader::selectFile(void) {
+bool FirmwareLoader::selectFile() {
   QSettings settings;
   QFileDialog fd(Q_NULLPTR, "Choose firmware file");
   fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
@@ -156,7 +156,7 @@ bool FirmwareLoader::selectFile(void) {
   return false;
 }
 
-void FirmwareLoader::start(void) {
+void FirmwareLoader::start() {
   QSettings settings;
   if (!_loadFirmwareFile()) {
     qInfo("Invalid firmware file - check file integrity!");
@@ -178,7 +178,7 @@ void FirmwareLoader::start(void) {
   emit switchMode(bootloaderMode);
 }
 
-void FirmwareLoader::load(void) {
+void FirmwareLoader::load() {
   if (!firmware) {
     if (!_loadFirmwareFile()) {
       qInfo() << "Invalid firmware file! cannot proceed!";
@@ -190,7 +190,7 @@ void FirmwareLoader::load(void) {
   _sendCommand(BCMD_EnterBootloader);
 }
 
-bool FirmwareLoader::_loadFirmwareFile(void) {
+bool FirmwareLoader::_loadFirmwareFile() {
   QSettings settings;
   QString fn = settings.value(FIRMWARE_FILE_KEY).toString();
   if (fn.length() < 1) {

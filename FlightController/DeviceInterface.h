@@ -22,11 +22,8 @@
 
 class DeviceInterface : public QObject {
   Q_OBJECT
-  Q_ENUMS(DeviceStatus)
-  Q_ENUMS(KeyStatus)
-  Q_ENUMS(Mode)
 
-public:
+ public:
   static DeviceInterface& get() {
     static DeviceInterface instance{};
     return instance;
@@ -34,10 +31,10 @@ public:
   static DeviceConfig* config;
   DeviceInterface(QObject *parent = nullptr);
   ~DeviceInterface();
-  void start(void);
+  void start();
   bool event(QEvent *e);
-  device_status_t *getStatus(void);
-  void releaseDevice(void);
+  device_status_t *getStatus();
+  void releaseDevice();
   enum DeviceStatus {
     DeviceConnected,
     DeviceDisconnected,
@@ -45,8 +42,11 @@ public:
     BootloaderConnected,
     StatusUpdated
   };
+  Q_ENUM(DeviceStatus)
   enum KeyStatus { KeyPressed, KeyReleased };
+  Q_ENUM(KeyStatus)
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
+  Q_ENUM(Mode)
   bool scanEnabled {false};
   bool outputEnabled {false};
   bool setupMode {false};
@@ -60,7 +60,7 @@ public:
   QString dieTemp{};
   QString latencyMs{};
 
-public slots:
+ public slots:
   void sendCommand(c2command, uint8_t *);
   void sendCommand(c2command, uint8_t);
   void sendCommand(OUT_c2packet_t);
@@ -69,18 +69,18 @@ public slots:
   bool getStatusBit(deviceStatus bit);
   void setStatusBit(deviceStatus bit, bool value);
   void flipStatusBit(deviceStatus bit);
-  void configChanged(void);
+  void configChanged();
   void bootloaderMode(bool bEnable);
 
-signals:
+ signals:
   void deviceStatusNotification(DeviceInterface::DeviceStatus);
   void scancodeReceived(uint8_t row, uint8_t col,
                         DeviceInterface::KeyStatus status);
 
-protected:
+ protected:
   virtual void timerEvent(QTimerEvent *);
 
-private:
+ private:
   struct DetectedDevices {
     DeviceList keyboards{};
     DeviceList bootloaders{};
@@ -101,13 +101,13 @@ private:
   std::atomic<bool> releaseDevice_ {false};
 
   void processStatusReply(QByteArray* payload);
-  hid_device *acquireDevice(void);
-  void _initDevice(void);
+  hid_device *acquireDevice();
+  void _initDevice();
   void _enqueueCommand(OUT_c2packet_t outbox);
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);
-  bool _sendPacket(void);
-  bool _receivePacket(void);
+  bool _sendPacket();
+  bool _receivePacket();
   void _updateDeviceStatus(DeviceStatus);
   DetectedDevices listDevices();
   DeviceConfig config_{};
@@ -115,6 +115,6 @@ private:
   std::mutex queueLock_{};
   qint64 lastSend_;
 
-private slots:
-  void deviceMessageReceiver(void);
+ private slots:
+  void deviceMessageReceiver();
 };

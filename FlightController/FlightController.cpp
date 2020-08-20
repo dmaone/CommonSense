@@ -60,7 +60,7 @@ FlightController::FlightController(QWidget *parent)
   blinkTimerId = startTimer(kBlinkTimerTick);
 }
 
-void FlightController::setup(void) {
+void FlightController::setup() {
   DeviceInterface &di = DeviceInterface::get();
 
   connect(ui->ClearButton, SIGNAL(clicked()), ui->LogViewport,
@@ -155,7 +155,7 @@ void FlightController::timerEvent(QTimerEvent * timer) {
   }
 }
 
-void FlightController::updateStatus(void) {
+void FlightController::updateStatus() {
   DeviceInterface &di = DeviceInterface::get();
   ui->fwVersionLabel->setText(di.firmwareVersion);
   ui->tempGauge->setText(di.dieTemp);
@@ -197,7 +197,7 @@ void FlightController::updateStatus(void) {
   }
 }
 
-void FlightController::show(void) {
+void FlightController::show() {
   QMainWindow::show();
 }
 
@@ -212,7 +212,7 @@ FlightController::~FlightController() {
   delete ui;
 }
 
-LogViewer *FlightController::getLogViewport(void) { return ui->LogViewport; }
+LogViewer *FlightController::getLogViewport() { return ui->LogViewport; }
 
 void FlightController::setOldLogger(QtMessageHandler *logger) {
   _oldLogger = logger;
@@ -222,7 +222,7 @@ void FlightController::logToViewport(const QString &msg) {
   ui->LogViewport->logMessage(msg);
 }
 
-void FlightController::showKeyMonitor(void) { matrixMonitor->show(); }
+void FlightController::showKeyMonitor() { matrixMonitor->show(); }
 
 void FlightController::deviceStatusNotification(
     DeviceInterface::DeviceStatus s) {
@@ -276,19 +276,19 @@ void FlightController::lockUI(bool lock) {
   }
 }
 
-void FlightController::editLayoutClick(void) {
+void FlightController::editLayoutClick() {
   layoutEditor->show();
   layoutEditor->raise();
 }
 
-void FlightController::editMacrosClick(void) { macroEditor->show(); }
+void FlightController::editMacrosClick() { macroEditor->show(); }
 
-void FlightController::editThresholdsClick(void) {
+void FlightController::editThresholdsClick() {
   thresholdEditor->show();
   thresholdEditor->raise();
 }
 
-void FlightController::showLayerConditions(void) {
+void FlightController::showLayerConditions() {
   layerConditions->show();
   layerConditions->raise();
 }
@@ -331,7 +331,7 @@ void FlightController::on_reconnectButton_clicked() {
   di.releaseDevice();
 }
 
-void FlightController::on_statusRequestButton_clicked(void) {
+void FlightController::on_statusRequestButton_clicked() {
   DeviceInterface &di = DeviceInterface::get();
   di.printableStatus = true;
 }

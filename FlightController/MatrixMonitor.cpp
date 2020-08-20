@@ -30,7 +30,7 @@ MatrixMonitor::MatrixMonitor(QWidget *parent)
   deviceConfig = di.config;
 }
 
-void MatrixMonitor::show(void) {
+void MatrixMonitor::show() {
   if (deviceConfig->bValid) {
     updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
     QWidget::show();
@@ -43,7 +43,7 @@ void MatrixMonitor::show(void) {
 
 MatrixMonitor::~MatrixMonitor() { delete ui; }
 
-void MatrixMonitor::initDisplay(void) {
+void MatrixMonitor::initDisplay() {
   this->enableTelemetry(0);
   grid->setSpacing(0);
   for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
@@ -94,7 +94,7 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols) {
   adjustSize();
 }
 
-bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
+bool MatrixMonitor::eventFilter(QObject* /* obj */,
                                 QEvent *event) {
   if (event->type() == DeviceMessage::ET) {
     QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
@@ -141,7 +141,7 @@ bool MatrixMonitor::eventFilter(QObject *obj __attribute__((unused)),
         cell->display(cells[row][i].max);
         break;
       case DisplayAvg:
-        cell->display((uint8_t)(cells[row][i].sum / cells[row][i].sampleCount));
+        cell->display((uint8_t)(cells[row][i].sum / cells[row][i].count));
         break;
       default:
         qCritical() << "Unknown display mode selected!!";
@@ -170,11 +170,7 @@ void MatrixMonitor::enableTelemetry(uint8_t m) {
 }
 
 void MatrixMonitor::on_runButton_clicked() {
-  if (ui->runButton->text() == "Stop!") {
-    this->enableTelemetry(0);
-  } else {
-    this->enableTelemetry(1);
-  }
+  this->enableTelemetry(ui->runButton->text() == "Stop!" ? 0 : 1);
 }
 
 void MatrixMonitor::on_setThresholdsButton_clicked() {
@@ -210,8 +206,7 @@ void MatrixMonitor::on_modeBox_currentTextChanged(QString newValue) {
 void MatrixMonitor::_resetCells() {
   for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
     for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
-      cells[i][j] = {
-          .now = 0, .min = 255, .max = 0, .sum = 0, .sampleCount = 0};
+      cells[i][j] = {.now = 0, .min = 255, .max = 0, .sum = 0, .count = 0};
       _updateStatCellDisplay(i, j);
       display[i][j]->display(0);
     }
@@ -225,27 +220,27 @@ void MatrixMonitor::_updateStatCell(uint8_t row, uint8_t col, uint8_t level) {
   cells[row][col].min = std::min(level, cells[row][col].min);
   cells[row][col].max = std::max(level, cells[row][col].max);
   cells[row][col].sum += level;
-  cells[row][col].sampleCount++;
+  cells[row][col].count++;
   _updateStatCellDisplay(row, col);
 }
 
 void MatrixMonitor::_updateStatCellDisplay(uint8_t row, uint8_t col) {
-  if (cells[row][col].sampleCount)
-    statsDisplay[row][col]->setText(
-        QString("%1 %2 %3")
-            .arg(cells[row][col].min)
-            .arg(cells[row][col].sum / cells[row][col].sampleCount)
-            .arg(cells[row][col].max));
-  else
+  if (cells[row][col].count == 0) {
     statsDisplay[row][col]->setText(QString("-- -- --"));
+    return;
+  }
+  const auto& cell = cells[row][col];
+  statsDisplay[row][col]->setText(QString("%1 %2 %3").arg(cell.min)
+                                                     .arg(cell.sum / cell.count)
+                                                     .arg(cell.max));
 }
 
-void MatrixMonitor::on_resetButton_clicked(void) {
+void MatrixMonitor::on_resetButton_clicked() {
   enableTelemetry(0);
   _resetCells();
 }
 
-void MatrixMonitor::on_exportButton_clicked(void) {
+void MatrixMonitor::on_exportButton_clicked() {
   QSettings settings;
   QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
   fd.setDirectory(settings.value(SETTINGS_DIR_KEY).toString());
@@ -260,15 +255,16 @@ void MatrixMonitor::on_exportButton_clicked(void) {
     ts << "Row,Col,Min,Max,Avg,Sum,Count\n";
     ts.setIntegerBase(10);
     for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
-      QByteArray buf;
       for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
+        const auto& cell = cells[i][j];
         ts << i << "," << j << ",";
-        ts << cells[i][j].min << "," << cells[i][j].max << ",";
-        if (cells[i][j].sampleCount)
-          ts << cells[i][j].sum / cells[i][j].sampleCount << ",";
-        else
+        ts << cell.min << "," << cell.max << ",";
+        if (cell.count == 0) {
           ts << "0,";
-        ts << cells[i][j].sum << "," << cells[i][j].sampleCount << "\n";
+        } else {
+          ts << cell.sum / cell.count << ",";
+        }
+        ts << cell.sum << "," << cell.count << "\n";
       }
     }
     f.close();

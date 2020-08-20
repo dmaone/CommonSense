@@ -33,7 +33,7 @@ DeviceInterface::DeviceInterface(QObject *parent)
   statusTimerId = startTimer(kStatusTimerTick);
 }
 
-DeviceInterface::~DeviceInterface(void) { releaseDevice(); }
+DeviceInterface::~DeviceInterface() { releaseDevice(); }
 
 void DeviceInterface::processStatusReply(QByteArray* payload) {
   if (receivedStatus_ != payload->at(1)) {
@@ -115,7 +115,7 @@ bool DeviceInterface::event(QEvent *e) {
   return QObject::event(e);
 }
 
-void DeviceInterface::deviceMessageReceiver(void) {
+void DeviceInterface::deviceMessageReceiver() {
   qInfo() << "Message received";
 }
 
@@ -156,7 +156,7 @@ void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
   _enqueueCommand(outbox);
 }
 
-void DeviceInterface::configChanged(void) {
+void DeviceInterface::configChanged() {
   qInfo() << "Configuration changed.";
   switchType = QString(config->getSwitchTypeName().data());
   if (currentStatus == DeviceConnected) {
@@ -169,7 +169,7 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
     qInfo() << "Entering firmware update mode.";
     mode = DeviceInterfaceBootloader;
     if (currentStatus == DeviceConnected) {
-      emit sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
+      sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
     }
   } else {
     qInfo() << "Resuming normal operations.";
@@ -213,14 +213,15 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
   if (timer->timerId() == statusTimerId) {
     if (mode == DeviceInterfaceNormal && currentStatus == DeviceConnected) {
       // request status, so you see actual status.
-      emit sendCommand(C2CMD_GET_STATUS, 1);
+      sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
   } else if (timer->timerId() != pollTimerId) {
     return;
   }
-  if (!device)
+  if (!device) {
     return _initDevice();
+  }
   const auto receivedThings = _receivePacket();
   const auto sentThings = _sendPacket();
   if (receivedThings || sentThings || mode == DeviceInterfaceBootloader) {
@@ -285,7 +286,7 @@ bool DeviceInterface::_sendPacket() {
   return true;
 }
 
-bool DeviceInterface::_receivePacket(void) {
+bool DeviceInterface::_receivePacket() {
   memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
   int bytesRead;
   {
@@ -314,7 +315,7 @@ bool DeviceInterface::_receivePacket(void) {
   return rx;
 }
 
-void DeviceInterface::_initDevice(void) {
+void DeviceInterface::_initDevice() {
   qDebug() << "InitDevice deviceLock";
   std::lock_guard<std::mutex> lock{deviceLock_};
   device = acquireDevice();
@@ -370,7 +371,7 @@ DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
   return retval;
 }
 
-hid_device *DeviceInterface::acquireDevice(void) {
+hid_device *DeviceInterface::acquireDevice() {
   hid_device *retval = NULL;
   if (hid_init()) {
     qInfo() << "Cannot initialize hidapi!";
@@ -402,7 +403,7 @@ hid_device *DeviceInterface::acquireDevice(void) {
     selector.exec();
     auto deviceSerial = selector.getResult();
     qInfo().noquote() << "Connecting to s/n" << deviceSerial;
-    for (auto it : *what) {
+    for (const auto& it : *what) {
       if (it.first == deviceSerial) {
         retval = hid_open_path(it.second.data());
       }
@@ -411,11 +412,11 @@ hid_device *DeviceInterface::acquireDevice(void) {
   return retval;
 }
 
-void DeviceInterface::releaseDevice(void) {
+void DeviceInterface::releaseDevice() {
   releaseDevice_ = true;
 }
 
-void DeviceInterface::start(void) {
-  qInfo() << "Acquiring device";
+void DeviceInterface::start() {
+  qInfo() << "Acquiring device. Can take a while with certain old USB hubs..";
   _resetTimer(kNormalOperationTick);
 }
