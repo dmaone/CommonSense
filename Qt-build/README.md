@@ -1,15 +1,8 @@
-# hidapi build
-
-First, you'll need to build HIDAPI lib.
+# hidapi
+hidapi 0.9.0+ is required. Luckily, it's available in precompiled form for all 3 platforms in 2020.
 
 ## Windows
-you need [msys32](https://msys2.github.io/). Here's [a good guide](https://wiki.qt.io/MSYS2).
-
-!!!WARNING!!! you need "msys MinGW 32 bit" shell !!!
-
-```
-pacman -S autoconf automake libtool gcc
-```
+Download compiled [hidapi package](https://repo.msys2.org/mingw/i686/mingw-w64-i686-hidapi-0.9.0-1-any.pkg.tar.xz) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir ([7zip](https://www.7-zip.org/) can into .tar.xz)
 
 ## mac
 You'll need [brew](https://brew.sh)
@@ -17,22 +10,8 @@ Open terminal,
 ```
 /usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
 
-brew install autoconf automake libtool
+brew install hidapi
 ```
-
-## Both
-
-navigate to CommonSense dir.
-
-```
-git clone https://github.com/signal11/hidapi.git
-cd hidapi
-./bootstrap
-./configure
-make
-```
-
-you should have libhidapi[something] in [platform]/.libs - leave it there.
 
 
 ## Ubuntu 16.04
@@ -49,35 +28,24 @@ Because windows app can be a single file - static version is better.
 
 [Official way](https://wiki.qt.io/Building_a_static_Qt_for_Windows_using_MinGW)
 
-### Abridged version
-http://download.qt.io/official_releases/qt/
+### Walkthrough
+* Download and run [opensource QT installer](https://www.qt.io/download-open-source)
+* Install the following into `c:\qt`
+  *  `Sources` and `MinGW 32-bit` from the latest qt version
+  * `Qt Creator` and matching `MinGW 32-bit` from tools
+* Fix qt and MinGW versions if needed
+* run `build.cmd`
+* https://www.youtube.com/watch?v=bMVbaCiy_XE
+* Profit!
 
-Get qt-opensource-windows-x86-???.exe from a version subdir. Latest is 5.14.1 as of now.
-Install "Sources", "MinGWx.x.x 32bit" and everything from "Tools" to C:\Qt.
-Perl msi didn't run on me - installed with defaults to c:\Strawberry.
-copy windows-build-qt-static.ps1 to c:\qt
-```
-
-cd \qt
-mkdir static
-mv 5.14.1\Src static
-
-```
-
-Fix versions in windows-build-qt-static.ps1
-
-Run powershell as administrator. Run windows-build-qt-static.ps1 - you _may_ need to `Set-Ex[TAB] Bypass` to run it.
-
-This will take a while.
-
-Then in Qt Creator go Tools->options, select "Build & Run", add new Qt version from c:\Qt\Static\{qt version}\, 
-then clone autodetected kit, name "static", select newly added Qt version for it.
+Run Qt Creator, Tools->options, select "Build & Run", add new Qt version from `c:\Qt\Static\`
+then clone autodetected kit, name it `static`, select newly added Qt version for it.
 
 Don't forget to click "Apply".
 
-Now it's time to open the project. Select "static" kit in setup dialog. In bottom-left corner, select static kit, release config.
+Now it's time to open the project. Select `static` kit in setup dialog. In bottom-left corner, select static kit, release config.
 
-Click the green "Run" icon. Find FlightController.exe in the build directory - you can copy it and use to control your keyboard.
+Click the green "Run" icon. Find `FlightController.exe` in the build directory - you can copy it and use to control your keyboard.
 
 program crashes, debug run says "During startup program exited with code 0x00000135"? You haven't selected the static kit.
 
@@ -87,7 +55,7 @@ Since OS X application is a folder anyway - no point in making static version. O
 
 You'll need XCode. Look at the previous version of this document if the one from appstore doesn't work for you.
 
-The detour section is for people who try to walk this path elsewhere - mac-build.sh takes care of this.
+The detour section is for people who try to walk this path elsewhere - `mac-build.sh` takes care of this.
 
 ## DETOUR
 Then you'll have "Error: Could not resolve SDK path for 'macosx' and that would be it.

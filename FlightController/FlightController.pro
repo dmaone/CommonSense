@@ -13,11 +13,9 @@ CONFIG += static c++17
 
 CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
-# Not needed for linux, but doesn't hurt.
-INCLUDEPATH += ../../hidapi
-
 win32 {
-    LIBS += -L$$PWD/../../hidapi/windows/.libs -lhidapi -lsetupapi
+    INCLUDEPATH += $$PWD/../mingw32/include
+    LIBS += -L$$PWD/../mingw32/lib -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
 macx {
