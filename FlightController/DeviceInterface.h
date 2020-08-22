@@ -52,7 +52,6 @@ class DeviceInterface : public QObject {
   bool setupMode {false};
   bool matrixMonitor {false};
   bool controllerInsane {false};
-  bool printableStatus {false};
   bool rx {false};
   bool tx {false};
   QString switchType{};

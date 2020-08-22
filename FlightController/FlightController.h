@@ -76,8 +76,6 @@ private slots:
   void on_scanButton_clicked();
   void on_outputButton_clicked();
   void on_setupButton_clicked();
-  void on_redButton_clicked();
-  void on_statusRequestButton_clicked();
   void on_reconnectButton_clicked();
   void editDelays();
   void editHardware();

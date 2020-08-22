@@ -57,17 +57,6 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
     setupMode = false;
   }
   emit deviceStatusNotification(StatusUpdated);
-  if (!printableStatus) {
-    return;
-  }
-  printableStatus = false;
-  qInfo().nospace().noquote() << "CommonSense v" << firmwareVersion
-                    << ", die temp: " << dieTemp << "°C";
-  qInfo().nospace() << "Scan: " << scanEnabled
-      << ", Output: " << outputEnabled
-      << ", Monitor: " << matrixMonitor
-      << ", setup mode: " << setupMode
-      << ", insane? " << controllerInsane;
 }
 
 /**
@@ -270,7 +259,7 @@ bool DeviceInterface::_sendPacket() {
     cmd = commandQueue_.dequeue();
   }
   outbox[0] = 0x00; // ReportID is not used.
-  if (printableStatus || cmd.command != C2CMD_GET_STATUS) {
+  if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
     emit deviceStatusNotification(StatusUpdated); // Blink the TX light
     lastSend_ = QDateTime::currentMSecsSinceEpoch();
@@ -303,7 +292,7 @@ bool DeviceInterface::_receivePacket() {
   }
   qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)bytesFromDevice[1];
   cts_.store(true);
-  if (printableStatus || bytesFromDevice[0] != C2RESPONSE_STATUS) {
+  if (bytesFromDevice[0] != C2RESPONSE_STATUS) {
     rx = true;
     if (lastSend_ > 0) {
       latencyMs = QString("%1 ms ").arg(

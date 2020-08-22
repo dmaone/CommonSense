@@ -256,7 +256,6 @@ void FlightController::deviceStatusNotification(
 
 void FlightController::lockUI(bool lock) {
   _uiLocked = lock;
-  ui->statusRequestButton->setDisabled(lock);
   ui->MatrixMonitorButton->setDisabled(lock);
   ui->thresholdsButton->setDisabled(lock);
   ui->macrosButton->setDisabled(lock);
@@ -319,19 +318,9 @@ void FlightController::on_setupButton_clicked() {
   emit flipStatusBit(C2DEVSTATUS_SETUP_MODE);
 }
 
-void FlightController::on_redButton_clicked() {
-  ui->redButton->setStyleSheet("color: #ff0000; background-color: #990000");
-  emit sendCommand(C2CMD_EWO, 0);
-}
-
 void FlightController::on_reconnectButton_clicked() {
   qInfo() << "reconnecting..";
   emit setStatusBit(C2DEVSTATUS_SETUP_MODE, false);
   DeviceInterface &di = DeviceInterface::get();
   di.releaseDevice();
-}
-
-void FlightController::on_statusRequestButton_clicked() {
-  DeviceInterface &di = DeviceInterface::get();
-  di.printableStatus = true;
 }
