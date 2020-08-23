@@ -1,67 +1,55 @@
-#include <QLabel>
-
 #include "Delays.h"
 
-DelayWatcher::DelayWatcher(DeviceConfig *config, int delayIndex, QSpinBox *box,
-                           QObject *parent)
-    : QObject(parent), config(config), delayIndex(delayIndex), box(box) {
-  connect(box, SIGNAL(valueChanged(int)), SLOT(changed(int)));
+DelayWatcher::DelayWatcher(
+    DeviceConfig& config, int pos, QSpinBox& box):
+        config_{config}, pos_{pos} {
+  connect(&box, SIGNAL(valueChanged(int)), SLOT(changed(int)));
 }
 
 void DelayWatcher::changed(int delay_ms) {
-  config->setDelay(delayIndex, delay_ms);
+  config_.setDelay(pos_, delay_ms);
 }
 
-Delays::Delays(DeviceConfig *config, QWidget *parent)
-    : QWidget(parent, Qt::Tool), _config(config) {
-  _grid = new QGridLayout;
+Delays::Delays(DeviceConfig& config)
+    : QWidget{nullptr, Qt::Tool}, config_{config} {
   setWindowTitle("Delays");
   setMinimumWidth(150);
 }
 
-Delays::~Delays() {
-  _deinit();
-  delete _grid;
-}
-
-void Delays::_deinit() {
-  QLayoutItem *item;
-  while ((item = _grid->takeAt(0)) != NULL) {
-    delete item->widget();
-    delete item;
-  }
-
-  for (size_t i = 0; i < delayWatchers.size(); i++)
-    delete delayWatchers[i];
-  delayWatchers.clear();
-}
-
 void Delays::init() {
-  _deinit();
-  std::vector<uint16_t> delays = _config->delays();
-  int count = delays.size();
-  for (int i = 0; i < count; i++) {
-    QLabel *rowLabel;
+  watchers.clear();
+  LabelList labels;
+  SpinBoxList delays;
+
+  grid_ = std::make_unique<QGridLayout>();
+  for (size_t i = 0; i < config_.numDelays; ++i) {
+    labels.emplace_back(std::make_unique<QLabel>());
+    auto& label = *labels.back();
     switch (i) {
-    case 0:
-      rowLabel = new QLabel(QString("Event delay"));
+     case 0:
+      label.setText(QString("Event delay"));
       break;
-    case 1:
-      rowLabel = new QLabel(QString("Tap delay"));
+     case 1:
+      label.setText(QString("Tap delay"));
       break;
-    default:
-      rowLabel = new QLabel(QString("%1").arg(i));
+     default:
+      label.setText(QString("%1").arg(i));
       break;
     }
-    rowLabel->setAlignment(Qt::AlignRight | Qt::AlignCenter);
-    _grid->addWidget(rowLabel, i, 0);
+    label.setAlignment(Qt::AlignRight | Qt::AlignCenter);
+    grid_->addWidget(&label, i, 0);
 
-    QSpinBox *delay = new QSpinBox;
-    delay->setMaximum(UINT16_MAX);
-    delay->setValue(delays[i]);
-    _grid->addWidget(delay, i, 1);
-    delayWatchers.push_back(new DelayWatcher(_config, i, delay, this));
+    delays.emplace_back(std::make_unique<QSpinBox>());
+    auto& box = *delays.back();
+    box.setMaximum(UINT16_MAX);
+    box.setValue(config_.getDelay(i));
+    grid_->addWidget(&box, i, 1);
+    watchers.emplace_back(std::make_unique<DelayWatcher>(config_, i, box));
   }
-  setLayout(_grid);
+  setLayout(grid_.get());
   adjustSize();
+
+  rowLabels_.swap(labels);
+  delays_.swap(delays);
+
 }

@@ -6,28 +6,11 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
-#include "FlightController.h"
 #include <QApplication>
-
-static LogViewer *logger;
-static QtMessageHandler old_logger;
-
-void logToViewport(QtMsgType type, const QMessageLogContext &context,
-                   const QString &msg) {
-  if (logger) {
-    if (msg.length() < 3) {
-      logger->continueMessage(msg);
-    } else {
-      logger->logMessage(msg);
-    }
-  } else if (old_logger) {
-    old_logger(type, context, msg);
-  }
-}
+#include "DeviceInterface.h"
+#include "FlightController.h"
 
 int main(int argc, char *argv[]) {
-  logger = NULL;
-  old_logger = NULL;
   QApplication a(argc, argv);
   QCoreApplication::setOrganizationDomain("none.exists");
   QCoreApplication::setOrganizationName("DMA Labs");
@@ -35,11 +18,6 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setApplicationVersion("1.0.1.1");
   qInfo() << "Start start!";
   FlightController w;
-  qInfo() << "Switching to LogViewer..";
-  logger = w.getLogViewport();
-  old_logger = qInstallMessageHandler(logToViewport);
-  w.setOldLogger(&old_logger);
-  w.setup();
   w.show();
 
   return a.exec();

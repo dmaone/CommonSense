@@ -14,18 +14,19 @@ class DeviceSelector : public QDialog
   Q_OBJECT
 
  public:
-  DeviceSelector(DeviceList& list, QWidget *parent = 0);
+  DeviceSelector(const DeviceList& list);
   ~DeviceSelector() {};
 
   QString getResult() {
     return buttons_[selectedIndex]->text();
   }
+
  public slots:
   void onClick(size_t idx);
 
  private:
-  std::unique_ptr<QVBoxLayout> layout_;
-  std::unique_ptr<QLabel> label_;
+  QVBoxLayout layout_{};
+  QLabel label_{};
   std::vector<std::unique_ptr<QPushButton>> buttons_{};
   size_t selectedIndex{0};
 };

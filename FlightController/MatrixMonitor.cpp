@@ -12,52 +12,52 @@
 #include "Events.h"
 #include "MatrixMonitor.h"
 #include "settings.h"
-#include "ui_MatrixMonitor.h"
 
-MatrixMonitor::MatrixMonitor(QWidget *parent)
-    : QFrame(parent, Qt::Tool), ui(new Ui::MatrixMonitor), debug(0),
-      displayMode(DisplayNow), grid(new QGridLayout()),
-      _warmupRows(ABSOLUTE_MAX_ROWS) {
+MatrixMonitor::MatrixMonitor(DeviceInterface& di) :
+    QFrame{nullptr, Qt::Tool}, di_{di} {
   ui->setupUi(this);
 
   initDisplay();
-  auto& di = DeviceInterface::get();
   connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
           SLOT(sendCommand(c2command, uint8_t)));
   connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
           SLOT(setStatusBit(deviceStatus, bool)));
+
+  connect(
+      &di,
+      SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
+      this,
+      SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+
   di.installEventFilter(this);
-  deviceConfig = di.config;
 }
 
 void MatrixMonitor::show() {
-  if (deviceConfig->bValid) {
-    updateDisplaySize(deviceConfig->numRows, deviceConfig->numCols);
-    QWidget::show();
-    QWidget::raise();
-  } else {
+  if (!di_.config.bValid) {
     QMessageBox::critical(this, "Error",
                           "Matrix not configured - cannot monitor");
+    return;
   }
+  updateDisplaySize(di_.config.numRows, di_.config.numCols);
+  QWidget::show();
+  QWidget::raise();
 }
-
-MatrixMonitor::~MatrixMonitor() { delete ui; }
 
 void MatrixMonitor::initDisplay() {
   this->enableTelemetry(0);
-  grid->setSpacing(0);
+  grid_.setSpacing(0);
   for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
-    grid->addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1,
+    grid_.addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1,
                     Qt::AlignCenter);
     if (i <= ABSOLUTE_MAX_ROWS) {
-      grid->addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1,
+      grid_.addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1,
                       Qt::AlignRight);
     }
   }
   for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
     for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
       QWidget *w = new QWidget;
-      grid->addWidget(w, i + 1, j + 1, 1, 1);
+      grid_.addWidget(w, i + 1, j + 1, 1, 1);
       QVBoxLayout *ll = new QVBoxLayout;
       ll->setSpacing(0);
       w->setLayout(ll);
@@ -72,7 +72,7 @@ void MatrixMonitor::initDisplay() {
       statsDisplay[i][j] = lbl;
     }
   }
-  ui->Dashboard->setLayout(grid);
+  ui->Dashboard->setLayout(&grid_);
   _resetCells();
 }
 
@@ -80,12 +80,12 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols) {
   this->enableTelemetry(0);
   for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
     if (i <= ABSOLUTE_MAX_ROWS)
-      grid->itemAtPosition(i, 0)->widget()->setVisible(i <= rows);
-    grid->itemAtPosition(0, i)->widget()->setVisible(i <= cols);
+      grid_.itemAtPosition(i, 0)->widget()->setVisible(i <= rows);
+    grid_.itemAtPosition(0, i)->widget()->setVisible(i <= cols);
   }
   for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
     for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
-      grid->itemAtPosition(i + 1, j + 1)
+      grid_.itemAtPosition(i + 1, j + 1)
           ->widget()
           ->setVisible((i < rows) && (j < cols));
     }
@@ -94,59 +94,57 @@ void MatrixMonitor::updateDisplaySize(uint8_t rows, uint8_t cols) {
   adjustSize();
 }
 
-bool MatrixMonitor::eventFilter(QObject* /* obj */,
-                                QEvent *event) {
-  if (event->type() == DeviceMessage::ET) {
-    QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-    if (pl->at(0) != C2RESPONSE_MATRIX_ROW)
-      return false;
-    if (_warmupRows > 0) {
-      _warmupRows--;
-      return true;
-    }
-    auto& di = DeviceInterface::get();
-    uint8_t row = pl->at(1);
-    uint8_t max_cols = pl->at(2);
-    for (uint8_t i = 0; i < max_cols; i++) {
-      QLCDNumber *cell = display[row][i];
-      uint8_t level = pl->constData()[3 + i];
-      const auto thr = deviceConfig->thresholds[row][i];
-      if (thr == K_IGNORE_KEY) {
-        cell->setStyleSheet("background-color: #999999;");
-      } else if (di.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
-        if (level > 0) {
-          cell->setStyleSheet("color: black; background-color: #ff3333;");
-        } else {
-          cell->setStyleSheet("");
-        }
+bool MatrixMonitor::eventFilter(QObject* /* obj */, QEvent* event) {
+  if (event->type() != DeviceMessage::ET) {
+    return false;
+  }
+  QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
+  if (pl->at(0) != C2RESPONSE_MATRIX_ROW) {
+    return false;
+  }
+  if (warmupRows_ > 0) {
+    --warmupRows_;
+    return true;
+  }
+
+  uint8_t row = pl->at(1);
+  uint8_t max_cols = pl->at(2);
+  for (uint8_t i = 0; i < max_cols; i++) {
+    QLCDNumber *cell = display[row][i];
+    uint8_t level = pl->constData()[3 + i];
+    const auto thr = di_.config.thresholds[row][i];
+    if (thr == K_IGNORE_KEY) {
+      cell->setStyleSheet("background-color: #999999;");
+    } else if (di_.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
+      if (level > 0) {
+        cell->setStyleSheet("color: black; background-color: #ff3333;");
       } else {
-        if (
-          (deviceConfig->bNormallyLow && level > thr) ||
-          (!deviceConfig->bNormallyLow && level < thr)
-        ) {
-          cell->setStyleSheet("color: black; background-color: #33ff33;");
-        } else {
-          cell->setStyleSheet("");
-        }
+        cell->setStyleSheet("");
       }
-      _updateStatCell(row, i, level);
-      switch (displayMode) {
-      case DisplayNow:
-        cell->display(cells[row][i].now);
-        break;
-      case DisplayMin:
-        cell->display(cells[row][i].min);
-        break;
-      case DisplayMax:
-        cell->display(cells[row][i].max);
-        break;
-      case DisplayAvg:
-        cell->display((uint8_t)(cells[row][i].sum / cells[row][i].count));
-        break;
-      default:
-        qCritical() << "Unknown display mode selected!!";
-        close();
+    } else {
+      if (di_.config.capabilities.isNormallyLow ? level > thr : level < thr) {
+        cell->setStyleSheet("color: black; background-color: #33ff33;");
+      } else {
+        cell->setStyleSheet("");
       }
+    }
+    _updateStatCell(row, i, level);
+    switch (displayMode) {
+    case DisplayNow:
+      cell->display(cells[row][i].now);
+      break;
+    case DisplayMin:
+      cell->display(cells[row][i].min);
+      break;
+    case DisplayMax:
+      cell->display(cells[row][i].max);
+      break;
+    case DisplayAvg:
+      cell->display((uint8_t)(cells[row][i].sum / cells[row][i].count));
+      break;
+    default:
+      qCritical() << "Unknown display mode selected!!";
+      close();
     }
   }
   return false;
@@ -174,11 +172,12 @@ void MatrixMonitor::on_runButton_clicked() {
 }
 
 void MatrixMonitor::on_setThresholdsButton_clicked() {
-  if (!deviceConfig->bValid)
+  if (!di_.config.bValid) {
     return;
-  for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
-    for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
-      deviceConfig->thresholds[i][j] = display[i][j]->intValue();
+  }
+  for (uint8_t i = 0; i < di_.config.numRows; i++) {
+    for (uint8_t j = 0; j < di_.config.numCols; j++) {
+      di_.config.thresholds[i][j] = display[i][j]->intValue();
     }
   }
 }
@@ -211,7 +210,7 @@ void MatrixMonitor::_resetCells() {
       display[i][j]->display(0);
     }
   }
-  _warmupRows = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple
+  warmupRows_ = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple
                                    // of first rows.
 }
 
@@ -242,7 +241,7 @@ void MatrixMonitor::on_resetButton_clicked() {
 
 void MatrixMonitor::on_exportButton_clicked() {
   QSettings settings;
-  QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
+  QFileDialog fd(nullptr, "Choose one file to export to");
   fd.setDirectory(settings.value(SETTINGS_DIR_KEY).toString());
   fd.setNameFilter(tr("Matrix stats(*.csv)"));
   fd.setDefaultSuffix(QString("csv"));
@@ -254,8 +253,8 @@ void MatrixMonitor::on_exportButton_clicked() {
     QTextStream ts(&f);
     ts << "Row,Col,Min,Max,Avg,Sum,Count\n";
     ts.setIntegerBase(10);
-    for (uint8_t i = 0; i < deviceConfig->numRows; i++) {
-      for (uint8_t j = 0; j < deviceConfig->numCols; j++) {
+    for (uint8_t i = 0; i < di_.config.numRows; i++) {
+      for (uint8_t j = 0; j < di_.config.numCols; j++) {
         const auto& cell = cells[i][j];
         ts << i << "," << j << ",";
         ts << cell.min << "," << cell.max << ",";

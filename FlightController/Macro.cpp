@@ -9,18 +9,17 @@ Macro::Macro(
     keyCode(keyCode), flags(flags), body(body) {
 }
 
-Macro::Macro(const uint8_t keyCode,
-             const QString &triggerEvent,
-             const QByteArray &body) : keyCode(keyCode), body(body) {
+Macro::Macro(const uint8_t kc, const QString& trigger, const QByteArray& body) :
+    keyCode(kc), body(body) {
   flags = 0;
-  if (triggerEvent == "release") {
+  if (trigger == "release") {
     flags |= MACRO_TYPE_ONKEYUP;
-  } else if (triggerEvent == "tap") {
+  } else if (trigger == "tap") {
     flags |= MACRO_TYPE_TAP;
-  } else if (triggerEvent == "press") {
+  } else if (trigger == "press") {
     // Do nothing, it's default
   } else {
-    qInfo() << "Unknown trigger event: " << triggerEvent;
+    qInfo() << "Unknown trigger event: " << trigger;
   }
 }
 

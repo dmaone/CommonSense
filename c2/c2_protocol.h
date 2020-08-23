@@ -23,7 +23,6 @@
 #define ABSOLUTE_MAX_ROWS 16
 #define ABSOLUTE_MAX_COLS 24
 #define ABSOLUTE_MAX_LAYERS 8
-#define NUM_LAYER_CONDITIONS 8
 #define NUM_DELAYS 16
 // Careful when changing above - may need to check nvram.h sizes.
 
@@ -76,11 +75,6 @@ enum deviceStatus {
   C2DEVSTATUS_MATRIX_MONITOR,
   C2DEVSTATUS_SETUP_MODE,
   C2DEVSTATUS_INSANE,
-};
-
-enum capsenseFlags {
-  CSF_OE = 0,
-  CSF_NL = 1,
 };
 
 enum deviceMode {

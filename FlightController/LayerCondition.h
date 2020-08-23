@@ -1,7 +1,7 @@
-#pragma once
+# pragma once
 
 class LayerCondition {
-public:
+ public:
   enum FnKeyMask {
     fkmFn1 = (1 << 0),
     fkmFn2 = (1 << 1),
@@ -9,7 +9,7 @@ public:
     fkmFn4 = (1 << 3)
   };
 
-  LayerCondition();
+  LayerCondition() = default;
   LayerCondition(unsigned char bin);
   LayerCondition(bool fn1, bool fn2, bool fn3, bool fn4, int layer);
   bool fn1Set();
@@ -19,7 +19,8 @@ public:
   int layer();
   unsigned char toBin();
 
-private:
-  unsigned char fnKeys;
-  unsigned char layer_;
+ private:
+  unsigned char fnKeys_{0};
+  unsigned char layer_{0};
 };
+

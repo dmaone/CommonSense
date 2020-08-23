@@ -9,74 +9,74 @@
 #pragma once
 
 #include <QMainWindow>
+#include "ui_FlightController.h"
 
 #include "Delays.h"
 #include "DeviceInterface.h"
-#include "Hardware.h"
 #include "FirmwareLoader.h"
+#include "Hardware.h"
 #include "LayerConditions.h"
-#include "LayoutEditor.h"
+#include "Layout.h"
+#include "Macros.h"
 #include "MatrixMonitor.h"
-#include "ThresholdEditor.h"
-#include "MacroEditor.h"
-
-namespace Ui {
-class FlightController;
-}
+#include "Thresholds.h"
 
 class FlightController : public QMainWindow {
   Q_OBJECT
 
-public:
-  explicit FlightController(QWidget *parent = 0);
+ public:
+  explicit FlightController();
   ~FlightController();
-  void setup();
-  void show();
-  LogViewer *getLogViewport();
-  void setOldLogger(QtMessageHandler *logger);
-  void logToViewport(const QString &);
 
-signals:
+  void setup();
+
+ signals:
   void sendCommand(c2command cmd, uint8_t msg);
   void flipStatusBit(deviceStatus bit);
   void setStatusBit(deviceStatus bit, bool newValue);
 
-public slots:
-  void showKeyMonitor();
-  void editLayoutClick();
-  void editMacrosClick();
-  void editThresholdsClick();
-  void showLayerConditions();
+ public slots:
   void deviceStatusNotification(DeviceInterface::DeviceStatus);
 
-protected:
-  void closeEvent(QCloseEvent *);
+ private slots:
+  void setMode_(bool isSetup);
+  void showDelays_();
+  void showHardware_();
+  void showKeyMonitor_();
+  void showLayers_();
+  void showLayout_();
+  void showMacros_();
+  void showThresholds_();
+  void resetConnection_();
+  void toggleOutput_();
+  void toggleScan_();
+  void toggleSetupMode_();
 
-private:
-  Ui::FlightController *ui;
-  MatrixMonitor *matrixMonitor;
-  LayoutEditor *layoutEditor;
-  ThresholdEditor *thresholdEditor;
-  MacroEditor *macroEditor;
-  LayerConditions *layerConditions;
-  Delays *_delays;
-  Hardware *_hardware;
-  FirmwareLoader *loader;
-  QtMessageHandler *_oldLogger;
-  bool _uiLocked = false;
-  int blinkTimerId;
+ private:
+  template <class T>
+  void activate_(T& form) {
+    form.show();
+    form.raise();
+  }
 
-  void lockUI(bool lock);
-  void updateStatus();
-  void timerEvent(QTimerEvent * timer);
-  void blinkLights();
+  void connectBackendSlots_();
+  void connectUiSlots_();
+  void lockUI_(bool lock);
+  void timerEvent(QTimerEvent* timer);
 
-private slots:
-  void on_action_Setup_mode_triggered(bool bMode);
-  void on_scanButton_clicked();
-  void on_outputButton_clicked();
-  void on_setupButton_clicked();
-  void on_reconnectButton_clicked();
-  void editDelays();
-  void editHardware();
+  Ui::FlightController realUi_{};
+  Ui::FlightController* ui{&realUi_};
+  DeviceInterface di_{};
+  Delays delays_;
+  Hardware hardware_;
+  LayerConditions layers_;
+  Layout layout_;
+  FirmwareLoader loader_;
+  Macros macros_;
+  MatrixMonitor monitor_;
+  Thresholds thresholds_;
+  bool uiLocked_{false};
+  int blinkTimerId_{0};
+
+
 };

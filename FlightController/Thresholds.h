@@ -1,22 +1,21 @@
 #pragma once
 
-#include "DeviceConfig.h"
-#include "DeviceInterface.h"
 #include <QCheckBox>
 #include <QFrame>
 #include <QGridLayout>
 #include <QSpinBox>
+#include "ui_Thresholds.h"
 
-namespace Ui {
-class ThresholdEditor;
-}
+#include "DeviceConfig.h"
+#include "DeviceInterface.h"
 
-class ThresholdEditor : public QFrame {
+
+class Thresholds : public QFrame {
   Q_OBJECT
 
 public:
-  explicit ThresholdEditor(DeviceConfig *config, QWidget *parent = 0);
-  ~ThresholdEditor();
+  explicit Thresholds(DeviceInterface& di);
+
   void show();
 
 public slots:
@@ -31,10 +30,12 @@ protected:
   bool eventFilter(QObject *obj, QEvent *event);
 
 private:
-  Ui::ThresholdEditor *ui;
-  QGridLayout *grid;
+  Ui::Thresholds realUi_{};
+  Ui::Thresholds* ui{&realUi_};
+
+  QGridLayout _grid{};
   QSpinBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-  DeviceConfig *deviceConfig;
+  DeviceInterface& di_;
   void initDisplay();
   void updateDisplaySize(uint8_t, uint8_t);
   void adjustThresholds(size_t delta);

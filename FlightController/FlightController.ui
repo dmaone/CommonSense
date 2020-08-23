@@ -53,7 +53,7 @@
        </widget>
       </item>
       <item row="12" column="0">
-       <widget class="QPushButton" name="MatrixMonitorButton">
+       <widget class="QPushButton" name="KeyMonitorButton">
         <property name="text">
          <string>Key monitor</string>
         </property>

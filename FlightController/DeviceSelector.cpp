@@ -2,10 +2,9 @@
 
 #include <QDebug>
 
-DeviceSelector::DeviceSelector(DeviceList& list, QWidget *parent) :
-  QDialog(parent), layout_(new QVBoxLayout), label_(new QLabel) {
-  label_->setText("Select a device:");
-  layout_->addWidget(label_.get());
+DeviceSelector::DeviceSelector(const DeviceList& list) {
+  label_.setText("Select a device:");
+  layout_.addWidget(&label_);
   size_t i{0};
   for (const auto& sn : list) {
     buttons_.emplace_back(std::make_unique<QPushButton>(sn.first));
@@ -14,10 +13,10 @@ DeviceSelector::DeviceSelector(DeviceList& list, QWidget *parent) :
       &QPushButton::clicked,
       this,
       [this, i](){ onClick(i); });
-    layout_->addWidget(buttons_.back().get());
+    layout_.addWidget(buttons_.back().get());
     ++i;
   }
-  setLayout(layout_.get());
+  setLayout(&layout_);
   setWindowTitle("Select a device");
 }
 

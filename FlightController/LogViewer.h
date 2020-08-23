@@ -14,11 +14,11 @@ class LogViewer : public QPlainTextEdit {
   Q_OBJECT
 
  public:
-  LogViewer(QWidget *parent = NULL);
+  LogViewer(QWidget *parent = nullptr);
 
  public slots:
-  void clearButtonClick();
-  void copyAllButtonClick();
+  void clearAll();
+  void copyAll();
   void logMessage(QString msg);
   void continueMessage(QString msg);
 

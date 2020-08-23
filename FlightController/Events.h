@@ -7,16 +7,17 @@
  * published by the Free Software Foundation.
  */
 #pragma once
+
 #include <QtCore>
 
 class DeviceMessage : public QEvent {
  public:
-  static const QEvent::Type ET;
-  QByteArray payload;
-
   DeviceMessage(const unsigned char *buf);
 
   QByteArray* getPayload() {
     return &payload;
   }
+
+  static const QEvent::Type ET;
+  QByteArray payload;
 };

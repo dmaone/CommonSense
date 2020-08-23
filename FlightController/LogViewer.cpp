@@ -38,7 +38,7 @@ void LogViewer::continueMessage(QString msg) {
   repaint();
 }
 
-void LogViewer::clearButtonClick() {
+void LogViewer::clearAll() {
   QMessageBox::StandardButton result = QMessageBox::question(
       this, "Erase current logs", "Irreversibly! Ain't it a great thing to do?",
       QMessageBox::Yes | QMessageBox::No);
@@ -46,7 +46,7 @@ void LogViewer::clearButtonClick() {
     this->clear();
 }
 
-void LogViewer::copyAllButtonClick() {
+void LogViewer::copyAll() {
   this->selectAll();
   this->copy();
   QTextCursor cur = this->textCursor();

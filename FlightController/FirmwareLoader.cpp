@@ -7,21 +7,23 @@
 #include "Events.h"
 #include "settings.h"
 
-FirmwareLoader::FirmwareLoader(QObject *parent)
-    : QObject(parent), bootloaderMode(false), firmware(NULL),
-      lastCommand(BR_CYRET_SUCCESS) {
-  DeviceInterface &di = DeviceInterface::get();
+FirmwareLoader::FirmwareLoader(DeviceInterface& di) {
+  connect(this, SIGNAL(switchMode(bool)),
+      &di, SLOT(bootloaderMode(bool)));
+  connect(this, SIGNAL(sendPacket(Bootloader_packet_t)),
+      &di, SLOT(sendCommand(Bootloader_packet_t)));
+
   di.installEventFilter(this);
 }
 
 bool FirmwareLoader::_checkCompatibility(const Bootloader_packet_t& packet) {
   uint32_t siliconId;
   memcpy(&siliconId, &packet.payload[0], 4);
-  if (siliconId != firmware->siliconId ||
-      packet.payload[4] != firmware->siliconRevision) {
+  if (siliconId != firmware_->siliconId ||
+      packet.payload[4] != firmware_->siliconRevision) {
     qInfo() << "Silicon: " << siliconId << " revision " << packet.payload[4];
-    qInfo() << "Firmware: " << firmware->siliconId
-            << " revision " << firmware->siliconRevision;
+    qInfo() << "Firmware: " << firmware_->siliconId
+            << " revision " << firmware_->siliconRevision;
     qCritical()
         << "Firmware from incompatible hardware! Please use correct firmware!";
     return true;
@@ -35,7 +37,7 @@ bool FirmwareLoader::_checkCompatibility(const Bootloader_packet_t& packet) {
   // siliconId already, oughtta be enough. Let's just upload the row instead.
   // QByteArray pkt = QByteArray(0x00);
   //_sendPacket(BCMD_GetFlashSize, pkt);
-  lastRow = firmware->data.back();
+  lastRow = firmware_->data.back().get();
   _upload_row();
   return true;
 }
@@ -66,12 +68,11 @@ bool FirmwareLoader::_checkFlashSize(const Bootloader_packet_t& packet)
 */
 
 bool FirmwareLoader::_upload_row() {
-  if (lastRow == NULL) {
+  if (lastRow == nullptr) {
     _sendCommand(BCMD_ExitBootloader);
     qInfo() << "Firmware uploaded!";
     bootloaderMode = false;
-    delete firmware;
-    firmware = NULL;
+    firmware_.reset();
     emit switchMode(bootloaderMode);
   } else if (lastRow->data.size() <= BOOTLOADER_MAX_PACKET_LENGTH) {
     qDebug() << "Programming array" << lastRow->array << "row" << lastRow->row;
@@ -80,8 +81,8 @@ bool FirmwareLoader::_upload_row() {
     lastRow->data.push_front((uint8_t)(lastRow->row & 0xff));
     lastRow->data.push_front(lastRow->array);
     _sendPacket(BCMD_ProgramRow, lastRow->data);
-    firmware->data.pop_back();
-    lastRow = (firmware->data.size() > 0) ? firmware->data.back() : NULL;
+    firmware_->data.pop_back();
+    lastRow = (firmware_->data.empty()) ? nullptr: firmware_->data.back().get();
   } else {
     QByteArray slice = lastRow->data.left(BOOTLOADER_MAX_PACKET_LENGTH);
     _sendPacket(BCMD_SendData, slice);
@@ -137,7 +138,7 @@ bool FirmwareLoader::eventFilter(QObject* /* obj */, QEvent* event) {
 
 bool FirmwareLoader::selectFile() {
   QSettings settings;
-  QFileDialog fd(Q_NULLPTR, "Choose firmware file");
+  QFileDialog fd(nullptr, "Choose firmware file");
   fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
   fd.setNameFilter(tr("Bootloader files(*.cyacd)"));
   fd.setDefaultSuffix(QString("cyacd"));
@@ -168,7 +169,7 @@ void FirmwareLoader::start() {
     //return;
   }
   QMessageBox::StandardButton result = QMessageBox::question(
-      NULL, "Are you sure?",
+      nullptr, "Are you sure?",
       QString("About to flash %1\n\nYou will lose communication with the "
               "device until reset or firmware update!")
           .arg(settings.value(FIRMWARE_FILE_KEY).toString()),
@@ -179,7 +180,7 @@ void FirmwareLoader::start() {
 }
 
 void FirmwareLoader::load() {
-  if (!firmware) {
+  if (!firmware_) {
     if (!_loadFirmwareFile()) {
       qInfo() << "Invalid firmware file! cannot proceed!";
       return;
@@ -198,10 +199,8 @@ bool FirmwareLoader::_loadFirmwareFile() {
       return false;
     fn = settings.value(FIRMWARE_FILE_KEY).toString();
   }
-  if (firmware)
-    delete firmware;
   try {
-    firmware = new CyACD(fn);
+    firmware_ = std::make_unique<CyACD>(fn);
   } catch (const char *msg) {
     qCritical() << msg;
     return false;

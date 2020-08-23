@@ -1,14 +1,13 @@
 #include "Hardware.h"
-#include "ui_Hardware.h"
 
 namespace {
 constexpr size_t kMaxDebouncingTicks{64};
 }
 
-Hardware::Hardware(DeviceConfig *config, QWidget *parent)
-    : QFrame(parent, Qt::Tool), ui(new Ui::Hardware), _config(config) {
+Hardware::Hardware(DeviceConfig& config) :
+    QFrame{nullptr, Qt::Tool}, config_{config} {
   ui->setupUi(this);
-  for (const auto& it: _config->getExpModeNames()) {
+  for (const auto& it: config_.getExpModeNames()) {
     ui->modeBox->addItem(it.data());
   }
 }
@@ -16,7 +15,7 @@ Hardware::Hardware(DeviceConfig *config, QWidget *parent)
 Hardware::~Hardware() { delete ui; }
 
 void Hardware::init() {
-  auto config = _config->getHardwareConfig();
+  auto config = config_.getHardwareConfig();
   switch (config.adcBits) {
     case 8:
       ui->adcBits->setCurrentIndex(0);
@@ -36,10 +35,9 @@ void Hardware::init() {
   ui->debouncingTicks->setValue(config.debouncingTicks);
   ui->debouncingTicks->setRange(1, kMaxDebouncingTicks);
 
-  auto caps = _config->getSwitchCapabilities();
-  ui->adcBits->setEnabled(caps.hasMatrixMonitor);
-  ui->chargeDelay->setEnabled(caps.hasDelays);
-  ui->dischargeDelay->setEnabled(caps.hasDelays);
+  ui->adcBits->setEnabled(config_.capabilities.hasMatrixMonitor);
+  ui->chargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);
+  ui->dischargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);
 
   ui->modeBox->setCurrentIndex(config.expHdrMode);
   ui->Param1->setValue(config.expHdrParam1);
@@ -65,7 +63,7 @@ void Hardware::on_applyButton_clicked() {
   config.expHdrMode = ui->modeBox->currentIndex();
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();
-  _config->setHardwareConfig(config);
+  config_.setHardwareConfig(config);
 }
 
 void Hardware::on_revertButton_clicked() {

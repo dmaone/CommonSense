@@ -1,28 +1,28 @@
 #pragma once
 
 #include <QFrame>
+#include "ui_Hardware.h"
 
 #include "DeviceConfig.h"
-
-namespace Ui {
-class Hardware;
-}
 
 class Hardware : public QFrame {
   Q_OBJECT
 
-public:
-  explicit Hardware(DeviceConfig *config, QWidget *parent = 0);
+ public:
+  explicit Hardware(DeviceConfig& config);
   ~Hardware();
   void init();
 
-private:
-  Ui::Hardware *ui;
-  DeviceConfig *_config;
+ private:
   void _updateParamVisibility();
 
-private slots:
-  void on_modeBox_currentIndexChanged(int idx);
+  Ui::Hardware realUi_{};
+  Ui::Hardware* ui{&realUi_};
+
+  DeviceConfig& config_;
+
+ private slots:
   void on_applyButton_clicked();
+  void on_modeBox_currentIndexChanged(int idx);
   void on_revertButton_clicked();
 };

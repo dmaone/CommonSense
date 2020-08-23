@@ -18,42 +18,46 @@ struct HardwareConfig {
 };
 
 struct SwitchTypeCapabilities {
-  SwitchTypeCapabilities(const bool t, const bool m, const bool d):
-    hasThresholds(t),
-    hasMatrixMonitor(m), hasDelays(d) {}
-  bool hasThresholds{false};
-  bool hasMatrixMonitor{false};
-  bool hasDelays{false};
+  bool hasChargeSequencer{true};
+  bool hasMatrixMonitor{true};
+  bool hasThresholds{true};
+  bool isNormallyLow{true};
 };
+
+class DeviceInterface;
 
 class DeviceConfig : public QObject {
   Q_OBJECT
 
  public:
-  explicit DeviceConfig(QObject *parent = 0);
-  bool bValid;
   enum TransferDirection { TransferIdle, TransferUpload, TransferDownload };
   Q_ENUM(TransferDirection)
-  uint8_t numRows;
-  uint8_t numCols;
-  uint8_t switchType;
-  uint8_t numLayers;
-  uint8_t numLayerConditions;
-  uint8_t numDelays;
-  bool bNormallyLow;
-  uint8_t thresholds[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-  uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-  std::vector<Macro> macros;
-  std::vector<LayerCondition> loadLayerConditions();
+
+  explicit DeviceConfig(DeviceInterface* di);
+
+  std::vector<LayerCondition> loadLayers();
   void setLayerCondition(int conditionIdx, LayerCondition cnd);
-  void setLayerConditions(std::vector<LayerCondition> lcs);
-  std::vector<uint16_t> delays();
-  void setDelay(int delayIdx, uint16_t delay_ms);
+  void setLayers(std::vector<LayerCondition> lcs);
+
+  uint16_t getDelay(size_t delayIdx);
+  void setDelay(size_t delayIdx, uint16_t delay_ms);
+
   HardwareConfig getHardwareConfig();
   void setHardwareConfig(HardwareConfig config);
   const std::vector<std::string> getExpModeNames();
   const std::string& getSwitchTypeName();
-  const SwitchTypeCapabilities getSwitchCapabilities();
+
+  bool bValid{false};
+  uint8_t numRows{0};
+  uint8_t numCols{0};
+  uint8_t switchType;
+  uint8_t numLayers{ABSOLUTE_MAX_LAYERS};
+  uint8_t numDelays{NUM_DELAYS};
+  uint8_t thresholds[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+  uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+  SwitchTypeCapabilities capabilities{};
+  std::vector<Macro> macros{};
+
 
  signals:
   void changed();
@@ -73,12 +77,15 @@ class DeviceConfig : public QObject {
   bool eventFilter(QObject *obj, QEvent *event);
 
  private:
-  psoc_eeprom_t _eeprom;
-  enum TransferDirection transferDirection;
-  uint8_t currentBlock;
   void _uploadConfigBlock();
   void _receiveConfigBlock(QByteArray *);
   void _unpack();
   void _assemble();
+  void _setSwitchCapabilities();
+
+  DeviceInterface* interface_;
+  psoc_eeprom_t _eeprom;
+  TransferDirection transferDirection_{TransferIdle};
+  uint8_t currentBlock{0};
 };
 

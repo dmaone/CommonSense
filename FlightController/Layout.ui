@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>LayoutEditor</class>
- <widget class="QFrame" name="LayoutEditor">
+ <class>Layout</class>
+ <widget class="QFrame" name="Layout">
   <property name="geometry">
    <rect>
     <x>0</x>

@@ -2,13 +2,13 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-#include "../c2/c2_protocol.h"
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 #include "LayerCondition.h"
 #include "settings.h"
 
 namespace {
+
 static const std::vector<std::string> expModeNames_{
   "Disabled",
 
@@ -18,26 +18,23 @@ static const std::vector<std::string> expModeNames_{
 static const std::vector<std::string> switchTypeNames_ {
   "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "Microswitch", "UNKNOWN"
 };
+
 } //namespace
 
-DeviceConfig::DeviceConfig(QObject *parent)
-    : QObject(parent), bValid(false), numRows(0), numCols(0),
-      numLayers(ABSOLUTE_MAX_LAYERS), numLayerConditions(NUM_LAYER_CONDITIONS),
-      numDelays(NUM_DELAYS), bNormallyLow(false),
-      transferDirection(TransferIdle) {
+DeviceConfig::DeviceConfig(DeviceInterface* di) : interface_{di} {
   memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
 }
 
-bool DeviceConfig::eventFilter(QObject* /* obj */,
-                               QEvent *event) {
-  if (event->type() != DeviceMessage::ET)
+bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
+  if (event->type() != DeviceMessage::ET) {
     return false;
+  }
   QByteArray *payload = static_cast<DeviceMessage *>(event)->getPayload();
   if (payload->at(0) != C2RESPONSE_CONFIG)
     return false;
 
   currentBlock++;
-  switch (transferDirection) {
+  switch (transferDirection_) {
   case TransferDownload:
     _receiveConfigBlock(payload);
     break;
@@ -56,21 +53,20 @@ bool DeviceConfig::eventFilter(QObject* /* obj */,
  * Fire up the uploader.
  */
 void DeviceConfig::toDevice() {
-  DeviceInterface &di = DeviceInterface::get();
-  if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
-    QMessageBox::critical(NULL, "Matrix monitor active",
+  if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+    QMessageBox::critical(nullptr, "Matrix monitor active",
                           "Turn off matrix monitor first!");
     return;
   }
-  if (transferDirection != TransferIdle) {
+  if (transferDirection_ != TransferIdle) {
     qInfo() << "Not a good day to upload config!";
-    QMessageBox::critical(NULL, "Not a good day to upload config",
+    QMessageBox::critical(nullptr, "Not a good day to upload config",
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
   this->_assemble();
   emit sendCommand(C2CMD_EWO, (1 << C2DEVSTATUS_SETUP_MODE));
-  this->transferDirection = TransferUpload;
+  this->transferDirection_ = TransferUpload;
   this->currentBlock = 0;
   qInfo() << "Uploading config";
   this->_uploadConfigBlock();
@@ -82,11 +78,11 @@ void DeviceConfig::toDevice() {
  * We don't really care about the input packet here
  */
 void DeviceConfig::_uploadConfigBlock() {
-  switch (transferDirection) {
+  switch (transferDirection_) {
   case TransferUpload:
     if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
       qInfo() << "done!";
-      transferDirection = TransferIdle;
+      transferDirection_ = TransferIdle;
       emit sendCommand(C2CMD_APPLY_CONFIG, 1);
       return;
     }
@@ -101,21 +97,20 @@ void DeviceConfig::_uploadConfigBlock() {
     break;
   default:
     qInfo() << "Not a good day to upload config block!";
-    QMessageBox::critical(NULL, "Not a good day to upload config block",
+    QMessageBox::critical(nullptr, "Not a good day to upload config block",
                           "Error! Try pressing 'Reconnect' button!");
   }
 }
 
 void DeviceConfig::fromDevice() {
-  DeviceInterface &di = DeviceInterface::get();
-  if (di.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
-    QMessageBox::critical(NULL, "Matrix monitor active",
+  if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+    QMessageBox::critical(nullptr, "Matrix monitor active",
                           "Turn off matrix monitor first!");
     return;
   }
-  switch (transferDirection) {
+  switch (transferDirection_) {
   case TransferIdle:
-    transferDirection = TransferDownload;
+    transferDirection_ = TransferDownload;
     currentBlock = 0;
     qInfo() << "Downloading config";
     qInfo() << ".";
@@ -125,7 +120,7 @@ void DeviceConfig::fromDevice() {
     break;
   default:
     qInfo() << "Not a good day to download config!";
-    QMessageBox::critical(NULL, "Not a good day to download config",
+    QMessageBox::critical(nullptr, "Not a good day to download config",
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
@@ -138,15 +133,15 @@ void DeviceConfig::fromDevice() {
  * @param payload - packet payload
  */
 void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
-  if (transferDirection != TransferDownload) {
+  if (transferDirection_ != TransferDownload) {
     qInfo() << "Not a good day to download config block!";
-    QMessageBox::critical(NULL, "Not a good day to download config blockb",
+    QMessageBox::critical(nullptr, "Not a good day to download config blockb",
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
   qInfo(".");
   if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
-    transferDirection = TransferIdle;
+    transferDirection_ = TransferIdle;
     qInfo() << "done, unpacking...";
     _unpack();
     return;
@@ -162,17 +157,17 @@ void DeviceConfig::_unpack() {
   numRows = _eeprom.matrixRows;
   numCols = _eeprom.matrixCols;
   numLayers = _eeprom.matrixLayers;
-  bNormallyLow = _eeprom.capsenseFlags & (1 << CSF_NL);
   uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
   switchType = std::min(_eeprom.switchType, maxSwitchIndex);
+  _setSwitchCapabilities();
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
-  auto caps = getSwitchCapabilities();
   uint8_t tableSize = numRows * numCols;
   for (uint8_t i = 0; i < numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
-      this->thresholds[i][j] = caps.hasThresholds ? _eeprom.stash[offset] : 1;
+      this->thresholds[i][j] =
+          capabilities.hasThresholds ? _eeprom.stash[offset] : 1;
       for (uint8_t k = 0; k < numLayers; k++) {
         layouts[k][i][j] = _eeprom.stash[tableSize * (k + 1) + offset];
       }
@@ -203,11 +198,11 @@ void DeviceConfig::_assemble() {
   memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
   memset(_eeprom._RESERVED1, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED1));
   uint8_t tableSize = numRows * numCols;
-  auto caps = getSwitchCapabilities();
+  _setSwitchCapabilities();
   for (uint8_t i = 0; i < this->numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
-      if (caps.hasThresholds) {
+      if (capabilities.hasThresholds) {
         _eeprom.stash[offset] = thresholds[i][j];
       }
       for (uint8_t k = 0; k < numLayers; k++) {
@@ -229,7 +224,7 @@ void DeviceConfig::_assemble() {
 
 void DeviceConfig::fromFile() {
   QSettings settings;
-  QFileDialog fd(Q_NULLPTR, "Choose one file to import from");
+  QFileDialog fd(nullptr, "Choose one file to import from");
   fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
   fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
   fd.setDefaultSuffix(QString("cfg"));
@@ -250,7 +245,7 @@ void DeviceConfig::fromFile() {
 void DeviceConfig::toFile() {
   QSettings settings;
   this->_assemble();
-  QFileDialog fd(Q_NULLPTR, "Choose one file to export to");
+  QFileDialog fd(nullptr, "Choose one file to export to");
   fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
   fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
   fd.setDefaultSuffix(QString("cfg"));
@@ -270,7 +265,7 @@ void DeviceConfig::toFile() {
 
 void DeviceConfig::commit() {
   QMessageBox::StandardButton result = QMessageBox::question(
-      NULL, "Saving EEPROM!",
+      nullptr, "Saving EEPROM!",
       "Do you want to write the config that is now in the device, to "
       "EEPROM?\n\nNOTICE\nIf thresholds don't fully take effect after "
       "commit\nPlease reset the device by using 'Revert' menu item!",
@@ -281,7 +276,7 @@ void DeviceConfig::commit() {
 
 void DeviceConfig::rollback() {
   QMessageBox::StandardButton result =
-      QMessageBox::question(NULL, "Resetting device!",
+      QMessageBox::question(nullptr, "Resetting device!",
                             "Device will be reset, config will be restored "
                             "from EEPROM and downloaded to host. OK?",
                             QMessageBox::Yes | QMessageBox::No);
@@ -289,9 +284,9 @@ void DeviceConfig::rollback() {
     emit sendCommand(C2CMD_ROLLBACK, 1u);
 }
 
-std::vector<LayerCondition> DeviceConfig::loadLayerConditions() {
-  std::vector<LayerCondition> cnds(numLayerConditions);
-  for (uint8_t i = 0; i < numLayerConditions; i++) {
+std::vector<LayerCondition> DeviceConfig::loadLayers() {
+  std::vector<LayerCondition> cnds(ABSOLUTE_MAX_LAYERS);
+  for (uint8_t i = 0; i < ABSOLUTE_MAX_LAYERS; i++) {
     cnds[i] = LayerCondition(_eeprom.layerConditions[i]);
   }
   return cnds;
@@ -301,22 +296,18 @@ void DeviceConfig::setLayerCondition(int conditionIdx, LayerCondition cnd) {
   _eeprom.layerConditions[conditionIdx] = cnd.toBin();
 }
 
-void DeviceConfig::setLayerConditions(std::vector<LayerCondition> lcs) {
+void DeviceConfig::setLayers(std::vector<LayerCondition> lcs) {
   int numLCs = lcs.size();
   for (int i = 0; i < numLCs; i++)
     setLayerCondition(i, lcs[i]);
 }
 
-std::vector<uint16_t> DeviceConfig::delays() {
-  std::vector<uint16_t> retval(numDelays);
-  for (uint8_t i = 0; i < numDelays; i++) {
-    retval[i] = _eeprom.delayLib[i];
-  }
-  return retval;
+uint16_t DeviceConfig::getDelay(size_t pos) {
+  return _eeprom.delayLib[pos];
 }
 
-void DeviceConfig::setDelay(int delayIdx, uint16_t delay_ms) {
-  _eeprom.delayLib[delayIdx] = delay_ms;
+void DeviceConfig::setDelay(size_t pos, uint16_t delay_ms) {
+  _eeprom.delayLib[pos] = delay_ms;
 }
 
 HardwareConfig DeviceConfig::getHardwareConfig() {
@@ -349,17 +340,26 @@ const std::string& DeviceConfig::getSwitchTypeName() {
   return switchTypeNames_.at(switchType);
 }
 
-const
-SwitchTypeCapabilities DeviceConfig::getSwitchCapabilities() {
+void DeviceConfig::_setSwitchCapabilities() {
+  capabilities.hasChargeSequencer = true;
+  capabilities.hasMatrixMonitor = true;
+  capabilities.hasThresholds = true;
+  capabilities.isNormallyLow = true;
   switch(switchType) {
     case SwitchType::ST_ADB:
     case SwitchType::ST_SUN:
     case SwitchType::ST_MICROSWITCH:
-      // has threshold, matrix monitorable, delays configurable
-      return {false, false, false};
+      capabilities.hasChargeSequencer = false;
+      capabilities.hasMatrixMonitor = false;
+      capabilities.hasThresholds = false;
+      break;
     case SwitchType::ST_MAGVALVE:
-      return {true, false, true};
+      capabilities.hasMatrixMonitor = false;
+      break;
+    case SwitchType::ST_BEAMSPRING:
+      capabilities.isNormallyLow = false;
+      break;
     default:
-      return {true, true, true};
+      break;
   }
 }

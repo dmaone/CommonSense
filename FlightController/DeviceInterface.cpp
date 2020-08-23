@@ -14,26 +14,28 @@ constexpr size_t kDeviceScanTick{1000}; // ms connect retry
 constexpr size_t kStatusTimerTick{200}; // ms between status updates
 constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
 constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
-DeviceConfig* DeviceInterface::config{nullptr};
 
-DeviceInterface::DeviceInterface(QObject *parent)
-    : QObject(parent), device(NULL), pollTimerId(0), statusTimerId(0),
-      mode(DeviceInterfaceNormal), currentStatus(DeviceDisconnected) {
-  config = &config_;
-  installEventFilter(config);
+DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
+  installEventFilter(&config);
 
-  connect(config, SIGNAL(changed()), this, SLOT(configChanged()));
-  connect(config, SIGNAL(downloadBlock(c2command, uint8_t)), this,
+  connect(&config, SIGNAL(changed()), this, SLOT(configChanged()));
+  connect(&config, SIGNAL(downloadBlock(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
-  connect(config, SIGNAL(uploadBlock(OUT_c2packet_t)), this,
+  connect(&config, SIGNAL(uploadBlock(OUT_c2packet_t)), this,
           SLOT(sendCommand(OUT_c2packet_t)));
 
-  connect(config, SIGNAL(sendCommand(c2command, uint8_t)), this,
+  connect(&config, SIGNAL(sendCommand(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
-  statusTimerId = startTimer(kStatusTimerTick);
+  statusTimerId_ = startTimer(kStatusTimerTick);
 }
 
-DeviceInterface::~DeviceInterface() { releaseDevice(); }
+DeviceInterface::~DeviceInterface() {
+  if (pollTimerId_ > 0) {
+    killTimer(pollTimerId_);
+  }
+  scheduleDeviceRelease_.store(true);
+  releaseDevice_();
+}
 
 void DeviceInterface::processStatusReply(QByteArray* payload) {
   if (receivedStatus_ != payload->at(1)) {
@@ -65,43 +67,43 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
  * of interest. Default behavior is to log them as strings.
  */
 bool DeviceInterface::event(QEvent *e) {
-  if (e->type() == DeviceMessage::ET) {
-    QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
-    switch (payload->at(0)) {
+  if (e->type() != DeviceMessage::ET) {
+    return QObject::event(e);
+  }
+  QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
+  switch (payload->at(0)) {
     case C2RESPONSE_MATRIX_ROW:
-        return true; // We are not interested in this, but it has >1 subscribers
+      break; // We are not interested in this, but it has >1 subscribers
     case C2RESPONSE_STATUS:
       processStatusReply(payload);
-      return true;
+      break;
     case C2RESPONSE_SCANCODE:
-      if (!config->bValid) {
-        return true;
+      if (!config.bValid) {
+        break;
       }
       uint8_t flags, scancode, row, col;
       uint8_t flagReleased;
       flagReleased = 0x80;
       flags = payload->at(1);
       scancode = payload->at(2);
-      col = scancode % config->numCols;
-      row = (scancode - col) / config->numCols;
-      emit scancodeReceived(
-          row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
+      col = scancode % config.numCols;
+      row = (scancode - col) / config.numCols;
       if (row == 15 && col == 15) {
         // "All keys released"
         qInfo() << "· ----------";
       } else {
+        emit scancodeReceived(
+            row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
         qInfo().noquote() <<
             QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
             .arg(row + 1, 2)
             .arg(col + 1, 2);
       }
-      return true;
+      break;
     default:
       qInfo() << payload->constData();
-      return true;
-    }
   }
-  return QObject::event(e);
+  return true;
 }
 
 void DeviceInterface::deviceMessageReceiver() {
@@ -147,25 +149,25 @@ void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
 
 void DeviceInterface::configChanged() {
   qInfo() << "Configuration changed.";
-  switchType = QString(config->getSwitchTypeName().data());
-  if (currentStatus == DeviceConnected) {
+  switchType = QString(config.getSwitchTypeName().data());
+  if (currentStatus_ == DeviceConnected) {
     emit deviceStatusNotification(DeviceConfigChanged);
   }
 }
 
 void DeviceInterface::bootloaderMode(bool bEnabled) {
   if (bEnabled) {
-    qInfo() << "Entering firmware update mode.";
-    mode = DeviceInterfaceBootloader;
-    if (currentStatus == DeviceConnected) {
+    qInfo() << "Entering firmware update mode_.";
+    mode_ = DeviceInterfaceBootloader;
+    if (currentStatus_ == DeviceConnected) {
       sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
     }
   } else {
     qInfo() << "Resuming normal operations.";
-    mode = DeviceInterfaceNormal;
+    mode_ = DeviceInterfaceNormal;
   }
   _resetTimer(kDeviceScanTick);
-  releaseDevice();
+  scheduleDeviceRelease_.store(true);
 }
 
 void DeviceInterface::flipStatusBit(deviceStatus bit) {
@@ -191,32 +193,32 @@ bool DeviceInterface::getStatusBit(deviceStatus bit) {
 }
 
 void DeviceInterface::_resetTimer(int interval) {
-  if (pollTimerId) {
-    killTimer(pollTimerId);
+  if (pollTimerId_ > 0) {
+    killTimer(pollTimerId_);
   }
   qDebug() << "Reset timer to " << interval;
-  pollTimerId = startTimer(interval);
+  pollTimerId_ = startTimer(interval);
 }
 
-void DeviceInterface::timerEvent(QTimerEvent * timer) {
-  if (timer->timerId() == statusTimerId) {
-    if (mode == DeviceInterfaceNormal && currentStatus == DeviceConnected) {
+void DeviceInterface::timerEvent(QTimerEvent* timer) {
+  if (timer->timerId() == statusTimerId_) {
+    if (mode_ == DeviceInterfaceNormal && currentStatus_ == DeviceConnected) {
       // request status, so you see actual status.
       sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
-  } else if (timer->timerId() != pollTimerId) {
+  } else if (timer->timerId() != pollTimerId_) {
     return;
   }
-  if (!device) {
+  if (!device_) {
     return _initDevice();
   }
   const auto receivedThings = _receivePacket();
   const auto sentThings = _sendPacket();
-  if (receivedThings || sentThings || mode == DeviceInterfaceBootloader) {
+  if (receivedThings || sentThings || mode_ == DeviceInterfaceBootloader) {
     antiLagTimer_ = kAntiLagTicks;
   } else {
-    // Go back to slow mode if idle and not bootloader.
+    // Go back to slow mode_ if idle and not bootloader.
     if (--antiLagTimer_ == 0) {
       qDebug("Idle. Slowing down to save CPU");
       _resetTimer(kNormalOperationTick);
@@ -224,17 +226,7 @@ void DeviceInterface::timerEvent(QTimerEvent * timer) {
     }
   }
   qDebug() << "Main timer deviceLock";
-  std::lock_guard<std::mutex> lock{deviceLock_};
-  if (releaseDevice_.exchange(false)) {
-    if (device) {
-      qInfo() << "Releasing device.";
-    }
-    _updateDeviceStatus(DeviceDisconnected);
-    hid_close(device);
-    device = NULL;
-    if (hid_exit())
-      qWarning("warning: error during hid_exit");
-  }
+  releaseDevice_();
   qDebug() << "Timer2 deviceUnlock";
 }
 
@@ -247,7 +239,7 @@ bool DeviceInterface::_sendPacket() {
     if (commandQueue_.empty()) {
       return false;
     }
-    if (!device) {
+    if (!device_) {
       commandQueue_.clear();
       qWarning() << "Device went away on send";
       return true;
@@ -267,10 +259,10 @@ bool DeviceInterface::_sendPacket() {
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
   std::lock_guard<std::mutex> lock{deviceLock_};
-  if (hid_write(device, outbox, sizeof outbox) == -1) {
+  if (hid_write(device_, outbox, sizeof outbox) == -1) {
     qWarning() << "Error sending to the device, will reconnect in 1 second";
     QThread::sleep(1);
-    releaseDevice();
+    scheduleDeviceRelease_.store(true);
   }
   return true;
 }
@@ -281,13 +273,13 @@ bool DeviceInterface::_receivePacket() {
   {
     qDebug() << "receivePacket deviceLock";
     std::lock_guard<std::mutex> lock{deviceLock_};
-    bytesRead = hid_read(device, bytesFromDevice, sizeof(bytesFromDevice));
+    bytesRead = hid_read(device_, bytesFromDevice, sizeof(bytesFromDevice));
   }
   if (bytesRead == 0) {
     return false;
   } else if (bytesRead < 0) {
     qWarning() << "Device went away. Reconnecting";
-    releaseDevice();
+    scheduleDeviceRelease_.store(true);
     return true;
   }
   qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)bytesFromDevice[1];
@@ -307,16 +299,16 @@ bool DeviceInterface::_receivePacket() {
 void DeviceInterface::_initDevice() {
   qDebug() << "InitDevice deviceLock";
   std::lock_guard<std::mutex> lock{deviceLock_};
-  device = acquireDevice();
-  if (!device) {
+  device_ = acquireDevice();
+  if (!device_) {
     qInfo() << ".";
     _resetTimer(kDeviceScanTick);
     return;
   }
-  hid_set_nonblocking(device, 1);
+  hid_set_nonblocking(device_, 1);
 
   cts_.store(true); // Not expecting anything from device - clear to send.
-  _updateDeviceStatus(mode == DeviceInterfaceNormal ? DeviceConnected
+  _updateDeviceStatus(mode_ == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
   QByteArray tmp(64, (char)0);
   processStatusReply(&tmp);
@@ -325,20 +317,20 @@ void DeviceInterface::_initDevice() {
 }
 
 void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
-  if (newStatus != currentStatus) {
-    currentStatus = newStatus;
+  if (newStatus != currentStatus_) {
+    currentStatus_ = newStatus;
     emit deviceStatusNotification(newStatus);
   }
 }
 
 DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
   DetectedDevices retval{};
-  hid_device_info *root = hid_enumerate(0, 0);
+  auto root = hid_enumerate(0, 0);
   if (!root) {
     qInfo() << "No HID devices on this system?";
     return retval;
   }
-  hid_device_info *d = root;
+  auto d{root};
   while (d) {
 //        qInfo() << d->path << d->vendor_id << d->product_id;
 // Usage and usage page are win and mac only :(
@@ -360,52 +352,63 @@ DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
   return retval;
 }
 
-hid_device *DeviceInterface::acquireDevice() {
-  hid_device *retval = NULL;
+hid_device* DeviceInterface::acquireDevice() {
   if (hid_init()) {
     qInfo() << "Cannot initialize hidapi!";
-    return NULL;
+    return nullptr;
   }
   auto devices = listDevices();
-  if (mode == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
+  if (mode_ == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
     QMessageBox::StandardButton result =
-        QMessageBox::question(NULL, "Bootloader detected!",
+        QMessageBox::question(nullptr, "Bootloader detected!",
                               "Detected an active bootloader. "
                               "Do you want to update that device's firmware?",
                               QMessageBox::Yes | QMessageBox::No);
     if (result == QMessageBox::Yes) {
-      mode = DeviceInterfaceBootloader;
+      mode_ = DeviceInterfaceBootloader;
     }
   }
 
-  DeviceList* what = mode == DeviceInterfaceNormal ? &devices.keyboards
-                                                   : &devices.bootloaders;
+  const auto& what = mode_ == DeviceInterfaceNormal ? devices.keyboards
+                                                    : devices.bootloaders;
+  if (what.empty()) {
+    return nullptr;
+  }
 
-  if (what->size() == 1) {
+  if (what.size() == 1) {
     qInfo() << "Found a node!";
-    qDebug() << "Trying to use" << what->at(0).second.data();
-    retval = hid_open_path(what->at(0).second.data());
-  } else if (what->size() > 1) {
-    // More than one device.
-    qInfo() << "Hello, fellow DT member!";
-    DeviceSelector selector{*what};
-    selector.exec();
-    auto deviceSerial = selector.getResult();
-    qInfo().noquote() << "Connecting to s/n" << deviceSerial;
-    for (const auto& it : *what) {
-      if (it.first == deviceSerial) {
-        retval = hid_open_path(it.second.data());
-      }
+    qDebug() << "Trying to use" << what.at(0).second.data();
+    return hid_open_path(what.at(0).second.data());
+  }
+  // More than one device.
+  qInfo() << "Hello, fellow DT member!";
+  DeviceSelector selector{what};
+  selector.exec();
+  auto deviceSerial = selector.getResult();
+  qInfo().noquote() << "Connecting to s/n" << deviceSerial;
+  for (const auto& it : what) {
+    if (it.first == deviceSerial) {
+      return hid_open_path(it.second.data());
     }
   }
-  return retval;
+  return nullptr;
 }
 
-void DeviceInterface::releaseDevice() {
-  releaseDevice_ = true;
+void DeviceInterface::releaseDevice_() {
+  std::lock_guard<std::mutex> lock{deviceLock_};
+  if (scheduleDeviceRelease_.exchange(false)) {
+    if (device_) {
+      qInfo() << "Releasing device..";
+    }
+    _updateDeviceStatus(DeviceDisconnected);
+    hid_close(device_);
+    device_ = nullptr;
+    if (hid_exit())
+      qWarning("warning: error during hid_exit");
+  }
 }
 
 void DeviceInterface::start() {
-  qInfo() << "Acquiring device. Can take a while with certain old USB hubs..";
+  qInfo() << "Acquiring device - can take a while with certain old USB hubs..";
   _resetTimer(kNormalOperationTick);
 }

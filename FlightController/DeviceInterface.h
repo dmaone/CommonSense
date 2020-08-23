@@ -24,17 +24,6 @@ class DeviceInterface : public QObject {
   Q_OBJECT
 
  public:
-  static DeviceInterface& get() {
-    static DeviceInterface instance{};
-    return instance;
-  }
-  static DeviceConfig* config;
-  DeviceInterface(QObject *parent = nullptr);
-  ~DeviceInterface();
-  void start();
-  bool event(QEvent *e);
-  device_status_t *getStatus();
-  void releaseDevice();
   enum DeviceStatus {
     DeviceConnected,
     DeviceDisconnected,
@@ -43,17 +32,30 @@ class DeviceInterface : public QObject {
     StatusUpdated
   };
   Q_ENUM(DeviceStatus)
+
   enum KeyStatus { KeyPressed, KeyReleased };
   Q_ENUM(KeyStatus)
+
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
   Q_ENUM(Mode)
-  bool scanEnabled {false};
-  bool outputEnabled {false};
-  bool setupMode {false};
-  bool matrixMonitor {false};
-  bool controllerInsane {false};
-  bool rx {false};
-  bool tx {false};
+
+  DeviceInterface();
+  ~DeviceInterface();
+  void start();
+  bool event(QEvent *e);
+  device_status_t *getStatus();
+  void scheduleDeviceRelease() {
+    scheduleDeviceRelease_.store(true);
+  };
+
+  DeviceConfig config;
+  bool scanEnabled{false};
+  bool outputEnabled{false};
+  bool setupMode{false};
+  bool matrixMonitor{false};
+  bool controllerInsane{false};
+  std::atomic<bool> rx{false};
+  std::atomic<bool> tx{false};
   QString switchType{};
   QString firmwareVersion{};
   QString dieTemp{};
@@ -85,31 +87,32 @@ class DeviceInterface : public QObject {
     DeviceList bootloaders{};
   };
 
-  hid_device *device;
-  int pollTimerId;
-  int statusTimerId;
-  unsigned char bytesFromDevice[65];
-  device_status_t status;
-  uint8_t mode{0};
-  DeviceStatus currentStatus;
-  uint8_t receivedStatus_{0};
-  QQueue<OUT_c2packet_t> commandQueue_;
-  std::atomic<bool> cts_ {true};
-  size_t noCtsDelay_{0};
-  size_t antiLagTimer_{0};
-  std::atomic<bool> releaseDevice_ {false};
+  hid_device* acquireDevice();
+  void releaseDevice_();
 
-  void processStatusReply(QByteArray* payload);
-  hid_device *acquireDevice();
   void _initDevice();
   void _enqueueCommand(OUT_c2packet_t outbox);
   void _resetTimer(int interval);
   void _resetStatusTimer(int interval);
   bool _sendPacket();
   bool _receivePacket();
-  void _updateDeviceStatus(DeviceStatus);
+  void _updateDeviceStatus(DeviceStatus newStatus);
   DetectedDevices listDevices();
-  DeviceConfig config_{};
+  void processStatusReply(QByteArray* payload);
+
+  hid_device* device_{nullptr};
+  int pollTimerId_{0};
+  int statusTimerId_{0};
+  unsigned char bytesFromDevice[65];
+  device_status_t status{};
+  Mode mode_{DeviceInterfaceNormal};
+  DeviceStatus currentStatus_{DeviceDisconnected};
+  uint8_t receivedStatus_{0};
+  QQueue<OUT_c2packet_t> commandQueue_{};
+  std::atomic<bool> cts_{true};
+  size_t noCtsDelay_{0};
+  size_t antiLagTimer_{0};
+  std::atomic<bool> scheduleDeviceRelease_{false};
   std::mutex deviceLock_{};
   std::mutex queueLock_{};
   qint64 lastSend_;

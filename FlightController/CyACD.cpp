@@ -2,72 +2,71 @@
 #include <QFile>
 
 #include "CyACD.h"
+namespace {
+
+void appendByte(uint32_t& buffer, const uint8_t byte) {
+  buffer <<= 8;
+  buffer |= byte;
+}
+
+} // namespace
 
 CyACD::CyACD(const QString& filename) {
-  loaded = false;
   QFile f(filename);
   f.open(QIODevice::ReadOnly);
   QTextStream ts(&f);
-  siliconId = _readByte(ts) << 24;
-  siliconId |= _readByte(ts) << 16;
-  siliconId |= _readByte(ts) << 8;
-  siliconId |= _readByte(ts);
-  siliconRevision = _readByte(ts);
-  _checksumType = _readByte(ts);
+  appendByte(siliconId, readByte_(ts));
+  appendByte(siliconId, readByte_(ts));
+  appendByte(siliconId, readByte_(ts));
+  appendByte(siliconId, readByte_(ts));
+
+  siliconRevision = readByte_(ts);
+
+  _checksumType = readByte_(ts);
   while (!ts.atEnd()) {
-    _readRow(ts);
+    readRow_(ts);
   }
   f.close();
 }
 
 CyACD::~CyACD() { data.clear(); }
 
-uint8_t CyACD::_readByte(QTextStream &ts) {
+uint8_t CyACD::readByte_(QTextStream &ts) {
   QString buf = ts.read(2);
-  if (buf.length() != 2)
-    throw("File corrupted - expecting more bytes!");
+  if (buf.length() != 2) {
+    throw("File corrupted - incomplete hex-encoded byte!");
+  }
   bool ok;
   uint8_t retval = buf.toUInt(&ok, 16);
-  if (!ok)
+  if (!ok) {
     throw("File corrupted - not a hex string!");
-  checksum += retval;
+  }
+  runningSum_ += retval;
   return retval;
 }
 
-uint16_t CyACD::_readUInt16(QTextStream &ts) {
-  return (_readByte(ts) << 8) + _readByte(ts);
+uint16_t CyACD::readUInt16_(QTextStream &ts) {
+  return (readByte_(ts) << 8) + readByte_(ts);
 }
 
-void CyACD::_readRow(QTextStream &ts) {
+void CyACD::readRow_(QTextStream &ts) {
   char rs;
   ts >> rs;
   if (rs == ':') {
-    _resetChecksum();
-    CyACD_row *row = new CyACD_row();
-    row->array = _readByte(ts);
-    row->row = _readUInt16(ts);
-    uint16_t dataLength = _readUInt16(ts);
+    runningSum_ = 0;
+    auto row = std::make_unique<CyACD_row>();
+    row->array = readByte_(ts);
+    row->row = readUInt16_(ts);
+    uint16_t dataLength = readUInt16_(ts);
     for (uint16_t i = 0; i < dataLength; i++) {
-      row->data.append(_readByte(ts));
+      row->data.append(readByte_(ts));
     }
-    _calculateChecksum();
-    row->checksum = _readByte(ts);
-    _verifyChecksum(row);
-    // std::vector<CyACD_row *>::iterator it = data.begin();
-    data.insert(data.begin(), row);
+    // Must calculate checksum here - reading bytes changes running sum
+    uint8_t checksum = (1 + ~runningSum_) & 0xff;
+    row->checksum = readByte_(ts);
+    if (checksum != row->checksum) {
+      throw("File corrupted - row checksum mismatch!");
+    }
+    data.insert(data.begin(), std::move(row));
   }
-}
-
-void CyACD::_resetChecksum() {
-  checksum = 0;
-  _checksum = 0;
-}
-
-void CyACD::_calculateChecksum() {
-  _checksum = (1 + ~checksum) & 0xff; // 2's complement
-}
-
-void CyACD::_verifyChecksum(CyACD_row *row) {
-  if (_checksum != row->checksum)
-    throw("File corrupted - row checksum mismatch!");
 }

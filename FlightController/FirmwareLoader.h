@@ -5,13 +5,14 @@
 
 #include "../c2/c2_protocol.h"
 #include "CyACD.h"
+#include "DeviceInterface.h"
 
 #define BOOTLOADER_SOP_MARKER 0x01
 #define BOOTLOADER_EOP_MARKER 0x17
 class FirmwareLoader : public QObject {
   Q_OBJECT
 
-public:
+ public:
   enum BootloaderVerb {
     BR_CYRET_SUCCESS = 0x00,
     BOOTLOADER_ERR_UNK01,
@@ -49,26 +50,21 @@ public:
   };
   Q_ENUM(BootloaderVerb)
 
-  explicit FirmwareLoader(QObject *parent = 0);
+  explicit FirmwareLoader(DeviceInterface& di);
   void load();
 
-public slots:
+ public slots:
   void start();
   bool selectFile();
 
-signals:
+ signals:
   void switchMode(bool bEnable);
   void sendPacket(Bootloader_packet_t packet); // Yes, copy.
 
-protected:
+ protected:
   bool eventFilter(QObject *obj, QEvent *event);
 
-private:
-  bool bootloaderMode;
-  CyACD *firmware;
-  BootloaderVerb lastCommand;
-  CyACD_row *lastRow;
-
+ private:
   bool _loadFirmwareFile();
   void _sendCommand(BootloaderVerb command);
   void _sendPacket(BootloaderVerb command, QByteArray &data);
@@ -77,4 +73,9 @@ private:
   bool _checkCompatibility(const Bootloader_packet_t& packet);
   bool _checkFlashSize(const Bootloader_packet_t& packet);
   bool _upload_row();
+
+  bool bootloaderMode{false};
+  std::unique_ptr<CyACD> firmware_{nullptr};
+  BootloaderVerb lastCommand{BR_CYRET_SUCCESS};
+  CyACD_row* lastRow;
 };

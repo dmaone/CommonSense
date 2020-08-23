@@ -1,17 +1,15 @@
 #pragma once
 
-#include "DeviceConfig.h"
-#include "DeviceInterface.h"
-#include "Events.h"
 #include <QGridLayout>
 #include <QLCDNumber>
 #include <QLabel>
 #include <QtCore>
 #include <stdint.h>
+#include "ui_MatrixMonitor.h"
 
-namespace Ui {
-class MatrixMonitor;
-}
+#include "DeviceConfig.h"
+#include "DeviceInterface.h"
+#include "Events.h"
 
 typedef struct {
   uint8_t now;
@@ -25,8 +23,8 @@ class MatrixMonitor : public QFrame {
   Q_OBJECT
 
 public:
-  explicit MatrixMonitor(QWidget *parent = 0);
-  ~MatrixMonitor();
+  explicit MatrixMonitor(DeviceInterface& di);
+
   void show();
   enum DisplayMode { DisplayNow, DisplayMin, DisplayMax, DisplayAvg };
   Q_ENUM(DisplayMode);
@@ -44,15 +42,17 @@ protected:
   void closeEvent(QCloseEvent *);
 
 private:
-  Ui::MatrixMonitor *ui;
+  Ui::MatrixMonitor realUi_{};
+  Ui::MatrixMonitor* ui{&realUi_};
+
   uint8_t debug;
-  DisplayMode displayMode;
-  QGridLayout *grid;
+  DisplayMode displayMode{DisplayNow};
+  QGridLayout grid_{};
   QLCDNumber *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   MonitoredCell cells[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   QLabel *statsDisplay[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
-  DeviceConfig *deviceConfig;
-  uint8_t _warmupRows;
+  DeviceInterface& di_;
+  uint8_t warmupRows_{ABSOLUTE_MAX_ROWS};
 
   void initDisplay();
   void updateDisplaySize(uint8_t, uint8_t);

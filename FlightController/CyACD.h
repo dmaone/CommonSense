@@ -2,32 +2,35 @@
 
 #include <QString>
 #include <QTextStream>
+#include <memory>
 
-typedef struct {
+using ChecksumBufferType = uint16_t;
+
+struct CyACD_row {
   uint8_t array;
   uint16_t row;
-  uint16_t checksum;
+  ChecksumBufferType checksum;
   QByteArray data;
-
-} CyACD_row;
+};
 
 class CyACD {
  public:
   CyACD(const QString& filename);
   ~CyACD();
-  bool loaded;
+
+  bool loaded{false};
   uint32_t siliconId;
   uint8_t siliconRevision;
-  std::vector<CyACD_row *> data;
+  std::vector<std::unique_ptr<CyACD_row>> data;
 
  private:
+  uint8_t readByte_(QTextStream &ts);
+  uint16_t readUInt16_(QTextStream &ts);
+  void readRow_(QTextStream &ts);
+  void initChecksum_();
+  void calculateChecksum_();
+
   uint8_t _checksumType;
-  uint8_t _readByte(QTextStream &ts);
-  uint16_t _readUInt16(QTextStream &ts);
-  uint16_t checksum{0};
-  uint16_t _checksum{0};
-  void _readRow(QTextStream &ts);
-  void _resetChecksum();
-  void _calculateChecksum();
-  void _verifyChecksum(CyACD_row *row);
+  ChecksumBufferType runningSum_{0};
+
 };

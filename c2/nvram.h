@@ -35,7 +35,7 @@ typedef union {
     uint8_t matrixRows;
     uint8_t matrixCols;
     uint8_t matrixLayers;
-    uint8_t capsenseFlags;
+    uint8_t _UNUSED0;
     uint8_t expMode;
     uint8_t expParam1;
     uint8_t expParam2;
@@ -45,7 +45,7 @@ typedef union {
     uint8_t debouncingTicks;
     uint8_t _RESERVED0[3];
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
-    uint8_t layerConditions[NUM_LAYER_CONDITIONS];
+    uint8_t layerConditions[ABSOLUTE_MAX_LAYERS];
     uint8_t switchType;
     uint8_t _RESERVED1[7];
 // CONFIG SIZE - count up from here.

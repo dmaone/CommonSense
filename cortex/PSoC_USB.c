@@ -91,7 +91,6 @@ void send_config_block(OUT_c2packet_t *inbox) {
 }
 
 void set_hardware_parameters(void) {
-  FORCE_BIT(config.capsenseFlags, CSF_NL, NORMALLY_LOW);
   if (config.matrixRows != MATRIX_ROWS || config.matrixCols != MATRIX_COLS) {
     // Yeehaw, a virgin EEPROM (or a different matrix size reflash)
     memset(config.thresholds, 0, sizeof(config.thresholds));

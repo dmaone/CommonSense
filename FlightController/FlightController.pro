@@ -15,7 +15,7 @@ CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
 
 win32 {
     INCLUDEPATH += $$PWD/../mingw32/include
-    LIBS += -L$$PWD/../mingw32/lib -lhidapi -lsetupapi
+    LIBS += -L$$PWD/../mingw32/lib -L$$PWD/../mingw32/bin -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
 macx {
@@ -27,55 +27,59 @@ linux {
 }
 
 SOURCES += main.cpp \
-    FlightController.cpp \
-    LogViewer.cpp \
-    DeviceInterface.cpp \
-    Events.cpp \
-    MatrixMonitor.cpp \
-    LayoutEditor.cpp \
-    ScancodeList.cpp \
-    ThresholdEditor.cpp \
-    MacroEditor.cpp \
-    DeviceConfig.cpp \
-    LayerConditions.cpp \
-    FirmwareLoader.cpp \
     CyACD.cpp \
-    LayerCondition.cpp \
     Delays.cpp \
+    DeviceConfig.cpp \
+    DeviceInterface.cpp \
+    DeviceSelector.cpp \
+    Events.cpp \
+    FirmwareLoader.cpp \
+    FlightController.cpp \
     Hardware.cpp \
+    LayerCondition.cpp \
+    LayerConditions.cpp \
+    Layout.cpp \
+    LogViewer.cpp \
     Macro.cpp \
-    DeviceSelector.cpp
+    Macros.cpp \
+    MatrixMonitor.cpp \
+    Pedals.cpp \
+    ScancodeList.cpp \
+    Thresholds.cpp \
+
 
 HEADERS  += \
     ../c2/nvram.h \
-    settings.h \
-    FlightController.h \
-    LogViewer.h \
-    DeviceInterface.h \
-    Events.h \
-    MatrixMonitor.h \
-    LayoutEditor.h \
-    ScancodeList.h \
-    ThresholdEditor.h \
-    MacroEditor.h \
-    DeviceConfig.h \
-    LayerConditions.h \
-    FirmwareLoader.h \
+    ../c2/c2_protocol.h \
     CyACD.h \
-    LayerCondition.h \
     Delays.h \
-    Hardware.h \
-    Macro.h \
+    DeviceConfig.h \
+    DeviceInterface.h \
     DeviceSelector.h \
-    ../c2/c2_protocol.h
+    Events.h \
+    FirmwareLoader.h \
+    FlightController.h \
+    Hardware.h \
+    LayerCondition.h \
+    LayerConditions.h \
+    Layout.h \
+    LogViewer.h \
+    MatrixMonitor.h \
+    Macro.h \
+    Macros.h \
+    Pedals.h \
+    ScancodeList.h \
+    settings.h \
+    Thresholds.h \
 
 FORMS    += \
+    DeviceSelector.ui \
     FlightController.ui \
-    MatrixMonitor.ui \
-    LayoutEditor.ui \
-    ThresholdEditor.ui \
-    MacroEditor.ui \
     Hardware.ui \
-    DeviceSelector.ui
+    Layout.ui \
+    Macros.ui \
+    MatrixMonitor.ui \
+    Pedals.ui \
+    Thresholds.ui \
 
 DISTFILES +=
