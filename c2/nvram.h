@@ -27,7 +27,7 @@
   (COMMONSENSE_BASE_SIZE + 2 * COMMONSENSE_MATRIX_SIZE)
 #endif
 
-#define MAX_DEBOUNCING_BUFFER_SIZE 16
+#define DEFAULT_DEBOUNCING_TICKS 4
 
 typedef union {
   struct {

@@ -1,6 +1,10 @@
 #include "Hardware.h"
 #include "ui_Hardware.h"
 
+namespace {
+constexpr size_t kMaxDebouncingTicks{64};
+}
+
 Hardware::Hardware(DeviceConfig *config, QWidget *parent)
     : QFrame(parent, Qt::Tool), ui(new Ui::Hardware), _config(config) {
   ui->setupUi(this);
@@ -30,6 +34,7 @@ void Hardware::init() {
   ui->chargeDelay->setValue(config.chargeDelay);
   ui->dischargeDelay->setValue(config.dischargeDelay);
   ui->debouncingTicks->setValue(config.debouncingTicks);
+  ui->debouncingTicks->setRange(1, kMaxDebouncingTicks);
 
   auto caps = _config->getSwitchCapabilities();
   ui->adcBits->setEnabled(caps.hasMatrixMonitor);

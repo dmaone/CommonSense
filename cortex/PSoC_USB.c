@@ -118,9 +118,7 @@ void set_hardware_parameters(void) {
     config.dischargeDelay = MIN_DISCHARGE_DELAY;
   }
   if (config.debouncingTicks < 1) {
-    config.debouncingTicks = 1;
-  } else if (config.debouncingTicks > MAX_DEBOUNCING_BUFFER_SIZE) {
-    config.debouncingTicks = MAX_DEBOUNCING_BUFFER_SIZE;
+    config.debouncingTicks = DEFAULT_DEBOUNCING_TICKS;
   }
 }
 
