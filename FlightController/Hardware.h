@@ -10,7 +10,7 @@ class Hardware : public QFrame {
 
  public:
   explicit Hardware(DeviceConfig& config);
-  ~Hardware();
+  ~Hardware() = default;
   void init();
 
  private:

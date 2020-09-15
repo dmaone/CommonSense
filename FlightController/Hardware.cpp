@@ -12,8 +12,6 @@ Hardware::Hardware(DeviceConfig& config) :
   }
 }
 
-Hardware::~Hardware() { delete ui; }
-
 void Hardware::init() {
   auto config = config_.getHardwareConfig();
   switch (config.adcBits) {
