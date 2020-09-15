@@ -67,9 +67,12 @@ inline void main_loop() {
         if (--ticksToAutonomy < 0) {
           // If FlightController doesn't poll us anymore - go to normal mode.
           ticksToAutonomy = LARGE_ENOUGH_32;
-          CLEAR_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
-          // Should reapply config - but firmware seems to crash if I do.
+
+          status_register = 0; // Clear EVERYTHING
+          scan_common_start(SANITY_CHECK_DURATION); // pipeline init doesn't
+
           pipeline_init();
+          // Should reapply config - but firmware seems to crash if I do.
           // apply_config();
         }
         if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
