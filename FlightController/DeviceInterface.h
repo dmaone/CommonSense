@@ -39,6 +39,12 @@ class DeviceInterface : public QObject {
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
   Q_ENUM(Mode)
 
+  struct KeyState{
+    uint8_t row;
+    uint8_t col;
+    DeviceInterface::KeyStatus status;
+  };
+
   DeviceInterface();
   ~DeviceInterface();
   void start();
@@ -75,8 +81,7 @@ class DeviceInterface : public QObject {
 
  signals:
   void deviceStatusNotification(DeviceInterface::DeviceStatus);
-  void scancodeReceived(uint8_t row, uint8_t col,
-                        DeviceInterface::KeyStatus status);
+  void keypress(DeviceInterface::KeyState state);
 
  protected:
   virtual void timerEvent(QTimerEvent *);

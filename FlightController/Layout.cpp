@@ -22,10 +22,8 @@ Layout::Layout(DeviceInterface& di) :
   connect(ui->switchButton, SIGNAL(clicked()), this, SLOT(switchLayer_()));
 
   connect(
-      &di,
-      SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
-      this,
-      SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
+      this, SLOT(keypress(DeviceInterface::KeyState)));
 }
 
 void Layout::init() {
@@ -168,13 +166,12 @@ void Layout::switchLayer_() {
   syncUiMatrix_();
 }
 
-void Layout::receiveScancode(uint8_t row, uint8_t col,
-                                   DeviceInterface::KeyStatus status) {
+void Layout::keypress(DeviceInterface::KeyState state) {
   if (display_.empty()) {
     return; // never happens, but..
   }
-  auto& cell = getUiCell_(row, col);
-  if (status != DeviceInterface::KeyPressed) {
+  auto& cell = getUiCell_(state.row, state.col);
+  if (state.status != DeviceInterface::KeyPressed) {
     cell.setStyleSheet("");
     return;
   }

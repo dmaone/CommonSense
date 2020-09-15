@@ -23,8 +23,7 @@ class Layout : public QFrame {
   void init();
 
  public slots:
-  void receiveScancode(
-      uint8_t row, uint8_t col, DeviceInterface::KeyStatus status);
+  void keypress(DeviceInterface::KeyState state);
 
  private slots:
   void import_();

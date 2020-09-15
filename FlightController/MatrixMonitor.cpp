@@ -24,10 +24,8 @@ MatrixMonitor::MatrixMonitor(DeviceInterface& di) :
           SLOT(setStatusBit(deviceStatus, bool)));
 
   connect(
-      &di,
-      SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
-      this,
-      SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
+      this, SLOT(keypress(DeviceInterface::KeyState)));
 
   di.installEventFilter(this);
 }
@@ -150,12 +148,11 @@ bool MatrixMonitor::eventFilter(QObject* /* obj */, QEvent* event) {
   return false;
 }
 
-void MatrixMonitor::receiveScancode(uint8_t row, uint8_t col,
-                                      DeviceInterface::KeyStatus status) {
-  if (status == DeviceInterface::KeyPressed) {
-    display[row][col]->setStyleSheet("color: black; background-color: #ffff33");
+void MatrixMonitor::keypress(DeviceInterface::KeyState state) {
+  if (state.status == DeviceInterface::KeyPressed) {
+    display[state.row][state.col]->setStyleSheet("color: black; background-color: #ffff33");
   } else {
-    display[row][col]->setStyleSheet("");
+    display[state.row][state.col]->setStyleSheet("");
   }
 }
 

@@ -30,8 +30,7 @@ public:
   Q_ENUM(DisplayMode);
 
 public slots:
-  void receiveScancode(uint8_t row, uint8_t col,
-                       DeviceInterface::KeyStatus status);
+  void keypress(DeviceInterface::KeyState state);
 
 signals:
   void sendCommand(c2command, uint8_t);

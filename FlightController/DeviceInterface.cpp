@@ -92,8 +92,10 @@ bool DeviceInterface::event(QEvent *e) {
         // "All keys released"
         qInfo() << "· ----------";
       } else {
-        emit scancodeReceived(
-            row, col, (flags & flagReleased) ? KeyReleased : KeyPressed);
+        emit keypress({
+            .row = row,
+            .col = col,
+            .status = (flags & flagReleased) ? KeyReleased : KeyPressed});
         qInfo().noquote() <<
             QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
             .arg(row + 1, 2)

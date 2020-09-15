@@ -15,10 +15,8 @@ Thresholds::Thresholds(DeviceInterface& di) :
   connect(ui->decButton, SIGNAL(clicked()), this, SLOT(decreaseThresholds()));
 
   connect(
-      &di,
-      SIGNAL(scancodeReceived(uint8_t, uint8_t, DeviceInterface::KeyStatus)),
-      this,
-      SLOT(receiveScancode(uint8_t, uint8_t, DeviceInterface::KeyStatus)));
+      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
+      this, SLOT(keypress(DeviceInterface::KeyState)));
 
   di.installEventFilter(this);
 }
@@ -149,12 +147,11 @@ bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
   return false;
 }
 
-void Thresholds::receiveScancode(uint8_t row, uint8_t col,
-                                      DeviceInterface::KeyStatus status) {
-  if (status != DeviceInterface::KeyPressed) {
-    return paintCell(display[row][col]);
+void Thresholds::keypress(DeviceInterface::KeyState state) {
+  if (state.status != DeviceInterface::KeyPressed) {
+    return paintCell(display[state.row][state.col]);
   }
-  display[row][col]->setStyleSheet("color: black; background-color: #ffff33");
+  display[state.row][state.col]->setStyleSheet("color: black; background-color: #ffff33");
 }
 
 void Thresholds::on_closeButton_clicked() { this->close(); }

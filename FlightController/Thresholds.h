@@ -23,8 +23,7 @@ public slots:
   void resetThresholds();
   void increaseThresholds();
   void decreaseThresholds();
-  void receiveScancode(uint8_t row, uint8_t col,
-                       DeviceInterface::KeyStatus status);
+  void keypress(DeviceInterface::KeyState state);
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
