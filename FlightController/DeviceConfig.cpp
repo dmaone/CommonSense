@@ -346,6 +346,10 @@ const QString DeviceConfig::getSwitchTypeName() {
   return QString{switchTypeNames_.at(switchType).data()};
 }
 
+size_t DeviceConfig::getMatrixSize() const {
+  return numRows * numCols;
+}
+
 void DeviceConfig::setSwitchCapabilities_() {
   capabilities.hasChargeSequencer = true;
   capabilities.hasTelemetry = true;

@@ -1,18 +1,24 @@
+#include "Thresholds.h"
+
 #include <QLabel>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSpinBox>
 
 #include "DeviceInterface.h"
-#include "Thresholds.h"
 
 Thresholds::Thresholds(DeviceInterface& di) :
     QFrame{nullptr, Qt::Tool}, di_{di} {
   ui->setupUi(this);
-  initDisplay();
-  connect(ui->applyButton, SIGNAL(clicked()), this, SLOT(applyThresholds()));
-  connect(ui->revertButton, SIGNAL(clicked()), this, SLOT(resetThresholds()));
-  connect(ui->incButton, SIGNAL(clicked()), this, SLOT(increaseThresholds()));
-  connect(ui->decButton, SIGNAL(clicked()), this, SLOT(decreaseThresholds()));
+
+  connect(ui->applyButton, &QPushButton::clicked, this, [this](){ apply_(); });
+  connect(ui->revertButton, &QPushButton::clicked, this, [this](){ reset_(); });
+  connect(ui->incButton, &QPushButton::clicked,
+      this, [this](){ bumpAll_(ui->adjustSpinbox->value()); });
+  connect(ui->decButton, &QPushButton::clicked,
+      this, [this](){ bumpAll_(0 - ui->adjustSpinbox->value()); });
+
+  connect(ui->closeButton, &QPushButton::clicked, this, [this](){ close(); });
 
   connect(
       &di, SIGNAL(keypress(DeviceInterface::KeyState)),
@@ -21,103 +27,80 @@ Thresholds::Thresholds(DeviceInterface& di) :
   di.installEventFilter(this);
 }
 
-void Thresholds::show() {
-  if (!di_.config.bValid) {
-    QMessageBox::critical(this, "Error", "Matrix not configured - cannot edit");
-    return;
+void Thresholds::init() {
+  LabelList labels;
+  grid_ = std::make_unique<QGridLayout>();
+  for (uint8_t i = 1; i <= di_.config.numCols; ++i) {
+    labels.emplace_back(std::make_unique<QLabel>(QString("%1").arg(i)));
+    grid_->addWidget(labels.back().get(), 0, i, 1, 1, Qt::AlignRight);
   }
-  updateDisplaySize(di_.config.numRows, di_.config.numCols);
-  resetThresholds();
-  QWidget::show();
-  QWidget::raise();
-}
 
-void Thresholds::initDisplay() {
-  for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
-    _grid.addWidget(new QLabel(QString("%1").arg(i)), 0, i, 1, 1,
-                    Qt::AlignRight);
-    if (i <= ABSOLUTE_MAX_ROWS) {
-      _grid.addWidget(new QLabel(QString("%1").arg(i)), i, 0, 1, 1,
-                      Qt::AlignRight);
-    }
-  }
-  for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
-    for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
-      QSpinBox *l = new QSpinBox();
-      l->setMaximum(254);
-      l->setMinimum(0);
-      l->setAlignment(Qt::AlignRight);
-      l->setMaximumWidth(80);
-      connect(l, QOverload<int>::of(&QSpinBox::valueChanged),
-          [this, l](int){ paintCell(l); });
-      display[i][j] = l;
-      _grid.addWidget(l, i + 1, j + 1, 1, 1);
-    }
-  }
-  ui->Dashboard->setLayout(&_grid);
-}
+  std::vector<QSpinBox> cells{di_.config.getMatrixSize()};
+  auto cell = cells.begin();
+  for (uint8_t i = 1; i <= di_.config.numRows; ++i) {
+    labels.emplace_back(std::make_unique<QLabel>(QString("%1").arg(i)));
+    grid_->addWidget(labels.back().get(), i, 0, 1, 1, Qt::AlignRight);
+    for (uint8_t j = 1; j <= di_.config.numCols; ++j) {
+      cell->setMaximum(254);
+      cell->setMinimum(0);
+      cell->setAlignment(Qt::AlignRight);
+      cell->setMaximumWidth(80);
+      auto& cellRef = *cell;
+      connect(&cellRef, QOverload<int>::of(&QSpinBox::valueChanged),
+          [this, &cellRef](int){ paintCell_(cellRef); });
 
-void Thresholds::updateDisplaySize(uint8_t rows, uint8_t cols) {
-  for (uint8_t i = 1; i <= ABSOLUTE_MAX_COLS; i++) {
-    if (i <= ABSOLUTE_MAX_ROWS)
-      _grid.itemAtPosition(i, 0)->widget()->setVisible(i <= rows);
-    _grid.itemAtPosition(0, i)->widget()->setVisible(i <= cols);
-  }
-  for (uint8_t i = 0; i < ABSOLUTE_MAX_ROWS; i++) {
-    for (uint8_t j = 0; j < ABSOLUTE_MAX_COLS; j++) {
-      display[i][j]->setVisible((i < rows) & (j < cols));
+      grid_->addWidget(&cellRef, i, j, 1, 1);
+      ++cell;
     }
   }
+  ui->Dashboard->setLayout(grid_.get());
   adjustSize();
+
+  cells_.swap(cells);
+  labels_.swap(labels);
 }
 
-void Thresholds::adjustThresholds(size_t delta) {
+
+QSpinBox& Thresholds::getCell_(uint8_t row, uint8_t col) {
+  return cells_.at(row * di_.config.numCols + col);
+}
+
+void Thresholds::bumpAll_(int delta) {
   size_t nonZeroes{0};
-  for (uint8_t i = 0; i < di_.config.numRows; i++) {
-    for (uint8_t j = 0; j < di_.config.numCols; j++) {
-      nonZeroes += display[i][j]->value();
-    }
+  for (auto& cell : cells_) {
+    nonZeroes += cell.value();
   }
-  for (uint8_t i = 0; i < di_.config.numRows; i++) {
-    for (uint8_t j = 0; j < di_.config.numCols; j++) {
-      auto threshold = display[i][j]->value();
-      if (threshold == 0 && nonZeroes > 0) {
-        continue;
-      }
-      display[i][j]->setValue(threshold + delta);
+  for (auto& cell : cells_) {
+    auto threshold = cell.value();
+    if (threshold == 0 && nonZeroes > 0) {
+      continue; // Only bump zeroes when ALL cells are zero.
     }
+    cell.setValue(threshold + delta);
   }
 }
 
-void Thresholds::paintCell(QSpinBox *cell) {
-  cell->setStyleSheet(
-      cell->value() == K_IGNORE_KEY ? "background-color: #999999" : "");
+void Thresholds::paintCell_(QSpinBox& cell) {
+  cell.setStyleSheet(
+      cell.value() == K_IGNORE_KEY ? "background-color: #999999" : "");
 }
 
-void Thresholds::increaseThresholds() {
-  adjustThresholds(ui->adjustSpinbox->value());
-}
-
-void Thresholds::decreaseThresholds() {
-  adjustThresholds(0 - ui->adjustSpinbox->value());
-}
-
-void Thresholds::applyThresholds() {
+void Thresholds::apply_() {
   for (uint8_t i = 0; i < di_.config.numRows; i++) {
     for (uint8_t j = 0; j < di_.config.numCols; j++) {
-      di_.config.thresholds[i][j] = display[i][j]->value();
+      di_.config.thresholds[i][j] = getCell_(i, j).value();
     }
   }
 }
 
-void Thresholds::resetThresholds() {
+void Thresholds::reset_() {
   for (uint8_t i = 0; i < di_.config.numRows; i++) {
     for (uint8_t j = 0; j < di_.config.numCols; j++) {
-      display[i][j]->setValue(di_.config.thresholds[i][j]);
-      paintCell(display[i][j]);
+      auto& cell = getCell_(i, j);
+      cell.setValue(di_.config.thresholds[i][j]);
+      paintCell_(cell);
     }
   }
-  qInfo() << "Loaded threshold map";
+  qInfo() << "Reloaded threshold map";
 }
 
 bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
@@ -136,24 +119,25 @@ bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
   for (uint8_t i = 0; i < max_cols; i++) {
     const auto thr = di_.config.thresholds[row][i];
     qDebug() << row << " " << i << " " << thr << " = " << pl->constData()[3 + i];
+    auto& cell = getCell_(row, i);
     if (thr == K_IGNORE_KEY) {
-      display[row][i]->setStyleSheet("background-color: #999999;");
+      cell.setStyleSheet("background-color: #999999;");
     } else if (pl->constData()[3 + i] > 0) {
-      display[row][i]->setStyleSheet("color: black; background-color: #ff3333;");
+      cell.setStyleSheet("color: black; background-color: #ff3333;");
     } else {
-      display[row][i]->setStyleSheet("");
+      cell.setStyleSheet("");
     }
   }
   return false;
 }
 
 void Thresholds::keypress(DeviceInterface::KeyState state) {
+  auto& cell = getCell_(state.row, state.col);
   if (state.status != DeviceInterface::KeyPressed) {
-    return paintCell(display[state.row][state.col]);
+    paintCell_(cell);
+    return;
   }
-  display[state.row][state.col]->setStyleSheet("color: black; background-color: #ffff33");
+  cell.setStyleSheet("color: black; background-color: #ffff33");
 }
-
-void Thresholds::on_closeButton_clicked() { this->close(); }
 
 

@@ -48,6 +48,7 @@ class DeviceConfig : public QObject {
   void setHardwareConfig(HardwareConfig config);
   const std::vector<std::string> getExpModeNames();
   const QString getSwitchTypeName();
+  size_t getMatrixSize() const;
 
   bool bValid{false};
   uint8_t numRows{0};

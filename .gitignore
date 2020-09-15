@@ -15,6 +15,7 @@ Compiled
 build-FlightController*
 
 mingw32
+mingw64
 
 # Standard ones from https://gist.github.com/octocat/9257657
 # Compiled source #

@@ -58,7 +58,7 @@ void Telemetry::init() {
     grid_->addWidget(labels.back().get(), 0, i, 1, 1, Qt::AlignCenter);
   }
 
-  std::vector<Cell> cells{(size_t)(di_.config.numRows * di_.config.numCols)};
+  std::vector<Cell> cells{di_.config.getMatrixSize()};
   auto cell = cells.begin();
   for (uint8_t i = 1; i <= di_.config.numRows; ++i) {
     labels.emplace_back(std::make_unique<QLabel>(QString("%1").arg(i)));

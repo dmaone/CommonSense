@@ -1,8 +1,8 @@
 #pragma once
 
-#include <QCheckBox>
 #include <QFrame>
 #include <QGridLayout>
+#include <QLabel>
 #include <QSpinBox>
 #include "ui_Thresholds.h"
 
@@ -13,33 +13,31 @@
 class Thresholds : public QFrame {
   Q_OBJECT
 
+  using LabelList = std::vector<std::unique_ptr<QLabel>>;
+
 public:
   explicit Thresholds(DeviceInterface& di);
 
-  void show();
+  void init();
 
 public slots:
-  void applyThresholds();
-  void resetThresholds();
-  void increaseThresholds();
-  void decreaseThresholds();
   void keypress(DeviceInterface::KeyState state);
 
 protected:
   bool eventFilter(QObject *obj, QEvent *event);
 
 private:
+  void apply_();
+  void reset_();
+  void bumpAll_(int delta);
+  QSpinBox& getCell_(uint8_t row, uint8_t col);
+  void paintCell_(QSpinBox& cell);
+
   Ui::Thresholds realUi_{};
   Ui::Thresholds* ui{&realUi_};
 
-  QGridLayout _grid{};
-  QSpinBox *display[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+  std::unique_ptr<QGridLayout> grid_;
+  std::vector<QSpinBox> cells_{};
+  LabelList labels_{};
   DeviceInterface& di_;
-  void initDisplay();
-  void updateDisplaySize(uint8_t, uint8_t);
-  void adjustThresholds(size_t delta);
-  void paintCell(QSpinBox *cell);
-
-private slots:
-  void on_closeButton_clicked();
 };

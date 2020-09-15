@@ -159,6 +159,7 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
     layers_.init();
     layout_.init();
     telemetry_.init();
+    thresholds_.init();
     ui->typeLabel->setText(di_.config.getSwitchTypeName());
     lockUI_(false);
     break;
