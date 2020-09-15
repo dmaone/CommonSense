@@ -113,7 +113,7 @@ bool DeviceInterface::event(QEvent *e) {
 }
 
 void DeviceInterface::enqueueCommand_(OUT_c2packet_t outbox) {
-  if (state_ != DeviceConnected) {
+  if (state_ != DeviceConnected && state_ != BootloaderConnected) {
     qInfo() << "Command while disconnected";
     return;
   }
