@@ -170,7 +170,7 @@ void scan_common_tick() {
 void report_matrix_readouts(void) {
   uint8_t idx = 0;
   for (uint8 i = 0; i < MATRIX_ROWS; i++) {
-    outbox.response_type = C2RESPONSE_MATRIX_ROW;
+    outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
     outbox.payload[0] = i;
     outbox.payload[1] = MATRIX_COLS;
     for (uint8_t j = 0; j < MATRIX_COLS; j++) {
@@ -186,7 +186,7 @@ void scan_report_insanity() {
     cur_row = MATRIX_ROWS;
   }
   --cur_row;
-  outbox.response_type = C2RESPONSE_MATRIX_ROW;
+  outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
   outbox.payload[0] = cur_row;
   outbox.payload[1] = MATRIX_COLS;
   uint8_t start_index = MATRIX_COLS * cur_row;

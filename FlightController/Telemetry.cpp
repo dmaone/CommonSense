@@ -85,7 +85,7 @@ void Telemetry::init() {
   resetCells_();
   initialized_.store(true);
   // TODO fix start button label and/or disable telemetry on connect
-  // enableReporting_(di_.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR));
+  // enableReporting_(di_.getStatusBit(C2DEVSTATUS_TELEMETRY_MODE));
 }
 
 void Telemetry::deinit() {
@@ -109,7 +109,7 @@ bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
     return false;
   }
   QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-  if (pl->at(0) != C2RESPONSE_MATRIX_ROW) {
+  if (pl->at(0) != C2RESPONSE_TELEMETRY_ROW) {
     return false;
   }
   if (warmupRows_ > 0) {
@@ -180,7 +180,7 @@ void Telemetry::enableReporting_(bool newState) {
   isActive_ = newState;
   // TODO feed commands slowly, so they won't be lost.
   // di_.setStatusBit(C2DEVSTATUS_OUTPUT_ENABLED, false);
-  di_.sendCommand(C2CMD_GET_MATRIX_STATE, newState ? 1 : 0);
+  di_.sendCommand(C2CMD_ENABLE_TELEMETRY, newState ? 1 : 0);
   di_.setStatusBit(C2DEVSTATUS_SCAN_ENABLED, true);
 }
 

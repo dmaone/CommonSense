@@ -174,7 +174,7 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
     ui->outputButton->setStyleSheet(di_.outputEnabled ? kGreen : kOff);
     ui->action_Setup_mode->setChecked(di_.setupMode);
     ui->setupButton->setStyleSheet(di_.setupMode ? kYellow : kOff);
-    ui->monitorLabel->setStyleSheet(di_.matrixMonitor ? kYellow : kDisabled);
+    ui->telemetryLabel->setStyleSheet(di_.matrixMonitor ? kYellow : kDisabled);
     ui->insaneLabel->setStyleSheet(di_.controllerInsane ? kRed : kDisabled);
     break;
   default:

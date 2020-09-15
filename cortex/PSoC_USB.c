@@ -203,8 +203,8 @@ void usb_receive(OUT_c2packet_t *inbox) {
   case C2CMD_ROLLBACK:
     xprintf("Resetting..");
     CySoftwareReset(); // Does not return, no need for break.
-  case C2CMD_GET_MATRIX_STATE:
-    FORCE_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR, inbox->payload[0]);
+  case C2CMD_ENABLE_TELEMETRY:
+    FORCE_BIT(status_register, C2DEVSTATUS_TELEMETRY_MODE, inbox->payload[0]);
     scan_reset();
     break;
   default:

@@ -60,7 +60,7 @@ bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
  * Fire up the uploader.
  */
 void DeviceConfig::toDevice() {
-  if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+  if (interface_->getStatusBit(C2DEVSTATUS_TELEMETRY_MODE)) {
     QMessageBox::critical(
         nullptr, "Telemetry active", "Turn off telemetry first!");
     return;
@@ -109,7 +109,7 @@ void DeviceConfig::sendConfigBlock_() {
 }
 
 void DeviceConfig::fromDevice() {
-  if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
+  if (interface_->getStatusBit(C2DEVSTATUS_TELEMETRY_MODE)) {
     QMessageBox::critical(
       nullptr, "Telemetry active", "Turn off telemetry first!");
     return;

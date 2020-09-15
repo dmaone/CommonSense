@@ -75,7 +75,7 @@ inline void main_loop() {
           // Should reapply config - but firmware seems to crash if I do.
           // apply_config();
         }
-        if (TEST_BIT(status_register, C2DEVSTATUS_MATRIX_MONITOR)) {
+        if (TEST_BIT(status_register, C2DEVSTATUS_TELEMETRY_MODE)) {
           report_matrix_readouts();
         } else if (TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
           pipeline_process();

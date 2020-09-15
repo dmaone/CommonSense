@@ -53,7 +53,7 @@ void DeviceInterface::processStatusReply_(QByteArray* payload) {
   scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
   outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
   setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
-  matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_MATRIX_MONITOR);
+  matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_TELEMETRY_MODE);
   controllerInsane = payload->at(1) & (1 << C2DEVSTATUS_INSANE);
   firmwareVersion = QString("%1.%2")
       .arg((uint8_t)payload->at(2)).arg((uint8_t)payload->at(3));
@@ -76,7 +76,7 @@ bool DeviceInterface::event(QEvent *e) {
   }
   QByteArray *payload = static_cast<DeviceMessage *>(e)->getPayload();
   switch (payload->at(0)) {
-    case C2RESPONSE_MATRIX_ROW:
+    case C2RESPONSE_TELEMETRY_ROW:
       break; // We are not interested in this, but it has >1 subscribers
     case C2RESPONSE_STATUS:
       processStatusReply_(payload);

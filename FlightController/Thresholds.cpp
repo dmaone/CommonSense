@@ -109,7 +109,7 @@ bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
   }
 
   QByteArray *pl = static_cast<DeviceMessage *>(event)->getPayload();
-  if (pl->at(0) != C2RESPONSE_MATRIX_ROW
+  if (pl->at(0) != C2RESPONSE_TELEMETRY_ROW
       || !di_.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
     return false;
   }
