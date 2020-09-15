@@ -12,7 +12,8 @@
 
 class DeviceMessage : public QEvent {
  public:
-  DeviceMessage(const unsigned char *buf);
+  explicit DeviceMessage(const unsigned char *buf) :
+      QEvent(DeviceMessage::ET), payload((const char *)buf, 64) {};
 
   QByteArray* getPayload() {
     return &payload;

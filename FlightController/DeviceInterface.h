@@ -25,10 +25,10 @@ class DeviceInterface : public QObject {
 
  public:
   enum DeviceStatus {
-    DeviceConnected,
     DeviceDisconnected,
-    DeviceConfigChanged,
     BootloaderConnected,
+    DeviceConnected,
+    DeviceConfigured,
     StatusUpdated
   };
   Q_ENUM(DeviceStatus)
@@ -62,7 +62,6 @@ class DeviceInterface : public QObject {
   bool controllerInsane{false};
   std::atomic<bool> rx{false};
   std::atomic<bool> tx{false};
-  QString switchType{};
   QString firmwareVersion{};
   QString dieTemp{};
   QString latencyMs{};
@@ -76,7 +75,7 @@ class DeviceInterface : public QObject {
   bool getStatusBit(deviceStatus bit);
   void setStatusBit(deviceStatus bit, bool value);
   void flipStatusBit(deviceStatus bit);
-  void configChanged();
+  void configLoaded();
   void bootloaderMode(bool bEnable);
 
  signals:
@@ -108,7 +107,6 @@ class DeviceInterface : public QObject {
   hid_device* device_{nullptr};
   int pollTimerId_{0};
   int statusTimerId_{0};
-  unsigned char bytesFromDevice[65];
   device_status_t status{};
   Mode mode_{DeviceInterfaceNormal};
   DeviceStatus currentStatus_{DeviceDisconnected};

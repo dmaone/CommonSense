@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+namespace {
 constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
 constexpr size_t kNormalOperationTick{100}; // ms
 constexpr size_t kDeviceScanTick{1000}; // ms connect retry
@@ -15,10 +16,13 @@ constexpr size_t kStatusTimerTick{200}; // ms between status updates
 constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
 constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
 
+constexpr bool kDebugUsbTraffic{false};
+}
+
 DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
   installEventFilter(&config);
 
-  connect(&config, SIGNAL(changed()), this, SLOT(configChanged()));
+  connect(&config, SIGNAL(loaded()), this, SLOT(configLoaded()));
   connect(&config, SIGNAL(downloadBlock(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
   connect(&config, SIGNAL(uploadBlock(OUT_c2packet_t)), this,
@@ -113,6 +117,10 @@ void DeviceInterface::deviceMessageReceiver() {
 }
 
 void DeviceInterface::_enqueueCommand(OUT_c2packet_t outbox) {
+  if (currentStatus_ != DeviceConnected) {
+    qInfo() << "Command while disconnected";
+    return;
+  }
   {
     std::lock_guard<std::mutex> lock{queueLock_};
     commandQueue_.enqueue(outbox);
@@ -124,7 +132,6 @@ void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
   OUT_c2packet_t outbox;
   outbox.command = cmd;
   memcpy(outbox.payload, msg, 63);
-  qDebug() << "SendCmdMsgPtr queueLock";
   _enqueueCommand(outbox);
 }
 
@@ -132,12 +139,10 @@ void DeviceInterface::sendCommand(c2command cmd, uint8_t msg) {
   OUT_c2packet_t outbox;
   outbox.command = cmd;
   outbox.payload[0] = msg;
-  qDebug() << "SendCmdMsg queueLock";
   _enqueueCommand(outbox);
 }
 
 void DeviceInterface::sendCommand(OUT_c2packet_t cmd) {
-  qDebug() << "SendCmd queueLock";
   _enqueueCommand(cmd);
 }
 
@@ -145,15 +150,13 @@ void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
   OUT_c2packet_t outbox;
   // Structure is marker+[payload]+len16+checksum16+marker
   memcpy(outbox.raw, packet.raw, packet.length + 7);
-  qDebug() << "SendCmdPacketPtr queueLock";
   _enqueueCommand(outbox);
 }
 
-void DeviceInterface::configChanged() {
-  qInfo() << "Configuration changed.";
-  switchType = QString(config.getSwitchTypeName().data());
+void DeviceInterface::configLoaded() {
+  qInfo() << "Configuration loaded.";
   if (currentStatus_ == DeviceConnected) {
-    emit deviceStatusNotification(DeviceConfigChanged);
+    emit deviceStatusNotification(DeviceConfigured);
   }
 }
 
@@ -198,13 +201,12 @@ void DeviceInterface::_resetTimer(int interval) {
   if (pollTimerId_ > 0) {
     killTimer(pollTimerId_);
   }
-  qDebug() << "Reset timer to " << interval;
   pollTimerId_ = startTimer(interval);
 }
 
 void DeviceInterface::timerEvent(QTimerEvent* timer) {
   if (timer->timerId() == statusTimerId_) {
-    if (mode_ == DeviceInterfaceNormal && currentStatus_ == DeviceConnected) {
+    if (mode_ == DeviceInterfaceNormal && currentStatus_ == DeviceConnected && config.bValid) {
       // request status, so you see actual status.
       sendCommand(C2CMD_GET_STATUS, 1);
     }
@@ -227,16 +229,13 @@ void DeviceInterface::timerEvent(QTimerEvent* timer) {
       antiLagTimer_ = kAntiLagTicks;
     }
   }
-  qDebug() << "Main timer deviceLock";
   releaseDevice_();
-  qDebug() << "Timer2 deviceUnlock";
 }
 
 bool DeviceInterface::_sendPacket() {
   unsigned char outbox[65];
   OUT_c2packet_t cmd;
   {
-    qDebug() << "_sendPacket queueLock";
     std::lock_guard<std::mutex> lock{queueLock_};
     if (commandQueue_.empty()) {
       return false;
@@ -259,7 +258,9 @@ bool DeviceInterface::_sendPacket() {
     lastSend_ = QDateTime::currentMSecsSinceEpoch();
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
-  qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
+  if (kDebugUsbTraffic) {
+    qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
+  }
   std::lock_guard<std::mutex> lock{deviceLock_};
   if (hid_write(device_, outbox, sizeof outbox) == -1) {
     qWarning() << "Error sending to the device, will reconnect in 1 second";
@@ -270,12 +271,13 @@ bool DeviceInterface::_sendPacket() {
 }
 
 bool DeviceInterface::_receivePacket() {
-  memset(bytesFromDevice, 0x00, sizeof(bytesFromDevice));
+  unsigned char buffer[65];
+  memset(buffer, 0x00, sizeof(buffer));
+
   int bytesRead;
   {
-    qDebug() << "receivePacket deviceLock";
     std::lock_guard<std::mutex> lock{deviceLock_};
-    bytesRead = hid_read(device_, bytesFromDevice, sizeof(bytesFromDevice));
+    bytesRead = hid_read(device_, buffer, sizeof(buffer));
   }
   if (bytesRead == 0) {
     return false;
@@ -284,9 +286,11 @@ bool DeviceInterface::_receivePacket() {
     scheduleDeviceRelease_.store(true);
     return true;
   }
-  qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)bytesFromDevice[1];
+  if (kDebugUsbTraffic) {
+    qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)buffer[1];
+  }
   cts_.store(true);
-  if (bytesFromDevice[0] != C2RESPONSE_STATUS) {
+  if (buffer[0] != C2RESPONSE_STATUS) {
     rx = true;
     if (lastSend_ > 0) {
       latencyMs = QString("%1 ms ").arg(
@@ -294,12 +298,11 @@ bool DeviceInterface::_receivePacket() {
       lastSend_ = 0;
     }
   }
-  QCoreApplication::postEvent(this, new DeviceMessage(bytesFromDevice));
+  QCoreApplication::postEvent(this, new DeviceMessage(buffer));
   return rx;
 }
 
 void DeviceInterface::_initDevice() {
-  qDebug() << "InitDevice deviceLock";
   std::lock_guard<std::mutex> lock{deviceLock_};
   device_ = acquireDevice();
   if (!device_) {
@@ -308,12 +311,13 @@ void DeviceInterface::_initDevice() {
     return;
   }
   hid_set_nonblocking(device_, 1);
+  config.reset();
+  QByteArray tmp(64, (char)0); // initialize status by reading empty packet
+  processStatusReply(&tmp);
 
   cts_.store(true); // Not expecting anything from device - clear to send.
   _updateDeviceStatus(mode_ == DeviceInterfaceNormal ? DeviceConnected
                                                     : BootloaderConnected);
-  QByteArray tmp(64, (char)0);
-  processStatusReply(&tmp);
   // No need to change timer rate - loading config will switch it.
   return;
 }

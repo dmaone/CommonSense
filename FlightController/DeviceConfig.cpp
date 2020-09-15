@@ -22,7 +22,14 @@ static const std::vector<std::string> switchTypeNames_ {
 } //namespace
 
 DeviceConfig::DeviceConfig(DeviceInterface* di) : interface_{di} {
-  memset(this->_eeprom.raw, 0x00, sizeof(this->_eeprom));
+  reset();
+}
+
+void DeviceConfig::reset() {
+  memset(this->eeprom_.raw, 0x00, sizeof(this->eeprom_));
+  bValid = false;
+  transferDirection_ = TransferIdle;
+  currentBlock_ = 0;
 }
 
 bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
@@ -33,7 +40,7 @@ bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
   if (payload->at(0) != C2RESPONSE_CONFIG)
     return false;
 
-  currentBlock++;
+  currentBlock_++;
   switch (transferDirection_) {
   case TransferDownload:
     _receiveConfigBlock(payload);
@@ -67,7 +74,7 @@ void DeviceConfig::toDevice() {
   this->_assemble();
   emit sendCommand(C2CMD_EWO, (1 << C2DEVSTATUS_SETUP_MODE));
   this->transferDirection_ = TransferUpload;
-  this->currentBlock = 0;
+  this->currentBlock_ = 0;
   qInfo() << "Uploading config";
   this->_uploadConfigBlock();
 }
@@ -80,7 +87,7 @@ void DeviceConfig::toDevice() {
 void DeviceConfig::_uploadConfigBlock() {
   switch (transferDirection_) {
   case TransferUpload:
-    if (currentBlock > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
+    if (currentBlock_ > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
       qInfo() << "done!";
       transferDirection_ = TransferIdle;
       emit sendCommand(C2CMD_APPLY_CONFIG, 1);
@@ -89,9 +96,9 @@ void DeviceConfig::_uploadConfigBlock() {
     qInfo(".");
     OUT_c2packet_t msg;
     msg.command = C2CMD_UPLOAD_CONFIG;
-    msg.payload[0] = currentBlock;
+    msg.payload[0] = currentBlock_;
     memcpy(msg.payload + CONFIG_BLOCK_DATA_OFFSET,
-           this->_eeprom.raw + (CONFIG_TRANSFER_BLOCK_SIZE * currentBlock),
+           this->eeprom_.raw + (CONFIG_TRANSFER_BLOCK_SIZE * currentBlock_),
            CONFIG_TRANSFER_BLOCK_SIZE);
     emit uploadBlock(msg);
     break;
@@ -111,7 +118,7 @@ void DeviceConfig::fromDevice() {
   switch (transferDirection_) {
   case TransferIdle:
     transferDirection_ = TransferDownload;
-    currentBlock = 0;
+    currentBlock_ = 0;
     qInfo() << "Downloading config";
     qInfo() << ".";
     break;
@@ -124,7 +131,7 @@ void DeviceConfig::fromDevice() {
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
-  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock);
+  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock_);
 }
 
 /**
@@ -140,25 +147,25 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
     return;
   }
   qInfo(".");
-  if (currentBlock >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
+  if (currentBlock_ >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
     transferDirection_ = TransferIdle;
     qInfo() << "done, unpacking...";
     _unpack();
     return;
   }
-  memcpy(this->_eeprom.raw +
+  memcpy(this->eeprom_.raw +
              (CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)),
          payload->data() + 1 + CONFIG_BLOCK_DATA_OFFSET,
          CONFIG_TRANSFER_BLOCK_SIZE);
-  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock);
+  emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock_);
 }
 
 void DeviceConfig::_unpack() {
-  numRows = _eeprom.matrixRows;
-  numCols = _eeprom.matrixCols;
-  numLayers = _eeprom.matrixLayers;
+  numRows = eeprom_.matrixRows;
+  numCols = eeprom_.matrixCols;
+  numLayers = eeprom_.matrixLayers;
   uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
-  switchType = std::min(_eeprom.switchType, maxSwitchIndex);
+  switchType = std::min(eeprom_.switchType, maxSwitchIndex);
   _setSwitchCapabilities();
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
@@ -167,46 +174,46 @@ void DeviceConfig::_unpack() {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
       this->thresholds[i][j] =
-          capabilities.hasThresholds ? _eeprom.stash[offset] : 1;
+          capabilities.hasThresholds ? eeprom_.stash[offset] : 1;
       for (uint8_t k = 0; k < numLayers; k++) {
-        layouts[k][i][j] = _eeprom.stash[tableSize * (k + 1) + offset];
+        layouts[k][i][j] = eeprom_.stash[tableSize * (k + 1) + offset];
       }
     }
   }
   int macro_start = tableSize * (numLayers + 1);
   macros.clear();
-  while(_eeprom.stash[macro_start] != 0xff) {
-    size_t len = _eeprom.stash[macro_start + 2];
+  while(eeprom_.stash[macro_start] != 0xff) {
+    size_t len = eeprom_.stash[macro_start + 2];
     if (len == 0) {
       // Most likely fresh ROM
       break;
     }
-    macros.emplace_back(_eeprom.stash[macro_start],
-                        _eeprom.stash[macro_start+1],
+    macros.emplace_back(eeprom_.stash[macro_start],
+                        eeprom_.stash[macro_start+1],
                         QByteArray(reinterpret_cast<const char *>(
-                            _eeprom.stash+macro_start+3), len));
+                            eeprom_.stash+macro_start+3), len));
     macro_start += len + 3;
   }
   this->bValid = true;
-  emit changed();
+  emit loaded();
   return;
 }
 
 void DeviceConfig::_assemble() {
-  _eeprom.configVersion = 2;
-  memset(_eeprom.stash, EMPTY_FLASH_BYTE, sizeof(_eeprom.stash));
-  memset(_eeprom._RESERVED0, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED0));
-  memset(_eeprom._RESERVED1, EMPTY_FLASH_BYTE, sizeof(_eeprom._RESERVED1));
+  eeprom_.configVersion = 2;
+  memset(eeprom_.stash, EMPTY_FLASH_BYTE, sizeof(eeprom_.stash));
+  memset(eeprom_._RESERVED0, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED0));
+  memset(eeprom_._RESERVED1, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED1));
   uint8_t tableSize = numRows * numCols;
   _setSwitchCapabilities();
   for (uint8_t i = 0; i < this->numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
       if (capabilities.hasThresholds) {
-        _eeprom.stash[offset] = thresholds[i][j];
+        eeprom_.stash[offset] = thresholds[i][j];
       }
       for (uint8_t k = 0; k < numLayers; k++) {
-        this->_eeprom.stash[tableSize * (k + 1) + offset] =
+        this->eeprom_.stash[tableSize * (k + 1) + offset] =
             this->layouts[k][i][j];
       }
     }
@@ -216,7 +223,7 @@ void DeviceConfig::_assemble() {
   for (auto& m : macros) {
     auto bin = m.toBin();
     for (uint8_t i=0; i<bin.length(); i++) {
-      _eeprom.stash[macros_cursor++] = bin[i];
+      eeprom_.stash[macros_cursor++] = bin[i];
     }
   }
 
@@ -234,7 +241,7 @@ void DeviceConfig::fromFile() {
     QFile f(fns.at(0));
     f.open(QIODevice::ReadOnly);
     QDataStream ds(&f);
-    ds.readRawData((char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
+    ds.readRawData((char *)this->eeprom_.raw, sizeof(this->eeprom_.raw));
     qInfo() << "Imported config from" << fns.at(0);
     settings.setValue(DEVICECONFIG_DIR_KEY,
                       QFileInfo(fns.at(0)).canonicalPath());
@@ -255,7 +262,7 @@ void DeviceConfig::toFile() {
     QFile f(fns.at(0));
     f.open(QIODevice::WriteOnly);
     QDataStream ds(&f);
-    ds.writeRawData((const char *)this->_eeprom.raw, sizeof(this->_eeprom.raw));
+    ds.writeRawData((const char *)this->eeprom_.raw, sizeof(this->eeprom_.raw));
     f.close();
     qInfo() << "Exported config to" << fns.at(0);
     settings.setValue(DEVICECONFIG_DIR_KEY,
@@ -287,13 +294,13 @@ void DeviceConfig::rollback() {
 std::vector<LayerCondition> DeviceConfig::loadLayers() {
   std::vector<LayerCondition> cnds(ABSOLUTE_MAX_LAYERS);
   for (uint8_t i = 0; i < ABSOLUTE_MAX_LAYERS; i++) {
-    cnds[i] = LayerCondition(_eeprom.layerConditions[i]);
+    cnds[i] = LayerCondition(eeprom_.layerConditions[i]);
   }
   return cnds;
 }
 
 void DeviceConfig::setLayerCondition(int conditionIdx, LayerCondition cnd) {
-  _eeprom.layerConditions[conditionIdx] = cnd.toBin();
+  eeprom_.layerConditions[conditionIdx] = cnd.toBin();
 }
 
 void DeviceConfig::setLayers(std::vector<LayerCondition> lcs) {
@@ -303,41 +310,41 @@ void DeviceConfig::setLayers(std::vector<LayerCondition> lcs) {
 }
 
 uint16_t DeviceConfig::getDelay(size_t pos) {
-  return _eeprom.delayLib[pos];
+  return eeprom_.delayLib[pos];
 }
 
 void DeviceConfig::setDelay(size_t pos, uint16_t delay_ms) {
-  _eeprom.delayLib[pos] = delay_ms;
+  eeprom_.delayLib[pos] = delay_ms;
 }
 
 HardwareConfig DeviceConfig::getHardwareConfig() {
   HardwareConfig retval;
-  retval.adcBits = _eeprom.adcBits;
-  retval.chargeDelay = _eeprom.chargeDelay;
-  retval.dischargeDelay = _eeprom.dischargeDelay;
-  retval.debouncingTicks = _eeprom.debouncingTicks;
-  retval.expHdrMode = _eeprom.expMode;
-  retval.expHdrParam1 = _eeprom.expParam1;
-  retval.expHdrParam2 = _eeprom.expParam2;
+  retval.adcBits = eeprom_.adcBits;
+  retval.chargeDelay = eeprom_.chargeDelay;
+  retval.dischargeDelay = eeprom_.dischargeDelay;
+  retval.debouncingTicks = eeprom_.debouncingTicks;
+  retval.expHdrMode = eeprom_.expMode;
+  retval.expHdrParam1 = eeprom_.expParam1;
+  retval.expHdrParam2 = eeprom_.expParam2;
   return retval;
 }
 
 void DeviceConfig::setHardwareConfig(HardwareConfig config) {
-  _eeprom.adcBits = config.adcBits;
-  _eeprom.chargeDelay = config.chargeDelay;
-  _eeprom.dischargeDelay = config.dischargeDelay;
-  _eeprom.debouncingTicks = config.debouncingTicks;
-  _eeprom.expMode = config.expHdrMode;
-  _eeprom.expParam1 = config.expHdrParam1;
-  _eeprom.expParam2 = config.expHdrParam2;
+  eeprom_.adcBits = config.adcBits;
+  eeprom_.chargeDelay = config.chargeDelay;
+  eeprom_.dischargeDelay = config.dischargeDelay;
+  eeprom_.debouncingTicks = config.debouncingTicks;
+  eeprom_.expMode = config.expHdrMode;
+  eeprom_.expParam1 = config.expHdrParam1;
+  eeprom_.expParam2 = config.expHdrParam2;
 }
 
 const std::vector<std::string> DeviceConfig::getExpModeNames() {
   return expModeNames_;
 }
 
-const std::string& DeviceConfig::getSwitchTypeName() {
-  return switchTypeNames_.at(switchType);
+const QString DeviceConfig::getSwitchTypeName() {
+  return QString{switchTypeNames_.at(switchType).data()};
 }
 
 void DeviceConfig::_setSwitchCapabilities() {

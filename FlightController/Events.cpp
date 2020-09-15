@@ -13,6 +13,4 @@
 const QEvent::Type DeviceMessage::ET =
     static_cast<QEvent::Type>(QEvent::registerEventType());
 
-DeviceMessage::DeviceMessage(const unsigned char *buf)
-    : QEvent(DeviceMessage::ET), payload((const char *)buf, 64) {}
 

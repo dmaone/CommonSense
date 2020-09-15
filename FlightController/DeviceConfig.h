@@ -35,6 +35,8 @@ class DeviceConfig : public QObject {
 
   explicit DeviceConfig(DeviceInterface* di);
 
+  void reset();
+
   std::vector<LayerCondition> loadLayers();
   void setLayerCondition(int conditionIdx, LayerCondition cnd);
   void setLayers(std::vector<LayerCondition> lcs);
@@ -45,7 +47,7 @@ class DeviceConfig : public QObject {
   HardwareConfig getHardwareConfig();
   void setHardwareConfig(HardwareConfig config);
   const std::vector<std::string> getExpModeNames();
-  const std::string& getSwitchTypeName();
+  const QString getSwitchTypeName();
 
   bool bValid{false};
   uint8_t numRows{0};
@@ -60,7 +62,7 @@ class DeviceConfig : public QObject {
 
 
  signals:
-  void changed();
+  void loaded();
   void uploadBlock(OUT_c2packet_t);
   void downloadBlock(c2command, uint8_t);
   void sendCommand(c2command, uint8_t);
@@ -84,8 +86,8 @@ class DeviceConfig : public QObject {
   void _setSwitchCapabilities();
 
   DeviceInterface* interface_;
-  psoc_eeprom_t _eeprom;
+  psoc_eeprom_t eeprom_;
   TransferDirection transferDirection_{TransferIdle};
-  uint8_t currentBlock{0};
+  uint8_t currentBlock_{0};
 };
 
