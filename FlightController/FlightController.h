@@ -18,7 +18,7 @@
 #include "LayerConditions.h"
 #include "Layout.h"
 #include "Macros.h"
-#include "MatrixMonitor.h"
+#include "MatrixView.h"
 #include "Thresholds.h"
 
 class FlightController : public QMainWindow {
@@ -42,7 +42,7 @@ class FlightController : public QMainWindow {
   void setMode_(bool isSetup);
   void showDelays_();
   void showHardware_();
-  void showKeyMonitor_();
+  void showMatrixView_();
   void showLayers_();
   void showLayout_();
   void showMacros_();
@@ -73,7 +73,7 @@ class FlightController : public QMainWindow {
   Layout layout_;
   FirmwareLoader loader_;
   Macros macros_;
-  MatrixMonitor monitor_;
+  MatrixView matrixView_;
   Thresholds thresholds_;
   bool uiLocked_{false};
   int blinkTimerId_{0};

@@ -19,7 +19,7 @@ struct HardwareConfig {
 
 struct SwitchTypeCapabilities {
   bool hasChargeSequencer{true};
-  bool hasMatrixMonitor{true};
+  bool hasMatrixView{true};
   bool hasThresholds{true};
   bool isNormallyLow{true};
 };

@@ -54,8 +54,8 @@ bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
  */
 void DeviceConfig::toDevice() {
   if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
-    QMessageBox::critical(nullptr, "Matrix monitor active",
-                          "Turn off matrix monitor first!");
+    QMessageBox::critical(
+        nullptr, "MatrixView active", "Turn off MatrixView first!");
     return;
   }
   if (transferDirection_ != TransferIdle) {
@@ -104,8 +104,8 @@ void DeviceConfig::_uploadConfigBlock() {
 
 void DeviceConfig::fromDevice() {
   if (interface_->getStatusBit(C2DEVSTATUS_MATRIX_MONITOR)) {
-    QMessageBox::critical(nullptr, "Matrix monitor active",
-                          "Turn off matrix monitor first!");
+    QMessageBox::critical(
+      nullptr, "MatrixView active", "Turn off MatrixView first!");
     return;
   }
   switch (transferDirection_) {
@@ -342,7 +342,7 @@ const std::string& DeviceConfig::getSwitchTypeName() {
 
 void DeviceConfig::_setSwitchCapabilities() {
   capabilities.hasChargeSequencer = true;
-  capabilities.hasMatrixMonitor = true;
+  capabilities.hasMatrixView = true;
   capabilities.hasThresholds = true;
   capabilities.isNormallyLow = true;
   switch(switchType) {
@@ -350,11 +350,11 @@ void DeviceConfig::_setSwitchCapabilities() {
     case SwitchType::ST_SUN:
     case SwitchType::ST_MICROSWITCH:
       capabilities.hasChargeSequencer = false;
-      capabilities.hasMatrixMonitor = false;
+      capabilities.hasMatrixView = false;
       capabilities.hasThresholds = false;
       break;
     case SwitchType::ST_MAGVALVE:
-      capabilities.hasMatrixMonitor = false;
+      capabilities.hasMatrixView = false;
       break;
     case SwitchType::ST_BEAMSPRING:
       capabilities.isNormallyLow = false;

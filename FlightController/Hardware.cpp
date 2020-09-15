@@ -35,7 +35,7 @@ void Hardware::init() {
   ui->debouncingTicks->setValue(config.debouncingTicks);
   ui->debouncingTicks->setRange(1, kMaxDebouncingTicks);
 
-  ui->adcBits->setEnabled(config_.capabilities.hasMatrixMonitor);
+  ui->adcBits->setEnabled(config_.capabilities.hasMatrixView);
   ui->chargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);
   ui->dischargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);
 

@@ -42,7 +42,7 @@ SOURCES += main.cpp \
     LogViewer.cpp \
     Macro.cpp \
     Macros.cpp \
-    MatrixMonitor.cpp \
+    MatrixView.cpp \
     Pedals.cpp \
     ScancodeList.cpp \
     Thresholds.cpp \
@@ -64,9 +64,9 @@ HEADERS  += \
     LayerConditions.h \
     Layout.h \
     LogViewer.h \
-    MatrixMonitor.h \
     Macro.h \
     Macros.h \
+    MatrixView.h \
     Pedals.h \
     ScancodeList.h \
     settings.h \
@@ -78,7 +78,7 @@ FORMS    += \
     Hardware.ui \
     Layout.ui \
     Macros.ui \
-    MatrixMonitor.ui \
+    MatrixView.ui \
     Pedals.ui \
     Thresholds.ui \
 

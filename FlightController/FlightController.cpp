@@ -44,7 +44,7 @@ FlightController::FlightController()
     layout_{di_},
     loader_{di_},
     macros_{di_.config},
-    monitor_{di_},
+    matrixView_{di_},
     thresholds_{di_} {
   ui->setupUi(this);
   lockUI_(true);
@@ -104,7 +104,7 @@ void FlightController::connectUiSlots_() {
   // Window menu
   trigThis(ui->action_Delays, SLOT(showDelays_()));
   trigThis(ui->action_Hardware, SLOT(showHardware_()));
-  trigThis(ui->action_Key_Monitor, SLOT(showKeyMonitor_()));
+  trigThis(ui->action_MatrixView, SLOT(showMatrixView_()));
   trigThis(ui->action_Layer_mods, SLOT(showLayers_()));
   trigThis(ui->action_Layout, SLOT(showLayout_()));
   trigThis(ui->action_Macros, SLOT(showMacros_()));
@@ -124,7 +124,7 @@ void FlightController::connectUiSlots_() {
   click2trig(ui->BootloaderButton, ui->action_Update_Firmware);
   click2trig(ui->delaysButton, ui->action_Delays);
   click2trig(ui->hwButton, ui->action_Hardware);
-  click2trig(ui->KeyMonitorButton, ui->action_Key_Monitor);
+  click2trig(ui->MatrixViewButton, ui->action_MatrixView);
   click2trig(ui->layerModsButton, ui->action_Layer_mods);
   click2trig(ui->layoutButton, ui->action_Layout);
   click2trig(ui->macrosButton, ui->action_Macros);
@@ -149,13 +149,15 @@ void FlightController::deviceStatusNotification(
     break;
   case DeviceInterface::DeviceDisconnected:
     lockUI_(true);
+    matrixView_.disconnect();
     break;
-  case DeviceInterface::DeviceConfigChanged:
+  case DeviceInterface::DeviceConfigured:
     delays_.init();
     hardware_.init();
     layers_.init();
     layout_.init();
-    ui->typeLabel->setText(di_.switchType);
+    matrixView_.init();
+    ui->typeLabel->setText(di_.config.getSwitchTypeName());
     lockUI_(false);
     break;
   case DeviceInterface::BootloaderConnected:
@@ -179,7 +181,7 @@ void FlightController::deviceStatusNotification(
 
 void FlightController::lockUI_(bool lock) {
   uiLocked_ = lock;
-  ui->KeyMonitorButton->setDisabled(lock);
+  ui->MatrixViewButton->setDisabled(lock);
   ui->thresholdsButton->setDisabled(lock);
   ui->macrosButton->setDisabled(lock);
   ui->layoutButton->setDisabled(lock);
@@ -190,7 +192,7 @@ void FlightController::lockUI_(bool lock) {
     return;
   }
   ui->thresholdsButton->setEnabled(di_.config.capabilities.hasThresholds);
-  ui->KeyMonitorButton->setEnabled(di_.config.capabilities.hasMatrixMonitor);
+  ui->MatrixViewButton->setEnabled(di_.config.capabilities.hasMatrixView);
 }
 
 void FlightController::timerEvent(QTimerEvent* timer) {
@@ -225,8 +227,8 @@ void FlightController::showHardware_() {
   activate_(hardware_);
 }
 
-void FlightController::showKeyMonitor_() {
-  activate_(monitor_);
+void FlightController::showMatrixView_() {
+  activate_(matrixView_);
 }
 
 void FlightController::showLayers_() {
