@@ -11,11 +11,16 @@ TEMPLATE = app
 
 CONFIG += static c++17
 
-CONFIG(release, debug|release):DEFINES += QT_NO_DEBUG_OUTPUT
+CONFIG(release, debug|release) {
+  DEFINES += QT_NO_DEBUG_OUTPUT
+}
 
 win32 {
-    INCLUDEPATH += $$PWD/../mingw32/include
-    LIBS += -L$$PWD/../mingw32/lib -L$$PWD/../mingw32/bin -lhidapi -lsetupapi
+    # mingw32 for release, mingw64 for debug (use dynamic, 64-bit kit!)
+    INCLUDEPATH += $$PWD/../mingw32/include $$PWD/../mingw64/include
+    LIBS += -L$$PWD/../mingw32/lib -L$$PWD/../mingw32/bin
+    LIBS += -L$$PWD/../mingw64/lib -L$$PWD/../mingw64/bin
+    LIBS += -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
 macx {

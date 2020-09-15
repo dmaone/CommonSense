@@ -4,6 +4,8 @@ hidapi 0.9.0+ is required. Luckily, it's available in precompiled form for all 3
 ## Windows
 Download compiled [hidapi package](https://repo.msys2.org/mingw/i686/mingw-w64-i686-hidapi-0.9.0-1-any.pkg.tar.xz) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir ([7zip](https://www.7-zip.org/) can into .tar.xz)
 
+If you want to run a debugging build - use dynamic linking and [x86_64 package](https://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-hidapi-0.9.0-1-any.pkg.tar.xz) - gdb can't load 32-bit ntdll on Windows 10 :(
+
 ## mac
 You'll need [brew](https://brew.sh)
 Open terminal,
