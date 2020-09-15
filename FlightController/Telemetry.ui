@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>MatrixView</class>
- <widget class="QFrame" name="MatrixView">
+ <class>Telemetry</class>
+ <widget class="QFrame" name="Telemetry">
   <property name="geometry">
    <rect>
     <x>0</x>
@@ -17,7 +17,7 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>MatrixView</string>
+   <string>Telemetry</string>
   </property>
   <property name="frameShape">
    <enum>QFrame::StyledPanel</enum>

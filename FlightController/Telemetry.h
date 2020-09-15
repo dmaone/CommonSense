@@ -5,13 +5,13 @@
 #include <QLabel>
 #include <QtCore>
 #include <stdint.h>
-#include "ui_MatrixView.h"
+#include "ui_Telemetry.h"
 
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
 #include "Events.h"
 
-class MatrixView : public QFrame {
+class Telemetry : public QFrame {
   Q_OBJECT
 
   struct Cell {
@@ -30,10 +30,10 @@ class MatrixView : public QFrame {
   using LcdList = std::vector<std::unique_ptr<QLCDNumber>>;
 
  public:
-  explicit MatrixView(DeviceInterface& di);
+  explicit Telemetry(DeviceInterface& di);
 
   void init();
-  void disconnect();
+  void deinit();
 
   enum DisplayMode { DisplayNow, DisplayMin, DisplayMax, DisplayAvg };
   Q_ENUM(DisplayMode);
@@ -58,8 +58,8 @@ signals:
   void closeEvent(QCloseEvent *);
 
  private:
-  Ui::MatrixView realUi_{};
-  Ui::MatrixView* ui{&realUi_};
+  Ui::Telemetry realUi_{};
+  Ui::Telemetry* ui{&realUi_};
 
   DisplayMode displayMode{DisplayNow};
   std::atomic<bool> initialized_{false};
@@ -71,5 +71,5 @@ signals:
   uint8_t warmupRows_{ABSOLUTE_MAX_ROWS};
 
   Cell& getCell_(uint8_t row, uint8_t col);
-  void enableTelemetry_(bool newState);
+  void enableReporting_(bool newState);
 };

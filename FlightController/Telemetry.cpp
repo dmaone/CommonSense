@@ -10,7 +10,7 @@
 
 #include "DeviceInterface.h"
 #include "Events.h"
-#include "MatrixView.h"
+#include "Telemetry.h"
 #include "settings.h"
 
 namespace {
@@ -22,7 +22,7 @@ const QString kStop{"Stop!"};
 
 } // namespace
 
-MatrixView::MatrixView(DeviceInterface& di) :
+Telemetry::Telemetry(DeviceInterface& di) :
     QFrame{nullptr, Qt::Tool}, di_{di} {
   ui->setupUi(this);
 
@@ -51,7 +51,7 @@ MatrixView::MatrixView(DeviceInterface& di) :
   click(ui->setThresholdsButton, this, SLOT(setThresholds_()));
 }
 
-void MatrixView::init() {
+void Telemetry::init() {
   initialized_.store(false);
   grid_ = std::make_unique<QGridLayout>();
 
@@ -89,23 +89,24 @@ void MatrixView::init() {
   cells_.swap(cells);
   resetCells_();
   initialized_.store(true);
-  // TODO fix start button label and/or disable matrix monitor on connect
-  enableTelemetry_(di_.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR));
+  // TODO fix start button label and/or disable telemetry on connect
+  // enableReporting_(di_.getStatusBit(C2DEVSTATUS_MATRIX_MONITOR));
 }
 
-void MatrixView::disconnect() {
+void Telemetry::deinit() {
   if (!initialized_.exchange(false)) {
     return;
   }
   isActive_ = false;
-  resetCells_();
+  // Do not reset cells here - no crime if old values stay, but avoids SIGSEGV
+  // on a dangling pointer in the UI when closing.
 }
 
-MatrixView::Cell& MatrixView::getCell_(uint8_t row, uint8_t col) {
+Telemetry::Cell& Telemetry::getCell_(uint8_t row, uint8_t col) {
   return cells_.at(row * di_.config.numCols + col);
 }
 
-bool MatrixView::eventFilter(QObject* /* obj */, QEvent* event) {
+bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
   if (initialized_.load() == false) {
     return false;
   }
@@ -172,7 +173,7 @@ bool MatrixView::eventFilter(QObject* /* obj */, QEvent* event) {
   return false;
 }
 
-void MatrixView::enableTelemetry_(bool newState) {
+void Telemetry::enableReporting_(bool newState) {
   if (initialized_.load() == false) {
     ui->runButton->setText(kStart);
     isActive_ = false;
@@ -188,19 +189,19 @@ void MatrixView::enableTelemetry_(bool newState) {
   emit setStatusBit(C2DEVSTATUS_SCAN_ENABLED, true);
 }
 
-void MatrixView::closeEvent(QCloseEvent *event) {
-  this->enableTelemetry_(false);
+void Telemetry::closeEvent(QCloseEvent *event) {
+  this->enableReporting_(false);
   event->accept();
 }
 
 // slots -----------------------------------------------------------------------
 
-void MatrixView::close_() {
-  this->enableTelemetry_(false);
+void Telemetry::close_() {
+  this->enableReporting_(false);
   this->close();
 }
 
-void MatrixView::export_() {
+void Telemetry::export_() {
   QSettings settings;
   QFileDialog fd(nullptr, "Choose one file to export to");
   fd.setDirectory(settings.value(SETTINGS_DIR_KEY).toString());
@@ -231,7 +232,7 @@ void MatrixView::export_() {
   }
 }
 
-void MatrixView::keypress(DeviceInterface::KeyState state) {
+void Telemetry::keypress(DeviceInterface::KeyState state) {
   auto& readout = getCell_(state.row,state.col).readout;
   if (state.status == DeviceInterface::KeyPressed) {
     readout.setStyleSheet("color: black; background-color: #ffff33");
@@ -240,8 +241,8 @@ void MatrixView::keypress(DeviceInterface::KeyState state) {
   }
 }
 
-void MatrixView::resetCells_() {
-  enableTelemetry_(false);
+void Telemetry::resetCells_() {
+  enableReporting_(false);
   for (auto& cell : cells_) {
     cell.count = 0;
     cell.sum = 0;
@@ -255,11 +256,11 @@ void MatrixView::resetCells_() {
                                    // of first rows.
 }
 
-void MatrixView::run_() {
-  this->enableTelemetry_(!isActive_);
+void Telemetry::run_() {
+  this->enableReporting_(!isActive_);
 }
 
-void MatrixView::setDisplayMode_(QString newValue) {
+void Telemetry::setDisplayMode_(QString newValue) {
   if (newValue == "Now")
     displayMode = DisplayNow;
   else if (newValue == "Min")
@@ -272,7 +273,7 @@ void MatrixView::setDisplayMode_(QString newValue) {
     qCritical() << "Unknown display mode selected!!";
 }
 
-void MatrixView::setThresholds_() {
+void Telemetry::setThresholds_() {
   if (initialized_.load() == false) {
     return;
   }

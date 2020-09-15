@@ -47,9 +47,9 @@ SOURCES += main.cpp \
     LogViewer.cpp \
     Macro.cpp \
     Macros.cpp \
-    MatrixView.cpp \
     Pedals.cpp \
     ScancodeList.cpp \
+    Telemetry.cpp \
     Thresholds.cpp \
 
 
@@ -71,9 +71,9 @@ HEADERS  += \
     LogViewer.h \
     Macro.h \
     Macros.h \
-    MatrixView.h \
     Pedals.h \
     ScancodeList.h \
+    Telemetry.h \
     settings.h \
     Thresholds.h \
 
@@ -83,8 +83,8 @@ FORMS    += \
     Hardware.ui \
     Layout.ui \
     Macros.ui \
-    MatrixView.ui \
     Pedals.ui \
+    Telemetry.ui \
     Thresholds.ui \
 
 DISTFILES +=

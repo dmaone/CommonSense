@@ -53,9 +53,9 @@
        </widget>
       </item>
       <item row="12" column="0">
-       <widget class="QPushButton" name="MatrixViewButton">
+       <widget class="QPushButton" name="TelemetryButton">
         <property name="text">
-         <string>MatrixView</string>
+         <string>Telemetry</string>
         </property>
        </widget>
       </item>
@@ -369,7 +369,7 @@
     <property name="title">
      <string>&amp;Window</string>
     </property>
-    <addaction name="action_MatrixView"/>
+    <addaction name="action_Telemetry"/>
     <addaction name="action_Thresholds"/>
     <addaction name="action_Layer_mods"/>
     <addaction name="action_Layout"/>
@@ -410,7 +410,7 @@
     <string>Ctrl+S</string>
    </property>
   </action>
-  <action name="action_MatrixView">
+  <action name="action_Telemetry">
    <property name="text">
     <string>Matrix&amp;View</string>
    </property>
