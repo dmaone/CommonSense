@@ -37,7 +37,7 @@ void logToViewport(
 
 } // namespace
 
-FlightController::FlightController()
+FlightController::FlightController(bool useCustomMessageHandler)
   : delays_{di_.config},
     hardware_{di_.config},
     layers_{di_.config},
@@ -52,7 +52,10 @@ FlightController::FlightController()
   connectUiSlots_();
   ui->swVersionLabel->setText(QCoreApplication::applicationVersion());
   logger = ui->LogViewport;
-  qInstallMessageHandler(&logToViewport);
+
+  if (useCustomMessageHandler) {
+    qInstallMessageHandler(&logToViewport);
+  }
 
   blinkTimerId_ = startTimer(kBlinkTimerTick);
   di_.start();
@@ -79,14 +82,14 @@ void FlightController::connectBackendSlots_() {
  * The idea: everything is attached to _actions_. Buttons trigger actions.
  */
 void FlightController::connectUiSlots_() {
-  auto click = [this] (auto button, auto who, auto& slot) {
+  auto click = [this] (auto button, auto who, auto slot) {
     this->connect(button, SIGNAL(clicked()), who, slot);
   };
 
-  auto trig = [this] (auto action, auto& who, auto& slot) {
+  auto trig = [this] (auto action, auto& who, auto slot) {
     this->connect(action, SIGNAL(triggered()), &who, slot);
   };
-  auto trigThis = [this] (auto action, auto& slot) {
+  auto trigThis = [this] (auto action, auto slot) {
     this->connect(action, SIGNAL(triggered()), this, slot);
   };
 

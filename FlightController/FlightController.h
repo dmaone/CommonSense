@@ -25,7 +25,7 @@ class FlightController : public QMainWindow {
   Q_OBJECT
 
  public:
-  explicit FlightController();
+  explicit FlightController(bool useCustomMessageHandler);
   ~FlightController();
 
   void setup();

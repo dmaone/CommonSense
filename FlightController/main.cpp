@@ -17,7 +17,7 @@ int main(int argc, char *argv[]) {
   QCoreApplication::setApplicationName("FlightController");
   QCoreApplication::setApplicationVersion("1.0.1.1");
   qInfo() << "Start start!";
-  FlightController w;
+  FlightController w{true};
   w.show();
 
   return a.exec();
