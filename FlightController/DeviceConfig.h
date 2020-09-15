@@ -79,11 +79,11 @@ class DeviceConfig : public QObject {
   bool eventFilter(QObject *obj, QEvent *event);
 
  private:
-  void _uploadConfigBlock();
-  void _receiveConfigBlock(QByteArray *);
-  void _unpack();
-  void _assemble();
-  void _setSwitchCapabilities();
+  void sendConfigBlock_();
+  void receiveConfigBlock_(QByteArray *);
+  void unpack_();
+  void assemble_();
+  void setSwitchCapabilities_();
 
   DeviceInterface* interface_;
   psoc_eeprom_t eeprom_;

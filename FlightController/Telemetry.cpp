@@ -26,11 +26,6 @@ Telemetry::Telemetry(DeviceInterface& di) :
     QFrame{nullptr, Qt::Tool}, di_{di} {
   ui->setupUi(this);
 
-  connect(this, SIGNAL(sendCommand(c2command, uint8_t)), &di,
-          SLOT(sendCommand(c2command, uint8_t)));
-  connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di,
-          SLOT(setStatusBit(deviceStatus, bool)));
-
   connect(
       &di, SIGNAL(keypress(DeviceInterface::KeyState)),
       this, SLOT(keypress(DeviceInterface::KeyState)));
@@ -152,7 +147,7 @@ bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
     cell.stats.setText(QString("%1 %2 %3")
         .arg(cell.min).arg(cell.sum / cell.count).arg(cell.max));
 
-    switch (displayMode) {
+    switch (displayMode_) {
     case DisplayNow:
       cell.readout.display(cell.now);
       break;
@@ -184,9 +179,9 @@ void Telemetry::enableReporting_(bool newState) {
   }
   isActive_ = newState;
   // TODO feed commands slowly, so they won't be lost.
-  // emit setStatusBit(C2DEVSTATUS_OUTPUT_ENABLED, false);
-  emit sendCommand(C2CMD_GET_MATRIX_STATE, newState ? 1 : 0);
-  emit setStatusBit(C2DEVSTATUS_SCAN_ENABLED, true);
+  // di_.setStatusBit(C2DEVSTATUS_OUTPUT_ENABLED, false);
+  di_.sendCommand(C2CMD_GET_MATRIX_STATE, newState ? 1 : 0);
+  di_.setStatusBit(C2DEVSTATUS_SCAN_ENABLED, true);
 }
 
 void Telemetry::closeEvent(QCloseEvent *event) {
@@ -262,13 +257,13 @@ void Telemetry::run_() {
 
 void Telemetry::setDisplayMode_(QString newValue) {
   if (newValue == "Now")
-    displayMode = DisplayNow;
+    displayMode_ = DisplayNow;
   else if (newValue == "Min")
-    displayMode = DisplayMin;
+    displayMode_ = DisplayMin;
   else if (newValue == "Max")
-    displayMode = DisplayMax;
+    displayMode_ = DisplayMax;
   else if (newValue == "Avg")
-    displayMode = DisplayAvg;
+    displayMode_ = DisplayAvg;
   else
     qCritical() << "Unknown display mode selected!!";
 }

@@ -24,14 +24,14 @@ class DeviceInterface : public QObject {
   Q_OBJECT
 
  public:
-  enum DeviceStatus {
+  enum State {
     DeviceDisconnected,
     BootloaderConnected,
     DeviceConnected,
     DeviceConfigured,
     StatusUpdated
   };
-  Q_ENUM(DeviceStatus)
+  Q_ENUM(State)
 
   enum KeyStatus { KeyPressed, KeyReleased };
   Q_ENUM(KeyStatus)
@@ -79,7 +79,7 @@ class DeviceInterface : public QObject {
   void bootloaderMode(bool bEnable);
 
  signals:
-  void deviceStatusNotification(DeviceInterface::DeviceStatus);
+  void notify(DeviceInterface::State);
   void keypress(DeviceInterface::KeyState state);
 
  protected:
@@ -91,26 +91,24 @@ class DeviceInterface : public QObject {
     DeviceList bootloaders{};
   };
 
-  hid_device* acquireDevice();
+  hid_device* acquireDevice_();
+  void initDevice_();
   void releaseDevice_();
+  void setState_(State newState);
+  bool receivePacket_();
+  bool sendPacket_();
 
-  void _initDevice();
-  void _enqueueCommand(OUT_c2packet_t outbox);
-  void _resetTimer(int interval);
-  void _resetStatusTimer(int interval);
-  bool _sendPacket();
-  bool _receivePacket();
-  void _updateDeviceStatus(DeviceStatus newStatus);
-  DetectedDevices listDevices();
-  void processStatusReply(QByteArray* payload);
+  void enqueueCommand_(OUT_c2packet_t outbox);
+  DetectedDevices listDevices_();
+  void processStatusReply_(QByteArray* payload);
+  void resetTimer_(int interval);
 
   hid_device* device_{nullptr};
   int pollTimerId_{0};
   int statusTimerId_{0};
-  device_status_t status{};
   Mode mode_{DeviceInterfaceNormal};
-  DeviceStatus currentStatus_{DeviceDisconnected};
-  uint8_t receivedStatus_{0};
+  State state_{DeviceDisconnected};
+  uint8_t deviceStatus_{0};
   QQueue<OUT_c2packet_t> commandQueue_{};
   std::atomic<bool> cts_{true};
   size_t noCtsDelay_{0};
@@ -118,8 +116,5 @@ class DeviceInterface : public QObject {
   std::atomic<bool> scheduleDeviceRelease_{false};
   std::mutex deviceLock_{};
   std::mutex queueLock_{};
-  qint64 lastSend_;
-
- private slots:
-  void deviceMessageReceiver();
+  qint64 lastSentAt_;
 };

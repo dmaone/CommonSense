@@ -1,9 +1,6 @@
 #pragma once
 
-#include <QCheckBox>
 #include <QFrame>
-#include <QGridLayout>
-#include <QSpinBox>
 #include "ui_Macros.h"
 
 #include "DeviceConfig.h"
@@ -16,34 +13,31 @@ class Macros : public QFrame {
   explicit Macros(DeviceConfig& config);
 
   void show();
-  int findWidgetRow(QWidget *w);
   void fillCommandParameters(int row, int command);
 
  private:
-  QByteArray encodeSteps(int row);
-  void populateSteps(QByteArray& bytes);
-  void addStep(int row);
+  QByteArray encodeSteps_(int row);
+  void populateSteps_(QByteArray& bytes);
+  void addStep_(int row);
+  void appendMacro_();
 
   Ui::Macros realUi_{};
   Ui::Macros* ui{&realUi_};
 
   DeviceConfig& config_;
-  int currentMacro{0};
-  bool changed{false};
-  bool ignoreOnce{false};
-  int contextMenuRow;
+  int currentMacro_{0};
+  bool dirty_{false};
+  int contextMenuRow_;
+
 
  private slots:
-  void addStepButtonClicked();
-  void cmdIndexChanged(int);
-  void contextMenuInsertTriggered();
-  void contextMenuDeleteTriggered();
-  void on_addButton_clicked();
-  void on_closeButton_clicked();
-  void on_deleteButton_clicked();
-  void on_macroListCombo_currentIndexChanged(int);
-  void on_resetButton_clicked();
-  void on_revertButton_clicked();
-  void showContextMenu(QPoint);
-  void userChanged();
+  void appendStep_();
+  void setTriggerMode_(int);
+  void insertStep_();
+  void deleteStep_();
+  void deleteCurrentMacro_();
+  void selectMacro_(int);
+  void reset_();
+  void contextMenu_(QPoint);
+  void setDirty_();
 };

@@ -18,7 +18,7 @@ class DeviceSelector : public QDialog
   ~DeviceSelector() {};
 
   QString getResult() {
-    return buttons_[selectedIndex]->text();
+    return buttons_[selectedIndex_]->text();
   }
 
  public slots:
@@ -28,5 +28,5 @@ class DeviceSelector : public QDialog
   QVBoxLayout layout_{};
   QLabel label_{};
   std::vector<std::unique_ptr<QPushButton>> buttons_{};
-  size_t selectedIndex{0};
+  size_t selectedIndex_{0};
 };

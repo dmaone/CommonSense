@@ -21,6 +21,6 @@ DeviceSelector::DeviceSelector(const DeviceList& list) {
 }
 
 void DeviceSelector::onClick(size_t idx) {
-  selectedIndex = idx;
+  selectedIndex_ = idx;
   accept();
 }

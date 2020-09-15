@@ -43,10 +43,10 @@ bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
   currentBlock_++;
   switch (transferDirection_) {
   case TransferDownload:
-    _receiveConfigBlock(payload);
+    receiveConfigBlock_(payload);
     break;
   case TransferUpload:
-    _uploadConfigBlock();
+    sendConfigBlock_();
     break;
   default:
     qInfo() << "Received config block" << ((uint8_t)payload->at(1))
@@ -71,20 +71,19 @@ void DeviceConfig::toDevice() {
                           "Error! Try pressing 'Reconnect' button!");
     return;
   }
-  this->_assemble();
+  this->assemble_();
   emit sendCommand(C2CMD_EWO, (1 << C2DEVSTATUS_SETUP_MODE));
   this->transferDirection_ = TransferUpload;
   this->currentBlock_ = 0;
   qInfo() << "Uploading config";
-  this->_uploadConfigBlock();
+  this->sendConfigBlock_();
 }
 
 /**
- * @brief DeviceInterface::uploadConfigBlock
- * Upload one block to device.
- * We don't really care about the input packet here
+ * @brief DeviceInterface::sendConfigBlock
+ * Uploads block pointed to by currentBlock_ to device.
  */
-void DeviceConfig::_uploadConfigBlock() {
+void DeviceConfig::sendConfigBlock_() {
   switch (transferDirection_) {
   case TransferUpload:
     if (currentBlock_ > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
@@ -139,7 +138,7 @@ void DeviceConfig::fromDevice() {
  * Receives one block from device, writes it to local config.F
  * @param payload - packet payload
  */
-void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
+void DeviceConfig::receiveConfigBlock_(QByteArray *payload) {
   if (transferDirection_ != TransferDownload) {
     qInfo() << "Not a good day to download config block!";
     QMessageBox::critical(nullptr, "Not a good day to download config blockb",
@@ -150,7 +149,7 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
   if (currentBlock_ >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
     transferDirection_ = TransferIdle;
     qInfo() << "done, unpacking...";
-    _unpack();
+    unpack_();
     return;
   }
   memcpy(this->eeprom_.raw +
@@ -160,13 +159,13 @@ void DeviceConfig::_receiveConfigBlock(QByteArray *payload) {
   emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock_);
 }
 
-void DeviceConfig::_unpack() {
+void DeviceConfig::unpack_() {
   numRows = eeprom_.matrixRows;
   numCols = eeprom_.matrixCols;
   numLayers = eeprom_.matrixLayers;
   uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
   switchType = std::min(eeprom_.switchType, maxSwitchIndex);
-  _setSwitchCapabilities();
+  setSwitchCapabilities_();
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
   uint8_t tableSize = numRows * numCols;
@@ -199,13 +198,13 @@ void DeviceConfig::_unpack() {
   return;
 }
 
-void DeviceConfig::_assemble() {
+void DeviceConfig::assemble_() {
   eeprom_.configVersion = 2;
   memset(eeprom_.stash, EMPTY_FLASH_BYTE, sizeof(eeprom_.stash));
   memset(eeprom_._RESERVED0, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED0));
   memset(eeprom_._RESERVED1, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED1));
   uint8_t tableSize = numRows * numCols;
-  _setSwitchCapabilities();
+  setSwitchCapabilities_();
   for (uint8_t i = 0; i < this->numRows; i++) {
     for (uint8_t j = 0; j < numCols; j++) {
       uint16_t offset = i * numCols + j;
@@ -245,13 +244,13 @@ void DeviceConfig::fromFile() {
     qInfo() << "Imported config from" << fns.at(0);
     settings.setValue(DEVICECONFIG_DIR_KEY,
                       QFileInfo(fns.at(0)).canonicalPath());
-    this->_unpack();
+    this->unpack_();
   }
 }
 
 void DeviceConfig::toFile() {
   QSettings settings;
-  this->_assemble();
+  this->assemble_();
   QFileDialog fd(nullptr, "Choose one file to export to");
   fd.setDirectory(settings.value(DEVICECONFIG_DIR_KEY).toString());
   fd.setNameFilter(tr("CommonSense config files(*.cfg)"));
@@ -347,7 +346,7 @@ const QString DeviceConfig::getSwitchTypeName() {
   return QString{switchTypeNames_.at(switchType).data()};
 }
 
-void DeviceConfig::_setSwitchCapabilities() {
+void DeviceConfig::setSwitchCapabilities_() {
   capabilities.hasChargeSequencer = true;
   capabilities.hasTelemetry = true;
   capabilities.hasThresholds = true;

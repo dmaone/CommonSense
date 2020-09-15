@@ -22,7 +22,7 @@ CyACD::CyACD(const QString& filename) {
 
   siliconRevision = readByte_(ts);
 
-  _checksumType = readByte_(ts);
+  checksumType_ = readByte_(ts);
   while (!ts.atEnd()) {
     readRow_(ts);
   }

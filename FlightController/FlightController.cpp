@@ -74,8 +74,8 @@ void FlightController::connectBackendSlots_() {
           SLOT(flipStatusBit(deviceStatus)));
   connect(this, SIGNAL(setStatusBit(deviceStatus, bool)), &di_,
           SLOT(setStatusBit(deviceStatus, bool)));
-  connect(&di_, SIGNAL(deviceStatusNotification(DeviceInterface::DeviceStatus)),
-          this, SLOT(deviceStatusNotification(DeviceInterface::DeviceStatus)));
+  connect(&di_, SIGNAL(notify(DeviceInterface::State)),
+          this, SLOT(deviceInterfaceNotification(DeviceInterface::State)));
 }
 
 /*
@@ -142,8 +142,7 @@ void FlightController::connectUiSlots_() {
   click(ui->setupButton, this, SLOT(toggleSetupMode_()));
 }
 
-void FlightController::deviceStatusNotification(
-    DeviceInterface::DeviceStatus s) {
+void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
   switch (s) {
   case DeviceInterface::DeviceConnected:
     lockUI_(true);

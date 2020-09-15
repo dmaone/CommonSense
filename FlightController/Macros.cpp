@@ -1,6 +1,7 @@
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QSpinBox>
 
 #include "DeviceInterface.h"
@@ -16,9 +17,27 @@ Macros::Macros(DeviceConfig& config) :
   ui->setupUi(this);
   ScancodeList scanCodes;
   ui->scanCode->addItems(*scanCodes.list);
-  connect(ui->scanCode, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
-  connect(ui->triggerEvent,
-      SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  connect(ui->scanCode, SIGNAL(currentIndexChanged(int)), SLOT(setDirty_()));
+
+  connect(ui->macroListCombo, SIGNAL(currentIndexChanged(int)),
+      this, SLOT(selectMacro_(int)));
+
+  connect(ui->triggerEvent, SIGNAL(currentIndexChanged(int)),
+      this, SLOT(setDirty_()));
+
+  connect(ui->addButton, &QPushButton::clicked,
+      this, [this](){ appendMacro_(); });
+
+  connect(ui->closeButton, &QPushButton::clicked, this, [this](){ close(); });
+
+  connect(ui->deleteButton, &QPushButton::clicked,
+      this, [this](){ deleteCurrentMacro_(); });
+
+  connect(ui->resetButton, &QPushButton::clicked, this, [this](){ reset_(); });
+
+  connect(ui->revertButton, &QPushButton::clicked,
+      this, [this](){ selectMacro_(ui->macroListCombo->currentIndex()); });
+
 }
 
 void Macros::show() {
@@ -27,33 +46,29 @@ void Macros::show() {
     ui->macroListCombo->addItem(m.fullName());
   }
   ui->macroListCombo->addItem(kNew);
-  currentMacro = config_.macros.size() - 1;
-  changed = false;
-  ui->macroListCombo->setCurrentIndex(std::max(currentMacro, 0));
+  currentMacro_ = config_.macros.size() - 1;
+  dirty_ = false;
+  ui->macroListCombo->setCurrentIndex(std::max(currentMacro_, 0));
   QWidget::show();
   QWidget::raise();
 }
 
-void Macros::on_revertButton_clicked() {
-  on_macroListCombo_currentIndexChanged(ui->macroListCombo->currentIndex());
-}
-
-void Macros::on_resetButton_clicked() {
+void Macros::reset_() {
   auto result = QMessageBox::question(
       this, "Are you sure?", "Erase all macros?",
       QMessageBox::Yes | QMessageBox::No);
   if (result == QMessageBox::Yes) {
     config_.macros.clear();
-    currentMacro = 0;
+    currentMacro_ = 0;
     show();
   }
 }
 
-void Macros::populateSteps(QByteArray &bytes) {
+void Macros::populateSteps_(QByteArray &bytes) {
   int row = -1;
   int mptr = 0;
   while(mptr < bytes.size()) {
-    addStep(++row);
+    addStep_(++row);
     auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
     auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
     auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
@@ -83,10 +98,10 @@ void Macros::populateSteps(QByteArray &bytes) {
     }
     ++mptr;
   }
-  changed = false;
+  dirty_ = false;
 }
 
-QByteArray Macros::encodeSteps(int /* macro_row */) {
+QByteArray Macros::encodeSteps_(int /* macro_row */) {
   QByteArray retval;
   for (int row = 0; row < ui->bodyTable->rowCount() - 1; row++) {
     auto *cmd = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 0));
@@ -119,9 +134,9 @@ QByteArray Macros::encodeSteps(int /* macro_row */) {
   return retval;
 }
 
-void Macros::on_macroListCombo_currentIndexChanged(int index) {
+void Macros::selectMacro_(int index) {
   bool existingMacro = (index + 1 != ui->macroListCombo->count());
-  if (changed) {
+  if (dirty_) {
     QMessageBox::question(this, "Warning",
         "All your base are belong to us - unsaved changes will be lost",
         QMessageBox::Ok);
@@ -132,7 +147,7 @@ void Macros::on_macroListCombo_currentIndexChanged(int index) {
   ui->bodyTable->setHorizontalHeaderLabels(
       QStringList() << "Command" << "Delay" << "Key");
   QPushButton *addStepButton = new QPushButton("+");
-  connect(addStepButton, SIGNAL(clicked()), SLOT(addStepButtonClicked()));
+  connect(addStepButton, SIGNAL(clicked()), SLOT(appendStep_()));
   ui->bodyTable->setSpan(0, 0, 1, 3);
   ui->bodyTable->setCellWidget(0, 0, addStepButton);
   if (!existingMacro) {
@@ -144,23 +159,23 @@ void Macros::on_macroListCombo_currentIndexChanged(int index) {
     auto& m = config_.macros[index];
     ui->scanCode->setCurrentIndex(m.keyCode);
     ui->triggerEvent->setCurrentText(m.getTriggerEventText());
-    populateSteps(m.body);
+    populateSteps_(m.body);
   }
   ui->addButton->setEnabled(false);
   ui->deleteButton->setEnabled(existingMacro);
-  changed=false;
+  dirty_ = false;
 }
 
-void Macros::on_addButton_clicked() {
+void Macros::appendMacro_() {
   ui->addButton->setEnabled(false);
-  if (!changed) {
+  if (!dirty_) {
     return;
   }
   auto newMacro = Macro(ui->scanCode->currentIndex(),
                         ui->triggerEvent->currentText(),
-                        encodeSteps(currentMacro));
+                        encodeSteps_(currentMacro_));
   size_t pos = ui->macroListCombo->currentIndex();
-  bool existingMacro = false;
+  bool existingMacro{false};
   if (pos < config_.macros.size()) {
     config_.macros[pos] = newMacro;
     existingMacro = true;
@@ -176,7 +191,7 @@ void Macros::on_addButton_clicked() {
       return;
     }
   }
-  changed = false;
+  dirty_ = false;
   if (existingMacro) {
     ui->macroListCombo->setItemText(pos, newMacro.fullName());
   } else {
@@ -192,46 +207,45 @@ void Macros::on_addButton_clicked() {
   }
 }
 
-void Macros::on_deleteButton_clicked() {
+void Macros::deleteCurrentMacro_() {
   auto pos = ui->macroListCombo->currentIndex();
   ui->macroListCombo->removeItem(pos);
   config_.macros.erase(config_.macros.begin() + pos);
 }
 
-void Macros::addStepButtonClicked() {
-  auto row = ui->bodyTable->rowCount() - 1;
-  addStep(row);
-  changed = true;
-}
-
-void Macros::addStep(int row) {
+void Macros::addStep_(int row) {
   ui->bodyTable->insertRow(row);
   QComboBox *cmd = new QComboBox();
   cmd->addItems(QStringList{"-select-", "Press", "Release", "Type", "Wait"});
-  connect(cmd, SIGNAL(currentIndexChanged(int)), SLOT(cmdIndexChanged(int)));
+  connect(cmd, SIGNAL(currentIndexChanged(int)), SLOT(setTriggerMode_(int)));
   cmd->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(cmd, SIGNAL(customContextMenuRequested(QPoint)),
-    SLOT(showContextMenu(QPoint)));
+      this, SLOT(contextMenu_(QPoint)));
   ui->bodyTable->setCellWidget(row, 0, cmd);
   QComboBox *delay = new QComboBox();
   for (size_t pos = 0; pos < config_.numDelays; ++pos) {
     delay->addItem(QString("%1 ms").arg(config_.getDelay(pos)));
   }
-  connect(delay, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  connect(delay, SIGNAL(currentIndexChanged(int)), SLOT(setDirty_()));
   delay->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(delay, SIGNAL(customContextMenuRequested(QPoint)),
-    SLOT(showContextMenu(QPoint)));
+    this, SLOT(contextMenu_(QPoint)));
   ui->bodyTable->setCellWidget(row, 1, delay);
   QComboBox *sc = new QComboBox();
   sc->addItems(*ScancodeList().list);
-  connect(sc, SIGNAL(currentIndexChanged(int)), SLOT(userChanged()));
+  connect(sc, SIGNAL(currentIndexChanged(int)), SLOT(setDirty_()));
   sc->setContextMenuPolicy(Qt::CustomContextMenu);
   connect(sc, SIGNAL(customContextMenuRequested(QPoint)),
-    SLOT(showContextMenu(QPoint)));
+    this, SLOT(contextMenu_(QPoint)));
   ui->bodyTable->setCellWidget(row, 2, sc);
 }
 
-void Macros::showContextMenu(QPoint pt) {
+void Macros::appendStep_() {
+  addStep_(ui->bodyTable->rowCount() - 1);
+  dirty_ = true;
+}
+
+void Macros::contextMenu_(QPoint pt) {
   QWidget *w = qobject_cast<QWidget *>(QObject::sender());
   if (!w) {
     return;
@@ -251,33 +265,25 @@ void Macros::showContextMenu(QPoint pt) {
   QModelIndex index = ui->bodyTable->indexAt(pt);
   if (!index.isValid() || index.row() == ui->bodyTable->rowCount() - 1)
       return;
-  contextMenuRow = index.row();
+  contextMenuRow_ = index.row();
   QMenu *menu = new QMenu(this);
 
-  menu->addAction("&Insert row", this, SLOT(contextMenuInsertTriggered()));
-  menu->addAction("&Delete row", this, SLOT(contextMenuDeleteTriggered()));
+  menu->addAction("&Insert step", this, SLOT(insertStep_()));
+  menu->addAction("&Delete step", this, SLOT(deleteStep_()));
 
   menu->popup(ui->bodyTable->viewport()->mapToGlobal(pt));
 }
-void Macros::contextMenuInsertTriggered() {
-  if (contextMenuRow >= 0 && contextMenuRow < ui->bodyTable->rowCount() - 1) {
-    addStep(contextMenuRow);
+
+void Macros::insertStep_() {
+  if (contextMenuRow_ >= 0 && contextMenuRow_ < ui->bodyTable->rowCount() - 1) {
+    addStep_(contextMenuRow_);
   }
 }
 
-void Macros::contextMenuDeleteTriggered() {
-  if (contextMenuRow >= 0 && contextMenuRow < ui->bodyTable->rowCount() - 1) {
-    ui->bodyTable->removeRow(contextMenuRow);
+void Macros::deleteStep_() {
+  if (contextMenuRow_ >= 0 && contextMenuRow_ < ui->bodyTable->rowCount() - 1) {
+    ui->bodyTable->removeRow(contextMenuRow_);
   }
-}
-
-int Macros::findWidgetRow(QWidget *w) {
-  for(int i=0; i < ui->bodyTable->rowCount(); i++) {
-    if (ui->bodyTable->cellWidget(i, 0) == w) {
-      return i;
-    }
-  }
-  return -1;
 }
 
 void Macros::fillCommandParameters(int row, int command) {
@@ -296,23 +302,23 @@ void Macros::fillCommandParameters(int row, int command) {
   }
 }
 
-void Macros::cmdIndexChanged(int /* idx */) {
+void Macros::setTriggerMode_(int /* idx */) {
   auto *cb = qobject_cast<QComboBox *>(QObject::sender());
   if (!cb) {
     return;
   }
   int command = cb->currentIndex();
-  int row = findWidgetRow(cb);
-  if (row >= 0) {
-    fillCommandParameters(row, command);
+  for(int i=0; i < ui->bodyTable->rowCount(); i++) {
+    if (ui->bodyTable->cellWidget(i, 0) == cb) {
+      fillCommandParameters(i, command);
+      break;
+    }
   }
-  changed = true;
+  dirty_ = true;
   ui->addButton->setEnabled(true);
 }
 
-void Macros::userChanged() {
-  changed = true;
+void Macros::setDirty_() {
+  dirty_ = true;
   ui->addButton->setEnabled(true);
 }
-
-void Macros::on_closeButton_clicked() { this->close(); }

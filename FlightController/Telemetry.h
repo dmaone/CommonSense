@@ -49,10 +49,6 @@ class Telemetry : public QFrame {
   void resetCells_();
   void run_();
 
-signals:
-  void sendCommand(c2command, uint8_t);
-  void setStatusBit(deviceStatus, bool);
-
  protected:
   bool eventFilter(QObject *obj, QEvent *event);
   void closeEvent(QCloseEvent *);
@@ -61,7 +57,7 @@ signals:
   Ui::Telemetry realUi_{};
   Ui::Telemetry* ui{&realUi_};
 
-  DisplayMode displayMode{DisplayNow};
+  DisplayMode displayMode_{DisplayNow};
   std::atomic<bool> initialized_{false};
   bool isActive_{false};
   LabelList labels_{};

@@ -30,7 +30,7 @@ class CyACD {
   void initChecksum_();
   void calculateChecksum_();
 
-  uint8_t _checksumType;
+  uint8_t checksumType_; // currently unused
   ChecksumBufferType runningSum_{0};
 
 };

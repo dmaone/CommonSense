@@ -36,7 +36,7 @@ class FlightController : public QMainWindow {
   void setStatusBit(deviceStatus bit, bool newValue);
 
  public slots:
-  void deviceStatusNotification(DeviceInterface::DeviceStatus);
+  void deviceInterfaceNotification(DeviceInterface::State);
 
  private slots:
   void setMode_(bool isSetup);

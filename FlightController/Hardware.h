@@ -14,7 +14,8 @@ class Hardware : public QFrame {
   void init();
 
  private:
-  void _updateParamVisibility();
+  void apply_();
+  void updateParamVisibility_();
 
   Ui::Hardware realUi_{};
   Ui::Hardware* ui{&realUi_};
@@ -22,7 +23,5 @@ class Hardware : public QFrame {
   DeviceConfig& config_;
 
  private slots:
-  void on_applyButton_clicked();
-  void on_modeBox_currentIndexChanged(int idx);
-  void on_revertButton_clicked();
+  void changeMode_(int idx);
 };

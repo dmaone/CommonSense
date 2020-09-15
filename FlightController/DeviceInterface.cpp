@@ -41,15 +41,15 @@ DeviceInterface::~DeviceInterface() {
   releaseDevice_();
 }
 
-void DeviceInterface::processStatusReply(QByteArray* payload) {
-  if (receivedStatus_ != payload->at(1)) {
+void DeviceInterface::processStatusReply_(QByteArray* payload) {
+  if (deviceStatus_ != payload->at(1)) {
     rx = true;
   }
   if (payload->size() < 6) {
     qInfo() << "Received status packet runt, length: " << payload->size();
     return;
   }
-  receivedStatus_ = payload->at(1);
+  deviceStatus_ = payload->at(1);
   scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
   outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
   setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
@@ -62,7 +62,7 @@ void DeviceInterface::processStatusReply(QByteArray* payload) {
   if (matrixMonitor) {
     setupMode = false;
   }
-  emit deviceStatusNotification(StatusUpdated);
+  emit notify(StatusUpdated);
 }
 
 /**
@@ -79,7 +79,7 @@ bool DeviceInterface::event(QEvent *e) {
     case C2RESPONSE_MATRIX_ROW:
       break; // We are not interested in this, but it has >1 subscribers
     case C2RESPONSE_STATUS:
-      processStatusReply(payload);
+      processStatusReply_(payload);
       break;
     case C2RESPONSE_SCANCODE:
       if (!config.bValid) {
@@ -112,12 +112,8 @@ bool DeviceInterface::event(QEvent *e) {
   return true;
 }
 
-void DeviceInterface::deviceMessageReceiver() {
-  qInfo() << "Message received";
-}
-
-void DeviceInterface::_enqueueCommand(OUT_c2packet_t outbox) {
-  if (currentStatus_ != DeviceConnected) {
+void DeviceInterface::enqueueCommand_(OUT_c2packet_t outbox) {
+  if (state_ != DeviceConnected) {
     qInfo() << "Command while disconnected";
     return;
   }
@@ -125,38 +121,38 @@ void DeviceInterface::_enqueueCommand(OUT_c2packet_t outbox) {
     std::lock_guard<std::mutex> lock{queueLock_};
     commandQueue_.enqueue(outbox);
   }
-  _resetTimer(kHaveDataTickMs);
+  resetTimer_(kHaveDataTickMs);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
   OUT_c2packet_t outbox;
   outbox.command = cmd;
   memcpy(outbox.payload, msg, 63);
-  _enqueueCommand(outbox);
+  enqueueCommand_(outbox);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t msg) {
   OUT_c2packet_t outbox;
   outbox.command = cmd;
   outbox.payload[0] = msg;
-  _enqueueCommand(outbox);
+  enqueueCommand_(outbox);
 }
 
 void DeviceInterface::sendCommand(OUT_c2packet_t cmd) {
-  _enqueueCommand(cmd);
+  enqueueCommand_(cmd);
 }
 
 void DeviceInterface::sendCommand(Bootloader_packet_t packet) {
   OUT_c2packet_t outbox;
   // Structure is marker+[payload]+len16+checksum16+marker
   memcpy(outbox.raw, packet.raw, packet.length + 7);
-  _enqueueCommand(outbox);
+  enqueueCommand_(outbox);
 }
 
 void DeviceInterface::configLoaded() {
   qInfo() << "Configuration loaded.";
-  if (currentStatus_ == DeviceConnected) {
-    emit deviceStatusNotification(DeviceConfigured);
+  if (state_ == DeviceConnected) {
+    emit notify(DeviceConfigured);
   }
 }
 
@@ -164,19 +160,19 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
   if (bEnabled) {
     qInfo() << "Entering firmware update mode_.";
     mode_ = DeviceInterfaceBootloader;
-    if (currentStatus_ == DeviceConnected) {
+    if (state_ == DeviceConnected) {
       sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
     }
   } else {
     qInfo() << "Resuming normal operations.";
     mode_ = DeviceInterfaceNormal;
   }
-  _resetTimer(kDeviceScanTick);
+  resetTimer_(kDeviceScanTick);
   scheduleDeviceRelease_.store(true);
 }
 
 void DeviceInterface::flipStatusBit(deviceStatus bit) {
-  auto newStatus = receivedStatus_;
+  auto newStatus = deviceStatus_;
   auto oldValue = newStatus & (1 << bit);
   newStatus &= ~(1 << bit);
   if (!oldValue) {
@@ -186,7 +182,7 @@ void DeviceInterface::flipStatusBit(deviceStatus bit) {
 }
 
 void DeviceInterface::setStatusBit(deviceStatus bit, bool newValue) {
-  auto newStatus = receivedStatus_;
+  auto newStatus = deviceStatus_;
   auto oldValue = newStatus & (1 << bit);
   if (oldValue != newValue) {
     flipStatusBit(bit);
@@ -194,10 +190,10 @@ void DeviceInterface::setStatusBit(deviceStatus bit, bool newValue) {
 }
 
 bool DeviceInterface::getStatusBit(deviceStatus bit) {
-  return receivedStatus_ & (1 << bit);
+  return deviceStatus_ & (1 << bit);
 }
 
-void DeviceInterface::_resetTimer(int interval) {
+void DeviceInterface::resetTimer_(int interval) {
   if (pollTimerId_ > 0) {
     killTimer(pollTimerId_);
   }
@@ -215,24 +211,24 @@ void DeviceInterface::timerEvent(QTimerEvent* timer) {
     return;
   }
   if (!device_) {
-    return _initDevice();
+    return initDevice_();
   }
-  const auto receivedThings = _receivePacket();
-  const auto sentThings = _sendPacket();
+  const auto receivedThings = receivePacket_();
+  const auto sentThings = sendPacket_();
   if (receivedThings || sentThings || mode_ == DeviceInterfaceBootloader) {
     antiLagTimer_ = kAntiLagTicks;
   } else {
     // Go back to slow mode_ if idle and not bootloader.
     if (--antiLagTimer_ == 0) {
       qDebug("Idle. Slowing down to save CPU");
-      _resetTimer(kNormalOperationTick);
+      resetTimer_(kNormalOperationTick);
       antiLagTimer_ = kAntiLagTicks;
     }
   }
   releaseDevice_();
 }
 
-bool DeviceInterface::_sendPacket() {
+bool DeviceInterface::sendPacket_() {
   unsigned char outbox[65];
   OUT_c2packet_t cmd;
   {
@@ -254,8 +250,8 @@ bool DeviceInterface::_sendPacket() {
   outbox[0] = 0x00; // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
-    emit deviceStatusNotification(StatusUpdated); // Blink the TX light
-    lastSend_ = QDateTime::currentMSecsSinceEpoch();
+    emit notify(StatusUpdated); // Blink the TX light
+    lastSentAt_ = QDateTime::currentMSecsSinceEpoch();
   }
   memcpy(outbox+1, cmd.raw, sizeof(cmd));
   if (kDebugUsbTraffic) {
@@ -270,7 +266,7 @@ bool DeviceInterface::_sendPacket() {
   return true;
 }
 
-bool DeviceInterface::_receivePacket() {
+bool DeviceInterface::receivePacket_() {
   unsigned char buffer[65];
   memset(buffer, 0x00, sizeof(buffer));
 
@@ -292,22 +288,22 @@ bool DeviceInterface::_receivePacket() {
   cts_.store(true);
   if (buffer[0] != C2RESPONSE_STATUS) {
     rx = true;
-    if (lastSend_ > 0) {
+    if (lastSentAt_ > 0) {
       latencyMs = QString("%1 ms ").arg(
-          QDateTime::currentMSecsSinceEpoch() - lastSend_);
-      lastSend_ = 0;
+          QDateTime::currentMSecsSinceEpoch() - lastSentAt_);
+      lastSentAt_ = 0;
     }
   }
   QCoreApplication::postEvent(this, new DeviceMessage(buffer));
   return rx;
 }
 
-void DeviceInterface::_initDevice() {
+void DeviceInterface::initDevice_() {
   std::lock_guard<std::mutex> lock{deviceLock_};
-  device_ = acquireDevice();
+  device_ = acquireDevice_();
   if (!device_) {
     qInfo() << ".";
-    _resetTimer(kDeviceScanTick);
+    resetTimer_(kDeviceScanTick);
     return;
   }
   hid_set_nonblocking(device_, 1);
@@ -321,20 +317,20 @@ void DeviceInterface::_initDevice() {
   hid_write(device_, buf, sizeof buf); // Only flipping scan bit inits scanner
 
   cts_.store(true); // Not expecting anything from device - clear to send.
-  _updateDeviceStatus(mode_ == DeviceInterfaceNormal ? DeviceConnected
-                                                    : BootloaderConnected);
+  setState_(mode_ == DeviceInterfaceNormal ? DeviceConnected
+                                           : BootloaderConnected);
   // No need to change timer rate - loading config will switch it.
   return;
 }
 
-void DeviceInterface::_updateDeviceStatus(DeviceStatus newStatus) {
-  if (newStatus != currentStatus_) {
-    currentStatus_ = newStatus;
-    emit deviceStatusNotification(newStatus);
+void DeviceInterface::setState_(State newState) {
+  if (newState != state_) {
+    state_ = newState;
+    emit notify(state_);
   }
 }
 
-DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
+DeviceInterface::DetectedDevices DeviceInterface::listDevices_() {
   DetectedDevices retval{};
   auto root = hid_enumerate(0, 0);
   if (!root) {
@@ -363,12 +359,12 @@ DeviceInterface::DetectedDevices DeviceInterface::listDevices() {
   return retval;
 }
 
-hid_device* DeviceInterface::acquireDevice() {
+hid_device* DeviceInterface::acquireDevice_() {
   if (hid_init()) {
     qInfo() << "Cannot initialize hidapi!";
     return nullptr;
   }
-  auto devices = listDevices();
+  auto devices = listDevices_();
   if (mode_ == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
     QMessageBox::StandardButton result =
         QMessageBox::question(nullptr, "Bootloader detected!",
@@ -411,7 +407,7 @@ void DeviceInterface::releaseDevice_() {
     if (device_) {
       qInfo() << "Releasing device..";
     }
-    _updateDeviceStatus(DeviceDisconnected);
+    setState_(DeviceDisconnected);
     hid_close(device_);
     device_ = nullptr;
     if (hid_exit())
@@ -421,5 +417,5 @@ void DeviceInterface::releaseDevice_() {
 
 void DeviceInterface::start() {
   qInfo() << "Acquiring device - can take a while with certain old USB hubs..";
-  _resetTimer(kNormalOperationTick);
+  resetTimer_(kNormalOperationTick);
 }

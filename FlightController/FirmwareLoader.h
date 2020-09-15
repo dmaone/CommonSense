@@ -65,17 +65,17 @@ class FirmwareLoader : public QObject {
   bool eventFilter(QObject *obj, QEvent *event);
 
  private:
-  bool _loadFirmwareFile();
-  void _sendCommand(BootloaderVerb command);
-  void _sendPacket(BootloaderVerb command, QByteArray &data);
-  bool _responseValid(const Bootloader_packet_t& data);
-  uint16_t _packetChecksum(const Bootloader_packet_t& packet);
-  bool _checkCompatibility(const Bootloader_packet_t& packet);
-  bool _checkFlashSize(const Bootloader_packet_t& packet);
-  bool _upload_row();
+  bool loadFirmwareFile_();
+  void sendCommand_(BootloaderVerb command);
+  void sendPacket_(BootloaderVerb command, QByteArray &data);
+  bool validResponse_(const Bootloader_packet_t& data);
+  uint16_t calculateChecksum_(const Bootloader_packet_t& packet);
+  bool isCompatible_(const Bootloader_packet_t& packet);
+  // bool validateFlashSize_(const Bootloader_packet_t& packet);
+  bool uploadRow_();
 
-  bool bootloaderMode{false};
+  bool bootloaderMode_{false};
   std::unique_ptr<CyACD> firmware_{nullptr};
-  BootloaderVerb lastCommand{BR_CYRET_SUCCESS};
-  CyACD_row* lastRow;
+  BootloaderVerb lastCommand_{BR_CYRET_SUCCESS};
+  CyACD_row* lastRow_;
 };

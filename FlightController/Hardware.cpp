@@ -1,5 +1,7 @@
 #include "Hardware.h"
 
+#include <QPushButton>
+
 namespace {
 constexpr size_t kMaxDebouncingTicks{64};
 }
@@ -10,6 +12,10 @@ Hardware::Hardware(DeviceConfig& config) :
   for (const auto& it: config_.getExpModeNames()) {
     ui->modeBox->addItem(it.data());
   }
+  connect(ui->applyButton, &QPushButton::clicked, this, [this](){ apply_(); });
+  connect(ui->revertButton, &QPushButton::clicked, this, [this](){ init(); });
+  connect(ui->modeBox, SIGNAL(currentIndexChanged(int)),
+          this, SLOT(changeMode_(int)));
 }
 
 void Hardware::init() {
@@ -42,16 +48,16 @@ void Hardware::init() {
   ui->Param2->setValue(config.expHdrParam2);
 }
 
-void Hardware::_updateParamVisibility() {
+void Hardware::updateParamVisibility_() {
   // Nothing - both modes blink something on keypress now.
 }
 
-void Hardware::on_modeBox_currentIndexChanged(int idx) {
+void Hardware::changeMode_(int idx) {
   Q_UNUSED(idx);
-  _updateParamVisibility();
+  updateParamVisibility_();
 }
 
-void Hardware::on_applyButton_clicked() {
+void Hardware::apply_() {
   std::vector<uint8_t> adcBitMap {8, 10, 12};
   HardwareConfig config;
   config.adcBits = adcBitMap[ui->adcBits->currentIndex()];
@@ -62,8 +68,4 @@ void Hardware::on_applyButton_clicked() {
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();
   config_.setHardwareConfig(config);
-}
-
-void Hardware::on_revertButton_clicked() {
-  init();
 }
