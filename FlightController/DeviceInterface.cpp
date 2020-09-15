@@ -206,7 +206,7 @@ void DeviceInterface::_resetTimer(int interval) {
 
 void DeviceInterface::timerEvent(QTimerEvent* timer) {
   if (timer->timerId() == statusTimerId_) {
-    if (mode_ == DeviceInterfaceNormal && currentStatus_ == DeviceConnected && config.bValid) {
+    if (mode_ == DeviceInterfaceNormal && config.bValid) {
       // request status, so you see actual status.
       sendCommand(C2CMD_GET_STATUS, 1);
     }
@@ -312,8 +312,13 @@ void DeviceInterface::_initDevice() {
   }
   hid_set_nonblocking(device_, 1);
   config.reset();
-  QByteArray tmp(64, (char)0); // initialize status by reading empty packet
-  processStatusReply(&tmp);
+  unsigned char buf[65];
+  buf[0] = 0;
+  buf[1] = C2CMD_EWO;
+  buf[2] = 1 << deviceStatus::C2DEVSTATUS_SETUP_MODE;
+  hid_write(device_, buf, sizeof buf);
+  buf[2] += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
+  hid_write(device_, buf, sizeof buf); // Only flipping scan bit inits scanner
 
   cts_.store(true); // Not expecting anything from device - clear to send.
   _updateDeviceStatus(mode_ == DeviceInterfaceNormal ? DeviceConnected
