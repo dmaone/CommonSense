@@ -50,12 +50,10 @@ void Telemetry::init() {
   initialized_.store(false);
   grid_ = std::make_unique<QGridLayout>();
 
-  grid_->setSpacing(0);
   LabelList labels;
-  grid_ = std::make_unique<QGridLayout>();
   for (uint8_t i = 1; i <= di_.config.numCols; ++i) {
     labels.emplace_back(std::make_unique<QLabel>(QString("%1").arg(i)));
-    grid_->addWidget(labels.back().get(), 0, i, 1, 1, Qt::AlignCenter);
+    grid_->addWidget(labels.back().get(), 0, i, 1, 1, Qt::AlignRight);
   }
 
   std::vector<Cell> cells{di_.config.getMatrixSize()};
@@ -65,6 +63,7 @@ void Telemetry::init() {
     grid_->addWidget(labels.back().get(), i, 0, 1, 1, Qt::AlignRight);
     for (uint8_t j = 1; j <= di_.config.numCols; ++j) {
       cell->subLayout.setSpacing(0);
+      cell->subLayout.setContentsMargins(0, 0, 0, 0);
       cell->widget.setLayout(&cell->subLayout);
 
       cell->readout.setDigitCount(3);
@@ -81,7 +80,9 @@ void Telemetry::init() {
   }
 
   ui->Dashboard->setLayout(grid_.get());
+  adjustSize();
   cells_.swap(cells);
+  labels_.swap(labels);
   resetCells_();
   initialized_.store(true);
   // TODO fix start button label and/or disable telemetry on connect
