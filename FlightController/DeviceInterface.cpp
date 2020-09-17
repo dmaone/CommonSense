@@ -94,7 +94,7 @@ bool DeviceInterface::event(QEvent *e) {
       row = (scancode - col) / config.numCols;
       if (row == 15 && col == 15) {
         // "All keys released"
-        qInfo() << "· ----------";
+        qInfo() << "---------";
       } else {
         emit keypress({
             .row = row,
@@ -158,7 +158,7 @@ void DeviceInterface::configLoaded() {
 
 void DeviceInterface::bootloaderMode(bool bEnabled) {
   if (bEnabled) {
-    qInfo() << "Entering firmware update mode_.";
+    qInfo() << "Entering firmware update mode.";
     mode_ = DeviceInterfaceBootloader;
     if (state_ == DeviceConnected) {
       sendCommand(C2CMD_ENTER_BOOTLOADER, 1);
