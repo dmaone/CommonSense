@@ -19,6 +19,8 @@ uint8_t tap_usb_sc;
 uint32_t tap_deadline;
 uint_fast16_t saved_macro_ptr;
 
+extern const scan_event_t scan_idle;
+
 inline bool empty_keycode_at(uint8_t pos) {
   return USBQueue[pos].keycode == USBCODE_NOEVENT;
 }
@@ -50,6 +52,8 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
       break;
     }
   }
+  // Aktchually figure out what's pressed and how it should change with layer change
+  // then enqueue DIFFS ONLY
 #ifdef DEBUG_PIPELINE
   xprintf("L@%d: %02x %02x -> %d", systime, flags, keycode, currentLayer);
 #endif
@@ -177,33 +181,6 @@ inline void play_macro(uint_fast16_t start) {
   }
 }
 
-inline scancode_t read_scancode(void) {
-  if (scancodes_rpos == scancodes_wpos) {
-    // Nothing to read. Return empty value AKA "Pressed nokey".
-    scancode_t result;
-    result.flags = 0;
-    result.scancode = COMMONSENSE_NOKEY;
-    return result;
-  }
-  // Skip empty elements that might be there
-  while (scancodes[scancodes_rpos].scancode == COMMONSENSE_NOKEY &&
-        (scancodes[scancodes_rpos].flags & USBQUEUE_RELEASED_MASK) == 0
-  ) {
-    scancodes_rpos = SCANCODES_NEXT(scancodes_rpos);
-  }
-  // MOVE the value from ring buffer to output buffer. Mark source as empty.
-  scancode_t scancode = scancodes[scancodes_rpos];
-  scancodes[scancodes_rpos].flags = 0;
-  scancodes[scancodes_rpos].scancode = COMMONSENSE_NOKEY;
-#ifdef MATRIX_LEVELS_DEBUG
-  xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
-          scancode, systime,
-          level_buffer[scancodes_rpos],
-          level_buffer_inst[scancodes_rpos]);
-#endif
-  return scancode;
-}
-
 bool reports_reset_pending;
 inline void process_real_key(void) {
   if (tap_deadline > 0 && systime > tap_deadline) {
@@ -234,21 +211,11 @@ inline void process_real_key(void) {
       return;
     }
   }
-  scancode_t sc = read_scancode();
-  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
-    if (!(sc.flags & KEY_UP_MASK) && sc.scancode == COMMONSENSE_NOKEY) {
-      return; // All keys up needs to be printed, "no key" doesn't.
-    }
-    // In setup mode all scancodes(not USB!) go up the control channel, not HID.
-    outbox.response_type = C2RESPONSE_SCANCODE;
-    outbox.payload[0] = sc.flags;
-    outbox.payload[1] = sc.scancode;
-    usb_send_c2();
-    return;
-  }
-  if (sc.scancode == COMMONSENSE_NOKEY) {
+
+  scan_event_t event = scan_read_event();  
+  if (event.key == COMMONSENSE_NOKEY) {
     // An empty value. Likely because nothing was pressed last tick, but..
-    if (sc.flags & KEY_UP_MASK) {
+    if (event.flags & KEY_UP_MASK) {
       // This is "All keys are up" signal, sun keyboard-style. It deals with
       // stuck keys. Those appear due to layers - suppose you press the key,
       // then switch layer which has another key at that scancode position.
@@ -266,7 +233,7 @@ inline void process_real_key(void) {
   // Resolve USB keycode using current active layers - drop down until defined.
   uint8_t usb_sc = USBCODE_TRANSPARENT;
   for (int8_t i = currentLayer; i >= 0; --i) {
-    usb_sc = config.layers[i][sc.scancode];
+    usb_sc = config.layers[i][event.key];
 #ifdef DEBUG_PIPELINE
     xprintf("Lookup@%d: %02x %02x@L%d -> %d",
             systime, sc.flags, sc.scancode, i, usb_sc);
@@ -284,11 +251,11 @@ inline void process_real_key(void) {
           systime, sc.flags, sc.scancode, currentLayer, usb_sc);
 #endif
 
-  uint8_t keyflags = sc.flags | USBQUEUE_REAL_KEY_MASK;
+  uint8_t keyflags = event.flags | USBQUEUE_REAL_KEY_MASK;
   uint_fast16_t macro_ptr;
   if (tap_deadline > 0) { // <TapWait>
     // Tap wait mode. We are here because tap macro triggered on previous tick.
-    if (usb_sc == tap_usb_sc || sc.scancode == COMMONSENSE_NOKEY) {
+    if (usb_sc == tap_usb_sc || event.key == COMMONSENSE_NOKEY) {
       // Ok, the key matches.
       // Or it's a tap timeout - in which case we KIND OF have a second keyDown.
       if (systime <= tap_deadline) {
@@ -433,9 +400,9 @@ inline void pipeline_process(void) {
 }
 
 inline bool pipeline_process_wakeup(void) {
-  scancode_t sc = read_scancode();
+  scan_event_t event = scan_read_event();
   // We don't care about _which_ key is pressed - we wake up on key _press_
-  return sc.scancode != COMMONSENSE_NOKEY && (sc.flags & KEY_UP_MASK) == 0;
+  return (event.raw != scan_idle.raw) && (event.flags & KEY_UP_MASK) == 0;
 }
 
 void pipeline_init(void) {

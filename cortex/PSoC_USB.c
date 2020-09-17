@@ -6,12 +6,15 @@
  * it under the terms of the GNU General Public License version 2 as
  * published by the Free Software Foundation.
  */
+#include "PSoC_USB.h"
+
 #include <project.h>
 #include <stdio.h>
+
 #include "exp.h"
 #include "globals.h"
+#include "scan.h"
 
-#include "PSoC_USB.h"
 
 // for xprintf - stdio + stdarg
 #include <stdarg.h>

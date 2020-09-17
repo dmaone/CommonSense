@@ -235,12 +235,12 @@ CY_ISR(Result_ISR) {
       continue; // As if nothing happened!
     }
     if (Results[adc_buffer_pos] ADC_CMP_OP threshold) {
-      append_debounced(0, keyIndex);
+      scan_debounce(0, keyIndex);
 #if DEBUG_SHOW_MATRIX_EVENTS == 1
       PIN_DEBUG(4, 1);
 #endif
     } else {
-      append_debounced(KEY_UP_MASK, keyIndex);
+      scan_debounce(KEY_UP_MASK, keyIndex);
     }
   }
 #if PROFILE_SCAN_PROCESSING == 1

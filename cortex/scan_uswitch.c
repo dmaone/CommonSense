@@ -51,7 +51,7 @@ CY_ISR(SenseIRQ_ISR) {
   }
   prev_row_status = row_status;
   prev_col_status = col_status;
-  append_debounced(row_down ? 0 : KEY_UP_MASK, row * MATRIX_COLS + col);
+  scan_debounce(row_down ? 0 : KEY_UP_MASK, row * MATRIX_COLS + col);
 }
 
 void scan_init(uint8_t debouncing_period) {

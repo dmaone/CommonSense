@@ -92,16 +92,16 @@ CY_ISR(Result_ISR) {
   // So, in the name of Consistency, we'll use channels backwards too.
   // We are screwed at pinout level anyway, so let's keep madness in one place.
   if (config.thresholds[--key_index] > 0) {
-    append_debounced(TEST_BIT(status, 3) ? 0 : KEY_UP_MASK, key_index);
+    scan_debounce(TEST_BIT(status, 3) ? 0 : KEY_UP_MASK, key_index);
   }
   if (config.thresholds[--key_index] > 0) {
-    append_debounced(TEST_BIT(status, 2) ? 0 : KEY_UP_MASK, key_index);
+    scan_debounce(TEST_BIT(status, 2) ? 0 : KEY_UP_MASK, key_index);
   }
   if (config.thresholds[--key_index] > 0) {
-    append_debounced(TEST_BIT(status, 1) ? 0 : KEY_UP_MASK, key_index);
+    scan_debounce(TEST_BIT(status, 1) ? 0 : KEY_UP_MASK, key_index);
   }
   if (config.thresholds[--key_index] > 0) {
-    append_debounced(TEST_BIT(status, 0) ? 0 : KEY_UP_MASK, key_index);
+    scan_debounce(TEST_BIT(status, 0) ? 0 : KEY_UP_MASK, key_index);
   }
   
   if (mux_position == 0) {

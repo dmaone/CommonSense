@@ -10,8 +10,6 @@
 
 #include "scan.h"
 
-#define SCANCODE_MASK 0x7f
-
 uint8_t local_led_status;
 
 void sync_leds(void) {
@@ -67,12 +65,11 @@ void scan_tick(void) {
           code = N_UART_GetChar();
           return;
       case 0x7F: // all keys up
-          append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
+          scan_register_event(KEY_UP_MASK, COMMONSENSE_NOKEY);
           return;
       default:
-        // A bit of clowntown - this abuses the fact that high bit is "released"
-        // in original sun serial protocol and this matches CS key released flag
-        append_scancode((code & KEY_UP_MASK), (code & SCANCODE_MASK));
+        // high bit is "key released", lower bits are scancode.
+        scan_register_event(code & 0x80 ? KEY_UP_MASK : 0, code & 0x7f);
   }
   // Uncomment below for click
   // N_UART_PutChar(0x0A);

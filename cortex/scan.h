@@ -13,10 +13,10 @@
 typedef union {
   struct {
     uint8_t flags;
-    uint8_t scancode;
+    uint8_t key;
   } __attribute__((packed));
-  uint8_t raw[2];
-} scancode_t;
+  uint16_t raw;
+} scan_event_t;
 
 // number of ticks to check for spam after scan starts
 #define SANITY_CHECK_DURATION 1000
@@ -33,18 +33,13 @@ typedef union {
 #define DEBUG_SHOW_MATRIX_EVENTS 0
 #define PROFILE_SCAN_PROCESSING 0
 
-#define SCANCODES_END 31
-#define SCANCODES_NEXT(X) ((X + 1) & SCANCODES_END)
-// ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
-
-scancode_t scancodes[SCANCODES_END + 1];
-uint8_t scancodes_wpos;
-uint8_t scancodes_rpos;
-
-void append_scancode(uint8_t flags, uint8_t scancode);
-void append_debounced(uint8_t flags, uint8_t scancode);
+void scan_register_event(uint8_t flags, uint8_t key);
+void scan_debounce(uint8_t flags, uint8_t key);
 void scan_set_matrix_value(uint8_t keyIndex, int8_t value);
 void report_matrix_readouts();
+
+// Returns COMMONSENSE_NOKEY if no events pending
+scan_event_t scan_read_event();
 
 void scan_check_matrix();
 void scan_sanity_check();

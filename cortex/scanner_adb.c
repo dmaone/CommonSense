@@ -10,9 +10,7 @@
 
 #include "scan.h"
 
-#define ADDR_KEYBOARD 0x20
-
-#define SCANCODE_MASK 0x7f
+#define ADB_ADDR_KEYBOARD 0x20
 
 typedef union {
   struct {
@@ -174,17 +172,21 @@ void scan_nap(void) {
 void scan_wake(void) {
 }
 
+void send_keypress(uint8_t sc) {
+  scan_register_event((sc & 0x80) ? KEY_UP_MASK : 0, sc & 0x7f);
+}
+
 void scan_tick(void) {
   CyDelayUs(12); //delay for preventing overload of poor ADB keyboard controller
   adb_pdu_t codes;
-  codes.raw = adb_host_dev_recv(ADDR_KEYBOARD, 0);
+  codes.raw = adb_host_dev_recv(ADB_ADDR_KEYBOARD, 0);
   if (codes.key0 == codes.key1) {
     switch (codes.key0) {
       case 0x7f:
         // intentional fallthru
       case 0xff:
-        // power key. Subtract one not to clash with COMMONSENSE_NO_KEY
-        append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK) - 1);
+        // power key. Subtract one not to clash with COMMONSENSE_NOKEY
+        send_keypress(codes.key0 - 1);
         break;
       default:
         break;
@@ -196,9 +198,9 @@ void scan_tick(void) {
     // xprintf("%02x %02x", codes.key0, codes.key1);
     // A bit of clowntown - this abuses the fact that high bit is "released"
     // in ADB protocol and this matches CS key released flag
-    append_scancode(codes.key1 & KEY_UP_MASK, (codes.key1 & SCANCODE_MASK));
+    send_keypress(codes.key1);
     if (codes.key0 != 0xFF) {
-      append_scancode(codes.key0 & KEY_UP_MASK, (codes.key0 & SCANCODE_MASK));
+      send_keypress(codes.key0);
     }
   }
   if (local_led_status != led_status) {

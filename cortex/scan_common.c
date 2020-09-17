@@ -12,28 +12,54 @@
 
 #include "PSoC_USB.h"
 
+#define SCANNER_RING_BUFFER_SIZE 64
+// ^ MUST BE POWER OF 2!
+
+#define ADVANCE(X) X = (X + 1) & (SCANNER_RING_BUFFER_SIZE - 1)
+
+// "Empty" value: "no key" w/cleared flags (so, technically, PRESSED CS_NOKEY).
+const scan_event_t scan_idle = {.key = COMMONSENSE_NOKEY, .flags = 0};
+
+// REMINDER: can't make anything here static, because inline functions.
+// Take care not to use any, technically, globals, outside scan_common.
+
+// Ring buffer for detected-but-not-yet-processed keypresses.
+scan_event_t pending_events[SCANNER_RING_BUFFER_SIZE];
+uint8_t write_cursor;
+uint8_t read_cursor;
+
 // After debouncer conversion, matrix_status exists exclusively for spammy keys
 // reporting. Can be removed anytime.
 #define SCAN_ROW_SHIFT 5
 #define SCAN_COL_MASK 0x1f
 uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
 
-bool matrix_was_active = 0;
+bool matrix_was_active = false;
 
 int8_t matrix[COMMONSENSE_MATRIX_SIZE];
 int8_t press_threshold;
 int8_t release_threshold;
 uint8_t scancodes_while_output_disabled = 0;
 
-inline void append_scancode(uint8_t flags, uint8_t code) {
+inline void scan_register_event(uint8_t flags, uint8_t key) {
   if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
     if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
       // Avoid overflowing counter! Things can get ugly FAST!
       ++scancodes_while_output_disabled;
 
       // Mark the key as noisy
-      SET_BIT(matrix_status[code >> SCAN_ROW_SHIFT], code & SCAN_COL_MASK);
+      SET_BIT(matrix_status[key >> SCAN_ROW_SHIFT], key & SCAN_COL_MASK);
     }
+    return;
+  }
+  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
+    // In setup mode all matrix events are sent via control channel, not HID.
+    // This is done to prevent key spam in case of unfortunate threshold change.
+    // Sanity checker should protect from this, but just in case..
+    outbox.response_type = C2RESPONSE_SCANCODE;
+    outbox.payload[0] = flags;
+    outbox.payload[1] = key;
+    usb_send_c2();
     return;
   }
 
@@ -44,13 +70,13 @@ inline void append_scancode(uint8_t flags, uint8_t code) {
     PIN_DEBUG(1, 2)
   }
 #endif
-  scancodes_wpos = SCANCODES_NEXT(scancodes_wpos);
-  scancodes[scancodes_wpos].flags = flags;
-  scancodes[scancodes_wpos].scancode = code;
+  ADVANCE(write_cursor);
+  pending_events[write_cursor].flags = flags;
+  pending_events[write_cursor].key = key;
 }
 
-inline void append_debounced(uint8_t flags, uint8_t keyIndex) {
-  int8_t key = matrix[keyIndex];
+inline void scan_debounce(uint8_t flags, uint8_t key) {
+  int8_t d_buf = matrix[key];
   /*
    *Stolen from improved xwhatsit firmware. Same algo as before, less bits.
    * Main idea: using sign for key state, abs. value to count the steps.
@@ -63,37 +89,52 @@ inline void append_debounced(uint8_t flags, uint8_t keyIndex) {
      * listing 1 does this with global counter var.
    */
   if (flags & KEY_UP_MASK) { // Matrix position is OFF
-    if (key <= 0) { // Still released. Reset the streak counter.
-      key = -1;
+    if (d_buf <= 0) { // Still released. Reset the streak counter.
+      d_buf = -1;
     } else { // Was pressed. Bump the streak counter.
-      if (++key >= release_threshold) { // Long enough. Release the hounds!
-        key = -1;
-        append_scancode(KEY_UP_MASK, keyIndex);
+      if (++d_buf >= release_threshold) { // Long enough. Release the hounds!
+        d_buf = -1;
+        scan_register_event(KEY_UP_MASK, key);
       }
     }
-  } else if (key > 0) { // Pressed, no change. Reset the streak counter.
-    key = 1;
+  } else if (d_buf > 0) { // Pressed, no change. Reset the streak counter.
+    d_buf = 1;
   } else { // Known pressed, was released. Bump the streak counter.
-    if (--key <= press_threshold) { // Long enough. Press the key.
-      key = 1;
-      append_scancode(0, keyIndex);
+    if (--d_buf <= press_threshold) { // Long enough. Press the key.
+      d_buf = 1;
+      scan_register_event(0, key);
       matrix_was_active = true;
     }
   }
-  matrix[keyIndex] = key;
+  matrix[key] = d_buf;
 }
 
-inline void scan_set_matrix_value(uint8_t keyIndex, int8_t value) {
-  matrix[keyIndex] = value;
+inline void scan_set_matrix_value(uint8_t key, int8_t value) {
+  matrix[key] = value;
 }
 
-/*
- * Generates that "matrix is idle" key
- * The idea: 2 low bits of matrix_activity_detector are used:
-   * bit 0 for "key was pressed since last check"
-   * bit 1 for "key was pressed last time"
- * Longer delays achievable with shifts and bitmask, but not necessary.
- */
+inline scan_event_t scan_read_event(void) {
+  if (read_cursor == write_cursor) {
+    // Nothing to read.
+    return scan_idle;
+  }
+  // Skip empty elements that might be there
+  while (pending_events[read_cursor].raw == scan_idle.raw) {
+    ADVANCE(read_cursor);
+  }
+  // MOVE the value from ring buffer to output buffer. Erase buffer element.
+  scan_event_t result = pending_events[read_cursor];
+  pending_events[read_cursor].raw = scan_idle.raw;
+#ifdef MATRIX_LEVELS_DEBUG
+  xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
+          scancode, systime,
+          level_buffer[read_cursor],
+          level_buffer_inst[read_cursor]);
+#endif
+  return result;
+}
+
+
 inline void scan_check_matrix(void) {
   if (!matrix_was_active) { // idle -> idle
     return;
@@ -106,7 +147,7 @@ inline void scan_check_matrix(void) {
     }
   }
   if (!matrix_was_active) { // was active, no longer is.
-    append_scancode(KEY_UP_MASK, COMMONSENSE_NOKEY);
+    scan_register_event(KEY_UP_MASK, COMMONSENSE_NOKEY);
   }
 }
 
@@ -142,13 +183,12 @@ void scan_common_init(uint8_t steps) {
 }
 
 void scan_common_reset() {
-  for(uint8_t i = 0; i <= SCANCODES_END; i++) {
-    scancodes[i].flags = 0;
-    scancodes[i].scancode = COMMONSENSE_NOKEY;
+  for(uint8_t i = 0; i < SCANNER_RING_BUFFER_SIZE; i++) {
+    pending_events[i].raw = scan_idle.raw;
   }
   memset(matrix_status, 0, sizeof(matrix_status));
-  scancodes_rpos = 0;
-  scancodes_wpos = 0;
+  read_cursor = 0;
+  write_cursor = 0;
   for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; i++) {
     matrix[i] = -1;
   }
@@ -201,3 +241,5 @@ void scan_report_insanity() {
   }
   usb_send_c2_blocking();
 }
+
+#undef ADVANCE

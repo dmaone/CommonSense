@@ -39,7 +39,7 @@ CY_ISR(DriveIRQ_ISR) {
       Strobe_Write(3);
       break;
     case READ_POINT:
-      append_debounced(CyPins_ReadPin(SensePin_0) ? 0 : KEY_UP_MASK, current_key);
+      scan_debounce(CyPins_ReadPin(SensePin_0) ? 0 : KEY_UP_MASK, current_key);
       // The range is 0 - number of keys. So at the last key we reset to zero.
       if (current_key >= 99) {
         current_key = 0;

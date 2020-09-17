@@ -9,7 +9,6 @@
 
 #pragma once
 #include "pipeline.h"
-#include "scan.h"
 
 #define SUSPEND_SYSTIMER_DIVISOR 10
 
