@@ -30,6 +30,17 @@ inline bool valid_actionable_keycode_at(uint8_t pos) {
       USBQueue[pos].sysTime <= systime;
 }
 
+inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
+  for (int8_t i = layer; i >= 0; --i) {
+    if (config.layers[i][key] == USBCODE_TRANSPARENT ) {
+      continue;
+    }
+    return config.layers[i][key];
+  }
+  return USBCODE_TRANSPARENT;
+}
+
+
 inline void process_layerMods(uint8_t flags, uint8_t keycode) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
   if (keycode & 0x04) {
@@ -231,17 +242,7 @@ inline void process_real_key(void) {
   // OK, we're done with special cases. General scancode processing starts here.
 
   // Resolve USB keycode using current active layers - drop down until defined.
-  uint8_t usb_sc = USBCODE_TRANSPARENT;
-  for (int8_t i = currentLayer; i >= 0; --i) {
-    usb_sc = config.layers[i][event.key];
-#ifdef DEBUG_PIPELINE
-    xprintf("Lookup@%d: %02x %02x@L%d -> %d",
-            systime, sc.flags, sc.scancode, i, usb_sc);
-#endif
-    if (usb_sc != USBCODE_TRANSPARENT) {
-      break;
-    }
-  }
+  uint8_t usb_sc = resolve_key(event.key, currentLayer);
   if (usb_sc == USBCODE_TRANSPARENT) {
     // Empty key in layout from current layer down to base. Fuck no, DON'T EVER.
     return;
