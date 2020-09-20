@@ -18,7 +18,7 @@
 #define ADVANCE(X) X = (X + 1) & (SCANNER_RING_BUFFER_SIZE - 1)
 
 // "Empty" value: "no key" w/cleared flags (so, technically, PRESSED CS_NOKEY).
-const scan_event_t scan_idle = {.key = COMMONSENSE_NOKEY, .flags = 0};
+const scan_event_t scan_no_key = {.key = COMMONSENSE_NOKEY, .flags = 0};
 
 // REMINDER: can't make anything here static, because inline functions.
 // Take care not to use any, technically, globals, outside scan_common.
@@ -30,6 +30,7 @@ uint8_t read_cursor;
 
 // After debouncer conversion, matrix_status exists exclusively for spammy keys
 // reporting. Can be removed anytime.
+// It has value for spammy keys tho - we need to know which keys, not frequency.
 #define SCAN_ROW_SHIFT 5
 #define SCAN_COL_MASK 0x1f
 uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
@@ -109,6 +110,7 @@ inline void scan_debounce(uint8_t flags, uint8_t key) {
   matrix[key] = d_buf;
 }
 
+// For telemetry reporting - cells are used as raw readout value storage.
 inline void scan_set_matrix_value(uint8_t key, int8_t value) {
   matrix[key] = value;
 }
@@ -116,15 +118,15 @@ inline void scan_set_matrix_value(uint8_t key, int8_t value) {
 inline scan_event_t scan_read_event(void) {
   if (read_cursor == write_cursor) {
     // Nothing to read.
-    return scan_idle;
+    return scan_no_key;
   }
   // Skip empty elements that might be there
-  while (pending_events[read_cursor].raw == scan_idle.raw) {
+  while (pending_events[read_cursor].raw == scan_no_key.raw) {
     ADVANCE(read_cursor);
   }
   // MOVE the value from ring buffer to output buffer. Erase buffer element.
   scan_event_t result = pending_events[read_cursor];
-  pending_events[read_cursor].raw = scan_idle.raw;
+  pending_events[read_cursor].raw = scan_no_key.raw;
 #ifdef MATRIX_LEVELS_DEBUG
   xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
           scancode, systime,
@@ -184,7 +186,7 @@ void scan_common_init(uint8_t steps) {
 
 void scan_common_reset() {
   for(uint8_t i = 0; i < SCANNER_RING_BUFFER_SIZE; i++) {
-    pending_events[i].raw = scan_idle.raw;
+    pending_events[i].raw = scan_no_key.raw;
   }
   memset(matrix_status, 0, sizeof(matrix_status));
   read_cursor = 0;

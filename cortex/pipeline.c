@@ -19,7 +19,7 @@ uint8_t tap_usb_sc;
 uint32_t tap_deadline;
 uint_fast16_t saved_macro_ptr;
 
-extern const scan_event_t scan_idle;
+extern const scan_event_t scan_no_key;
 
 inline bool empty_keycode_at(uint8_t pos) {
   return USBQueue[pos].keycode == USBCODE_NOEVENT;
@@ -402,7 +402,7 @@ inline void pipeline_process(void) {
 inline bool pipeline_process_wakeup(void) {
   scan_event_t event = scan_read_event();
   // We don't care about _which_ key is pressed - we wake up on key _press_
-  return (event.raw != scan_idle.raw) && (event.flags & KEY_UP_MASK) == 0;
+  return (event.raw != scan_no_key.raw) && (event.flags & KEY_UP_MASK) == 0;
 }
 
 void pipeline_init(void) {
