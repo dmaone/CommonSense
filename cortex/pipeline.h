@@ -37,9 +37,6 @@ typedef union {
 #define KEYCODE_BUFFER_PREV(X) ((X + KEYCODE_BUFFER_END) & KEYCODE_BUFFER_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
-#define MACRO_NOT_FOUND UINT_FAST16_MAX
-#define MACRO_KEY_UPDOWN_RELEASE 0x02
-
 queuedScancode USBQueue[KEYCODE_BUFFER_END + 1];
 uint8_t USBQueue_rpos;
 uint8_t USBQueue_wpos;

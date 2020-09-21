@@ -15,9 +15,17 @@
 #include "PSoC_USB.h"
 #include "sup_serial.h"
 
-uint8_t tap_usb_sc;
-uint32_t tap_deadline;
-uint_fast16_t saved_macro_ptr;
+// Tap detector structure. Preferred way to check for emptiness is code == 0.
+// However, comparing timestamp it's faster (and OK) to check for deadline > 0.
+union {
+  struct {
+    uint32_t deadline;
+    uint8_t key;
+    uint8_t code;
+    uint16_t macro_ptr;
+  } __attribute__((packed));
+  uint64_t raw;
+} tap;
 
 extern const scan_event_t scan_no_key;
 
@@ -70,10 +78,21 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
 #endif
 }
 
+#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
+#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
+#define MACRO_KEY_UPDOWN_RELEASE 0x02
+
+
+#define MACRO_FLAGS(x) config.macros[x]
+#define MACRO_NOT_FOUND 0
+
 /*
  * Data structure: [scancode][flags][data length][macro data]
+ * WARNING: the "pointer" returned is an opaque pointer-ish value.
+ * Restrict usage outside lookup_macro and play_macro to macros defined above!
  */
-inline uint_fast16_t lookup_macro(uint8_t flags, uint8_t keycode) {
+inline uint16_t lookup_macro(
+    uint8_t flags, uint8_t keycode, const bool no_taps) {
   uint_fast16_t ptr = 0;
   do {
 #if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
@@ -83,9 +102,8 @@ inline uint_fast16_t lookup_macro(uint8_t flags, uint8_t keycode) {
     if (config.macros[ptr] == keycode && // obvious..
         // only keyUp macros on keyUp (tap and keyDn on keyDn)..
         ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
-        // in tap wait, skip tap macros. See TapWait processing for why.
-        (tap_deadline == 0 || (mFlags & MACRO_TYPE_TAP) == 0)) {
-      return ptr;
+        (!no_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
+      return ptr + 1;
     } else {
       ptr += config.macros[ptr + 2] + 3; // length + header size
     }
@@ -137,6 +155,7 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
 }
 
 inline void play_macro(uint_fast16_t start) {
+  --start; // externally, macro_ptr is 1-based, so that zero is NULLPTR
   uint8_t *mptr = &config.macros[start] + 3;
   uint8_t *macro_end = mptr + config.macros[start + 2];
 #ifdef DEBUG_PIPELINE
@@ -194,15 +213,13 @@ inline void play_macro(uint_fast16_t start) {
 
 bool reports_reset_pending;
 inline void process_real_key(void) {
-  if (tap_deadline > 0 && systime > tap_deadline) {
-    // Tap timeout. MAKE DOUBLE SURE this is a timeout situation.
-    // Clownetowne: we need to switch from TapWait to normal mode and send that
-    // keyDown. So we send ANOTHER keyDown for the trigger key, but let our
-    // later self know it's actually a timeout.
+  if (tap.deadline > 0 && systime > tap.deadline) {
+    // Tap timeout. MAKE DOUBLE SURE this branch is tap timeout situation ONLY.
+    // See <TapWait> section for details.
 #ifdef DEBUG_PIPELINE
-    xprintf("Tap@%d: %d timed out", systime, saved_macro_ptr);
+    xprintf("Tap@%d: %d timed out", systime, tap.macro_ptr);
 #endif
-    saved_macro_ptr = MACRO_NOT_FOUND; // Large-ish footgun!
+    tap.macro_ptr = MACRO_NOT_FOUND;
   } else if (reports_reset_pending) {
     if (USBQUEUE_IS_EMPTY) {
       // ONLY reset if there are no pending USB events.
@@ -223,8 +240,15 @@ inline void process_real_key(void) {
     }
   }
 
-  scan_event_t event = scan_read_event();  
-  if (event.key == COMMONSENSE_NOKEY) {
+  scan_event_t event = scan_read_event();
+  uint8_t usb_sc = 0;
+  if (event.key != COMMONSENSE_NOKEY) {
+    usb_sc = resolve_key(event.key, currentLayer);
+    if (usb_sc == USBCODE_TRANSPARENT) {
+      // Empty key in layout from current layer down to base. DON'T EVER.
+      return;
+    }
+  } else {
     // An empty value. Likely because nothing was pressed last tick, but..
     if (event.flags & KEY_UP_MASK) {
       // This is "All keys are up" signal, sun keyboard-style. It deals with
@@ -234,77 +258,63 @@ inline void process_real_key(void) {
       // which is not that bad - but first key is stuck forever.
       reports_reset_pending = true;
     }
-    if (tap_deadline == 0 || saved_macro_ptr != MACRO_NOT_FOUND) {
-      // not TapWait, not TapWait timeout either, no key.. Done!
-      return;
+    if (tap.code == 0 || tap.macro_ptr == MACRO_NOT_FOUND) {
+      // "TapWait timed out" condition needs to be handled even if no keypress.
+      return; // No real key - return early.
     }
-  }
-  // OK, we're done with special cases. General scancode processing starts here.
-
-  // Resolve USB keycode using current active layers - drop down until defined.
-  uint8_t usb_sc = resolve_key(event.key, currentLayer);
-  if (usb_sc == USBCODE_TRANSPARENT) {
-    // Empty key in layout from current layer down to base. Fuck no, DON'T EVER.
-    return;
   }
 #ifdef DEBUG_PIPELINE
   xprintf("SC@%d: %02x %02x@L%d -> %d",
-          systime, sc.flags, sc.scancode, currentLayer, usb_sc);
+      systime, event.flags, event.key, currentLayer, usb_sc);
 #endif
 
   uint8_t keyflags = event.flags | USBQUEUE_REAL_KEY_MASK;
-  uint_fast16_t macro_ptr;
-  if (tap_deadline > 0) { // <TapWait>
-    // Tap wait mode. We are here because tap macro triggered on previous tick.
-    if (usb_sc == tap_usb_sc || event.key == COMMONSENSE_NOKEY) {
-      // Ok, the key matches.
-      // Or it's a tap timeout - in which case we KIND OF have a second keyDown.
-      if (systime <= tap_deadline) {
-        // Quick enough. Play macro, eat keyUp, return to normal mode.
+  if (tap.code > 0) { // <TapWait>
+    // Tap wait mode. We are here because tap macro triggered in the past.
+    if (usb_sc == tap.code && systime <= tap.deadline) {
+      // Ok, the key matches quickly enough. Play macro, resume normal mode.
 #ifdef DEBUG_PIPELINE
-        xprintf("Tap@%d: %d", systime, saved_macro_ptr);
+      xprintf("Tap@%d: %d", systime, tap.macro_ptr);
 #endif
-        play_macro(saved_macro_ptr);
-        tap_deadline = 0;
-        return; // Eat the keyUp by not queueing it.
-      }
+      play_macro(tap.macro_ptr);
+      tap.raw = 0;
+      return; // Eat the keyUp by not queueing it.
     }
-    // Ok, NOT a tap. Doesn't matter why, really. BUT there COULD HAVE BEEN
-    // a keyDown macro on that key. keyUp, too - but that we will process in a
-    // business-as-usual way.
+    // Ok, tap not happened. Another key, not quick enough - NOT IMPORTANT.
+    // keyUp will be processed in main/normal mode branch below - NOT SPECIAL.
 
-    // Flags override has a clowntown potential, I admit.
-    // Should probably save it from the keypress time, but naaah, wcgw.
-    // Also macro lookup is Special - it skips tap macros in TapWait mode.
-    macro_ptr = lookup_macro(USBQUEUE_REAL_KEY_MASK, tap_usb_sc);
-    if (macro_ptr == MACRO_NOT_FOUND) {
-      // Ugh.. Less-clowny way, just pretend we submitted the key a bit ago
-      queue_usbcode(tap_deadline - 120, USBQUEUE_REAL_KEY_MASK, tap_usb_sc);
-    } else {
+    // keyDown macro on that key, though, _is_ special - we need to trigger it
+    // _instead_of_ tap - and then process current keypress in a normal way.
+    uint16_t keyDown_ptr = lookup_macro(USBQUEUE_REAL_KEYDOWN, tap.code, true);
+    if (keyDown_ptr != MACRO_NOT_FOUND) {
       // Play the keyDown, play it again, my Johnny..
-      play_macro(macro_ptr);
+      play_macro(keyDown_ptr);
+    } else {
+      // Ugh.. no macro.. just pretend we pressed the key back then.
+      // Post-dating the event to ensure keypress is sent to USB _this_ tick -
+      // possibly postponing the scheduled keypresses of any macros.
+      queue_usbcode(tap.deadline - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
     }
-    // And now back to normal processing of what's hopefully a keyDown.
-    tap_deadline = 0;
-    if (saved_macro_ptr == MACRO_NOT_FOUND) {
-      // Stop all the madness // stop clowntown // it's my life (c) Dr. Alban.
-      // Seriously though - this is special mode for TapWait timeout.
-      // There is no real key. Don't complicate downstream's life.
+    if (tap.macro_ptr == MACRO_NOT_FOUND) {
+      tap.raw = 0;
+      // Switch to normal mode. Early return - no real keys were involved.
       return;
     }
+    tap.raw = 0; // Normal mode, still need to process the actual key event.
   } // </TapWait>
   // Trick: FlightController must save tap macros before keyDown macros - so
   // if both defined, we find tap first.
-  macro_ptr = lookup_macro(keyflags, usb_sc);
+  uint16_t macro_ptr = lookup_macro(keyflags, usb_sc, false);
   if (macro_ptr != MACRO_NOT_FOUND) {
-    if ((config.macros[macro_ptr + 1] & MACRO_TYPE_TAP) == 0) {
+    if ((MACRO_FLAGS(macro_ptr) & MACRO_TYPE_TAP) == 0) {
       play_macro(macro_ptr);
     } else {
       // Tap macro cannot be selected for keyUp. So this must be keyDown.
       // Enter the TapWait mode.
-      saved_macro_ptr = macro_ptr;
-      tap_usb_sc = usb_sc;
-      tap_deadline = systime + config.delayLib[DELAYS_TAP];
+      tap.macro_ptr = macro_ptr;
+      tap.key = event.key;
+      tap.code = usb_sc;
+      tap.deadline = systime + config.delayLib[DELAYS_TAP];
     }
     return;
   }
@@ -414,5 +424,12 @@ void pipeline_init(void) {
   USBQueue_wpos = 0;
   cooldown_timer = 0;
   memset(USBQueue, USBCODE_NOEVENT, sizeof USBQueue);
-  saved_macro_ptr = MACRO_NOT_FOUND;
+  tap.raw = 0;
+  tap.macro_ptr = MACRO_NOT_FOUND;
 }
+
+#undef MACRO_FLAGS
+#undef MACRO_NOT_FOUND
+#undef USBQUEUE_REAL_KEYDOWN
+#undef USBQUEUE_REAL_KEYUP
+#undef MACRO_KEY_UPDOWN_RELEASE
