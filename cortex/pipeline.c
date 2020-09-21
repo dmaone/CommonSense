@@ -33,11 +33,6 @@ inline bool empty_keycode_at(uint8_t pos) {
   return USBQueue[pos].keycode == USBCODE_NOEVENT;
 }
 
-inline bool valid_actionable_keycode_at(uint8_t pos) {
-  return USBQueue[pos].keycode != USBCODE_NOEVENT &&
-      USBQueue[pos].sysTime <= systime;
-}
-
 inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   for (int8_t i = layer; i >= 0; --i) {
     if (config.layers[i][key] == USBCODE_TRANSPARENT ) {
@@ -47,7 +42,6 @@ inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   }
   return USBCODE_TRANSPARENT;
 }
-
 
 inline void process_layerMods(uint8_t flags, uint8_t keycode) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
@@ -76,40 +70,6 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
 #ifdef DEBUG_PIPELINE
   xprintf("L@%d: %02x %02x -> %d", systime, flags, keycode, currentLayer);
 #endif
-}
-
-#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
-#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
-#define MACRO_KEY_UPDOWN_RELEASE 0x02
-
-
-#define MACRO_FLAGS(x) config.macros[x]
-#define MACRO_NOT_FOUND 0
-
-/*
- * Data structure: [scancode][flags][data length][macro data]
- * WARNING: the "pointer" returned is an opaque pointer-ish value.
- * Restrict usage outside lookup_macro and play_macro to macros defined above!
- */
-inline uint16_t lookup_macro(
-    uint8_t flags, uint8_t keycode, const bool no_taps) {
-  uint_fast16_t ptr = 0;
-  do {
-#if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
-#error Please rewrite check below - it is no longer valid
-#endif
-    uint8_t mFlags = config.macros[ptr + 1];
-    if (config.macros[ptr] == keycode && // obvious..
-        // only keyUp macros on keyUp (tap and keyDn on keyDn)..
-        ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
-        (!no_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
-      return ptr + 1;
-    } else {
-      ptr += config.macros[ptr + 2] + 3; // length + header size
-    }
-  } while (ptr < sizeof config.macros &&
-           config.macros[ptr] != EMPTY_FLASH_BYTE);
-  return MACRO_NOT_FOUND;
 }
 
 inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
@@ -152,6 +112,42 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   USBQueue[USBQueue_wpos].sysTime = time;
   USBQueue[USBQueue_wpos].flags = flags;
   USBQueue[USBQueue_wpos].keycode = keycode;
+}
+
+// MACRO UTILS -----------------------------------------------------------------
+
+#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
+#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
+#define MACRO_KEY_UPDOWN_RELEASE 0x02
+
+
+#define MACRO_FLAGS(x) config.macros[x]
+#define MACRO_NOT_FOUND 0
+
+/*
+ * Data structure: [scancode][flags][data length][macro data]
+ * WARNING: the "pointer" returned is an opaque pointer-ish value.
+ * Restrict usage outside lookup_macro and play_macro to macros defined above!
+ */
+inline uint16_t lookup_macro(
+    uint8_t flags, uint8_t keycode, const bool no_taps) {
+  uint_fast16_t ptr = 0;
+  do {
+#if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
+#error Please rewrite check below - it is no longer valid
+#endif
+    uint8_t mFlags = config.macros[ptr + 1];
+    if (config.macros[ptr] == keycode && // obvious..
+        // only keyUp macros on keyUp (tap and keyDn on keyDn)..
+        ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
+        (!no_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
+      return ptr + 1;
+    } else {
+      ptr += config.macros[ptr + 2] + 3; // length + header size
+    }
+  } while (ptr < sizeof config.macros &&
+           config.macros[ptr] != EMPTY_FLASH_BYTE);
+  return MACRO_NOT_FOUND;
 }
 
 inline void play_macro(uint_fast16_t start) {
@@ -210,6 +206,8 @@ inline void play_macro(uint_fast16_t start) {
     mptr++;
   }
 }
+
+// ---------------------------------------------------------------- /MACRO UTILS
 
 bool reports_reset_pending;
 inline void process_real_key(void) {
@@ -324,6 +322,11 @@ inline void process_real_key(void) {
   // NOTE2: we still want to maintain order? Otherwise linked list is probably
   // better (though expensive at 4B/pointer plus memory management)
   queue_usbcode(systime, keyflags, usb_sc);
+}
+
+inline bool valid_actionable_keycode_at(uint8_t pos) {
+  return USBQueue[pos].keycode != USBCODE_NOEVENT &&
+      USBQueue[pos].sysTime <= systime;
 }
 
 /*
