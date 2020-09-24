@@ -19,18 +19,27 @@
 // ^ MUST BE POWER OF 2!
 
 // Ring buffer for USB scancodes to report, with times (macros are the future).
-queuedScancode USBQueue[QUEUE_SIZE];
-uint8_t USBQueue_begin; // "unprocessed data start" position
-uint8_t USBQueue_end; // "unprocessed data end" - writer updates data then this.
+static queuedScancode USBQueue[QUEUE_SIZE];
+static uint8_t USBQueue_begin; // "pending events start" position
+static uint8_t USBQueue_end; // "pending events end" - writes go to next slot.
 
 #define BUF_NEXT(X) (X + 1) & (QUEUE_SIZE - 1)
 #define BUF_EMPTY 0
 
 #define USBCODE_TRANSPARENT 0
 
+#define LEAVE_TAP_MODE tap.raw = 0
+
+#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
+#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
+
+#define MACRO_NOT_FOUND 0
+
+static bool reports_reset_pending; // to hold report reset until macros finish.
+
 // Tap detector structure. Preferred way to check for emptiness is code == 0.
 // However, comparing timestamp it's faster (and OK) to check for deadline > 0.
-union {
+static union {
   struct {
     uint32_t deadline;
     uint8_t key;
@@ -40,25 +49,19 @@ union {
   uint64_t raw;
 } tap;
 
-#define LEAVE_TAP_MODE tap.raw = 0
-
-extern const scan_event_t scan_no_key;
-
-bool reports_reset_pending; // to pause USB report reset until macros finish.
-
-inline bool USBQueue_has_data_at(uint8_t pos) {
+static inline bool USBQueue_has_data_at(uint8_t pos) {
   return USBQueue_begin != USBQueue_end && USBQueue[pos].raw != BUF_EMPTY;
 }
 
-inline bool USBQueue_empty_at(uint8_t pos) {
+static inline bool USBQueue_empty_at(uint8_t pos) {
   return USBQueue_begin != USBQueue_end && USBQueue[pos].raw == BUF_EMPTY;
 }
 
-inline bool USBQueue_data_ready_at(uint8_t pos) {
+static inline bool USBQueue_data_ready_at(uint8_t pos) {
   return USBQueue[pos].raw != BUF_EMPTY && USBQueue[pos].sysTime <= systime;
 }
 
-inline bool is_special(uint8_t code) {
+static inline bool is_special(uint8_t code) {
   // First 4 USB codes are hijacked for internal functions.
   return code < 4; // Scancode 4 is "A"
 }
@@ -102,7 +105,7 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
 #endif
 }
 
-inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
+static inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
 #ifdef DEBUG_PIPELINE
   xprintf("Q@%d: %02x %d @%+d cur %d/%d", systime, flags, keycode, time - systime, USBQueue_begin, USBQueue_end);
 #endif
@@ -141,12 +144,11 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   USBQueue_end = pos;
 }
 
+
+
 // MACRO UTILS -----------------------------------------------------------------
 
-#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
-#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
 
-#define MACRO_NOT_FOUND 0
 
 inline bool is_tap_macro(uint16_t macro_ptr) {
   return config.macros[macro_ptr] & MACRO_TYPE_TAP;
@@ -182,7 +184,7 @@ inline uint16_t get_delay(uint8_t cmd) {
   return config.delayLib[(cmd & MACROCMD_DELAY_MASK) >> MACROCMD_DELAY_SHIFT];
 }
 
-inline void play_macro(uint_fast16_t start) {
+static inline void play_macro(uint_fast16_t start) {
   --start; // externally, macro_ptr is 1-based so NULLPTR can be zero
   uint8_t *mptr = &config.macros[start] + 3;
   uint8_t *macro_end = mptr + config.macros[start + 2];
@@ -227,9 +229,13 @@ inline void play_macro(uint_fast16_t start) {
   }
 }
 
+
+
 // ---------------------------------------------------------------- /MACRO UTILS
 
-inline void process_real_key(void) {
+
+
+static inline void process_real_key(void) {
   if (tap.deadline > 0 && systime > tap.deadline) {
 #ifdef DEBUG_PIPELINE
     xprintf("Tap@%d: %d timed out", systime, tap.macro_ptr);
@@ -358,7 +364,7 @@ inline void process_real_key(void) {
  * TODO: implement out of order key release?
  * NOTE ^ very rare situations where this is needed.
  */
-inline void update_reports(void) {
+static inline void update_reports(void) {
   if (cooldown_timer > 0) {
     // Slow down! Delay 0 controls update rate.
     // we should be called every millisecond - so setting delay0 to 10 will

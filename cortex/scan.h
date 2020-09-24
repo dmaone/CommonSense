@@ -18,6 +18,8 @@ typedef union {
   uint16_t raw;
 } scan_event_t;
 
+extern const scan_event_t scan_no_key;
+
 // number of ticks to check for spam after scan starts
 #define SANITY_CHECK_DURATION 1000
 #define SCANNER_INSANITY_THRESHOLD 3
