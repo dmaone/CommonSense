@@ -12,35 +12,34 @@
 
 #include "PSoC_USB.h"
 
-#define SCANNER_RING_BUFFER_SIZE 64
+#define QUEUE_SIZE 64
 // ^ MUST BE POWER OF 2!
 
-#define BUF_NEXT(X) ((X + 1) & (SCANNER_RING_BUFFER_SIZE - 1))
+#define BUF_NEXT(X) ((X + 1) & (QUEUE_SIZE - 1))
 
 // "Empty" value: "no key" w/cleared flags (so, technically, PRESSED CS_NOKEY).
 const scan_event_t scan_no_key = {.key = COMMONSENSE_NOKEY, .flags = 0};
 
-// REMINDER: can't make anything here static, because inline functions.
-// Take care not to use any, technically, globals, outside scan_common.
-
 // Ring buffer for detected-but-not-yet-processed keypresses.
-scan_event_t pending_events[SCANNER_RING_BUFFER_SIZE];
-uint8_t read_cursor;
-volatile uint8_t write_cursor;
+static scan_event_t event_queue[QUEUE_SIZE];
+static uint8_t q_begin;
+static uint8_t q_end;
+// volatile q_end was considered (in some scanners ISR enqueues events and main
+// loop was seen to lag). Doesn't cause reordering, so we can get away without.
+
+static int8_t matrix[COMMONSENSE_MATRIX_SIZE];
+static bool matrix_was_active = false;
+
+static int8_t press_threshold;
+static int8_t release_threshold;
+static uint8_t scancodes_while_output_disabled = 0;
 
 // After debouncer conversion, matrix_status exists exclusively for spammy keys
 // reporting. Can be removed anytime.
 // It has value for spammy keys tho - we need to know which keys, not frequency.
 #define SCAN_ROW_SHIFT 5
 #define SCAN_COL_MASK 0x1f
-uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
-
-bool matrix_was_active = false;
-
-int8_t matrix[COMMONSENSE_MATRIX_SIZE];
-int8_t press_threshold;
-int8_t release_threshold;
-uint8_t scancodes_while_output_disabled = 0;
+static uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
 
 inline void scan_register_event(uint8_t flags, uint8_t key) {
   if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
@@ -71,10 +70,10 @@ inline void scan_register_event(uint8_t flags, uint8_t key) {
     PIN_DEBUG(1, 2)
   }
 #endif
-  uint8_t pos = BUF_NEXT(write_cursor);
-  pending_events[pos].flags = flags;
-  pending_events[pos].key = key;
-  write_cursor = pos;
+  uint8_t pos = BUF_NEXT(q_end);
+  event_queue[pos].flags = flags;
+  event_queue[pos].key = key;
+  q_end = pos;
 }
 
 inline void scan_debounce(uint8_t flags, uint8_t key) {
@@ -117,26 +116,22 @@ inline void scan_set_matrix_value(uint8_t key, int8_t value) {
 }
 
 inline scan_event_t scan_read_event(void) {
-  if (read_cursor == write_cursor) {
-    // Nothing to read.
-    return scan_no_key;
-  }
   // Skip empty elements that might be there
-  while (pending_events[read_cursor].raw == scan_no_key.raw) {
-    read_cursor = BUF_NEXT(read_cursor);
+  while (q_begin != q_end && event_queue[q_begin].raw == scan_no_key.raw) {
+    q_begin = BUF_NEXT(q_begin);
   }
   // MOVE the value from ring buffer to output buffer. Erase buffer element.
-  scan_event_t result = pending_events[read_cursor];
-  pending_events[read_cursor].raw = scan_no_key.raw;
+  // DO NOT optimize into "return if q_begin = q_end" - value is important.
+  scan_event_t result = {.raw = event_queue[q_begin].raw};
+  event_queue[q_begin].raw = scan_no_key.raw;
 #ifdef MATRIX_LEVELS_DEBUG
   xprintf("sc: %d %d @ %d ms, lvl %d/%d", scancode & KEY_UP_MASK,
           scancode, systime,
-          level_buffer[read_cursor],
-          level_buffer_inst[read_cursor]);
+          level_buffer[q_begin],
+          level_buffer_inst[q_begin]);
 #endif
   return result;
 }
-
 
 inline void scan_check_matrix(void) {
   if (!matrix_was_active) { // idle -> idle
@@ -186,12 +181,12 @@ void scan_common_init(uint8_t steps) {
 }
 
 void scan_common_reset() {
-  for(uint8_t i = 0; i < SCANNER_RING_BUFFER_SIZE; i++) {
-    pending_events[i].raw = scan_no_key.raw;
+  for(uint8_t i = 0; i < QUEUE_SIZE; ++i) {
+    event_queue[i].raw = scan_no_key.raw;
   }
   memset(matrix_status, 0, sizeof(matrix_status));
-  read_cursor = 0;
-  write_cursor = 0;
+  q_begin = 0;
+  q_end = 0;
   for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; i++) {
     matrix[i] = -1;
   }
@@ -234,15 +229,17 @@ void scan_report_insanity() {
   outbox.payload[1] = MATRIX_COLS;
   uint8_t start_index = MATRIX_COLS * cur_row;
 
-  for (uint8_t i = 0; i < MATRIX_COLS; i++) {
+  for (uint8_t i = 0; i < MATRIX_COLS; ++i) {
     uint8_t sc = start_index + i;
-    if (TEST_BIT(matrix_status[sc >> SCAN_ROW_SHIFT], (sc & SCAN_COL_MASK))) {
-      outbox.payload[2 + i] = 1;
-    } else {
-      outbox.payload[2 + i] = 0;
-    }
+    outbox.payload[2 + i] =
+        TEST_BIT(matrix_status[sc >> SCAN_ROW_SHIFT], sc & SCAN_COL_MASK) ? 1
+                                                                          : 0;
   }
   usb_send_c2_blocking();
 }
 
 #undef BUF_NEXT
+#undef QUEUE_SIZE
+
+#undef SCAN_ROW_SHIFT
+#undef SCAN_COL_MASK
