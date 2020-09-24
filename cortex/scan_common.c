@@ -15,7 +15,7 @@
 #define SCANNER_RING_BUFFER_SIZE 64
 // ^ MUST BE POWER OF 2!
 
-#define ADVANCE(X) X = (X + 1) & (SCANNER_RING_BUFFER_SIZE - 1)
+#define BUF_NEXT(X) ((X + 1) & (SCANNER_RING_BUFFER_SIZE - 1))
 
 // "Empty" value: "no key" w/cleared flags (so, technically, PRESSED CS_NOKEY).
 const scan_event_t scan_no_key = {.key = COMMONSENSE_NOKEY, .flags = 0};
@@ -25,8 +25,8 @@ const scan_event_t scan_no_key = {.key = COMMONSENSE_NOKEY, .flags = 0};
 
 // Ring buffer for detected-but-not-yet-processed keypresses.
 scan_event_t pending_events[SCANNER_RING_BUFFER_SIZE];
-uint8_t write_cursor;
 uint8_t read_cursor;
+volatile uint8_t write_cursor;
 
 // After debouncer conversion, matrix_status exists exclusively for spammy keys
 // reporting. Can be removed anytime.
@@ -71,9 +71,10 @@ inline void scan_register_event(uint8_t flags, uint8_t key) {
     PIN_DEBUG(1, 2)
   }
 #endif
-  ADVANCE(write_cursor);
-  pending_events[write_cursor].flags = flags;
-  pending_events[write_cursor].key = key;
+  uint8_t pos = BUF_NEXT(write_cursor);
+  pending_events[pos].flags = flags;
+  pending_events[pos].key = key;
+  write_cursor = pos;
 }
 
 inline void scan_debounce(uint8_t flags, uint8_t key) {
@@ -122,7 +123,7 @@ inline scan_event_t scan_read_event(void) {
   }
   // Skip empty elements that might be there
   while (pending_events[read_cursor].raw == scan_no_key.raw) {
-    ADVANCE(read_cursor);
+    read_cursor = BUF_NEXT(read_cursor);
   }
   // MOVE the value from ring buffer to output buffer. Erase buffer element.
   scan_event_t result = pending_events[read_cursor];
@@ -244,4 +245,4 @@ void scan_report_insanity() {
   usb_send_c2_blocking();
 }
 
-#undef ADVANCE
+#undef BUF_NEXT
