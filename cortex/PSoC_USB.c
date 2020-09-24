@@ -295,8 +295,8 @@ void update_keyboard_report(queuedScancode *key) {
   }
   memcpy(KBD_OUTBOX, keyboard_report.raw, OUTBOX_SIZE(KBD_OUTBOX));
   if (keys_pressed > KBD_KRO_LIMIT) {
-    // on rollover error ALL keys must report ERO.
-    memset(KBD_OUTBOX + 2, USBCODE_ERO, KBD_KRO_LIMIT);
+    // on rollover error ALL keys must report ERO (Error: Rollover).
+    memset(KBD_OUTBOX + 2, 1, KBD_KRO_LIMIT); // ERO is scancode 1.
     xprintf("Keyboard rollover error");
   }
   USB_SEND_REPORT(KBD);

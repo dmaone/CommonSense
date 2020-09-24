@@ -15,6 +15,8 @@
 // xprintf is no-op outside of setup mode. This switch overrides that.
 // #define XPRINTF_ALWAYS_ENABLED
 
+// WARNING consider uncommenting ^ when enabling DEBUG_<anything>
+
 // #define DEBUG_STATE_MACHINE
 
 // #define DEBUG_PIPELINE

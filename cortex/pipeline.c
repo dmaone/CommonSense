@@ -15,6 +15,22 @@
 #include "PSoC_USB.h"
 #include "sup_serial.h"
 
+#define QUEUE_SIZE 64
+// ^ MUST BE POWER OF 2!
+
+// Ring buffer for USB scancodes to report, with times (macros are the future).
+queuedScancode USBQueue[QUEUE_SIZE];
+uint8_t USBQueue_begin; // "unprocessed data start" position
+uint8_t USBQueue_end; // "unprocessed data end" - writer updates data then this.
+
+#define BUF_NEXT(X) (X + 1) & (QUEUE_SIZE - 1)
+
+#define USBCODE_TRANSPARENT 0
+#define USBCODE_NOEVENT 1
+
+const queuedScancode USBQueue_no_data =
+    {.sysTime = 0, .keycode = USBCODE_NOEVENT, .flags = 0, .reserved_ = 0};
+
 // Tap detector structure. Preferred way to check for emptiness is code == 0.
 // However, comparing timestamp it's faster (and OK) to check for deadline > 0.
 union {
@@ -29,13 +45,31 @@ union {
 
 extern const scan_event_t scan_no_key;
 
-inline bool empty_keycode_at(uint8_t pos) {
-  return USBQueue[pos].keycode == USBCODE_NOEVENT;
+bool reports_reset_pending; // to pause USB report reset until macros finish.
+
+inline bool USBQueue_has_data_at(uint8_t pos) {
+  return USBQueue_begin != USBQueue_end &&
+         USBQueue[pos].raw != USBQueue_no_data.raw;
+}
+
+inline bool USBQueue_empty_at(uint8_t pos) {
+  return USBQueue_begin != USBQueue_end &&
+         USBQueue[pos].raw == USBQueue_no_data.raw;
+}
+
+inline bool USBQueue_data_ready_at(uint8_t pos) {
+  return USBQueue[pos].raw != USBQueue_no_data.raw &&
+         USBQueue[pos].sysTime <= systime;
+}
+
+inline bool is_special(uint8_t code) {
+  // First 4 USB codes are hijacked for internal functions.
+  return code < 4; // Scancode 4 is "A"
 }
 
 inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   for (int8_t i = layer; i >= 0; --i) {
-    if (config.layers[i][key] == USBCODE_TRANSPARENT ) {
+    if (config.layers[i][key] == USBCODE_TRANSPARENT) {
       continue;
     }
     return config.layers[i][key];
@@ -74,20 +108,19 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
 
 inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
 #ifdef DEBUG_PIPELINE
-  xprintf("Q@%d: %02x %d @%+d", systime, flags, keycode, time - systime);
+  xprintf("Q@%d: %02x %d @%+d cur %d/%d", systime, flags, keycode, time - systime, USBQueue_begin, USBQueue_end);
 #endif
   // Special keycodes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
-  if (keycode < USBCODE_A) {
-    // Special keycodes - see HID docs. Hijacked for Nefarious Purposes.
-    // These keys are special - they CANNOT be used as macro triggers.
+  if (is_special(keycode)) {
     if (flags & USBQUEUE_RELEASED_MASK) {
       return; // keyUp is ignored so not to toggle twice.
     }
     switch (keycode) {
-      case USBCODE_BOOTLDR:
-        Boot_Load(); // Does not return, no need for break
-      case USBCODE_EXP_TOGGLE:
+      case 2:
+      Boot_Load();
+        break; // NORETURN function, break is strictly for consistence.
+      case 3:
         exp_toggle();
         break;
       default:
@@ -101,36 +134,35 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
     process_layerMods(flags, keycode);
     return;
   }
-  // Trick - even if current buffer position is empty, write to the next one.
-  // It may be empty because reader already processed it.
-  USBQueue_wpos = KEYCODE_BUFFER_NEXT(USBQueue_wpos);
-  // Make sure not to overwrite pending events - TODO think how not to fall into
-  // infinite loop if buffer full.
-  while (!empty_keycode_at(USBQueue_wpos)) {
-    KEYCODE_BUFFER_STEP(USBQueue_wpos);
-  }
-  USBQueue[USBQueue_wpos].sysTime = time;
-  USBQueue[USBQueue_wpos].flags = flags;
-  USBQueue[USBQueue_wpos].keycode = keycode;
+  uint8_t pos = USBQueue_end;
+  do {
+    // TODO think how not to fall into infinite loop here if buffer is full.
+    pos = BUF_NEXT(pos);
+  } while (USBQueue[pos].raw != USBQueue_no_data.raw);
+  USBQueue[pos].sysTime = time;
+  USBQueue[pos].flags = flags;
+  USBQueue[pos].keycode = keycode;
+  USBQueue_end = pos;
 }
 
 // MACRO UTILS -----------------------------------------------------------------
 
 #define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
 #define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
-#define MACRO_KEY_UPDOWN_RELEASE 0x02
 
-
-#define MACRO_FLAGS(x) config.macros[x]
 #define MACRO_NOT_FOUND 0
+
+inline bool is_tap_macro(uint16_t macro_ptr) {
+  return config.macros[macro_ptr] & MACRO_TYPE_TAP;
+}
 
 /*
  * Data structure: [scancode][flags][data length][macro data]
  * WARNING: the "pointer" returned is an opaque pointer-ish value.
- * Restrict usage outside lookup_macro and play_macro to macros defined above!
+ * ONLY compare to MACRO_NOT_FOUND and call utils - no direct use!
  */
 inline uint16_t lookup_macro(
-    uint8_t flags, uint8_t keycode, const bool no_taps) {
+    uint8_t flags, uint8_t keycode, const bool find_taps) {
   uint_fast16_t ptr = 0;
   do {
 #if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
@@ -140,7 +172,7 @@ inline uint16_t lookup_macro(
     if (config.macros[ptr] == keycode && // obvious..
         // only keyUp macros on keyUp (tap and keyDn on keyDn)..
         ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
-        (!no_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
+        (find_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
       return ptr + 1;
     } else {
       ptr += config.macros[ptr + 2] + 3; // length + header size
@@ -150,93 +182,85 @@ inline uint16_t lookup_macro(
   return MACRO_NOT_FOUND;
 }
 
+inline uint16_t get_delay(uint8_t cmd) {
+  return config.delayLib[(cmd & MACROCMD_DELAY_MASK) >> MACROCMD_DELAY_SHIFT];
+}
+
 inline void play_macro(uint_fast16_t start) {
-  --start; // externally, macro_ptr is 1-based, so that zero is NULLPTR
+  --start; // externally, macro_ptr is 1-based so NULLPTR can be zero
   uint8_t *mptr = &config.macros[start] + 3;
   uint8_t *macro_end = mptr + config.macros[start + 2];
 #ifdef DEBUG_PIPELINE
   xprintf("PM@%d: %d, sz: %d", systime, start, config.macros[start + 2]);
 #endif
   uint32_t now = systime;
-  uint_fast16_t delay;
-  uint8_t keyflags;
   while (mptr <= macro_end) {
-    delay = config.delayLib[(*mptr >> 2) & 0x0f];
-    switch (*mptr >> 6) {
+    uint8_t cmd = *mptr;
+    ++mptr;
+    switch (cmd >> MACROCMD_CMD_SHIFT) {
     // Check first 2 bits - macro command
-    case 0: // TypeOneKey
+    case MACROCMD_TYPE:
       // Press+release, timing from delayLib
-      mptr++;
-      // FIXME possible to queue USB_NOEVENT.
-      // This will most likely trigger exp. header, but may be as bad as
-      // infinite loop.
+      // FIXME possible to queue USB_NOEVENT here. This will most likely trigger
+      // exp. header, but can be as bad as infinite loop.
       queue_usbcode(now, 0, *mptr);
-      now += delay;
+      now += get_delay(cmd);
       queue_usbcode(now, USBQUEUE_RELEASED_MASK, *mptr);
+      ++mptr;
       break;
-    case 1: // ChangeMods - currently PressKey and ReleaseKey
-      /*
-       * Initial plans for this were to be "change modifiers". Binary format - 
-       * 2 bits for (PressMod/ReleaseMod/ToggleMod/ForceMod)
-       * then 4 bits not used, then a byte of standard modflags.
-       * Now, though, it's 
-       * [4 bits delay, 1 bit direction, 1 bit reserved, 1 byte scancode]
-       */
-      keyflags =
-          (*mptr & MACRO_KEY_UPDOWN_RELEASE) ? USBQUEUE_RELEASED_MASK : 0;
-      mptr++;
-      queue_usbcode(now, keyflags, *mptr);
-      now += delay;
+    case MACROCMD_ACTUATE:
+      // Initial plans for this were to be "change modifiers". Layout to be
+      // [2b (PressMod/ReleaseMod/ToggleMod/ForceMod), 4b reserved, 1B mods]
+      // Currently [4b delay, 1b direction, 1b reserved, scancode]
+      queue_usbcode(
+          now,
+          (cmd & MACROCMD_ACTUATE_KEYUP) ? USBQUEUE_RELEASED_MASK : 0,
+          *mptr);
+      now += get_delay(cmd);
+      ++mptr;
       break;
-    case 2: // Mods stack manipulation
-      // 2 bits - PushMods, PopMods, RevertMods.
-      // Not used currently.
+    case MACROCMD_IGNORED:
+      // 2 bits - PushMods, PopMods, RevertMods. Not used currently.
       break;
-    case 3: // Wait
-      /* 4 bits for delay. Initially had special value of 
-       * 0 = "Wait for trigger key release", others from delayLib.
-       * But since now we have separate triggers on press and release - all
-       * values are from delayLib.
-       */
-      now += delay;
+    case MACROCMD_WAIT:
+      now += get_delay(cmd);
       break;
     default:
       return;
     }
-    mptr++;
   }
 }
 
 // ---------------------------------------------------------------- /MACRO UTILS
 
-bool reports_reset_pending;
 inline void process_real_key(void) {
   if (tap.deadline > 0 && systime > tap.deadline) {
-    // Tap timeout. MAKE DOUBLE SURE this branch is tap timeout situation ONLY.
-    // See <TapWait> section for details.
 #ifdef DEBUG_PIPELINE
     xprintf("Tap@%d: %d timed out", systime, tap.macro_ptr);
 #endif
+    // Tap timeout. MAKE DOUBLE SURE this branch is tap timeout situation ONLY.
+    // See <TapWait> section for details.
     tap.macro_ptr = MACRO_NOT_FOUND;
   } else if (reports_reset_pending) {
-    if (USBQUEUE_IS_EMPTY) {
-      // ONLY reset if there are no pending USB events.
-      // Those are supposed to only be generated by macros, but who knows.
-      reset_reports();
-      serial_reset_reports();
-      reports_reset_pending = false;
-    }
-    if (reports_reset_pending) {
-      // It is possible to get stuck here for LONG TIME if user makes something
-      // stupid (namely, long macro with huge delays), triggers it and releases
-      // all keys (see next big comment why that's important).
-      // Scancodes will be generated, but not processed until _ALL_ USB events
-      // generated by that macro are dispatched to host. Scancodes ring buffer
-      // can overflow - not causing memory corruption, but losing some events.
-      // Which _is_ bad, don't get me wrong - but user had it coming.
+    // It is possible to get stuck here for LONG TIME if user makes something
+    // stupid (namely, long macro with huge delays), triggers it and then
+    // releases all keys generating a pending report reset.
+    // Scancodes will be generated, but not processed until _ALL_ USB events
+    // generated by that macro are dispatched to host. Scancodes ring buffer
+    // can overflow - not causing memory corruption, but losing some events.
+    // Which _is_ bad, don't get me wrong - but user had it coming.
+    if (USBQueue_has_data_at(USBQueue_begin)) {
       return;
     }
+#ifdef DEBUG_PIPELINE
+    xprintf("Reset@%d: commencing", systime);
+#endif
+
+    reset_reports();
+    serial_reset_reports();
+    reports_reset_pending = false;
   }
+
 
   scan_event_t event = scan_read_event();
   uint8_t usb_sc = 0;
@@ -255,10 +279,12 @@ inline void process_real_key(void) {
       // When you release the key, non-existent key release is generated -
       // which is not that bad - but first key is stuck forever.
       reports_reset_pending = true;
+#ifdef DEBUG_PIPELINE
+      xprintf("Reset@%d: pending", systime);
+#endif
     }
-    if (tap.code == 0 || tap.macro_ptr == MACRO_NOT_FOUND) {
-      // "TapWait timed out" condition needs to be handled even if no keypress.
-      return; // No real key - return early.
+    if (tap.code == 0 || tap.macro_ptr != MACRO_NOT_FOUND) {
+      return; // 1) Not TapWait, 2) not TapWait timeout
     }
   }
 #ifdef DEBUG_PIPELINE
@@ -283,7 +309,7 @@ inline void process_real_key(void) {
 
     // keyDown macro on that key, though, _is_ special - we need to trigger it
     // _instead_of_ tap - and then process current keypress in a normal way.
-    uint16_t keyDown_ptr = lookup_macro(USBQUEUE_REAL_KEYDOWN, tap.code, true);
+    uint16_t keyDown_ptr = lookup_macro(USBQUEUE_REAL_KEYDOWN, tap.code, false);
     if (keyDown_ptr != MACRO_NOT_FOUND) {
       // Play the keyDown, play it again, my Johnny..
       play_macro(keyDown_ptr);
@@ -291,7 +317,7 @@ inline void process_real_key(void) {
       // Ugh.. no macro.. just pretend we pressed the key back then.
       // Post-dating the event to ensure keypress is sent to USB _this_ tick -
       // possibly postponing the scheduled keypresses of any macros.
-      queue_usbcode(tap.deadline - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
+      queue_usbcode(systime - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
     }
     if (tap.macro_ptr == MACRO_NOT_FOUND) {
       tap.raw = 0;
@@ -302,18 +328,18 @@ inline void process_real_key(void) {
   } // </TapWait>
   // Trick: FlightController must save tap macros before keyDown macros - so
   // if both defined, we find tap first.
-  uint16_t macro_ptr = lookup_macro(keyflags, usb_sc, false);
+  uint16_t macro_ptr = lookup_macro(keyflags, usb_sc, true);
   if (macro_ptr != MACRO_NOT_FOUND) {
-    if ((MACRO_FLAGS(macro_ptr) & MACRO_TYPE_TAP) == 0) {
+    if (!is_tap_macro(macro_ptr)) {
       play_macro(macro_ptr);
-    } else {
-      // Tap macro cannot be selected for keyUp. So this must be keyDown.
-      // Enter the TapWait mode.
-      tap.macro_ptr = macro_ptr;
-      tap.key = event.key;
-      tap.code = usb_sc;
-      tap.deadline = systime + config.delayLib[DELAYS_TAP];
+      return;
     }
+    // Tap macro cannot be selected for keyUp. So this must be keyDown.
+    // Enter the TapWait mode.
+    tap.macro_ptr = macro_ptr;
+    tap.key = event.key;
+    tap.code = usb_sc;
+    tap.deadline = systime + config.delayLib[DELAYS_TAP];
     return;
   }
   // OK. Not macro.
@@ -322,11 +348,6 @@ inline void process_real_key(void) {
   // NOTE2: we still want to maintain order? Otherwise linked list is probably
   // better (though expensive at 4B/pointer plus memory management)
   queue_usbcode(systime, keyflags, usb_sc);
-}
-
-inline bool valid_actionable_keycode_at(uint8_t pos) {
-  return USBQueue[pos].keycode != USBCODE_NOEVENT &&
-      USBQueue[pos].sysTime <= systime;
 }
 
 /*
@@ -350,21 +371,22 @@ inline void update_reports(void) {
     return;
   }
   // Eating up all the processed scancodes
-  while (USBQueue_rpos != USBQueue_wpos && empty_keycode_at(USBQueue_rpos)) {
-    KEYCODE_BUFFER_STEP(USBQueue_rpos); // Consuming real buffer!
+  while (USBQueue_empty_at(USBQueue_begin)) {
+    USBQueue_begin = BUF_NEXT(USBQueue_begin);
   }
   // We might have hit wpos here already. Not much point specialcasing tho -
   // there might be an actionable scancode at the very tail..
 
-  uint8_t pos = USBQueue_rpos;
-  while (pos != USBQueue_wpos && !valid_actionable_keycode_at(pos)) {
-    KEYCODE_BUFFER_STEP(pos); // Not consuming - just peeking!
+  uint8_t pos = USBQueue_begin;
+  while (pos != USBQueue_end && !USBQueue_data_ready_at(pos)) {
+    pos = BUF_NEXT(pos); // Not consuming - just peeking!
   }
-  if (!valid_actionable_keycode_at(pos)) { // Can only fail at rpos == wpos
+  if (!USBQueue_data_ready_at(pos)) {
+    // Can only fail at rpos == wpos AKA "all events are in the future"
     return; // We'll return here on the next tick, hopefully passing.
   }
 
-  if (USBQueue[pos].keycode < USBCODE_A) {
+  if (is_special(USBQueue[pos].keycode)) {
     // Clowntown: fully "transparent" will toggle exp. header
     // But it should not ever be put on queue!
     exp_toggle();
@@ -394,7 +416,8 @@ inline void update_reports(void) {
     cooldown_timer = config.delayLib[DELAYS_EVENT];
     exp_keypress(USBQueue[pos].keycode); // allow ExpHdr to see the scancode
   }
-  USBQueue[pos].keycode = USBCODE_NOEVENT; // Done, rpos will move next cycle.
+  USBQueue[pos].raw = USBQueue_no_data.raw;
+  // Done. Will bump .begin next cycle next cycle - to avoid .end > .begin
 }
 
 inline void pipeline_process(void) {
@@ -423,16 +446,22 @@ void pipeline_init(void) {
   // Pipeline is worked on in main loop only, no point disabling IRQs to avoid
   // preemption.
   scan_reset();
-  USBQueue_rpos = 0;
-  USBQueue_wpos = 0;
+  USBQueue_begin = 0;
+  USBQueue_end = 0;
   cooldown_timer = 0;
-  memset(USBQueue, USBCODE_NOEVENT, sizeof USBQueue);
+  for (uint8_t i = 0; i < QUEUE_SIZE; ++i) {
+    USBQueue[i].raw = USBQueue_no_data.raw;
+  }
   tap.raw = 0;
-  tap.macro_ptr = MACRO_NOT_FOUND;
+  reports_reset_pending = false;
 }
 
-#undef MACRO_FLAGS
+#undef USBCODE_TRANSPARENT
+#undef USBCODE_NOEVENT
+
+#undef QUEUE_SIZE
+#undef BUF_NEXT
+
 #undef MACRO_NOT_FOUND
 #undef USBQUEUE_REAL_KEYDOWN
 #undef USBQUEUE_REAL_KEYUP
-#undef MACRO_KEY_UPDOWN_RELEASE
