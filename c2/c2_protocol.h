@@ -150,8 +150,25 @@ typedef union {
 #define CONFIG_TRANSFER_BLOCK_SIZE 32
 #define CONFIG_BLOCK_DATA_OFFSET 1
 
+#define MACRO_TYPE_ONKEYDOWN 0x00
 #define MACRO_TYPE_ONKEYUP 0x80
 #define MACRO_TYPE_TAP 0x40
+#define MACRO_TYPE_MASK = (MACRO_TYPE_ONKEYUP | MACRO_TYPE_TAP)
+
+/* Macro serialization format: [Header, list<Command> AS data]
+ * Header: [8b usb code, 8b options, 8b data length]
+ * Command: [2b cmd, 4b delayIndex, 2b options, ?8b[usb code]]
+ */
+enum MacroCmdType {
+  MACROCMD_TYPE = 0, // Press-wait-release (code)
+  MACROCMD_ACTUATE = 1, // [1b up/down, 1b unused] (code),
+  MACROCMD_IGNORED = 2, // initially planned mods state stack ops, presently DNU
+  MACROCMD_WAIT = 3,
+};
+#define MACROCMD_CMD_SHIFT 6
+#define MACROCMD_DELAY_SHIFT 2
+#define MACROCMD_DELAY_MASK 0b00111100
+#define MACROCMD_ACTUATE_KEYUP 0x02
 
 #define DELAYS_EVENT 0
 #define DELAYS_TAP 1

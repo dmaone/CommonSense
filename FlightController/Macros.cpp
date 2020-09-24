@@ -73,26 +73,21 @@ void Macros::populateSteps_(QByteArray &bytes) {
     auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
     auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
     auto curByte = static_cast<uint8_t>(bytes[mptr]);
-    delay->setCurrentIndex((curByte >> 2) & 0x0f);
-    switch (curByte >> 6) {
-      case 0: // type
+    delay->setCurrentIndex(
+        (curByte & MACROCMD_DELAY_MASK) >> MACROCMD_DELAY_SHIFT);
+    switch (curByte >> MACROCMD_CMD_SHIFT) {
+      case MACROCMD_TYPE:
         cmd->setCurrentIndex(3);
         sc->setCurrentIndex(static_cast<uint8_t>(bytes[++mptr]));
         break;
-      case 1: // press or release
-        if (bytes[mptr] & 0x02) {
-          // key up
-          cmd->setCurrentIndex(2);
-        } else {
-          // key down
-          cmd->setCurrentIndex(1);
-        }
+      case MACROCMD_ACTUATE:
+        cmd->setCurrentIndex((bytes[mptr] & MACROCMD_ACTUATE_KEYUP) ? 2 : 1);
         sc->setCurrentIndex(static_cast<uint8_t>(bytes[++mptr]));
         break;
-      case 2:
+      case MACROCMD_IGNORED:
         qInfo() << "WTF unsupported macro command";
         break;
-      case 3: // wait
+      case MACROCMD_WAIT: // wait
         cmd->setCurrentIndex(4);
         break;
     }
@@ -108,21 +103,23 @@ QByteArray Macros::encodeSteps_(int /* macro_row */) {
     auto *delay = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 1));
     auto *sc = qobject_cast<QComboBox *>(ui->bodyTable->cellWidget(row, 2));
     bool shortCommand = false;
-    uint8_t commandByte = ((uint8_t)delay->currentIndex() << 2);
-    // See firmware sources for explanations on encoding.
+    uint8_t commandByte = abs(delay->currentIndex()) << MACROCMD_DELAY_SHIFT;
+    // See c2_protocol.h for explanations on encoding.
     switch (cmd->currentIndex()) {
-      case 0:
+      case 0: // Nothing selected - skip
         continue;
-      case 1: // press
-        commandByte |= (0x01 << 6);
+      case 1:
+        commandByte += MACROCMD_ACTUATE << MACROCMD_CMD_SHIFT;
         break;
-      case 2: // release
-        commandByte |= (0x01 << 6) | 0x02;
+      case 2:
+        commandByte += MACROCMD_ACTUATE << MACROCMD_CMD_SHIFT;
+        commandByte += MACROCMD_ACTUATE_KEYUP;
         break;
-      case 3: // tap
+      case 3:
+        commandByte += MACROCMD_TYPE << MACROCMD_CMD_SHIFT; // secretly nop
         break;
-      case 4: // wait
-         commandByte |= (0x03 << 6);
+      case 4:
+         commandByte += MACROCMD_WAIT << MACROCMD_CMD_SHIFT;
          shortCommand = true;
         break;
     }
