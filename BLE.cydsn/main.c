@@ -445,7 +445,7 @@ void process_i2c() {
     if (!i2c_counter) {
       // The dreaded SDA low!
       uint32_t tmp = SCB_I2CMasterStatus();
-      DBG_PRINTF("stuck in I2C RX: %d\r\n", tmp);
+      DBG_PRINTF("stuck in I2C RX: %lu\r\n", tmp);
       do {
         SCB_SET_HSIOM_SEL(SCB_SCL_HSIOM_REG, SCB_SCL_HSIOM_MASK,
             SCB_SCL_HSIOM_POS, SCB_HSIOM_GPIO_SEL); 
