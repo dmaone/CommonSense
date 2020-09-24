@@ -19,9 +19,9 @@
 // ^ MUST BE POWER OF 2!
 
 // Ring buffer for USB scancodes to report, with times (macros are the future).
-static queuedScancode USBQueue[QUEUE_SIZE];
-static uint8_t USBQueue_begin; // "pending events start" position
-static uint8_t USBQueue_end; // "pending events end" - writes go to next slot.
+static hid_event hid_queue[QUEUE_SIZE];
+static uint8_t q_begin; // "pending events start" position
+static uint8_t q_end; // "pending events end" - writes go to next slot.
 
 #define BUF_NEXT(X) (X + 1) & (QUEUE_SIZE - 1)
 #define BUF_EMPTY 0
@@ -49,16 +49,16 @@ static union {
   uint64_t raw;
 } tap;
 
-static inline bool USBQueue_has_data_at(uint8_t pos) {
-  return USBQueue_begin != USBQueue_end && USBQueue[pos].raw != BUF_EMPTY;
+static inline bool hid_queue_has_data_at(uint8_t pos) {
+  return q_begin != q_end && hid_queue[pos].raw != BUF_EMPTY;
 }
 
-static inline bool USBQueue_empty_at(uint8_t pos) {
-  return USBQueue_begin != USBQueue_end && USBQueue[pos].raw == BUF_EMPTY;
+static inline bool hid_queue_empty_at(uint8_t pos) {
+  return q_begin != q_end && hid_queue[pos].raw == BUF_EMPTY;
 }
 
-static inline bool USBQueue_data_ready_at(uint8_t pos) {
-  return USBQueue[pos].raw != BUF_EMPTY && USBQueue[pos].sysTime <= systime;
+static inline bool hid_queue_data_ready_at(uint8_t pos) {
+  return hid_queue[pos].raw != BUF_EMPTY && hid_queue[pos].sysTime <= systime;
 }
 
 static inline bool is_special(uint8_t code) {
@@ -76,20 +76,20 @@ inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   return USBCODE_TRANSPARENT;
 }
 
-inline void process_layerMods(uint8_t flags, uint8_t keycode) {
+inline void process_layerMods(uint8_t flags, uint8_t code) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
-  if (keycode & 0x04) {
+  if (code & 0x04) {
     // LLck. Keydown flips the bit, keyup is ignored.
     if (flags & KEY_UP_MASK) {
       return;
     }
-    FLIP_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
+    FLIP_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
   } else if ((flags & KEY_UP_MASK) == 0) {
     // Fn Press
-    SET_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
+    SET_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
   } else {
     // Fn Release
-    CLEAR_BIT(layerMods, (keycode & 0x03) + LAYER_MODS_SHIFT);
+    CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
   }
   // Figure layer condition
   for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
@@ -101,21 +101,21 @@ inline void process_layerMods(uint8_t flags, uint8_t keycode) {
   // Aktchually figure out what's pressed and how it should change with layer change
   // then enqueue DIFFS ONLY
 #ifdef DEBUG_PIPELINE
-  xprintf("L@%d: %02x %02x -> %d", systime, flags, keycode, currentLayer);
+  xprintf("L@%d: %02x %02x -> %d", systime, flags, code, currentLayer);
 #endif
 }
 
-static inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
+static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
 #ifdef DEBUG_PIPELINE
-  xprintf("Q@%d: %02x %d @%+d cur %d/%d", systime, flags, keycode, time - systime, USBQueue_begin, USBQueue_end);
+  xprintf("Q@%d: %02x %d @%+d cur %d/%d", systime, flags, code, time - systime, q_begin, q_end);
 #endif
-  // Special keycodes - they're not queued, but processed RIGHT NOW.
+  // Special codes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
-  if (is_special(keycode)) {
+  if (is_special(code)) {
     if (flags & USBQUEUE_RELEASED_MASK) {
       return; // keyUp is ignored so not to toggle twice.
     }
-    switch (keycode) {
+    switch (code) {
       case 2:
       Boot_Load();
         break; // NORETURN function, break is strictly for consistence.
@@ -126,22 +126,22 @@ static inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) 
         break;
     }
     return;
-  } else if ((keycode & 0xf8) == 0xa8) {
+  } else if ((code & 0xf8) == 0xa8) {
     // Layer mod. The "layer mod key not mapped in upper layers" solved
-    // by USB keycode lookup, as long as upper layers not mapped Fn key to
+    // by USB code lookup, as long as upper layers not mapped Fn key to
     // something else - which is clowny and should be punished anyway.
-    process_layerMods(flags, keycode);
+    process_layerMods(flags, code);
     return;
   }
-  uint8_t pos = USBQueue_end;
+  uint8_t pos = q_end;
   do {
     // TODO think how not to fall into infinite loop here if buffer is full.
     pos = BUF_NEXT(pos);
-  } while (USBQueue[pos].raw != BUF_EMPTY);
-  USBQueue[pos].sysTime = time;
-  USBQueue[pos].flags = flags;
-  USBQueue[pos].keycode = keycode;
-  USBQueue_end = pos;
+  } while (hid_queue[pos].raw != BUF_EMPTY);
+  hid_queue[pos].sysTime = time;
+  hid_queue[pos].flags = flags;
+  hid_queue[pos].code = code;
+  q_end = pos;
 }
 
 
@@ -160,14 +160,14 @@ inline bool is_tap_macro(uint16_t macro_ptr) {
  * ONLY compare to MACRO_NOT_FOUND and call utils - no direct use!
  */
 inline uint16_t lookup_macro(
-    uint8_t flags, uint8_t keycode, const bool find_taps) {
+    uint8_t flags, uint8_t code, const bool find_taps) {
   uint_fast16_t ptr = 0;
   do {
 #if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
 #error Please rewrite check below - it is no longer valid
 #endif
     uint8_t mFlags = config.macros[ptr + 1];
-    if (config.macros[ptr] == keycode && // obvious..
+    if (config.macros[ptr] == code && // obvious..
         // only keyUp macros on keyUp (tap and keyDn on keyDn)..
         ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
         (find_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
@@ -201,16 +201,16 @@ static inline void play_macro(uint_fast16_t start) {
       // Press+release, timing from delayLib
       // FIXME possible to queue NOEVENT here. This will most likely trigger
       // exp. header, but can be as bad as infinite loop.
-      queue_usbcode(now, 0, *mptr);
+      schedule_hid(now, 0, *mptr);
       now += get_delay(cmd);
-      queue_usbcode(now, USBQUEUE_RELEASED_MASK, *mptr);
+      schedule_hid(now, USBQUEUE_RELEASED_MASK, *mptr);
       ++mptr;
       break;
     case MACROCMD_ACTUATE:
       // Initial plans for this were to be "change modifiers". Layout to be
       // [2b (PressMod/ReleaseMod/ToggleMod/ForceMod), 4b reserved, 1B mods]
       // Currently [4b delay, 1b direction, 1b reserved, scancode]
-      queue_usbcode(
+      schedule_hid(
           now,
           (cmd & MACROCMD_ACTUATE_KEYUP) ? USBQUEUE_RELEASED_MASK : 0,
           *mptr);
@@ -251,7 +251,7 @@ static inline void process_real_key(void) {
     // generated by that macro are dispatched to host. Scancodes ring buffer
     // can overflow - not causing memory corruption, but losing some events.
     // Which _is_ bad, don't get me wrong - but user had it coming.
-    if (USBQueue_has_data_at(USBQueue_begin)) {
+    if (hid_queue_has_data_at(q_begin)) {
       return;
     }
 #ifdef DEBUG_PIPELINE
@@ -265,10 +265,10 @@ static inline void process_real_key(void) {
 
 
   scan_event_t event = scan_read_event();
-  uint8_t usb_sc = 0;
+  uint8_t code = 0;
   if (event.key != COMMONSENSE_NOKEY) {
-    usb_sc = resolve_key(event.key, currentLayer);
-    if (usb_sc == USBCODE_TRANSPARENT) {
+    code = resolve_key(event.key, currentLayer);
+    if (code == USBCODE_TRANSPARENT) {
       // Empty key in layout from current layer down to base. DON'T EVER.
       return;
     }
@@ -291,13 +291,13 @@ static inline void process_real_key(void) {
   }
 #ifdef DEBUG_PIPELINE
   xprintf("SC@%d: %02x %02x@L%d -> %d",
-      systime, event.flags, event.key, currentLayer, usb_sc);
+      systime, event.flags, event.key, currentLayer, code);
 #endif
 
   uint8_t keyflags = event.flags | USBQUEUE_REAL_KEY_MASK;
   if (tap.code > 0) { // <TapWait>
     // Tap wait mode. We are here because tap macro triggered in the past.
-    if (usb_sc == tap.code && systime <= tap.deadline) {
+    if (code == tap.code && systime <= tap.deadline) {
       // Ok, the key matches quickly enough. Play macro, resume normal mode.
 #ifdef DEBUG_PIPELINE
       xprintf("Tap@%d: %d", systime, tap.macro_ptr);
@@ -319,7 +319,7 @@ static inline void process_real_key(void) {
       // Ugh.. no macro.. just pretend we pressed the key back then.
       // Post-dating the event to ensure keypress is sent to USB _this_ tick -
       // possibly postponing the scheduled keypresses of any macros.
-      queue_usbcode(systime - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
+      schedule_hid(systime - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
     }
     if (tap.macro_ptr == MACRO_NOT_FOUND) {
       LEAVE_TAP_MODE;
@@ -330,7 +330,7 @@ static inline void process_real_key(void) {
   } // </TapWait>
   // Trick: FlightController must save tap macros before keyDown macros - so
   // if both defined, we find tap first.
-  uint16_t macro_ptr = lookup_macro(keyflags, usb_sc, true);
+  uint16_t macro_ptr = lookup_macro(keyflags, code, true);
   if (macro_ptr != MACRO_NOT_FOUND) {
     if (!is_tap_macro(macro_ptr)) {
       play_macro(macro_ptr);
@@ -340,16 +340,15 @@ static inline void process_real_key(void) {
     // Enter the TapWait mode.
     tap.macro_ptr = macro_ptr;
     tap.key = event.key;
-    tap.code = usb_sc;
+    tap.code = code;
     tap.deadline = systime + config.delayLib[DELAYS_TAP];
     return;
   }
   // OK. Not macro.
-  // NOTE: queue_usbcode skips non-zero cells in the buffer. Think what to do
-  // on overflow.
+  // NOTE: schedule_hid skips non-zero cells in the buffer. Think about overruns
   // NOTE2: we still want to maintain order? Otherwise linked list is probably
   // better (though expensive at 4B/pointer plus memory management)
-  queue_usbcode(systime, keyflags, usb_sc);
+  schedule_hid(systime, keyflags, code);
 }
 
 /*
@@ -373,52 +372,52 @@ static inline void update_reports(void) {
     return;
   }
   // Eating up all the processed scancodes
-  while (USBQueue_empty_at(USBQueue_begin)) {
-    USBQueue_begin = BUF_NEXT(USBQueue_begin);
+  while (hid_queue_empty_at(q_begin)) {
+    q_begin = BUF_NEXT(q_begin);
   }
   // We might have hit wpos here already. Not much point specialcasing tho -
   // there might be an actionable scancode at the very tail..
 
-  uint8_t pos = USBQueue_begin;
-  while (pos != USBQueue_end && !USBQueue_data_ready_at(pos)) {
+  uint8_t pos = q_begin;
+  while (pos != q_end && !hid_queue_data_ready_at(pos)) {
     pos = BUF_NEXT(pos); // Not consuming - just peeking!
   }
-  if (!USBQueue_data_ready_at(pos)) {
+  if (!hid_queue_data_ready_at(pos)) {
     // Can only fail at rpos == wpos AKA "all events are in the future"
     return; // We'll return here on the next tick, hopefully passing.
   }
 
-  if (is_special(USBQueue[pos].keycode)) {
+  if (is_special(hid_queue[pos].code)) {
     // Clowntown: fully "transparent" will toggle exp. header
     // But it should not ever be put on queue!
     exp_toggle();
-    USBQueue[pos].flags |= USBQUEUE_RELEASED_MASK; // skip-cooldown trick.
+    hid_queue[pos].flags |= USBQUEUE_RELEASED_MASK; // skip-cooldown trick.
     // ALL codes you want filtered from reports MUST BE ABOVE THIS LINE!
-  } else if (USBQueue[pos].keycode >= 0xe8) {
-    update_consumer_report(&USBQueue[pos]);
-  } else if (USBQueue[pos].keycode >= 0xa5 &&
-             USBQueue[pos].keycode <= 0xa7) {
-    update_system_report(&USBQueue[pos]);
+  } else if (hid_queue[pos].code >= 0xe8) {
+    update_consumer_report(&hid_queue[pos]);
+  } else if (hid_queue[pos].code >= 0xa5 &&
+             hid_queue[pos].code <= 0xa7) {
+    update_system_report(&hid_queue[pos]);
   } else {
     switch (output_direction) {
       case OUTPUT_DIRECTION_USB:
-        update_keyboard_report(&USBQueue[pos]);
+        update_keyboard_report(&hid_queue[pos]);
         break;
       case OUTPUT_DIRECTION_SERIAL:
-        update_serial_keyboard_report(&USBQueue[pos]);
+        update_serial_keyboard_report(&hid_queue[pos]);
         break;
       default:
         break;
     }
   }
-  if ((USBQueue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
+  if ((hid_queue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
     // We only throttle keypresses. Key release doesn't slow us down -
     // minimum duration is guaranteed by fact that key release goes after
     // key press and keypress triggers cooldown.
     cooldown_timer = config.delayLib[DELAYS_EVENT];
-    exp_keypress(USBQueue[pos].keycode); // allow ExpHdr to see the scancode
+    exp_keypress(hid_queue[pos].code); // allow ExpHdr to see the scancode
   }
-  USBQueue[pos].raw = BUF_EMPTY;
+  hid_queue[pos].raw = BUF_EMPTY;
   // Done. Will bump .begin next cycle next cycle - to avoid .end > .begin
 }
 
@@ -448,11 +447,11 @@ void pipeline_init(void) {
   // Pipeline is worked on in main loop only, no point disabling IRQs to avoid
   // preemption.
   scan_reset();
-  USBQueue_begin = 0;
-  USBQueue_end = 0;
+  q_begin = 0;
+  q_end = 0;
   cooldown_timer = 0;
   for (uint8_t i = 0; i < QUEUE_SIZE; ++i) {
-    USBQueue[i].raw = BUF_EMPTY;
+    hid_queue[i].raw = BUF_EMPTY;
   }
   LEAVE_TAP_MODE;
   reports_reset_pending = false;

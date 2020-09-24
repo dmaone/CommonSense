@@ -286,12 +286,12 @@ inline void keyboard_release(uint8_t keycode) {
   }
 }
 
-void update_keyboard_report(queuedScancode *key) {
+void update_keyboard_report(hid_event* event) {
   // xprintf("Updating report for %d", key->keycode);
-  if ((key->flags & USBQUEUE_RELEASED_MASK) == 0) {
-    keyboard_press(key->keycode);
+  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
+    keyboard_press(event->code);
   } else {
-    keyboard_release(key->keycode);
+    keyboard_release(event->code);
   }
   memcpy(KBD_OUTBOX, keyboard_report.raw, OUTBOX_SIZE(KBD_OUTBOX));
   if (keys_pressed > KBD_KRO_LIMIT) {
@@ -322,18 +322,18 @@ const uint16_t consumer_mapping[16] = {
 };
 
 // Very similar to keyboard_press, but keycode there is uint8_t :(
-static inline void consumer_press(uint16_t keycode) {
+static inline void consumer_press(uint16_t code) {
   for (uint8_t cur_pos = 0; cur_pos < CONSUMER_KRO_LIMIT; cur_pos++) {
-    if (consumer_report[cur_pos] == keycode) {
-      xprintf("Existing %d pos %d", keycode, cur_pos);
+    if (consumer_report[cur_pos] == code) {
+      xprintf("Existing %d pos %d", code, cur_pos);
       break;
     } else if (consumer_report[cur_pos] == 0) {
-      consumer_report[cur_pos] = keycode;
-      // xprintf("Pressed %d pos %d", keycode, cur_pos);
+      consumer_report[cur_pos] = code;
+      // xprintf("Pressed %d pos %d", code, cur_pos);
       break;
     }
   }
-  // xprintf("C_Pressing %d", keycode);
+  // xprintf("C_Pressing %d", code);
 }
 
 static inline void consumer_release(uint16_t keycode) {
@@ -353,21 +353,21 @@ static inline void consumer_release(uint16_t keycode) {
   }
 }
 
-void update_consumer_report(queuedScancode *key) {
+void update_consumer_report(hid_event* event) {
   // xprintf("Updating report for %d", key->keycode);
-  uint16_t keycode = consumer_mapping[key->keycode - 0xe8];
-  if ((key->flags & USBQUEUE_RELEASED_MASK) == 0) {
-    consumer_press(keycode);
+  uint16_t code = consumer_mapping[event->code - 0xe8];
+  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
+    consumer_press(code);
   } else {
-    consumer_release(keycode);
+    consumer_release(code);
   }
   memcpy(CONSUMER_OUTBOX, consumer_report, OUTBOX_SIZE(CONSUMER_OUTBOX));
   USB_SEND_REPORT(CONSUMER);
 }
 
-void update_system_report(queuedScancode *key) {
-  uint8_t keyIndex = key->keycode - 0xa5;
-  if ((key->flags & USBQUEUE_RELEASED_MASK) == 0) {
+void update_system_report(hid_event* event) {
+  uint8_t keyIndex = event->code - 0xa5;
+  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
     system_report[0] |= (1 << keyIndex);
   } else {
     system_report[0] &= ~(1 << keyIndex);

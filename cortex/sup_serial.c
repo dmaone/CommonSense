@@ -83,12 +83,12 @@ void serial_tick(void) {
 #endif
 }
 
-void update_serial_keyboard_report(queuedScancode *key) {
+void update_serial_keyboard_report(hid_event* event) {
 #ifdef HAS_EXTIF
   Sup_Pdu_t buffer;
   buffer.command =
-      (key->flags & USBQUEUE_RELEASED_MASK) ? SUP_CMD_KEYUP : SUP_CMD_KEYDOWN;
-  buffer.data = key->keycode;
+      (event->flags & USBQUEUE_RELEASED_MASK) ? SUP_CMD_KEYUP : SUP_CMD_KEYDOWN;
+  buffer.data = event->code;
   queue_ble_command(&buffer);
   //xprintf("%d %d %d %d", SCQueueReadPos, SCQueueWritePos, SCQueue[SCQueueWritePos].command, SCQueue[SCQueueWritePos].data);
 #endif

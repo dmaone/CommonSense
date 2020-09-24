@@ -15,11 +15,11 @@ typedef union {
   struct {
     uint32_t sysTime;
     uint8_t flags;
-    uint8_t keycode;
+    uint8_t code;
     uint16_t reserved_;
   } __attribute__((packed));
   uint64_t raw;
-} queuedScancode;
+} hid_event;
 
 #define USBQUEUE_RELEASED_MASK 0x80
 #define USBQUEUE_REAL_KEY_MASK 0x40

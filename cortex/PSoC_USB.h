@@ -53,9 +53,9 @@ void load_config(void);
 void apply_config(void);
 
 void reset_reports();
-void update_keyboard_report(queuedScancode *key);
-void update_consumer_report(queuedScancode *key);
-void update_system_report(queuedScancode *key);
+void update_keyboard_report(hid_event* key);
+void update_consumer_report(hid_event* key);
+void update_system_report(hid_event* key);
 
 #if NOT_A_KEYBOARD == 1
 #define _WIPE_OUTBOX(OUTBOX) memset(OUTBOX, 0, OUTBOX_SIZE(OUTBOX))
