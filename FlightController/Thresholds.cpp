@@ -58,6 +58,7 @@ void Thresholds::init() {
 
   cells_.swap(cells);
   labels_.swap(labels);
+  reset_();
 }
 
 
