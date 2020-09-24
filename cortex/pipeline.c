@@ -24,12 +24,9 @@ uint8_t USBQueue_begin; // "unprocessed data start" position
 uint8_t USBQueue_end; // "unprocessed data end" - writer updates data then this.
 
 #define BUF_NEXT(X) (X + 1) & (QUEUE_SIZE - 1)
+#define BUF_EMPTY 0
 
 #define USBCODE_TRANSPARENT 0
-#define USBCODE_NOEVENT 1
-
-const queuedScancode USBQueue_no_data =
-    {.sysTime = 0, .keycode = USBCODE_NOEVENT, .flags = 0, .reserved_ = 0};
 
 // Tap detector structure. Preferred way to check for emptiness is code == 0.
 // However, comparing timestamp it's faster (and OK) to check for deadline > 0.
@@ -43,23 +40,22 @@ union {
   uint64_t raw;
 } tap;
 
+#define LEAVE_TAP_MODE tap.raw = 0
+
 extern const scan_event_t scan_no_key;
 
 bool reports_reset_pending; // to pause USB report reset until macros finish.
 
 inline bool USBQueue_has_data_at(uint8_t pos) {
-  return USBQueue_begin != USBQueue_end &&
-         USBQueue[pos].raw != USBQueue_no_data.raw;
+  return USBQueue_begin != USBQueue_end && USBQueue[pos].raw != BUF_EMPTY;
 }
 
 inline bool USBQueue_empty_at(uint8_t pos) {
-  return USBQueue_begin != USBQueue_end &&
-         USBQueue[pos].raw == USBQueue_no_data.raw;
+  return USBQueue_begin != USBQueue_end && USBQueue[pos].raw == BUF_EMPTY;
 }
 
 inline bool USBQueue_data_ready_at(uint8_t pos) {
-  return USBQueue[pos].raw != USBQueue_no_data.raw &&
-         USBQueue[pos].sysTime <= systime;
+  return USBQueue[pos].raw != BUF_EMPTY && USBQueue[pos].sysTime <= systime;
 }
 
 inline bool is_special(uint8_t code) {
@@ -138,7 +134,7 @@ inline void queue_usbcode(uint32_t time, uint8_t flags, uint8_t keycode) {
   do {
     // TODO think how not to fall into infinite loop here if buffer is full.
     pos = BUF_NEXT(pos);
-  } while (USBQueue[pos].raw != USBQueue_no_data.raw);
+  } while (USBQueue[pos].raw != BUF_EMPTY);
   USBQueue[pos].sysTime = time;
   USBQueue[pos].flags = flags;
   USBQueue[pos].keycode = keycode;
@@ -201,7 +197,7 @@ inline void play_macro(uint_fast16_t start) {
     // Check first 2 bits - macro command
     case MACROCMD_TYPE:
       // Press+release, timing from delayLib
-      // FIXME possible to queue USB_NOEVENT here. This will most likely trigger
+      // FIXME possible to queue NOEVENT here. This will most likely trigger
       // exp. header, but can be as bad as infinite loop.
       queue_usbcode(now, 0, *mptr);
       now += get_delay(cmd);
@@ -301,7 +297,7 @@ inline void process_real_key(void) {
       xprintf("Tap@%d: %d", systime, tap.macro_ptr);
 #endif
       play_macro(tap.macro_ptr);
-      tap.raw = 0;
+      LEAVE_TAP_MODE;
       return; // Eat the keyUp by not queueing it.
     }
     // Ok, tap not happened. Another key, not quick enough - NOT IMPORTANT.
@@ -320,11 +316,11 @@ inline void process_real_key(void) {
       queue_usbcode(systime - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
     }
     if (tap.macro_ptr == MACRO_NOT_FOUND) {
-      tap.raw = 0;
+      LEAVE_TAP_MODE;
       // Switch to normal mode. Early return - no real keys were involved.
       return;
     }
-    tap.raw = 0; // Normal mode, still need to process the actual key event.
+    LEAVE_TAP_MODE; // ..still need to process the actual key event, continue
   } // </TapWait>
   // Trick: FlightController must save tap macros before keyDown macros - so
   // if both defined, we find tap first.
@@ -416,7 +412,7 @@ inline void update_reports(void) {
     cooldown_timer = config.delayLib[DELAYS_EVENT];
     exp_keypress(USBQueue[pos].keycode); // allow ExpHdr to see the scancode
   }
-  USBQueue[pos].raw = USBQueue_no_data.raw;
+  USBQueue[pos].raw = BUF_EMPTY;
   // Done. Will bump .begin next cycle next cycle - to avoid .end > .begin
 }
 
@@ -450,16 +446,18 @@ void pipeline_init(void) {
   USBQueue_end = 0;
   cooldown_timer = 0;
   for (uint8_t i = 0; i < QUEUE_SIZE; ++i) {
-    USBQueue[i].raw = USBQueue_no_data.raw;
+    USBQueue[i].raw = BUF_EMPTY;
   }
-  tap.raw = 0;
+  LEAVE_TAP_MODE;
   reports_reset_pending = false;
 }
 
 #undef USBCODE_TRANSPARENT
-#undef USBCODE_NOEVENT
+
+#undef LEAVE_TAP_MODE
 
 #undef QUEUE_SIZE
+#undef BUF_EMPTY
 #undef BUF_NEXT
 
 #undef MACRO_NOT_FOUND
