@@ -98,6 +98,7 @@ class DeviceInterface : public QObject {
   bool receivePacket_();
   bool sendPacket_();
 
+  void decodeMessage_(const QByteArray& payload);
   void enqueueCommand_(OUT_c2packet_t outbox);
   DetectedDevices listDevices_();
   void processStatusReply_(QByteArray* payload);

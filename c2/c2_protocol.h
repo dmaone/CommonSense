@@ -65,7 +65,7 @@ enum c2command {
 enum c2response {
   C2RESPONSE_STATUS = 0x00,
   C2RESPONSE_CONFIG,
-  C2RESPONSE_SCANCODE,
+  C2RESPONSE_CODED_MESSAGE,
   C2RESPONSE_TELEMETRY_ROW
 };
 
@@ -97,6 +97,10 @@ enum SwitchType {
   ST_MAGVALVE,
   ST_MICROSWITCH,
   ST_UNKNOWN,
+};
+
+enum MessageCode {
+  MC_KEYPRESS = 0,
 };
 
 typedef union {
@@ -174,6 +178,10 @@ enum MacroCmdType {
 #define DELAYS_TAP 1
 
 #define SKIP_SCAN 0
+
+// IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122
+// with it's 8x16 matrix.
+#define COMMONSENSE_NOKEY 255
 
 // serial stuff
 enum supervisory_command {

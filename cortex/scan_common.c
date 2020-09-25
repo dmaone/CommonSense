@@ -56,9 +56,10 @@ inline void scan_register_event(uint8_t flags, uint8_t key) {
     // In setup mode all matrix events are sent via control channel, not HID.
     // This is done to prevent key spam in case of unfortunate threshold change.
     // Sanity checker should protect from this, but just in case..
-    outbox.response_type = C2RESPONSE_SCANCODE;
-    outbox.payload[0] = flags;
-    outbox.payload[1] = key;
+    outbox.response_type = C2RESPONSE_CODED_MESSAGE;
+    outbox.payload[0] = MC_KEYPRESS;
+    outbox.payload[1] = flags;
+    outbox.payload[2] = key;
     usb_send_c2();
     return;
   }

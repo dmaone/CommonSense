@@ -41,6 +41,38 @@ DeviceInterface::~DeviceInterface() {
   releaseDevice_();
 }
 
+void DeviceInterface::decodeMessage_(const QByteArray& payload) {
+  uint8_t messageCode = payload.at(1);
+  uint8_t dataPos{2};
+  switch (messageCode) {
+    case MC_KEYPRESS: {
+      uint8_t flags = payload.at(dataPos++);
+      uint8_t keyIndex = payload.at(dataPos++);
+      if (!config.bValid) {
+        qWarning() << "Received key " << keyIndex << " on invalid config!";
+        return;
+      }
+      if (keyIndex == COMMONSENSE_NOKEY) {
+        // "All keys released"
+        qInfo() << "---------";
+        return;
+      }
+      uint8_t col = keyIndex % config.numCols;
+      uint8_t row = (keyIndex - col) / config.numCols;
+      bool keyUp = flags & 0x80;
+      emit keypress({.row = row,
+                     .col = col,
+                     .status = keyUp ? KeyReleased : KeyPressed});
+      qInfo().noquote() << QString(keyUp ? "· r%1 c%2" : "# r%1 c%2")
+                                  .arg(row + 1, 2)
+                                  .arg(col + 1, 2);
+      break;
+    }
+    default:
+      qWarning() << "Unknown message code " << messageCode;
+  }
+}
+
 void DeviceInterface::processStatusReply_(QByteArray* payload) {
   if (deviceStatus_ != payload->at(1)) {
     rx = true;
@@ -81,30 +113,9 @@ bool DeviceInterface::event(QEvent *e) {
     case C2RESPONSE_STATUS:
       processStatusReply_(payload);
       break;
-    case C2RESPONSE_SCANCODE: {
-      if (!config.bValid) {
-        break;
-      }
-      uint8_t flags = payload->at(1);
-      uint8_t scancode = payload->at(2);
-      if (scancode == 255) {
-        // "All keys released"
-        qInfo() << "---------";
-        return true;
-      }
-      uint8_t col = scancode % config.numCols;
-      uint8_t row = (scancode - col) / config.numCols;
-      uint8_t flagReleased{0x80};
-      emit keypress({
-          .row = row,
-          .col = col,
-          .status = (flags & flagReleased) ? KeyReleased : KeyPressed});
-      qInfo().noquote() <<
-          QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
-          .arg(row + 1, 2)
-          .arg(col + 1, 2);
+    case C2RESPONSE_CODED_MESSAGE:
+      decodeMessage_(*payload);
       break;
-    }
     default:
       qInfo() << payload->constData();
   }
