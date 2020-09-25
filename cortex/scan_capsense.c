@@ -189,7 +189,7 @@ CY_ISR(EoC_ISR) {
   if (0 == driving_row) {
     // End of the scan pass. Loop if full throttle, otherwise stop.
     if (power_state != DEVSTATE_FULL_THROTTLE
-        || 0 == TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
+        || STATUS_NOT(C2DEVSTATUS_SCAN_ENABLED)) {
       scan_in_progress = false;
       goto EoC_final; // Important - otherwise interrupts are left disabled!
     }
@@ -224,7 +224,7 @@ CY_ISR(Result_ISR) {
   for (int8_t curCol = ADC_CHANNELS * NUM_ADCs - 1; curCol >= 0; curCol--) {
     adc_buffer_pos += 4;
     // TEST_BIT is faster than bool inited outside of the loop.
-    if (TEST_BIT(status_register, C2DEVSTATUS_TELEMETRY_MODE)) {
+    if (STATUS_IS(C2DEVSTATUS_TELEMETRY_MODE)) {
       // When monitoring matrix we're interested in raw feed.
       // We also want to see all the keys, even ignored ones.
       scan_set_matrix_value(--keyIndex, Results[adc_buffer_pos]);

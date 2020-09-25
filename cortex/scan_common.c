@@ -42,7 +42,7 @@ static uint8_t scancodes_while_output_disabled = 0;
 static uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
 
 inline void scan_register_event(uint8_t flags, uint8_t key) {
-  if (0 == TEST_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED)) {
+  if (STATUS_NOT(C2DEVSTATUS_OUTPUT_ENABLED)) {
     if (scancodes_while_output_disabled <= SCANNER_INSANITY_THRESHOLD) {
       // Avoid overflowing counter! Things can get ugly FAST!
       ++scancodes_while_output_disabled;
@@ -52,7 +52,7 @@ inline void scan_register_event(uint8_t flags, uint8_t key) {
     }
     return;
   }
-  if (TEST_BIT(status_register, C2DEVSTATUS_SETUP_MODE)) {
+  if (STATUS_IS(C2DEVSTATUS_SETUP_MODE)) {
     // In setup mode all matrix events are sent via control channel, not HID.
     // This is done to prevent key spam in case of unfortunate threshold change.
     // Sanity checker should protect from this, but just in case..

@@ -114,7 +114,7 @@ CY_ISR(Result_ISR) {
     if (current_row == 0) {
       // End of the scan pass. Loop if full throttle, otherwise stop.
       if (power_state != DEVSTATE_FULL_THROTTLE
-          || 0 == TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
+          || STATUS_NOT(C2DEVSTATUS_SCAN_ENABLED)) {
         scan_in_progress = false;
         return;
       }

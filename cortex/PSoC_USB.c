@@ -64,7 +64,7 @@ void report_status(void) {
 void process_ewo(OUT_c2packet_t *inbox) {
   status_register = inbox->payload[0];
   report_status();
-  if (TEST_BIT(status_register, C2DEVSTATUS_SCAN_ENABLED)) {
+  if (STATUS_IS(C2DEVSTATUS_SCAN_ENABLED)) {
     scan_start();
   }
 }
@@ -176,7 +176,7 @@ void usb_receive(OUT_c2packet_t *inbox) {
     process_ewo(inbox);
     break;
   case C2CMD_GET_STATUS:
-    if (TEST_BIT(status_register, C2DEVSTATUS_INSANE)) {
+    if (STATUS_IS(C2DEVSTATUS_INSANE)) {
       scan_report_insanity();
     }
     report_status();

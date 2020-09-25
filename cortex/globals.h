@@ -130,6 +130,8 @@ volatile uint8_t power_state;
 uint16_t sanity_check_timer;
 uint8_t status_register;
 uint8_t led_status;
+#define STATUS_IS(X) (TEST_BIT(status_register, X) != 0)
+#define STATUS_NOT(X) (TEST_BIT(status_register, X) == 0)
 
 uint8_t output_direction;
 enum outputDirection {
