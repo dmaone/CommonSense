@@ -173,7 +173,7 @@ enum MacroCmdType {
 #define DELAYS_EVENT 0
 #define DELAYS_TAP 1
 
-#define K_IGNORE_KEY 0
+#define SKIP_SCAN 0
 
 // serial stuff
 enum supervisory_command {

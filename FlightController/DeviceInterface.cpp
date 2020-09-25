@@ -81,31 +81,30 @@ bool DeviceInterface::event(QEvent *e) {
     case C2RESPONSE_STATUS:
       processStatusReply_(payload);
       break;
-    case C2RESPONSE_SCANCODE:
+    case C2RESPONSE_SCANCODE: {
       if (!config.bValid) {
         break;
       }
-      uint8_t flags, scancode, row, col;
-      uint8_t flagReleased;
-      flagReleased = 0x80;
-      flags = payload->at(1);
-      scancode = payload->at(2);
-      col = scancode % config.numCols;
-      row = (scancode - col) / config.numCols;
-      if (row == 15 && col == 15) {
+      uint8_t flags = payload->at(1);
+      uint8_t scancode = payload->at(2);
+      if (scancode == 255) {
         // "All keys released"
         qInfo() << "---------";
-      } else {
-        emit keypress({
-            .row = row,
-            .col = col,
-            .status = (flags & flagReleased) ? KeyReleased : KeyPressed});
-        qInfo().noquote() <<
-            QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
-            .arg(row + 1, 2)
-            .arg(col + 1, 2);
+        return true;
       }
+      uint8_t col = scancode % config.numCols;
+      uint8_t row = (scancode - col) / config.numCols;
+      uint8_t flagReleased{0x80};
+      emit keypress({
+          .row = row,
+          .col = col,
+          .status = (flags & flagReleased) ? KeyReleased : KeyPressed});
+      qInfo().noquote() <<
+          QString((flags & flagReleased) ? "· r%1 c%2" : "# r%1 c%2")
+          .arg(row + 1, 2)
+          .arg(col + 1, 2);
       break;
+    }
     default:
       qInfo() << payload->constData();
   }

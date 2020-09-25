@@ -124,7 +124,7 @@ bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
     auto& cell = getCell_(row, i);
     uint8_t level = pl->constData()[3 + i];
     const auto thr = di_.config.thresholds[row][i];
-    if (thr == K_IGNORE_KEY) {
+    if (thr == SKIP_SCAN) {
       cell.readout.setStyleSheet("background-color: #999999;");
     } else if (di_.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
       if (level > 0) {

@@ -81,8 +81,8 @@ void Thresholds::bumpAll_(int delta) {
 }
 
 void Thresholds::paintCell_(QSpinBox& cell) {
-  cell.setStyleSheet(
-      cell.value() == K_IGNORE_KEY ? "background-color: #999999" : "");
+  cell.setStyleSheet(cell.value() == SKIP_SCAN ? "background-color: #999999"
+                                               : "");
 }
 
 void Thresholds::apply_() {
@@ -121,7 +121,7 @@ bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
     const auto thr = di_.config.thresholds[row][i];
     qDebug() << row << " " << i << " " << thr << " = " << pl->constData()[3 + i];
     auto& cell = getCell_(row, i);
-    if (thr == K_IGNORE_KEY) {
+    if (thr == SKIP_SCAN) {
       cell.setStyleSheet("background-color: #999999;");
     } else if (pl->constData()[3 + i] > 0) {
       cell.setStyleSheet("color: black; background-color: #ff3333;");

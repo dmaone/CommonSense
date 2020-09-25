@@ -86,7 +86,7 @@ void Pedals::setDisplay() {
   /*
   for (uint8_t i = 0; i < config_.numRows; i++) {
     for (uint8_t j = 0; j < config_.numCols; j++) {
-      if (config_.thresholds[i][j] == K_IGNORE_KEY) {
+      if (config_.thresholds[i][j] == SKIP_SCAN) {
         display[i][j]->setCurrentIndex(0);
         display[i][j]->setEnabled(false);
       } else {

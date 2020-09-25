@@ -231,7 +231,7 @@ CY_ISR(Result_ISR) {
       continue;
     }
     const uint8_t threshold = config.thresholds[--keyIndex];
-    if (threshold == K_IGNORE_KEY) {
+    if (threshold == SKIP_SCAN) {
       continue; // As if nothing happened!
     }
     if (Results[adc_buffer_pos] ADC_CMP_OP threshold) {
