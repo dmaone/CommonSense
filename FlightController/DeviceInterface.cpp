@@ -222,9 +222,7 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
   if (!device_) {
     return initDevice_();
   }
-  const auto receivedThings = receivePacket_();
-  const auto sentThings = sendPacket_();
-  if (receivedThings || sentThings || mode_ == DeviceInterfaceBootloader) {
+  if (receivePacket_() || sendPacket_() || mode_ == DeviceInterfaceBootloader) {
     antiLagTimer_ = kAntiLagTicks;
   } else {
     // Go back to slow mode_ if idle and not bootloader.
