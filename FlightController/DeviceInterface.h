@@ -77,7 +77,7 @@ class DeviceInterface : public QObject {
   void keypress(uint8_t keyIndex, DeviceInterface::KeyState state);
 
  protected:
-  virtual void timerEvent(QTimerEvent *);
+  virtual void timerEvent(QTimerEvent* event);
 
  private:
   struct DetectedDevices {
@@ -87,7 +87,7 @@ class DeviceInterface : public QObject {
 
   hid_device* acquireDevice_();
   void initDevice_();
-  void releaseDevice_();
+  void releaseDeviceIfScheduled_();
   void setState_(State newState);
   bool receivePacket_();
   bool sendPacket_();

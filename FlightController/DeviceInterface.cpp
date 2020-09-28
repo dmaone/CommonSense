@@ -38,7 +38,7 @@ DeviceInterface::~DeviceInterface() {
     killTimer(pollTimerId_);
   }
   scheduleDeviceRelease_.store(true);
-  releaseDevice_();
+  releaseDeviceIfScheduled_(); // So we don't wait for timer
 }
 
 void DeviceInterface::decodeMessage_(const QByteArray& payload) {
@@ -208,14 +208,15 @@ void DeviceInterface::resetTimer_(int interval) {
   pollTimerId_ = startTimer(interval);
 }
 
-void DeviceInterface::timerEvent(QTimerEvent* timer) {
-  if (timer->timerId() == statusTimerId_) {
+void DeviceInterface::timerEvent(QTimerEvent* event) {
+  if (event->timerId() == statusTimerId_) {
     if (mode_ == DeviceInterfaceNormal && config.bValid) {
       // request status, so you see actual status.
       sendCommand(C2CMD_GET_STATUS, 1);
     }
     return;
-  } else if (timer->timerId() != pollTimerId_) {
+  }
+  if (event->timerId() != pollTimerId_) {
     return;
   }
   if (!device_) {
@@ -233,7 +234,7 @@ void DeviceInterface::timerEvent(QTimerEvent* timer) {
       antiLagTimer_ = kAntiLagTicks;
     }
   }
-  releaseDevice_();
+  releaseDeviceIfScheduled_(); // handle device loss
 }
 
 bool DeviceInterface::sendPacket_() {
@@ -372,6 +373,7 @@ hid_device* DeviceInterface::acquireDevice_() {
     qInfo() << "Cannot initialize hidapi!";
     return nullptr;
   }
+  config.reset();
   auto devices = listDevices_();
   if (mode_ == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
     QMessageBox::StandardButton result =
@@ -409,17 +411,19 @@ hid_device* DeviceInterface::acquireDevice_() {
   return nullptr;
 }
 
-void DeviceInterface::releaseDevice_() {
+void DeviceInterface::releaseDeviceIfScheduled_() {
+  if (!scheduleDeviceRelease_.exchange(false)) {
+    return;
+  }
   std::lock_guard<std::mutex> lock{deviceLock_};
-  if (scheduleDeviceRelease_.exchange(false)) {
-    if (device_) {
-      qInfo() << "Releasing device..";
-    }
-    setState_(DeviceDisconnected);
-    hid_close(device_);
-    device_ = nullptr;
-    if (hid_exit())
-      qWarning("warning: error during hid_exit");
+  if (device_) {
+    qInfo() << "Releasing device..";
+  }
+  setState_(DeviceDisconnected);
+  hid_close(device_);
+  device_ = nullptr;
+  if (hid_exit() != 0) {
+    qWarning("warning: error during hid_exit");
   }
 }
 
