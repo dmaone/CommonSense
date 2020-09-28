@@ -288,7 +288,7 @@ inline void keyboard_release(uint8_t keycode) {
 
 void update_keyboard_report(hid_event* event) {
   // xprintf("Updating report for %d", key->keycode);
-  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
+  if ((event->flags & HID_RELEASED_MASK) == 0) {
     keyboard_press(event->code);
   } else {
     keyboard_release(event->code);
@@ -356,7 +356,7 @@ static inline void consumer_release(uint16_t keycode) {
 void update_consumer_report(hid_event* event) {
   // xprintf("Updating report for %d", key->keycode);
   uint16_t code = consumer_mapping[event->code - 0xe8];
-  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
+  if ((event->flags & HID_RELEASED_MASK) == 0) {
     consumer_press(code);
   } else {
     consumer_release(code);
@@ -367,7 +367,7 @@ void update_consumer_report(hid_event* event) {
 
 void update_system_report(hid_event* event) {
   uint8_t keyIndex = event->code - 0xa5;
-  if ((event->flags & USBQUEUE_RELEASED_MASK) == 0) {
+  if ((event->flags & HID_RELEASED_MASK) == 0) {
     system_report[0] |= (1 << keyIndex);
   } else {
     system_report[0] &= ~(1 << keyIndex);

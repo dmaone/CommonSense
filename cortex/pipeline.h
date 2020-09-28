@@ -21,9 +21,6 @@ typedef union {
   uint64_t raw;
 } hid_event;
 
-#define USBQUEUE_RELEASED_MASK 0x80
-#define USBQUEUE_REAL_KEY_MASK 0x40
-
 uint8_t mods;
 uint8_t layerMods;
 #define LAYER_MODS_SHIFT 4

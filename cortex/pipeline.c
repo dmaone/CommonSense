@@ -30,8 +30,8 @@ static uint8_t q_end; // "pending events end" - writes go to next slot.
 
 #define LEAVE_TAP_MODE tap.raw = 0
 
-#define USBQUEUE_REAL_KEYDOWN USBQUEUE_REAL_KEY_MASK
-#define USBQUEUE_REAL_KEYUP (USBQUEUE_REAL_KEY_MASK | USBQUEUE_RELEASED_MASK)
+#define HID_REAL_KEYDOWN HID_REAL_KEY_MASK
+#define HID_REAL_KEYUP (HID_REAL_KEY_MASK | HID_RELEASED_MASK)
 
 #define MACRO_NOT_FOUND 0
 
@@ -112,7 +112,7 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
   // Special codes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
   if (is_special(code)) {
-    if (flags & USBQUEUE_RELEASED_MASK) {
+    if (flags & HID_RELEASED_MASK) {
       return; // keyUp is ignored so not to toggle twice.
     }
     switch (code) {
@@ -163,13 +163,13 @@ inline uint16_t lookup_macro(
     uint8_t flags, uint8_t code, const bool find_taps) {
   uint_fast16_t ptr = 0;
   do {
-#if USBQUEUE_RELEASED_MASK != MACRO_TYPE_ONKEYUP
+#if HID_RELEASED_MASK != MACRO_TYPE_ONKEYUP
 #error Please rewrite check below - it is no longer valid
 #endif
     uint8_t mFlags = config.macros[ptr + 1];
     if (config.macros[ptr] == code && // obvious..
         // only keyUp macros on keyUp (tap and keyDn on keyDn)..
-        ((flags ^ mFlags) & USBQUEUE_RELEASED_MASK) == 0 &&
+        ((flags ^ mFlags) & HID_RELEASED_MASK) == 0 &&
         (find_taps || (mFlags & MACRO_TYPE_TAP) == 0)) {
       return ptr + 1;
     } else {
@@ -203,7 +203,7 @@ static inline void play_macro(uint_fast16_t start) {
       // exp. header, but can be as bad as infinite loop.
       schedule_hid(now, 0, *mptr);
       now += get_delay(cmd);
-      schedule_hid(now, USBQUEUE_RELEASED_MASK, *mptr);
+      schedule_hid(now, HID_RELEASED_MASK, *mptr);
       ++mptr;
       break;
     case MACROCMD_ACTUATE:
@@ -212,7 +212,7 @@ static inline void play_macro(uint_fast16_t start) {
       // Currently [4b delay, 1b direction, 1b reserved, scancode]
       schedule_hid(
           now,
-          (cmd & MACROCMD_ACTUATE_KEYUP) ? USBQUEUE_RELEASED_MASK : 0,
+          (cmd & MACROCMD_ACTUATE_KEYUP) ? HID_RELEASED_MASK : 0,
           *mptr);
       now += get_delay(cmd);
       ++mptr;
@@ -282,7 +282,7 @@ static inline void process_real_key(void) {
       // which is not that bad - but first key is stuck forever.
       reports_reset_pending = true;
 #ifdef DEBUG_PIPELINE
-      xprintf("Reset@%d: pending", systime);
+      txprintf("Reset: pending");
 #endif
     }
     if (tap.code == 0 || tap.macro_ptr != MACRO_NOT_FOUND) {
@@ -294,13 +294,13 @@ static inline void process_real_key(void) {
       systime, event.flags, event.key, currentLayer, code);
 #endif
 
-  uint8_t keyflags = event.flags | USBQUEUE_REAL_KEY_MASK;
+  uint8_t keyflags = event.flags | HID_REAL_KEY_MASK;
   if (tap.code > 0) { // <TapWait>
     // Tap wait mode. We are here because tap macro triggered in the past.
     if (code == tap.code && systime <= tap.deadline) {
       // Ok, the key matches quickly enough. Play macro, resume normal mode.
 #ifdef DEBUG_PIPELINE
-      xprintf("Tap@%d: %d", systime, tap.macro_ptr);
+      txprintf("Tap: macro@%d", tap.macro_ptr);
 #endif
       play_macro(tap.macro_ptr);
       LEAVE_TAP_MODE;
@@ -311,7 +311,7 @@ static inline void process_real_key(void) {
 
     // keyDown macro on that key, though, _is_ special - we need to trigger it
     // _instead_of_ tap - and then process current keypress in a normal way.
-    uint16_t keyDown_ptr = lookup_macro(USBQUEUE_REAL_KEYDOWN, tap.code, false);
+    uint16_t keyDown_ptr = lookup_macro(HID_REAL_KEYDOWN, tap.code, false);
     if (keyDown_ptr != MACRO_NOT_FOUND) {
       // Play the keyDown, play it again, my Johnny..
       play_macro(keyDown_ptr);
@@ -319,7 +319,7 @@ static inline void process_real_key(void) {
       // Ugh.. no macro.. just pretend we pressed the key back then.
       // Post-dating the event to ensure keypress is sent to USB _this_ tick -
       // possibly postponing the scheduled keypresses of any macros.
-      schedule_hid(systime - 120, USBQUEUE_REAL_KEY_MASK, tap.code);
+      schedule_hid(systime - 120, HID_REAL_KEY_MASK, tap.code);
     }
     if (tap.macro_ptr == MACRO_NOT_FOUND) {
       LEAVE_TAP_MODE;
@@ -391,7 +391,7 @@ static inline void update_reports(void) {
     // Clowntown: fully "transparent" will toggle exp. header
     // But it should not ever be put on queue!
     exp_toggle();
-    hid_queue[pos].flags |= USBQUEUE_RELEASED_MASK; // skip-cooldown trick.
+    hid_queue[pos].flags |= HID_RELEASED_MASK; // skip-cooldown trick.
     // ALL codes you want filtered from reports MUST BE ABOVE THIS LINE!
   } else if (hid_queue[pos].code >= 0xe8) {
     update_consumer_report(&hid_queue[pos]);
@@ -410,7 +410,7 @@ static inline void update_reports(void) {
         break;
     }
   }
-  if ((hid_queue[pos].flags & USBQUEUE_RELEASED_MASK) == 0) {
+  if ((hid_queue[pos].flags & HID_RELEASED_MASK) == 0) {
     // We only throttle keypresses. Key release doesn't slow us down -
     // minimum duration is guaranteed by fact that key release goes after
     // key press and keypress triggers cooldown.
@@ -466,5 +466,5 @@ void pipeline_init(void) {
 #undef BUF_NEXT
 
 #undef MACRO_NOT_FOUND
-#undef USBQUEUE_REAL_KEYDOWN
-#undef USBQUEUE_REAL_KEYUP
+#undef HID_REAL_KEYDOWN
+#undef HID_REAL_KEYUP
