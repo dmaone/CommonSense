@@ -104,6 +104,7 @@ enum MessageCode {
   MC_KEYPRESS = 0,
   MC_KEY_RESOLVED,
   MC_SCHEDULE_HID,
+  MC_PROCESS_HID,
 };
 
 typedef union {
@@ -154,9 +155,19 @@ typedef struct {
   uint8_t code;
   uint8_t flags;
   uint32_t event_time;
+  uint8_t position;
   uint8_t data_begin;
   uint8_t data_end;
 } __attribute__((packed)) mc_schedule_hid_payload_t;
+
+typedef struct {
+  uint8_t code;
+  uint8_t flags;
+  uint32_t event_time;
+  uint8_t position;
+  uint8_t data_begin;
+  uint8_t data_end;
+} __attribute__((packed)) mc_process_hid_payload_t;
 // CodedMessage payload layouts END
 
 typedef struct {

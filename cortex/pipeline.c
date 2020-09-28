@@ -106,12 +106,18 @@ inline void process_layerMods(uint8_t flags, uint8_t code) {
 }
 
 static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
+  uint8_t pos = q_end;
+  do {
+    // TODO think how not to fall into infinite loop here if buffer is full.
+    pos = BUF_NEXT(pos);
+  } while (hid_queue[pos].raw != BUF_EMPTY);
 #ifdef DEBUG_PIPELINE
   coded_message_t* cm = (coded_message_t*)&outbox.raw;
   mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm->message;
   msg->event_time = time;
   msg->code = code;
   msg->flags = flags;
+  msg->position = pos;
   msg->data_begin = q_begin;
   msg->data_end = q_end;
   coded_timestamped_message(MC_SCHEDULE_HID);
@@ -140,11 +146,6 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
     process_layerMods(flags, code);
     return;
   }
-  uint8_t pos = q_end;
-  do {
-    // TODO think how not to fall into infinite loop here if buffer is full.
-    pos = BUF_NEXT(pos);
-  } while (hid_queue[pos].raw != BUF_EMPTY);
   hid_queue[pos].sysTime = time;
   hid_queue[pos].flags = flags;
   hid_queue[pos].code = code;
@@ -398,7 +399,17 @@ static inline void update_reports(void) {
     // Can only fail at rpos == wpos AKA "all events are in the future"
     return; // We'll return here on the next tick, hopefully passing.
   }
-
+#ifdef DEBUG_PIPELINE
+  coded_message_t* cm = (coded_message_t*)&outbox.raw;
+  mc_process_hid_payload_t* msg = (mc_process_hid_payload_t*)&cm->message;
+  msg->event_time = hid_queue[pos].sysTime;
+  msg->code = hid_queue[pos].code;
+  msg->flags = hid_queue[pos].flags;
+  msg->position = pos;
+  msg->data_begin = q_begin;
+  msg->data_end = q_end;
+  coded_timestamped_message(MC_PROCESS_HID);
+#endif
   if (is_special(hid_queue[pos].code)) {
     // Clowntown: fully "transparent" will toggle exp. header
     // But it should not ever be put on queue!

@@ -101,12 +101,28 @@ void DeviceInterface::decodeMessage_(const QByteArray& payload) {
       QString s{};
       auto out = QTextStream{&s};
       out << formatSysTime_(msg->sysTime)
-          << "q " << QString((p->flags & HID_RELEASED_MASK) ? "· ": "# ")
+          << "Queued " << QString((p->flags & HID_RELEASED_MASK) ? "· ": "# ")
           << ScancodeList::asString(p->code)
           << ((p->flags & HID_REAL_KEY_MASK) ? "(real)": "")
           << " @" << formatSysTime_(p->event_time) << "(" << Qt::forcesign
-          << delta << Qt::noforcesign << " ms). Data: " << p->data_begin << " to "
-          << p->data_end;
+          << delta << Qt::noforcesign << " ms) pos " << p->position
+          << ". Buffer: " << p->data_begin << " to " << p->data_end;
+        out.flush();
+        qInfo().noquote().nospace() << s;
+      break;
+    }
+    case MC_PROCESS_HID: {
+      auto p = reinterpret_cast<const mc_process_hid_payload_t*>(msg->message);
+      int delta = p->event_time - msg->sysTime;
+      QString s{};
+      auto out = QTextStream{&s};
+      out << formatSysTime_(msg->sysTime)
+          << "Applying " << QString((p->flags & HID_RELEASED_MASK) ? "· ": "# ")
+          << ScancodeList::asString(p->code)
+          << ((p->flags & HID_REAL_KEY_MASK) ? "(real)": "")
+          << " @" << formatSysTime_(p->event_time) << "(" << Qt::forcesign
+          << delta << Qt::noforcesign << " ms) pos " << p->position
+          << ". Buffer: " << p->data_begin << " to " << p->data_end;
         out.flush();
         qInfo().noquote().nospace() << s;
       break;
