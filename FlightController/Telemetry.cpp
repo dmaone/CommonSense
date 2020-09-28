@@ -27,8 +27,8 @@ Telemetry::Telemetry(DeviceInterface& di) :
   ui->setupUi(this);
 
   connect(
-      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
-      this, SLOT(keypress(DeviceInterface::KeyState)));
+      &di, SIGNAL(keypress(uint8_t, DeviceInterface::KeyState)),
+      this, SLOT(keypress(uint8_t, DeviceInterface::KeyState)));
 
   di.installEventFilter(this);
 
@@ -228,9 +228,9 @@ void Telemetry::export_() {
   }
 }
 
-void Telemetry::keypress(DeviceInterface::KeyState state) {
-  auto& readout = getCell_(state.row,state.col).readout;
-  if (state.status == DeviceInterface::KeyPressed) {
+void Telemetry::keypress(uint8_t keyIndex, DeviceInterface::KeyState state) {
+  auto& readout = cells_.at(keyIndex).readout;
+  if (state == DeviceInterface::KeyPressed) {
     readout.setStyleSheet("color: black; background-color: #ffff33");
   } else {
     readout.setStyleSheet("");

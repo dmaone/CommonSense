@@ -373,3 +373,9 @@ void DeviceConfig::setSwitchCapabilities_() {
       break;
   }
 }
+
+std::pair<uint8_t, uint8_t>
+DeviceConfig::toRowCol(const uint8_t keyIndex) const {
+ const uint8_t col = keyIndex % numCols;
+ return {(keyIndex - col) / numCols, col};
+}

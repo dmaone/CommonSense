@@ -39,7 +39,7 @@ class Telemetry : public QFrame {
   Q_ENUM(DisplayMode);
 
  public slots:
-  void keypress(DeviceInterface::KeyState state);
+  void keypress(uint8_t keyIndex, DeviceInterface::KeyState state);
 
  private slots:
   void close_();

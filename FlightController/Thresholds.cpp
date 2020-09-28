@@ -21,8 +21,8 @@ Thresholds::Thresholds(DeviceInterface& di) :
   connect(ui->closeButton, &QPushButton::clicked, this, [this](){ close(); });
 
   connect(
-      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
-      this, SLOT(keypress(DeviceInterface::KeyState)));
+      &di, SIGNAL(keypress(uint8_t, DeviceInterface::KeyState)),
+      this, SLOT(keypress(uint8_t, DeviceInterface::KeyState)));
 
   di.installEventFilter(this);
 }
@@ -132,9 +132,9 @@ bool Thresholds::eventFilter(QObject* /* obj */, QEvent* event) {
   return false;
 }
 
-void Thresholds::keypress(DeviceInterface::KeyState state) {
-  auto& cell = getCell_(state.row, state.col);
-  if (state.status != DeviceInterface::KeyPressed) {
+void Thresholds::keypress(uint8_t keyIndex, DeviceInterface::KeyState state) {
+  auto& cell = cells_.at(keyIndex);
+  if (state != DeviceInterface::KeyPressed) {
     paintCell_(cell);
     return;
   }

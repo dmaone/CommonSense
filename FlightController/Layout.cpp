@@ -22,8 +22,8 @@ Layout::Layout(DeviceInterface& di) :
   connect(ui->switchButton, SIGNAL(clicked()), this, SLOT(switchLayer_()));
 
   connect(
-      &di, SIGNAL(keypress(DeviceInterface::KeyState)),
-      this, SLOT(keypress(DeviceInterface::KeyState)));
+      &di, SIGNAL(keypress(uint8_t, DeviceInterface::KeyState)),
+      this, SLOT(keypress(uint8_t, DeviceInterface::KeyState)));
 }
 
 void Layout::init() {
@@ -166,12 +166,12 @@ void Layout::switchLayer_() {
   syncUiMatrix_();
 }
 
-void Layout::keypress(DeviceInterface::KeyState state) {
+void Layout::keypress(uint8_t keyIndex, DeviceInterface::KeyState state) {
   if (display_.empty()) {
     return; // never happens, but..
   }
-  auto& cell = getUiCell_(state.row, state.col);
-  if (state.status != DeviceInterface::KeyPressed) {
+  auto& cell = *display_.at(keyIndex);
+  if (state != DeviceInterface::KeyPressed) {
     cell.setStyleSheet("");
     return;
   }

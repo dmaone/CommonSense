@@ -60,12 +60,10 @@ void DeviceInterface::decodeMessage_(const QByteArray& payload) {
       uint8_t col = keyIndex % config.numCols;
       uint8_t row = (keyIndex - col) / config.numCols;
       bool keyUp = flags & 0x80;
-      emit keypress({.row = row,
-                     .col = col,
-                     .status = keyUp ? KeyReleased : KeyPressed});
       qInfo().noquote() << QString(keyUp ? "· r%1 c%2" : "# r%1 c%2")
                                   .arg(row + 1, 2)
                                   .arg(col + 1, 2);
+      emit keypress(keyIndex, keyUp ? KeyReleased : KeyPressed);
       break;
     }
     default:

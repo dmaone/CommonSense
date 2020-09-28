@@ -49,6 +49,7 @@ class DeviceConfig : public QObject {
   const std::vector<std::string> getExpModeNames();
   const QString getSwitchTypeName();
   size_t getMatrixSize() const;
+  std::pair<uint8_t, uint8_t> toRowCol(uint8_t keyIndex) const;
 
   bool bValid{false};
   uint8_t numRows{0};

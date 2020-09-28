@@ -23,7 +23,7 @@ class Layout : public QFrame {
   void init();
 
  public slots:
-  void keypress(DeviceInterface::KeyState state);
+  void keypress(uint8_t keyIndex, DeviceInterface::KeyState state);
 
  private slots:
   void import_();

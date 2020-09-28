@@ -33,17 +33,11 @@ class DeviceInterface : public QObject {
   };
   Q_ENUM(State)
 
-  enum KeyStatus { KeyPressed, KeyReleased };
-  Q_ENUM(KeyStatus)
+  enum KeyState { KeyPressed, KeyReleased };
+  Q_ENUM(KeyState)
 
   enum Mode { DeviceInterfaceNormal, DeviceInterfaceBootloader };
   Q_ENUM(Mode)
-
-  struct KeyState{
-    uint8_t row;
-    uint8_t col;
-    DeviceInterface::KeyStatus status;
-  };
 
   DeviceInterface();
   ~DeviceInterface();
@@ -80,7 +74,7 @@ class DeviceInterface : public QObject {
 
  signals:
   void notify(DeviceInterface::State);
-  void keypress(DeviceInterface::KeyState state);
+  void keypress(uint8_t keyIndex, DeviceInterface::KeyState state);
 
  protected:
   virtual void timerEvent(QTimerEvent *);
