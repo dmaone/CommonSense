@@ -18,8 +18,12 @@ CONFIG(release, debug|release) {
 win32 {
     # mingw32 for release, mingw64 for debug (use dynamic, 64-bit kit!)
     INCLUDEPATH += $$PWD/../mingw32/include $$PWD/../mingw64/include
-    LIBS += -L$$PWD/../mingw32/lib -L$$PWD/../mingw32/bin
-    LIBS += -L$$PWD/../mingw64/lib -L$$PWD/../mingw64/bin
+    CONFIG(debug, debug|release) {
+        LIBS += -L$$PWD/../mingw64/lib -L$$PWD/../mingw64/bin
+    }
+    CONFIG(release, debug|release) {
+        LIBS += -L$$PWD/../mingw32/lib -L$$PWD/../mingw32/bin
+    }
     LIBS += -lhidapi -lsetupapi
     RC_FILE = WindowsIcon.rc
 }
@@ -47,7 +51,6 @@ SOURCES += main.cpp \
     LogViewer.cpp \
     Macro.cpp \
     Macros.cpp \
-    Pedals.cpp \
     ScancodeList.cpp \
     Telemetry.cpp \
     Thresholds.cpp \
@@ -71,7 +74,6 @@ HEADERS  += \
     LogViewer.h \
     Macro.h \
     Macros.h \
-    Pedals.h \
     ScancodeList.h \
     Telemetry.h \
     settings.h \
@@ -83,7 +85,6 @@ FORMS    += \
     Hardware.ui \
     Layout.ui \
     Macros.ui \
-    Pedals.ui \
     Telemetry.ui \
     Thresholds.ui \
 
