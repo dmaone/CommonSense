@@ -261,6 +261,11 @@ QStringList populateScancodeList_() {
 
   return list;
 }
+/* static */ QString ScancodeList::asString(uint8_t code) {
+  return QString("0x%1(%2)")
+      .arg(code, 2, 16, QLatin1Char('0'))
+      .arg(ScancodeList().list->at(code));
+}
 
 /* static */ QStringList* ScancodeList::getScancodeList_() {
   static QStringList list = populateScancodeList_();

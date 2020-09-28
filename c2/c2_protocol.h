@@ -66,7 +66,8 @@ enum c2response {
   C2RESPONSE_STATUS = 0x00,
   C2RESPONSE_CONFIG,
   C2RESPONSE_CODED_MESSAGE,
-  C2RESPONSE_TELEMETRY_ROW
+  C2RESPONSE_TELEMETRY_ROW,
+  C2RESPONSE_LOG_MESSAGE,
 };
 
 enum deviceStatus {
@@ -101,6 +102,8 @@ enum SwitchType {
 
 enum MessageCode {
   MC_KEYPRESS = 0,
+  MC_KEY_RESOLVED,
+  MC_SCHEDULE_HID,
 };
 
 typedef union {
@@ -115,11 +118,59 @@ typedef union {
 
 typedef union {
   struct {
-    unsigned char response_type;
-    unsigned char payload[63];
+    uint8_t response_type;
+    uint8_t payload[63];
   } __attribute__((packed));
   uint8_t raw[64];
 } IN_c2packet_t;
+
+// IN_c2packet_t alternative layouts BEGIN
+typedef struct {
+  uint8_t response_type;
+  uint8_t messageCode;
+  union {
+    uint8_t rawMessage[62];
+    struct {
+      uint8_t message[58];
+      uint32_t sysTime;
+    } __attribute__((packed));
+  };
+} __attribute__((packed)) coded_message_t;
+
+// CodedMessage payload layouts - starts at [2], pls keep wider things aligned.
+typedef struct {
+  uint8_t key;
+  uint8_t flags;
+} __attribute__((packed)) mc_keypress_t;
+
+typedef struct {
+  uint8_t key;
+  uint8_t flags;
+  uint8_t layer;
+  uint8_t code;
+} __attribute__((packed)) mc_key_resolved_payload_t;
+
+typedef struct {
+  uint8_t code;
+  uint8_t flags;
+  uint32_t event_time;
+  uint8_t data_begin;
+  uint8_t data_end;
+} __attribute__((packed)) mc_schedule_hid_payload_t;
+// CodedMessage payload layouts END
+
+typedef struct {
+  uint8_t response_type;
+  union {
+    struct {
+      char message[59];
+      uint32_t sysTime;
+    } __attribute__((packed));
+    char raw_message[63];
+  };
+} __attribute__((packed)) log_message_t;
+
+// IN_c2packet_t layouts END
 
 typedef union {
   struct {
@@ -182,6 +233,9 @@ enum MacroCmdType {
 // IMPORTANT - MUST NOT BE A REAL KEY! Easy for beamspring, less so for F122
 // with it's 8x16 matrix.
 #define COMMONSENSE_NOKEY 255
+
+#define HID_RELEASED_MASK 0x80
+#define HID_REAL_KEY_MASK 0x40
 
 // serial stuff
 enum supervisory_command {

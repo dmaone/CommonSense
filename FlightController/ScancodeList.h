@@ -7,6 +7,8 @@ class ScancodeList : public QStringList {
   QStringList* list;
   int width{2}; // Not a real width - fiddle if something doesn't fit.
 
+  static QString asString(uint8_t code);
+
  private:
   static QStringList* getScancodeList_();
 };

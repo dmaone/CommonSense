@@ -92,7 +92,10 @@ class DeviceInterface : public QObject {
   bool receivePacket_();
   bool sendPacket_();
 
+  void dumpInboundPacket_(const QByteArray* packet);
   void decodeMessage_(const QByteArray& payload);
+  QString formatKey_(uint8_t keyIndex, uint8_t flags) const;
+  QString formatSysTime_(uint32_t sysTime) const;
   void enqueueCommand_(OUT_c2packet_t outbox);
   DetectedDevices listDevices_();
   void processStatusReply_(QByteArray* payload);

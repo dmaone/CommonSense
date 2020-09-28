@@ -584,3 +584,34 @@ void xprintf(const char *format_p, ...) {
   va_end(va);
   usb_send_c2();
 }
+
+// Auto-timestamped xprintf
+void ts_xprintf(const char *format_p, ...) {
+#ifndef XPRINTF_ALWAYS_ENABLED
+  if (BIT_IS_CLEAR(status_register, C2DEVSTATUS_SETUP_MODE)) {
+    return;
+  }
+#endif
+  va_list va;
+  va_start(va, format_p);
+  log_message_t* msg = (log_message_t*)&outbox.raw;
+  vsnprintf(msg->message, sizeof(msg->message), format_p, va);
+  va_end(va);
+  msg->response_type = C2RESPONSE_LOG_MESSAGE;
+  msg->sysTime = systime;
+  usb_send_c2();
+}
+
+
+void coded_timestamped_message(uint8_t messageCode) {
+#ifndef CODED_MESSAGES_ALWAYS_ENABLED
+  if (BIT_IS_CLEAR(status_register, C2DEVSTATUS_SETUP_MODE)) {
+    return;
+  }
+#endif
+  coded_message_t* cm = (coded_message_t*)&outbox.raw;
+  cm->response_type = C2RESPONSE_CODED_MESSAGE;
+  cm->messageCode = messageCode;
+  cm->sysTime = systime;
+  usb_send_c2();
+}

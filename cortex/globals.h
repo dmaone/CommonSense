@@ -15,6 +15,9 @@
 // xprintf is no-op outside of setup mode. This switch overrides that.
 // #define XPRINTF_ALWAYS_ENABLED
 
+// same, for coded_[x]_message()
+// #define CODED_MESSAGES_ALWAYS_ENABLED
+
 // WARNING consider uncommenting ^ when enabling DEBUG_<anything>
 
 // #define DEBUG_STATE_MACHINE
@@ -143,6 +146,11 @@ enum outputDirection {
 };
 
 void xprintf(const char *format_p, ...);
+void ts_xprintf(const char *format_p, ...);
+
+// Expects the message prefilled in outbox. CAUTION: Overwrites first 6 bytes!
+// Wire format: [u8 cmd][u8 code][u32 systime][var payload]
+void coded_timestamped_message(uint8_t messageCode);
 
 #if SWITCH_TYPE == BEAMSPRING
 #define NORMALLY_LOW 0

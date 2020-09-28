@@ -8,6 +8,8 @@
 #include <algorithm>
 #include <string>
 
+#include "ScancodeList.h"
+
 namespace {
 constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
 constexpr size_t kNormalOperationTick{100}; // ms
@@ -17,6 +19,7 @@ constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
 constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
 
 constexpr bool kDebugUsbTraffic{false};
+constexpr bool kDumpIncomingPackets{false};
 }
 
 DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
@@ -41,34 +44,93 @@ DeviceInterface::~DeviceInterface() {
   releaseDeviceIfScheduled_(); // So we don't wait for timer
 }
 
+QString DeviceInterface::formatKey_(
+    const uint8_t keyIndex, const uint8_t flags) const {
+  auto [row, col] = config.toRowCol(keyIndex);
+  bool keyUp = flags & 0x80;
+  return QString("%1 r%2 c%3")
+      .arg(keyUp ? "·": "#").arg(row + 1, 2).arg(col + 1, 2);
+}
+
+QString DeviceInterface::formatSysTime_(const uint32_t sysTime) const {
+  return QString("t+%1.%2 ")
+      .arg((uint32_t)sysTime/1000)
+      .arg(sysTime % 1000, 3, 10, QLatin1Char('0'));
+}
+
 void DeviceInterface::decodeMessage_(const QByteArray& payload) {
-  uint8_t messageCode = payload.at(1);
-  uint8_t dataPos{2};
-  switch (messageCode) {
+  auto msg = reinterpret_cast<const coded_message_t*>(payload.constData());
+  switch (msg->messageCode) {
     case MC_KEYPRESS: {
-      uint8_t flags = payload.at(dataPos++);
-      uint8_t keyIndex = payload.at(dataPos++);
+      auto p = reinterpret_cast<const mc_keypress_t*>(msg->message);
       if (!config.bValid) {
-        qWarning() << "Received key " << keyIndex << " on invalid config!";
+        qWarning() << "Received key " << p->key << " on invalid config!";
         return;
       }
-      if (keyIndex == COMMONSENSE_NOKEY) {
+      if (p->key == COMMONSENSE_NOKEY) {
         // "All keys released"
         qInfo() << "---------";
         return;
       }
-      uint8_t col = keyIndex % config.numCols;
-      uint8_t row = (keyIndex - col) / config.numCols;
-      bool keyUp = flags & 0x80;
-      qInfo().noquote() << QString(keyUp ? "· r%1 c%2" : "# r%1 c%2")
-                                  .arg(row + 1, 2)
-                                  .arg(col + 1, 2);
-      emit keypress(keyIndex, keyUp ? KeyReleased : KeyPressed);
+      bool keyUp = p->flags & 0x80;
+      if (p->key >= config.getMatrixSize()) {
+        qWarning() << "Invalid key: " << p->key << formatKey_(p->key, p->flags);
+        return;
+      }
+      qInfo().noquote() << formatKey_(p->key, p->flags);
+      emit keypress(p->key, keyUp ? KeyReleased : KeyPressed);
+      break;
+    }
+    case MC_KEY_RESOLVED: {
+      auto p = reinterpret_cast<const mc_key_resolved_payload_t*>(msg->message);
+      QString s{};
+      auto out = QTextStream{&s};
+      out << formatSysTime_(msg->sysTime) << formatKey_(p->key, p->flags)
+          << " @L" << p->layer  << "-> " << ScancodeList::asString(p->code);
+      out.flush();
+      qInfo().noquote().nospace() << s;
+      break;
+    }
+    case MC_SCHEDULE_HID: {
+      auto p = reinterpret_cast<const mc_schedule_hid_payload_t*>(msg->message);
+      int delta = p->event_time - msg->sysTime;
+      QString s{};
+      auto out = QTextStream{&s};
+      out << formatSysTime_(msg->sysTime)
+          << "q " << QString((p->flags & HID_RELEASED_MASK) ? "· ": "# ")
+          << ScancodeList::asString(p->code)
+          << ((p->flags & HID_REAL_KEY_MASK) ? "(real)": "")
+          << " @" << formatSysTime_(p->event_time) << "(" << Qt::forcesign
+          << delta << Qt::noforcesign << " ms). Data: " << p->data_begin << " to "
+          << p->data_end;
+        out.flush();
+        qInfo().noquote().nospace() << s;
       break;
     }
     default:
-      qWarning() << "Unknown message code " << messageCode;
+      qWarning() << "Unknown message code " << msg->messageCode;
   }
+}
+
+void DeviceInterface::dumpInboundPacket_(const QByteArray* packet) {
+  if (!kDumpIncomingPackets) {
+    return;
+  }
+  auto data = reinterpret_cast<const uint8_t*>(packet->constData());
+  QString s{};
+  auto out = QTextStream{&s};
+  out.setIntegerBase(16);
+  out.setFieldAlignment(QTextStream::AlignRight);
+  for (int i = 0; i < (packet->size() / 2); ++i) {
+    out.setFieldWidth(2);
+    out.setPadChar('0');
+    out << data[i * 2] << data[i * 2 + 1];
+    out.setFieldWidth(0);
+    out << (i % 8 == 7 ? "\n" :" ");
+  }
+  out.flush();
+  //s.resize(s.size() - 1); // chomp;
+  qInfo().noquote().nospace() << s;
 }
 
 void DeviceInterface::processStatusReply_(QByteArray* payload) {
@@ -113,7 +175,15 @@ bool DeviceInterface::event(QEvent *e) {
       break;
     case C2RESPONSE_CODED_MESSAGE:
       decodeMessage_(*payload);
+      dumpInboundPacket_(payload);
       break;
+    case C2RESPONSE_LOG_MESSAGE: {
+      auto msg = reinterpret_cast<const log_message_t*>(payload->constData());
+      qInfo().noquote().nospace() << formatSysTime_(msg->sysTime)
+                                  << msg->message;
+      dumpInboundPacket_(payload);
+      break;
+    }
     default:
       qInfo() << payload->constData();
   }

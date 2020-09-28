@@ -101,13 +101,20 @@ inline void process_layerMods(uint8_t flags, uint8_t code) {
   // Aktchually figure out what's pressed and how it should change with layer change
   // then enqueue DIFFS ONLY
 #ifdef DEBUG_PIPELINE
-  xprintf("L@%d: %02x %02x -> %d", systime, flags, code, currentLayer);
+  ts_xprintf("LayerMods: %02x %02x -> L%d", flags, code, currentLayer);
 #endif
 }
 
 static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
 #ifdef DEBUG_PIPELINE
-  xprintf("Q@%d: %02x %d @%+d cur %d/%d", systime, flags, code, time - systime, q_begin, q_end);
+  coded_message_t* cm = (coded_message_t*)&outbox.raw;
+  mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm->message;
+  msg->event_time = time;
+  msg->code = code;
+  msg->flags = flags;
+  msg->data_begin = q_begin;
+  msg->data_end = q_end;
+  coded_timestamped_message(MC_SCHEDULE_HID);
 #endif
   // Special codes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
@@ -189,7 +196,7 @@ static inline void play_macro(uint_fast16_t start) {
   uint8_t *mptr = &config.macros[start] + 3;
   uint8_t *macro_end = mptr + config.macros[start + 2];
 #ifdef DEBUG_PIPELINE
-  xprintf("PM@%d: %d, sz: %d", systime, start, config.macros[start + 2]);
+  ts_xprintf("Play macro: %d, sz: %d", start, config.macros[start + 2]);
 #endif
   uint32_t now = systime;
   while (mptr <= macro_end) {
@@ -238,7 +245,7 @@ static inline void play_macro(uint_fast16_t start) {
 static inline void process_real_key(void) {
   if (tap.deadline > 0 && systime > tap.deadline) {
 #ifdef DEBUG_PIPELINE
-    xprintf("Tap@%d: %d timed out", systime, tap.macro_ptr);
+    ts_xprintf("Tap: macro@%d timed out", tap.macro_ptr);
 #endif
     // Tap timeout. MAKE DOUBLE SURE this branch is tap timeout situation ONLY.
     // See <TapWait> section for details.
@@ -255,7 +262,7 @@ static inline void process_real_key(void) {
       return;
     }
 #ifdef DEBUG_PIPELINE
-    xprintf("Reset@%d: commencing", systime);
+    ts_xprintf("Reset: commencing");
 #endif
 
     reset_reports();
@@ -282,7 +289,7 @@ static inline void process_real_key(void) {
       // which is not that bad - but first key is stuck forever.
       reports_reset_pending = true;
 #ifdef DEBUG_PIPELINE
-      txprintf("Reset: pending");
+      ts_xprintf("Reset: pending");
 #endif
     }
     if (tap.code == 0 || tap.macro_ptr != MACRO_NOT_FOUND) {
@@ -290,8 +297,13 @@ static inline void process_real_key(void) {
     }
   }
 #ifdef DEBUG_PIPELINE
-  xprintf("SC@%d: %02x %02x@L%d -> %d",
-      systime, event.flags, event.key, currentLayer, code);
+  coded_message_t* cm = (coded_message_t*)&outbox.raw;
+  mc_key_resolved_payload_t* msg = (mc_key_resolved_payload_t*)&cm->message;
+  msg->key = event.key;
+  msg->flags = event.flags;
+  msg->layer = currentLayer;
+  msg->code = code;
+  coded_timestamped_message(MC_KEY_RESOLVED);
 #endif
 
   uint8_t keyflags = event.flags | HID_REAL_KEY_MASK;
@@ -300,7 +312,7 @@ static inline void process_real_key(void) {
     if (code == tap.code && systime <= tap.deadline) {
       // Ok, the key matches quickly enough. Play macro, resume normal mode.
 #ifdef DEBUG_PIPELINE
-      txprintf("Tap: macro@%d", tap.macro_ptr);
+      ts_xprintf("Tap: macro@%d", tap.macro_ptr);
 #endif
       play_macro(tap.macro_ptr);
       LEAVE_TAP_MODE;
