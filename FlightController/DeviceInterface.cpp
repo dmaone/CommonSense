@@ -20,6 +20,10 @@ constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
 
 constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
+
+// Constants below are non-negotiable
+constexpr size_t kHidPacketSize{65};
+constexpr uint8_t kNoReport{0};
 }
 
 DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
@@ -197,7 +201,7 @@ void DeviceInterface::enqueueCommand_(OUT_c2packet_t outbox) {
   }
   {
     std::lock_guard<std::mutex> lock{queueLock_};
-    commandQueue_.enqueue(outbox);
+    outbox_.push(std::move(outbox));
   }
   resetTimer_(kHaveDataTickMs);
 }
@@ -305,16 +309,26 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
   releaseDeviceIfScheduled_(); // handle device loss
 }
 
+bool DeviceInterface::sendRawPacket_DANGER_(const std::vector<uint8_t>& buf) {
+  if (hid_write(device_, buf.data(), buf.size()) == -1) {
+    qWarning() << "Error sending to the device, will reconnect in 1 second";
+    QThread::sleep(1);
+    scheduleDeviceRelease_.store(true);
+    return false;
+  }
+  return true;
+}
+
 bool DeviceInterface::sendPacket_() {
-  unsigned char outbox[65];
   OUT_c2packet_t cmd;
   {
     std::lock_guard<std::mutex> lock{queueLock_};
-    if (commandQueue_.empty()) {
+    if (outbox_.empty()) {
       return false;
     }
     if (!device_) {
-      commandQueue_.clear();
+      UploadQueue tmp{};
+      outbox_.swap(tmp);
       qWarning() << "Device went away on send";
       return true;
     }
@@ -322,35 +336,35 @@ bool DeviceInterface::sendPacket_() {
       return true; // Do not slow down, may receive reply anytime soon!
     }
     noCtsDelay_ = kNoCtsDelay; // reset timer
-    cmd = commandQueue_.dequeue();
+    cmd = outbox_.front();
+    outbox_.pop();
   }
-  outbox[0] = 0x00; // ReportID is not used.
+  std::vector<uint8_t> buf{};
+  buf.reserve(kHidPacketSize);
+  buf.emplace_back(kNoReport); // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
     emit notify(StatusUpdated); // Blink the TX light
     lastSentAt_ = QDateTime::currentMSecsSinceEpoch();
   }
-  memcpy(outbox+1, cmd.raw, sizeof(cmd));
+  for (size_t i = 0; i < sizeof(cmd); ++i) {
+    buf.emplace_back(cmd.raw[i]);
+  }
   if (kDebugUsbTraffic) {
     qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
   }
   std::lock_guard<std::mutex> lock{deviceLock_};
-  if (hid_write(device_, outbox, sizeof outbox) == -1) {
-    qWarning() << "Error sending to the device, will reconnect in 1 second";
-    QThread::sleep(1);
-    scheduleDeviceRelease_.store(true);
-  }
-  return true;
+  return sendRawPacket_DANGER_(buf);
 }
 
 bool DeviceInterface::receivePacket_() {
-  unsigned char buffer[65];
-  memset(buffer, 0x00, sizeof(buffer));
+  std::vector<uint8_t> buffer{};
+  buffer.resize(kHidPacketSize, 0);
 
   int bytesRead;
   {
     std::lock_guard<std::mutex> lock{deviceLock_};
-    bytesRead = hid_read(device_, buffer, sizeof(buffer));
+    bytesRead = hid_read(device_, buffer.data(), buffer.size());
   }
   if (bytesRead == 0) {
     return false;
@@ -359,11 +373,12 @@ bool DeviceInterface::receivePacket_() {
     scheduleDeviceRelease_.store(true);
     return true;
   }
+  buffer.resize(bytesRead);
   if (kDebugUsbTraffic) {
-    qDebug() << "Got " << bytesRead << " b, cmd " << (uint8_t)buffer[1];
+    qDebug() << "Got " << bytesRead << " b, cmd " << buffer.front();
   }
   cts_.store(true);
-  if (buffer[0] != C2RESPONSE_STATUS) {
+  if (buffer.front() != C2RESPONSE_STATUS) {
     rx = true;
     if (lastSentAt_ > 0) {
       latencyMs = QString("%1 ms ").arg(
@@ -376,6 +391,7 @@ bool DeviceInterface::receivePacket_() {
 }
 
 void DeviceInterface::initDevice_() {
+  config.reset();
   std::lock_guard<std::mutex> lock{deviceLock_};
   device_ = acquireDevice_();
   if (!device_) {
@@ -384,14 +400,18 @@ void DeviceInterface::initDevice_() {
     return;
   }
   hid_set_nonblocking(device_, 1);
-  config.reset();
-  unsigned char buf[65];
-  buf[0] = 0;
-  buf[1] = C2CMD_EWO;
-  buf[2] = 1 << deviceStatus::C2DEVSTATUS_SETUP_MODE;
-  hid_write(device_, buf, sizeof buf);
-  buf[2] += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
-  hid_write(device_, buf, sizeof buf); // Only flipping scan bit inits scanner
+  // We want to put device into setup mode AND trigger scanner init on connect.
+  std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};
+  buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
+  if (!sendRawPacket_DANGER_(buf)) {
+    return;
+  }
+
+  // Only flipping of the scan bit reinits scanner.
+  buf.back() += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
+  if (!sendRawPacket_DANGER_(buf)) {
+    return;
+  }
 
   cts_.store(true); // Not expecting anything from device - clear to send.
   setState_(mode_ == DeviceInterfaceNormal ? DeviceConnected

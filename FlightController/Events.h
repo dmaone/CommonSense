@@ -9,11 +9,12 @@
 #pragma once
 
 #include <QtCore>
+#include <vector>
 
 class DeviceMessage : public QEvent {
  public:
-  explicit DeviceMessage(const unsigned char *buf) :
-      QEvent(DeviceMessage::ET), payload((const char *)buf, 64) {};
+  explicit DeviceMessage(const std::vector<uint8_t>& buf) :
+      QEvent(DeviceMessage::ET), payload((const char *)buf.data(), buf.size()) {};
 
   QByteArray* getPayload() {
     return &payload;

@@ -9,11 +9,11 @@
 
 #pragma once
 
-#include <mutex>
 #include <QDateTime>
 #include <QObject>
-#include <QQueue>
 #include <hidapi/hidapi.h>
+#include <mutex>
+#include <queue>
 
 #include "DeviceConfig.h"
 #include "DeviceSelector.h"
@@ -80,6 +80,7 @@ class DeviceInterface : public QObject {
   virtual void timerEvent(QTimerEvent* event);
 
  private:
+  using UploadQueue = std::queue<OUT_c2packet_t>;
   struct DetectedDevices {
     DeviceList keyboards{};
     DeviceList bootloaders{};
@@ -91,6 +92,7 @@ class DeviceInterface : public QObject {
   void setState_(State newState);
   bool receivePacket_();
   bool sendPacket_();
+  bool sendRawPacket_DANGER_(const std::vector<uint8_t>& buf);
 
   void dumpInboundPacket_(const QByteArray* packet);
   void decodeMessage_(const QByteArray& payload);
@@ -107,7 +109,7 @@ class DeviceInterface : public QObject {
   Mode mode_{DeviceInterfaceNormal};
   State state_{DeviceDisconnected};
   uint8_t deviceStatus_{0};
-  QQueue<OUT_c2packet_t> commandQueue_{};
+  UploadQueue outbox_{};
   std::atomic<bool> cts_{true};
   size_t noCtsDelay_{0};
   size_t antiLagTimer_{0};
