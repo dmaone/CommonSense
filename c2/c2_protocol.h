@@ -219,7 +219,7 @@ typedef union {
 #define MACRO_TYPE_ONKEYDOWN 0x00
 #define MACRO_TYPE_ONKEYUP 0x80
 #define MACRO_TYPE_TAP 0x40
-#define MACRO_TYPE_MASK = (MACRO_TYPE_ONKEYUP | MACRO_TYPE_TAP)
+#define MACRO_TYPE_MASK (MACRO_TYPE_ONKEYUP | MACRO_TYPE_TAP)
 
 /* Macro serialization format: [Header, list<Command> AS data]
  * Header: [8b usb code, 8b options, 8b data length]
