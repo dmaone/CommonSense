@@ -28,7 +28,9 @@ static uint8_t q_end; // "pending events end" - writes go to next slot.
 
 static bool reports_reset_pending; // to hold report reset until macros finish.
 
-#define USBCODE_TRANSPARENT 0
+static uint8_t pressed_codes[COMMONSENSE_MATRIX_SIZE];
+
+#define CODE_EMPTY 0
 
 #define LEAVE_TAP_MODE tap.raw = 0
 
@@ -72,14 +74,14 @@ static inline bool is_layer_mod(uint8_t code) {
   return (code & 0xf8) == 0xa8;
 }
 
-inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
-  for (int8_t i = layer; i >= 0; --i) {
-    if (config.layers[i][key] == USBCODE_TRANSPARENT) {
+inline uint8_t resolve_key(uint8_t key) {
+  for (int8_t i = currentLayer; i >= 0; --i) {
+    if (config.layers[i][key] == CODE_EMPTY) {
       continue;
     }
     return config.layers[i][key];
   }
-  return USBCODE_TRANSPARENT;
+  return CODE_EMPTY;
 }
 
 
@@ -172,7 +174,7 @@ static inline void play_macro(uint_fast16_t start) {
 
 
 
-inline void process_layerMods(uint8_t flags, uint8_t code) {
+static inline void process_layerMods(uint8_t flags, uint8_t code) {
   // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
   if (code & 0x04) {
     // LLck. Keydown flips the bit, keyup is ignored.
@@ -187,7 +189,7 @@ inline void process_layerMods(uint8_t flags, uint8_t code) {
     // Fn Release
     CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
   }
-  uint8_t old = currentLayer;
+  uint8_t oldLayer = currentLayer;
   // Figure layer condition
   for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
     if (layerMods == (config.layerConditions[i] & 0xf0)) {
@@ -196,11 +198,36 @@ inline void process_layerMods(uint8_t flags, uint8_t code) {
     }
   }
 #ifdef DEBUG_PIPELINE
-  ts_xprintf("LayerMods: %02x %02x: L%d->%d", flags, code, old, currentLayer);
+  ts_xprintf("LM: %02x %02x: L%d->%d", flags, code, oldLayer, currentLayer);
 #endif
-  if (old == currentLayer) {
+#ifdef REEVALUATE_ON_LAYER_CHANGE
+  if (oldLayer == currentLayer) {
     return;
   }
+  // OK. Now we have to see which keys are pressed, and what will change.
+  for (uint8_t keyIndex = 0; keyIndex < COMMONSENSE_MATRIX_SIZE; ++keyIndex) {
+    uint8_t old_code = pressed_codes[keyIndex];
+    if (old_code == CODE_EMPTY) { // Key isn't pressed
+      continue; // NO key should map to CODE_EMPTY below real codes.
+    }
+    if (is_layer_mod(old_code)) {
+      continue; // Avoiding loops from releasing the layer mod key.
+    }
+    uint8_t new_code = resolve_key(keyIndex); // Reevaluate on new layer
+    if (new_code == old_code) {
+      continue; // no change..
+    }
+    if (is_layer_mod(new_code)) {
+      continue; // Avoiding loops from pressing the layer mod from new layer.
+    }
+    // Re-push key for the user.
+#ifdef DEBUG_PIPELINE
+    ts_xprintf("LM remap %d: %d -> %d", keyIndex, old_code, new_code);
+#endif
+    scan_register_event(KEY_UP_MASK, keyIndex);
+    scan_register_event(0, keyIndex);
+  }
+#endif
 }
 
 static inline void process_real_key(void) {
@@ -235,8 +262,15 @@ static inline void process_real_key(void) {
   scan_event_t event = scan_read_event();
   uint8_t code = 0;
   if (event.key != COMMONSENSE_NOKEY) {
-    code = resolve_key(event.key, currentLayer);
-    if (code == USBCODE_TRANSPARENT) {
+    if (event.flags & KEY_UP_MASK) {
+      // Resolved value may differ due to layer changes. Using saved value.
+      code = pressed_codes[event.key];
+      pressed_codes[event.key] = CODE_EMPTY;
+    } else {
+      code = resolve_key(event.key);
+      pressed_codes[event.key] = code;
+    }
+    if (code == CODE_EMPTY) {
       // Empty key in layout from current layer down to base. DON'T EVER.
       return;
     }
@@ -492,11 +526,14 @@ void pipeline_init(void) {
   for (uint8_t i = 0; i < QUEUE_SIZE; ++i) {
     hid_queue[i].raw = BUF_EMPTY;
   }
+  for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; ++i) {
+    pressed_codes[i] = CODE_EMPTY;
+  }
   LEAVE_TAP_MODE;
   reports_reset_pending = false;
 }
 
-#undef USBCODE_TRANSPARENT
+#undef CODE_EMPTY
 
 #undef LEAVE_TAP_MODE
 

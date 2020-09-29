@@ -17,8 +17,12 @@
 #define MATRIX_ROWS 10
 #define MATRIX_LAYERS 4
 
-// Switch type: BUCKLING_SPRING or BEAMSPRING
+// Switch type: see globals.h for options
 #define SWITCH_TYPE CORTRON
+
+// For a key with Base "A" + L1 "B": pressing the key and switching layers
+// will release "A" and press "B". Default behavior is holding "A" till keyUp.
+// #define REEVALUATE_ON_LAYER_CHANGE
 
 /*
  * if SELF_POWERED is defined - the device is self/battery-powered.
