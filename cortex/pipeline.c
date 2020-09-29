@@ -68,6 +68,10 @@ static inline bool is_special(uint8_t code) {
   return code < 4; // Scancode 4 is "A"
 }
 
+static inline bool is_layer_mod(uint8_t code) {
+  return (code & 0xf8) == 0xa8;
+}
+
 inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   for (int8_t i = layer; i >= 0; --i) {
     if (config.layers[i][key] == USBCODE_TRANSPARENT) {
@@ -168,6 +172,37 @@ static inline void play_macro(uint_fast16_t start) {
 
 
 
+inline void process_layerMods(uint8_t flags, uint8_t code) {
+  // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
+  if (code & 0x04) {
+    // LLck. Keydown flips the bit, keyup is ignored.
+    if (flags & KEY_UP_MASK) {
+      return;
+    }
+    FLIP_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  } else if ((flags & KEY_UP_MASK) == 0) {
+    // Fn Press
+    SET_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  } else {
+    // Fn Release
+    CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  }
+  uint8_t old = currentLayer;
+  // Figure layer condition
+  for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
+    if (layerMods == (config.layerConditions[i] & 0xf0)) {
+      currentLayer = config.layerConditions[i] & 0x0f;
+      break;
+    }
+  }
+#ifdef DEBUG_PIPELINE
+  ts_xprintf("LayerMods: %02x %02x: L%d->%d", flags, code, old, currentLayer);
+#endif
+  if (old == currentLayer) {
+    return;
+  }
+}
+
 static inline void process_real_key(void) {
   if (tap.deadline > 0 && systime > tap.deadline) {
 #ifdef DEBUG_PIPELINE
@@ -203,6 +238,13 @@ static inline void process_real_key(void) {
     code = resolve_key(event.key, currentLayer);
     if (code == USBCODE_TRANSPARENT) {
       // Empty key in layout from current layer down to base. DON'T EVER.
+      return;
+    }
+    if (is_layer_mod(code)) {
+      // Layer mod. The "layer mod key not mapped in upper layers" solved
+      // by key resolver - as long as upper layers not mapped Fn key to
+      // something else - which is clowny and should be punished anyway.
+      process_layerMods(event.flags, code);
       return;
     }
   } else {
@@ -293,35 +335,6 @@ static inline void process_real_key(void) {
   schedule_hid(systime, keyflags, code);
 }
 
-inline void process_layerMods(uint8_t flags, uint8_t code) {
-  // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
-  if (code & 0x04) {
-    // LLck. Keydown flips the bit, keyup is ignored.
-    if (flags & KEY_UP_MASK) {
-      return;
-    }
-    FLIP_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  } else if ((flags & KEY_UP_MASK) == 0) {
-    // Fn Press
-    SET_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  } else {
-    // Fn Release
-    CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  }
-  // Figure layer condition
-  for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
-    if (layerMods == (config.layerConditions[i] & 0xf0)) {
-      currentLayer = config.layerConditions[i] & 0x0f;
-      break;
-    }
-  }
-  // Aktchually figure out what's pressed and how it should change with layer change
-  // then enqueue DIFFS ONLY
-#ifdef DEBUG_PIPELINE
-  ts_xprintf("LayerMods: %02x %02x -> L%d", flags, code, currentLayer);
-#endif
-}
-
 static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
   uint8_t pos = q_end;
   do {
@@ -356,11 +369,9 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
         break;
     }
     return;
-  } else if ((code & 0xf8) == 0xa8) {
-    // Layer mod. The "layer mod key not mapped in upper layers" solved
-    // by USB code lookup, as long as upper layers not mapped Fn key to
-    // something else - which is clowny and should be punished anyway.
-    process_layerMods(flags, code);
+  } else if (is_layer_mod(code)) {
+    // Not valid here - layer mods must be physical keys.
+    ts_xprintf("CLOWNTOWN Layer mod scheduled as synthetic key!");
     return;
   }
   hid_queue[pos].sysTime = time;
