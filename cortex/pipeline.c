@@ -26,6 +26,8 @@ static uint8_t q_end; // "pending events end" - writes go to next slot.
 #define BUF_NEXT(X) (X + 1) & (QUEUE_SIZE - 1)
 #define BUF_EMPTY 0
 
+static bool reports_reset_pending; // to hold report reset until macros finish.
+
 #define USBCODE_TRANSPARENT 0
 
 #define LEAVE_TAP_MODE tap.raw = 0
@@ -34,8 +36,6 @@ static uint8_t q_end; // "pending events end" - writes go to next slot.
 #define HID_REAL_KEYUP (HID_REAL_KEY_MASK | HID_RELEASED_MASK)
 
 #define MACRO_NOT_FOUND 0
-
-static bool reports_reset_pending; // to hold report reset until macros finish.
 
 // Tap detector structure. Preferred way to check for emptiness is code == 0.
 // However, comparing timestamp it's faster (and OK) to check for deadline > 0.
@@ -61,6 +61,8 @@ static inline bool hid_queue_data_ready_at(uint8_t pos) {
   return hid_queue[pos].raw != BUF_EMPTY && hid_queue[pos].sysTime <= systime;
 }
 
+static void schedule_hid(uint32_t time, uint8_t flags, uint8_t code);
+
 static inline bool is_special(uint8_t code) {
   // First 4 USB codes are hijacked for internal functions.
   return code < 4; // Scancode 4 is "A"
@@ -75,83 +77,6 @@ inline uint8_t resolve_key(uint8_t key, uint8_t layer) {
   }
   return USBCODE_TRANSPARENT;
 }
-
-inline void process_layerMods(uint8_t flags, uint8_t code) {
-  // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
-  if (code & 0x04) {
-    // LLck. Keydown flips the bit, keyup is ignored.
-    if (flags & KEY_UP_MASK) {
-      return;
-    }
-    FLIP_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  } else if ((flags & KEY_UP_MASK) == 0) {
-    // Fn Press
-    SET_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  } else {
-    // Fn Release
-    CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
-  }
-  // Figure layer condition
-  for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
-    if (layerMods == (config.layerConditions[i] & 0xf0)) {
-      currentLayer = config.layerConditions[i] & 0x0f;
-      break;
-    }
-  }
-  // Aktchually figure out what's pressed and how it should change with layer change
-  // then enqueue DIFFS ONLY
-#ifdef DEBUG_PIPELINE
-  ts_xprintf("LayerMods: %02x %02x -> L%d", flags, code, currentLayer);
-#endif
-}
-
-static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
-  uint8_t pos = q_end;
-  do {
-    // TODO think how not to fall into infinite loop here if buffer is full.
-    pos = BUF_NEXT(pos);
-  } while (hid_queue[pos].raw != BUF_EMPTY);
-#ifdef DEBUG_PIPELINE
-  coded_message_t* cm = (coded_message_t*)&outbox.raw;
-  mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm->message;
-  msg->event_time = time;
-  msg->code = code;
-  msg->flags = flags;
-  msg->position = pos;
-  msg->data_begin = q_begin;
-  msg->data_end = q_end;
-  coded_timestamped_message(MC_SCHEDULE_HID);
-#endif
-  // Special codes - they're not queued, but processed RIGHT NOW.
-  // Not sure macro-generated keys should be processed, but right now they are..
-  if (is_special(code)) {
-    if (flags & HID_RELEASED_MASK) {
-      return; // keyUp is ignored so not to toggle twice.
-    }
-    switch (code) {
-      case 2:
-      Boot_Load();
-        break; // NORETURN function, break is strictly for consistence.
-      case 3:
-        exp_toggle();
-        break;
-      default:
-        break;
-    }
-    return;
-  } else if ((code & 0xf8) == 0xa8) {
-    // Layer mod. The "layer mod key not mapped in upper layers" solved
-    // by USB code lookup, as long as upper layers not mapped Fn key to
-    // something else - which is clowny and should be punished anyway.
-    process_layerMods(flags, code);
-    return;
-  }
-  hid_queue[pos].sysTime = time;
-  hid_queue[pos].flags = flags;
-  hid_queue[pos].code = code;
-  q_end = pos;
-}
-
 
 
 // MACRO UTILS -----------------------------------------------------------------
@@ -366,6 +291,82 @@ static inline void process_real_key(void) {
   // NOTE2: we still want to maintain order? Otherwise linked list is probably
   // better (though expensive at 4B/pointer plus memory management)
   schedule_hid(systime, keyflags, code);
+}
+
+inline void process_layerMods(uint8_t flags, uint8_t code) {
+  // codes A8-AB - momentary selection(Fn), AC-AF - permanent(LLck)
+  if (code & 0x04) {
+    // LLck. Keydown flips the bit, keyup is ignored.
+    if (flags & KEY_UP_MASK) {
+      return;
+    }
+    FLIP_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  } else if ((flags & KEY_UP_MASK) == 0) {
+    // Fn Press
+    SET_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  } else {
+    // Fn Release
+    CLEAR_BIT(layerMods, (code & 0x03) + LAYER_MODS_SHIFT);
+  }
+  // Figure layer condition
+  for (uint8_t i = 0; i < sizeof(config.layerConditions); i++) {
+    if (layerMods == (config.layerConditions[i] & 0xf0)) {
+      currentLayer = config.layerConditions[i] & 0x0f;
+      break;
+    }
+  }
+  // Aktchually figure out what's pressed and how it should change with layer change
+  // then enqueue DIFFS ONLY
+#ifdef DEBUG_PIPELINE
+  ts_xprintf("LayerMods: %02x %02x -> L%d", flags, code, currentLayer);
+#endif
+}
+
+static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
+  uint8_t pos = q_end;
+  do {
+    // TODO think how not to fall into infinite loop here if buffer is full.
+    pos = BUF_NEXT(pos);
+  } while (hid_queue[pos].raw != BUF_EMPTY);
+#ifdef DEBUG_PIPELINE
+  coded_message_t* cm = (coded_message_t*)&outbox.raw;
+  mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm->message;
+  msg->event_time = time;
+  msg->code = code;
+  msg->flags = flags;
+  msg->position = pos;
+  msg->data_begin = q_begin;
+  msg->data_end = q_end;
+  coded_timestamped_message(MC_SCHEDULE_HID);
+#endif
+  // Special codes - they're not queued, but processed RIGHT NOW.
+  // Not sure macro-generated keys should be processed, but right now they are..
+  if (is_special(code)) {
+    if (flags & HID_RELEASED_MASK) {
+      return; // keyUp is ignored so not to toggle twice.
+    }
+    switch (code) {
+      case 2:
+      Boot_Load();
+        break; // NORETURN function, break is strictly for consistence.
+      case 3:
+        exp_toggle();
+        break;
+      default:
+        break;
+    }
+    return;
+  } else if ((code & 0xf8) == 0xa8) {
+    // Layer mod. The "layer mod key not mapped in upper layers" solved
+    // by USB code lookup, as long as upper layers not mapped Fn key to
+    // something else - which is clowny and should be punished anyway.
+    process_layerMods(flags, code);
+    return;
+  }
+  hid_queue[pos].sysTime = time;
+  hid_queue[pos].flags = flags;
+  hid_queue[pos].code = code;
+  q_end = pos;
 }
 
 /*
