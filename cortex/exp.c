@@ -20,14 +20,30 @@ static bool solenoid_on;
 static uint8_t solenoid_queue;
 static uint8_t exp_cooldown;
 
+#ifdef INVERT_EXPHDR
+#define EXPHDR_ON(X) CyPins_ClearPin(X)
+#define EXPHDR_OFF(X) CyPins_SetPin(X)
+#else
+#define EXPHDR_ON(X) CyPins_SetPin(X)
+#define EXPHDR_OFF(X) CyPins_ClearPin(X)
+#endif
+
+#ifdef INVERT_FIRE
+#define FIRE_ON(X) CyPins_ClearPin(X)
+#define FIRE_OFF(X) CyPins_SetPin(X)
+#else
+#define FIRE_ON(X) CyPins_SetPin(X)
+#define FIRE_OFF(X) CyPins_ClearPin(X)
+#endif
+
 void exp_reset(void) {
   solenoid_on = false;
   solenoid_queue = 0;
   exp_cooldown = 0;
-  CyPins_ClearPin(ExpHdr_0);
-  CyPins_ClearPin(ExpHdr_1);
-  CyPins_ClearPin(ExpHdr_2);
-  CyPins_ClearPin(ExpHdr_3);
+  EXPHDR_OFF(ExpHdr_0);
+  EXPHDR_OFF(ExpHdr_1);
+  FIRE_OFF(EXP_ACTUATION_PIN);
+  EXPHDR_OFF(ExpHdr_3);
 }
 
 void exp_init(void) {
@@ -35,7 +51,7 @@ void exp_init(void) {
   exp_reset();
   switch (mode) {
   case EXP_MODE_SOLENOID_NUMCAPS:
-    CyPins_SetPin(EXP_SOLENOID_POWER);
+    EXPHDR_ON(EXP_SOLENOID_POWER);
     break;
   case EXP_MODE_LEDS:
     break;
@@ -53,11 +69,7 @@ void exp_toggle(void) {
   }
 }
 
-#define SYNC_LED(MASK, PIN) \
-  if (leds & MASK)         \
-    CyPins_SetPin(PIN);    \
-  else                     \
-    CyPins_ClearPin(PIN);
+#define SYNC_LED(MASK, PIN) (leds & MASK) ? EXPHDR_ON(PIN) : EXPHDR_OFF(PIN);
 
 void exp_setLEDs(uint8_t status) {
   leds = status;
@@ -83,14 +95,19 @@ void exp_tick(uint8_t tick) {
   }
   if (solenoid_on) {
     exp_cooldown = config.expParam2;
-    CyPins_ClearPin(EXP_ACTUATION_PIN);
+    FIRE_OFF(EXP_ACTUATION_PIN);
     solenoid_on = false;
   } else if (solenoid_queue > 0) {
     exp_cooldown = config.expParam1;
-    CyPins_SetPin(EXP_ACTUATION_PIN);
+    FIRE_ON(EXP_ACTUATION_PIN);
     solenoid_on = true;
     solenoid_queue--;
   } else {
     exp_cooldown = 0;
   }
 }
+
+#undef EXPHDR_ON
+#undef EXPHDR_OFF
+#undef FIRE_ON
+#undef FIRE_OFF

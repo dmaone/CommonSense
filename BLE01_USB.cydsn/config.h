@@ -26,6 +26,13 @@
 // will release "A" and press "B". Default behavior is holding "A" till keyUp.
 // #define REEVALUATE_ON_LAYER_CHANGE
 
+// Some vintage keyboards have inverted signalling - 74xx are better at sinking
+// current (less heat dissipation). This switches ExpHdr to be normally high.
+// #define INVERT_EXPHDR
+
+// Pull down on "solenoid" "firing"
+// #define INVERT_FIRE
+
 /*
  * if SELF_POWERED is defined - the device is self/battery-powered.
  * What does this mean:
