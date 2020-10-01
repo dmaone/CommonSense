@@ -122,7 +122,7 @@ inline void main_loop() {
       scan_nap();
       serial_nap();
       SysTimer_Sleep();
-      //usb_nap();
+      usb_nap();
       CyPmSaveClocks();
       CyPmSleep(PM_SLEEP_TIME_NONE, PM_SLEEP_SRC_I2C|PM_SLEEP_SRC_PICU);
       CyPmRestoreClocks();
@@ -132,7 +132,7 @@ inline void main_loop() {
       buf.command = 4;
       buf.data = 5;
       serial_send(&buf);
-      //usb_wake();
+      usb_wake();
       scan_wake();
       power_state = DEVSTATE_FULL_THROTTLE;
       break;
