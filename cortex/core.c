@@ -17,12 +17,14 @@
 #include "scan.h"
 #include "sup_serial.h"
 
+static volatile uint8_t pending_usb_ticks;
+
 CY_ISR(BootIRQ_ISR) {
   Boot_Load();
 }
 
 CY_ISR(Timer_ISR) {
-  tick++;
+  pending_usb_ticks++;
   systime++;
 }
 
@@ -57,9 +59,9 @@ inline void main_loop() {
 #endif
     switch (power_state) {
     case DEVSTATE_FULL_THROTTLE:
-      if (tick) {
-        gpio_tick(tick);
-        tick = 0;
+      if (pending_usb_ticks > 0) {
+        gpio_tick(pending_usb_ticks);
+        pending_usb_ticks = 0;
         if (sanity_check_timer > 0) {
           scan_sanity_check();
         }
@@ -87,8 +89,8 @@ inline void main_loop() {
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
       break;
     case DEVSTATE_PREPARING_TO_SLEEP:
-      if (tick) {
-        tick = 0;
+      if (pending_usb_ticks) {
+        pending_usb_ticks = 0;
         // Changes power state!
         usb_check_power();
       }
@@ -99,8 +101,8 @@ inline void main_loop() {
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
       break;
     case DEVSTATE_WATCH:
-      if (tick > SUSPEND_SYSTIMER_DIVISOR) {
-        tick = 0;
+      if (pending_usb_ticks > SUSPEND_SYSTIMER_DIVISOR) {
+        pending_usb_ticks = 0;
         scan_start();
         if (pipeline_process_wakeup()) {
           usb_send_wakeup();
@@ -113,7 +115,7 @@ inline void main_loop() {
       break;
     case DEVSTATE_RESUMING:
       // only from deep sleep - RWU goes straight to full throttle.
-      tick = 0;
+      pending_usb_ticks = 0;
       usb_wake();
       break;
     case DEVSTATE_SLEEP_REQUEST:

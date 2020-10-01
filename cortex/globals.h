@@ -115,7 +115,6 @@ psoc_eeprom_t config;
   CyPins_ClearPin(ExpHdr_##POSITION);
 
 // Modified by ISR!
-volatile uint8_t tick;
 volatile uint32_t systime;
 
 enum devicePowerStates {
