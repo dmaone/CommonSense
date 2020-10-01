@@ -84,13 +84,13 @@ void gpio_keypress(__attribute__((unused)) uint8_t keycode) {
   solenoid_queue++;
 }
 
-void gpio_tick(uint8_t tick) {
+static inline void process_solenoid(uint8_t usb_ticks_passed) {
   if (mode == EXP_MODE_DISABLED) {
     return;
   }
 
-  if (exp_cooldown > tick) {
-    exp_cooldown -= tick;
+  if (exp_cooldown > usb_ticks_passed) {
+    exp_cooldown -= usb_ticks_passed;
     return;
   }
   if (solenoid_on) {
