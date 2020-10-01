@@ -200,10 +200,10 @@ static inline void process_layerMods(uint8_t flags, uint8_t code) {
 #ifdef DEBUG_PIPELINE
   ts_xprintf("LM: %02x %02x: L%d->%d", flags, code, oldLayer, currentLayer);
 #endif
-#ifdef REEVALUATE_ON_LAYER_CHANGE
   if (oldLayer == currentLayer) {
     return;
   }
+#ifdef REEVALUATE_ON_LAYER_CHANGE
   // OK. Now we have to see which keys are pressed, and what will change.
   for (uint8_t keyIndex = 0; keyIndex < COMMONSENSE_MATRIX_SIZE; ++keyIndex) {
     uint8_t old_code = pressed_codes[keyIndex];
