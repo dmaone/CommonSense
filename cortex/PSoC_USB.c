@@ -93,10 +93,11 @@ void send_config_block(OUT_c2packet_t *inbox) {
   usb_send_c2();
 }
 
-void set_hardware_parameters(void) {
+void sanitize_nvram_parameters(void) {
   if (config.matrixRows != MATRIX_ROWS || config.matrixCols != MATRIX_COLS) {
     // Yeehaw, a virgin EEPROM (or a different matrix size reflash)
     memset(config.thresholds, 0, sizeof(config.thresholds));
+    config.configVersion = CS_CONFIG_VERSION;
   }
   config.matrixRows = MATRIX_ROWS;
   config.matrixCols = MATRIX_COLS;
@@ -138,10 +139,10 @@ void load_config(void) {
   CyEEPROM_ReadRelease();
   CyExitCriticalSection(interruptState);
   EEPROM_Stop();
+  sanitize_nvram_parameters();
   if (config.configVersion != CS_CONFIG_VERSION) {
     xprintf("Old version of EEPROM - possibly unpredictable results.");
   }
-  set_hardware_parameters();
 }
 
 void apply_config(void) {
@@ -152,7 +153,7 @@ void apply_config(void) {
 }
 
 void save_config(void) {
-  set_hardware_parameters();
+  sanitize_nvram_parameters();
   EEPROM_Start();
   CyDelayUs(5);
   EEPROM_UpdateTemperature();
