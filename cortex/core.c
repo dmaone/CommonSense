@@ -10,7 +10,7 @@
 
 #include <project.h>
 
-#include "exp.h"
+#include "gpio.h"
 #include "globals.h"
 #include "pipeline.h"
 #include "PSoC_USB.h"

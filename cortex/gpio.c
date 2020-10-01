@@ -10,7 +10,7 @@
 #include "globals.h"
 #include <project.h>
 
-#include "exp.h"
+#include "gpio.h"
 
 static uint8_t mode;
 

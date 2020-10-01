@@ -11,7 +11,7 @@
 #include <project.h>
 #include <stdio.h>
 
-#include "exp.h"
+#include "gpio.h"
 #include "globals.h"
 #include "scan.h"
 
