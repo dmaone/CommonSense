@@ -37,6 +37,7 @@
 #define SUN 3
 #define CORTRON 4
 #define MICROSWITCH 5
+#define CONTACT 6
 // Do not touch above definitions. To change switch type change config.h
 
 #include "config.h"
@@ -164,6 +165,8 @@ void coded_timestamped_message(uint8_t messageCode);
 #define MIN_CHARGE_DELAY 20
 #define MIN_DISCHARGE_DELAY 4
 #elif SWITCH_TYPE == MICROSWITCH
+// Nothing, really
+#elif SWITCH_TYPE == CONTACT
 // Nothing, really
 #else
 #error "Unknown switch type"

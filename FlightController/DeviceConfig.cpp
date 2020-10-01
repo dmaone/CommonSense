@@ -16,7 +16,14 @@ static const std::vector<std::string> expModeNames_{
 };
 
 static const std::vector<std::string> switchTypeNames_ {
-  "CapInverted", "Capacitive", "ADB", "Sun", "Inductive", "Microswitch", "UNKNOWN"
+  "CapInverted",
+  "Capacitive",
+  "ADB",
+  "Sun",
+  "Inductive",
+  "Microswitch",
+  "Ohmic(contact)",
+  "UNKNOWN"
 };
 
 } //namespace
@@ -359,6 +366,7 @@ void DeviceConfig::setSwitchCapabilities_() {
     case SwitchType::ST_ADB:
     case SwitchType::ST_SUN:
     case SwitchType::ST_MICROSWITCH:
+    case SwitchType::ST_CONTACT:
       capabilities.hasChargeSequencer = false;
       capabilities.hasTelemetry = false;
       capabilities.hasThresholds = false;
