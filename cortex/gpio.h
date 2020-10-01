@@ -24,8 +24,8 @@
 // Provides solenoid enable signal, for xwhatsit solenoid board compatibility.
 #define EXP_SOLENOID_POWER ExpHdr_0
 
-void exp_init(void);
-void exp_toggle(void);
-void exp_tick(uint8_t tick);
-void exp_setLEDs(uint8_t status);
-void exp_keypress(uint8_t keycode);
+void gpio_init(void);
+void gpio_toggle_expHdr(void);
+void gpio_tick(uint8_t tick);
+void gpio_setLEDs(uint8_t status);
+void gpio_keypress(uint8_t keycode);

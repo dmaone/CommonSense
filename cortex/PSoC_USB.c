@@ -145,7 +145,7 @@ void load_config(void) {
 }
 
 void apply_config(void) {
-  exp_init();
+  gpio_init();
   pipeline_init(); // calls scan_reset
   scan_init(config.debouncingTicks);
   scan_start();
@@ -457,7 +457,7 @@ void usb_tick(void) {
   if (KBD_SCB.status == USB_XFER_STATUS_ACK) {
     led_status = KBD_INBOX[0];
     KBD_SCB.status = USB_XFER_IDLE;
-    exp_setLEDs(led_status);
+    gpio_setLEDs(led_status);
   }
   CyExitCriticalSection(enableInterrupts);
   usbSend();

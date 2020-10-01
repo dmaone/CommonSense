@@ -397,7 +397,7 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
       Boot_Load();
         break; // NORETURN function, break is strictly for consistence.
       case 3:
-        exp_toggle();
+        gpio_toggle_expHdr();
         break;
       default:
         break;
@@ -463,7 +463,7 @@ static inline void update_reports(void) {
   if (is_special(hid_queue[pos].code)) {
     // Clowntown: fully "transparent" will toggle exp. header
     // But it should not ever be put on queue!
-    exp_toggle();
+    gpio_toggle_expHdr();
     hid_queue[pos].flags |= HID_RELEASED_MASK; // skip-cooldown trick.
     // ALL codes you want filtered from reports MUST BE ABOVE THIS LINE!
   } else if (hid_queue[pos].code >= 0xe8) {
@@ -488,7 +488,7 @@ static inline void update_reports(void) {
     // minimum duration is guaranteed by fact that key release goes after
     // key press and keypress triggers cooldown.
     cooldown_timer = config.delayLib[DELAYS_EVENT];
-    exp_keypress(hid_queue[pos].code); // allow ExpHdr to see the scancode
+    gpio_keypress(hid_queue[pos].code); // allow ExpHdr to see the scancode
   }
   hid_queue[pos].raw = BUF_EMPTY;
   // Done. Will bump .begin next cycle next cycle - to avoid .end > .begin

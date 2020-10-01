@@ -58,7 +58,7 @@ inline void main_loop() {
     switch (power_state) {
     case DEVSTATE_FULL_THROTTLE:
       if (tick) {
-        exp_tick(tick);
+        gpio_tick(tick);
         tick = 0;
         if (sanity_check_timer > 0) {
           scan_sanity_check();

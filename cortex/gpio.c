@@ -36,7 +36,7 @@ static uint8_t exp_cooldown;
 #define FIRE_OFF(X) CyPins_ClearPin(X)
 #endif
 
-void exp_reset(void) {
+void gpio_reset(void) {
   solenoid_on = false;
   solenoid_queue = 0;
   exp_cooldown = 0;
@@ -46,9 +46,9 @@ void exp_reset(void) {
   EXPHDR_OFF(ExpHdr_3);
 }
 
-void exp_init(void) {
+void gpio_init(void) {
   mode = config.expMode;
-  exp_reset();
+  gpio_reset();
   switch (mode) {
   case EXP_MODE_SOLENOID_NUMCAPS:
     EXPHDR_ON(EXP_SOLENOID_POWER);
@@ -60,18 +60,18 @@ void exp_init(void) {
   }
 }
 
-void exp_toggle(void) {
+void gpio_toggle_expHdr(void) {
   if (mode == EXP_MODE_DISABLED) {
-    exp_init();
+    gpio_init();
   } else {
     mode = EXP_MODE_DISABLED;
-    exp_reset();
+    gpio_reset();
   }
 }
 
 #define SYNC_LED(MASK, PIN) (leds & MASK) ? EXPHDR_ON(PIN) : EXPHDR_OFF(PIN);
 
-void exp_setLEDs(uint8_t status) {
+void gpio_setLEDs(uint8_t status) {
   leds = status;
   SYNC_LED(LED_NUMLOCK_MASK, EXP_NUMLOCK_PIN);
   SYNC_LED(LED_CAPSLOCK_MASK, EXP_CAPSLOCK_PIN);
@@ -80,11 +80,11 @@ void exp_setLEDs(uint8_t status) {
   }
 }
 
-void exp_keypress(__attribute__((unused)) uint8_t keycode) {
+void gpio_keypress(__attribute__((unused)) uint8_t keycode) {
   solenoid_queue++;
 }
 
-void exp_tick(uint8_t tick) {
+void gpio_tick(uint8_t tick) {
   if (mode == EXP_MODE_DISABLED) {
     return;
   }
