@@ -77,6 +77,7 @@ class DeviceInterface : public QObject {
  signals:
   void notify(DeviceInterface::State);
   void keypress(uint8_t keyIndex, DeviceInterface::KeyState state);
+  void pedal(uint8_t pedalIndex, DeviceInterface::KeyState state);
 
  protected:
   virtual void timerEvent(QTimerEvent* event);

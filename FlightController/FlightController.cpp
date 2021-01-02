@@ -44,6 +44,7 @@ FlightController::FlightController(bool useCustomMessageHandler)
     layout_{di_},
     loader_{di_},
     macros_{di_.config},
+    pedals_{di_},
     telemetry_{di_},
     thresholds_{di_} {
   ui->setupUi(this);
@@ -111,6 +112,7 @@ void FlightController::connectUiSlots_() {
   trigThis(ui->action_Layer_mods, SLOT(showLayers_()));
   trigThis(ui->action_Layout, SLOT(showLayout_()));
   trigThis(ui->action_Macros, SLOT(showMacros_()));
+  trigThis(ui->action_Pedals, SLOT(showPedals_()));
   trigThis(ui->action_Thresholds, SLOT(showThresholds_()));
 
   // Action menu
@@ -131,6 +133,7 @@ void FlightController::connectUiSlots_() {
   click2trig(ui->layerModsButton, ui->action_Layer_mods);
   click2trig(ui->layoutButton, ui->action_Layout);
   click2trig(ui->macrosButton, ui->action_Macros);
+  click2trig(ui->pedalsButton, ui->action_Pedals);
   click2trig(ui->thresholdsButton, ui->action_Thresholds);
 
   // Buttons without actions
@@ -158,6 +161,7 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
     hardware_.init();
     layers_.init();
     layout_.init();
+    pedals_.init();
     telemetry_.init();
     thresholds_.init();
     ui->typeLabel->setText(di_.config.getSwitchTypeName());
@@ -189,6 +193,7 @@ void FlightController::lockUI_(bool lock) {
   ui->layerModsButton->setDisabled(lock);
   ui->delaysButton->setDisabled(lock);
   ui->hwButton->setDisabled(lock);
+  ui->pedalsButton->setEnabled(!lock && di_.config.numPedals);
   ui->thresholdsButton->setEnabled(!lock && di_.config.capabilities.hasThresholds);
   ui->TelemetryButton->setEnabled(!lock && di_.config.capabilities.hasTelemetry);
 }
@@ -239,6 +244,10 @@ void FlightController::showLayout_() {
 
 void FlightController::showMacros_() {
   activate_(macros_);
+}
+
+void FlightController::showPedals_() {
+  activate_(pedals_);
 }
 
 void FlightController::showThresholds_() {

@@ -12,6 +12,7 @@ struct HardwareConfig {
   uint8_t chargeDelay;
   uint16_t dischargeDelay;
   uint8_t debouncingTicks;
+  uint8_t pedalDebouncingTicks;
   uint8_t expHdrMode;
   uint8_t expHdrParam1;
   uint8_t expHdrParam2;
@@ -54,11 +55,15 @@ class DeviceConfig : public QObject {
   bool bValid{false};
   uint8_t numRows{0};
   uint8_t numCols{0};
+  uint8_t numPedals{0};
   uint8_t switchType;
   uint8_t numLayers{ABSOLUTE_MAX_LAYERS};
   uint8_t numDelays{NUM_DELAYS};
   uint8_t thresholds[ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
   uint8_t layouts[ABSOLUTE_MAX_LAYERS][ABSOLUTE_MAX_ROWS][ABSOLUTE_MAX_COLS];
+  uint8_t pedals[ABSOLUTE_MAX_PEDALS][ABSOLUTE_MAX_LAYERS];
+  uint8_t pedalFlags[ABSOLUTE_MAX_PEDALS];
+
   SwitchTypeCapabilities capabilities{};
   std::vector<Macro> macros{};
 

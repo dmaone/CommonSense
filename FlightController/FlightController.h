@@ -18,6 +18,7 @@
 #include "LayerConditions.h"
 #include "Layout.h"
 #include "Macros.h"
+#include "Pedals.h"
 #include "Telemetry.h"
 #include "Thresholds.h"
 
@@ -46,6 +47,7 @@ class FlightController : public QMainWindow {
   void showLayers_();
   void showLayout_();
   void showMacros_();
+  void showPedals_();
   void showThresholds_();
   void resetConnection_();
   void toggleOutput_();
@@ -73,6 +75,7 @@ class FlightController : public QMainWindow {
   Layout layout_;
   FirmwareLoader loader_;
   Macros macros_;
+  Pedals pedals_;
   Telemetry telemetry_;
   Thresholds thresholds_;
   bool uiLocked_{false};

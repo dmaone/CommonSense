@@ -45,6 +45,9 @@
 // Main safety switch
 #define NOT_A_KEYBOARD 0
 
+// Should matrix generate "All keys up" signal when no keys are pressed?
+#undef MATRIX_GENERATES_ALL_UP
+
 // If FlightController stops polling us - return to normal mode after X ticks.
 #define SETUP_TIMEOUT 2000
 #define LARGE_ENOUGH_32 (1 << 30);
@@ -65,7 +68,7 @@
 #include "../c2/nvram.h"
 
 #define DEVICE_VER_MAJOR 0x01
-#define DEVICE_VER_MINOR 0x03
+#define DEVICE_VER_MINOR 0x04
 
 /* Devices may append additional data to these boot reports,
  * but the first 8 bytes of keyboard reports

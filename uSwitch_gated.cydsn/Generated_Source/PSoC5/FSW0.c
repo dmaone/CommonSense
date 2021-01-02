@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: S0.c  
+* File Name: FSW0.c  
 * Version 1.90
 *
 * Description:
@@ -15,13 +15,13 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#include "S0.h"
+#include "FSW0.h"
 
-#if !defined(S0_sts_sts_reg__REMOVED) /* Check for removal by optimization */
+#if !defined(FSW0_sts_sts_reg__REMOVED) /* Check for removal by optimization */
 
 
 /*******************************************************************************
-* Function Name: S0_Read
+* Function Name: FSW0_Read
 ********************************************************************************
 *
 * Summary:
@@ -34,14 +34,14 @@
 *  The current value in the Status Register.
 *
 *******************************************************************************/
-uint8 S0_Read(void) 
+uint8 FSW0_Read(void) 
 { 
-    return S0_Status;
+    return FSW0_Status;
 }
 
 
 /*******************************************************************************
-* Function Name: S0_InterruptEnable
+* Function Name: FSW0_InterruptEnable
 ********************************************************************************
 *
 * Summary:
@@ -54,17 +54,17 @@ uint8 S0_Read(void)
 *  None.
 *
 *******************************************************************************/
-void S0_InterruptEnable(void) 
+void FSW0_InterruptEnable(void) 
 {
     uint8 interruptState;
     interruptState = CyEnterCriticalSection();
-    S0_Status_Aux_Ctrl |= S0_STATUS_INTR_ENBL;
+    FSW0_Status_Aux_Ctrl |= FSW0_STATUS_INTR_ENBL;
     CyExitCriticalSection(interruptState);
 }
 
 
 /*******************************************************************************
-* Function Name: S0_InterruptDisable
+* Function Name: FSW0_InterruptDisable
 ********************************************************************************
 *
 * Summary:
@@ -77,17 +77,17 @@ void S0_InterruptEnable(void)
 *  None.
 *
 *******************************************************************************/
-void S0_InterruptDisable(void) 
+void FSW0_InterruptDisable(void) 
 {
     uint8 interruptState;
     interruptState = CyEnterCriticalSection();
-    S0_Status_Aux_Ctrl &= (uint8)(~S0_STATUS_INTR_ENBL);
+    FSW0_Status_Aux_Ctrl &= (uint8)(~FSW0_STATUS_INTR_ENBL);
     CyExitCriticalSection(interruptState);
 }
 
 
 /*******************************************************************************
-* Function Name: S0_WriteMask
+* Function Name: FSW0_WriteMask
 ********************************************************************************
 *
 * Summary:
@@ -100,17 +100,17 @@ void S0_InterruptDisable(void)
 *  None.
 *
 *******************************************************************************/
-void S0_WriteMask(uint8 mask) 
+void FSW0_WriteMask(uint8 mask) 
 {
-    #if(S0_INPUTS < 8u)
-    	mask &= ((uint8)(1u << S0_INPUTS) - 1u);
-	#endif /* End S0_INPUTS < 8u */
-    S0_Status_Mask = mask;
+    #if(FSW0_INPUTS < 8u)
+    	mask &= ((uint8)(1u << FSW0_INPUTS) - 1u);
+	#endif /* End FSW0_INPUTS < 8u */
+    FSW0_Status_Mask = mask;
 }
 
 
 /*******************************************************************************
-* Function Name: S0_ReadMask
+* Function Name: FSW0_ReadMask
 ********************************************************************************
 *
 * Summary:
@@ -123,9 +123,9 @@ void S0_WriteMask(uint8 mask)
 *  The value of the interrupt mask of the Status Register.
 *
 *******************************************************************************/
-uint8 S0_ReadMask(void) 
+uint8 FSW0_ReadMask(void) 
 {
-    return S0_Status_Mask;
+    return FSW0_Status_Mask;
 }
 
 #endif /* End check for removal by optimization */

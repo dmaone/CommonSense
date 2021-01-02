@@ -10,6 +10,7 @@
 
 #include <project.h>
 
+#include "gpio.h"
 #include "PSoC_USB.h"
 
 #define QUEUE_SIZE 64
@@ -135,6 +136,7 @@ inline scan_event_t scan_read_event(void) {
 }
 
 inline void scan_check_matrix(void) {
+#ifdef MATRIX_GENERATES_ALL_UP
   if (!matrix_was_active) { // idle -> idle
     return;
   }
@@ -148,6 +150,7 @@ inline void scan_check_matrix(void) {
   if (!matrix_was_active) { // was active, no longer is.
     scan_register_event(KEY_UP_MASK, COMMONSENSE_NOKEY);
   }
+#endif
 }
 
 void scan_sanity_check() {
@@ -155,6 +158,7 @@ void scan_sanity_check() {
     // We're out of the woods.
     scan_common_reset();
     pipeline_init();
+    gpio_init(); // So that initially-pressed pedals are reported pressed
     SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   } else if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
     // Keyboard is insane. Disable it.

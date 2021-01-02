@@ -28,7 +28,7 @@ static uint8_t q_end; // "pending events end" - writes go to next slot.
 
 static bool reports_reset_pending; // to hold report reset until macros finish.
 
-static uint8_t pressed_codes[COMMONSENSE_MATRIX_SIZE];
+static uint8_t pressed_codes[COMMONSENSE_MATRIX_SIZE + NUM_PEDALS];
 
 #define CODE_EMPTY 0
 

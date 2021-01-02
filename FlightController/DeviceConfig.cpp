@@ -196,6 +196,7 @@ void DeviceConfig::unpack_() {
   }
   numRows = eeprom_.matrixRows;
   numCols = eeprom_.matrixCols;
+  numPedals = eeprom_.pedals == EMPTY_FLASH_BYTE ? 0 : eeprom_.pedals;
   numLayers = eeprom_.matrixLayers;
   uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
   switchType = std::min(eeprom_.switchType, maxSwitchIndex);
@@ -224,6 +225,18 @@ void DeviceConfig::unpack_() {
       }
     }
   }
+
+  memset(pedals, 0x00, sizeof(pedals));
+  memset(pedalFlags, 0x00, sizeof(pedalFlags));
+  for (uint8_t p = 0; p < numPedals; p++) {
+    for (uint8_t l = 0; l < numLayers; l++) {
+      pedals[p][l] = zeroEmpty(curPos++);
+    }
+  }
+  for (uint8_t p = 0; p < numPedals; p++) {
+    pedalFlags[p] = eeprom_.stash[curPos++];
+  }
+
   macros.clear();
   while(eeprom_.stash[curPos] != EMPTY_FLASH_BYTE) {
     size_t len = eeprom_.stash[curPos + 2];
@@ -263,6 +276,14 @@ void DeviceConfig::assemble_() {
         eeprom_.stash[curPos++] = this->layouts[l][r][c];
       }
     }
+  }
+  for (uint8_t p = 0; p < numPedals; p++) {
+    for (uint8_t l = 0; l < numLayers; l++) {
+      eeprom_.stash[curPos++] = pedals[p][l];
+    }
+  }
+  for (uint8_t p = 0; p < numPedals; p++) {
+    eeprom_.stash[curPos++] = pedalFlags[p];
   }
   for (auto& m : macros) {
     auto bin = m.toBin();
@@ -367,6 +388,7 @@ HardwareConfig DeviceConfig::getHardwareConfig() {
   retval.chargeDelay = eeprom_.chargeDelay;
   retval.dischargeDelay = eeprom_.dischargeDelay;
   retval.debouncingTicks = eeprom_.debouncingTicks;
+  retval.pedalDebouncingTicks = eeprom_.pedalDebouncingTicks;
   retval.expHdrMode = eeprom_.expMode;
   retval.expHdrParam1 = eeprom_.expParam1;
   retval.expHdrParam2 = eeprom_.expParam2;
@@ -378,6 +400,7 @@ void DeviceConfig::setHardwareConfig(HardwareConfig config) {
   eeprom_.chargeDelay = config.chargeDelay;
   eeprom_.dischargeDelay = config.dischargeDelay;
   eeprom_.debouncingTicks = config.debouncingTicks;
+  eeprom_.pedalDebouncingTicks = config.pedalDebouncingTicks;
   eeprom_.expMode = config.expHdrMode;
   eeprom_.expParam1 = config.expHdrParam1;
   eeprom_.expParam2 = config.expHdrParam2;

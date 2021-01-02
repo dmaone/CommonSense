@@ -29,7 +29,7 @@ typedef union {
     uint8_t matrixRows;
     uint8_t matrixCols;
     uint8_t matrixLayers;
-    uint8_t _UNUSED0;
+    uint8_t pedals; // +4
     uint8_t expMode;
     uint8_t expParam1;
     uint8_t expParam2;
@@ -37,6 +37,8 @@ typedef union {
     uint8_t chargeDelay;
     uint16_t dischargeDelay;
     uint8_t debouncingTicks; // +12
+    uint8_t pedalDebouncingTicks;
+    uint8_t _RESERVED0[2];
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
     uint8_t layerConditions[ABSOLUTE_MAX_LAYERS];
     uint8_t switchType;
@@ -49,9 +51,19 @@ typedef union {
 #define COMMONSENSE_MATRIX_SIZE (MATRIX_ROWS * MATRIX_COLS)
     uint8_t thresholds[COMMONSENSE_MATRIX_SIZE];
     uint8_t layers[COMMONSENSE_MATRIX_SIZE][MATRIX_LAYERS];
+#if NUM_PEDALS > 0
+#if NUM_PEDALS + COMMONSENSE_MATRIX_SIZE > 254
+#error max keyIndex too large - reduce matrix size or number of pedals!
+#endif
+#define COMMONSENSE_NUM_KEYS (COMMONSENSE_MATRIX_SIZE + NUM_PEDALS)
+    uint8_t pedal_layers[NUM_PEDALS * MATRIX_LAYERS];
+    uint8_t pedal_flags[NUM_PEDALS];
+#endif
     uint8_t macros[EEPROM_BYTESIZE -
                    COMMONSENSE_MATRIX_SIZE - // thresholds
-                   COMMONSENSE_MATRIX_SIZE * MATRIX_LAYERS]; // layout
+                   COMMONSENSE_MATRIX_SIZE * MATRIX_LAYERS - // layout
+                   NUM_PEDALS * MATRIX_LAYERS - // pedals layout
+                   NUM_PEDALS]; // pedal flags
 #else
 // FlightController. Must work with what firmware tells it.
     uint8_t stash[EEPROM_BYTESIZE - COMMONSENSE_BASE_SIZE];

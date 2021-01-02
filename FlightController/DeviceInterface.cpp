@@ -52,8 +52,12 @@ QString DeviceInterface::formatKey_(
     const uint8_t keyIndex, const uint8_t flags) const {
   auto [row, col] = config.toRowCol(keyIndex);
   bool keyUp = flags & 0x80;
+  if (keyIndex > config.getMatrixSize()) {
+    return QString("%1 p%2").arg(keyUp ? "·": "#").arg(col + 1, 2);
+  }
   return QString("%1 r%2 c%3")
       .arg(keyUp ? "·": "#").arg(row + 1, 2).arg(col + 1, 2);
+
 }
 
 QString DeviceInterface::formatSysTime_(const uint32_t sysTime) const {
@@ -76,13 +80,18 @@ void DeviceInterface::decodeMessage_(const QByteArray& payload) {
         qInfo() << "---------";
         return;
       }
+      auto matrixSize = config.getMatrixSize();
       bool keyUp = p->flags & 0x80;
-      if (p->key >= config.getMatrixSize()) {
+      if (p->key >= matrixSize + config.numPedals) {
         qWarning() << "Invalid key: " << p->key << formatKey_(p->key, p->flags);
         return;
       }
       qInfo().noquote() << formatKey_(p->key, p->flags);
-      emit keypress(p->key, keyUp ? KeyReleased : KeyPressed);
+      if (p->key >= matrixSize) {
+        emit pedal(p->key - matrixSize, keyUp ? KeyReleased : KeyPressed);
+      } else {
+        emit keypress(p->key, keyUp ? KeyReleased : KeyPressed);
+      }
       break;
     }
     case MC_KEY_RESOLVED: {

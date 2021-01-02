@@ -51,6 +51,7 @@ SOURCES += main.cpp \
   LogViewer.cpp \
   Macro.cpp \
   Macros.cpp \
+  Pedals.cpp \
   ScancodeList.cpp \
   Telemetry.cpp \
   Thresholds.cpp \
@@ -74,6 +75,7 @@ HEADERS += \
   LogViewer.h \
   Macro.h \
   Macros.h \
+  Pedals.h \
   ScancodeList.h \
   Telemetry.h \
   settings.h \
@@ -85,5 +87,6 @@ FORMS += \
   Hardware.ui \
   Layout.ui \
   Macros.ui \
+  Pedals.ui \
   Telemetry.ui \
   Thresholds.ui \

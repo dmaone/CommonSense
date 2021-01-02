@@ -103,6 +103,7 @@ void sanitize_nvram_parameters(void) {
   config.matrixCols = MATRIX_COLS;
   config.matrixLayers = MATRIX_LAYERS;
   config.switchType = SWITCH_TYPE;
+  config.pedals = NUM_PEDALS;
   switch (config.adcBits) {
     case 8:
     case 10:

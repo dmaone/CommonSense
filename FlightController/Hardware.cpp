@@ -38,6 +38,8 @@ void Hardware::init() {
   ui->dischargeDelay->setValue(config.dischargeDelay);
   ui->debouncingTicks->setValue(config.debouncingTicks);
   ui->debouncingTicks->setRange(0, kMaxDebouncingTicks);
+  ui->pedalDebouncingTicks->setValue(config.pedalDebouncingTicks);
+  ui->pedalDebouncingTicks->setRange(0, kMaxDebouncingTicks);
 
   ui->adcBits->setEnabled(config_.capabilities.hasTelemetry);
   ui->chargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);
@@ -64,6 +66,7 @@ void Hardware::apply_() {
   config.chargeDelay = ui->chargeDelay->value();
   config.dischargeDelay = ui->dischargeDelay->value();
   config.debouncingTicks = ui->debouncingTicks->value();
+  config.pedalDebouncingTicks = ui->pedalDebouncingTicks->value();
   config.expHdrMode = ui->modeBox->currentIndex();
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();

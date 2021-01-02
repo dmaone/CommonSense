@@ -1,5 +1,5 @@
 /*******************************************************************************
-* File Name: S0.h  
+* File Name: FSW0.h  
 * Version 1.90
 *
 * Description:
@@ -14,8 +14,8 @@
 * the software package with which this file was provided.
 *******************************************************************************/
 
-#if !defined(CY_STATUS_REG_S0_H) /* CY_STATUS_REG_S0_H */
-#define CY_STATUS_REG_S0_H
+#if !defined(CY_STATUS_REG_FSW0_H) /* CY_STATUS_REG_FSW0_H */
+#define CY_STATUS_REG_FSW0_H
 
 #include "cyfitter.h"
 
@@ -38,25 +38,25 @@ typedef struct
 {
     uint8 statusState;
 
-} S0_BACKUP_STRUCT;
+} FSW0_BACKUP_STRUCT;
 
 
 /***************************************
 *        Function Prototypes
 ***************************************/
 
-uint8 S0_Read(void) ;
-void S0_InterruptEnable(void) ;
-void S0_InterruptDisable(void) ;
-void S0_WriteMask(uint8 mask) ;
-uint8 S0_ReadMask(void) ;
+uint8 FSW0_Read(void) ;
+void FSW0_InterruptEnable(void) ;
+void FSW0_InterruptDisable(void) ;
+void FSW0_WriteMask(uint8 mask) ;
+uint8 FSW0_ReadMask(void) ;
 
 
 /***************************************
 *           API Constants
 ***************************************/
 
-#define S0_STATUS_INTR_ENBL    0x10u
+#define FSW0_STATUS_INTR_ENBL    0x10u
 
 
 /***************************************
@@ -64,7 +64,7 @@ uint8 S0_ReadMask(void) ;
 ***************************************/
 
 /* Status Register Inputs */
-#define S0_INPUTS              8
+#define FSW0_INPUTS              8
 
 
 /***************************************
@@ -72,12 +72,12 @@ uint8 S0_ReadMask(void) ;
 ***************************************/
 
 /* Status Register */
-#define S0_Status             (* (reg8 *) S0_sts_sts_reg__STATUS_REG )
-#define S0_Status_PTR         (  (reg8 *) S0_sts_sts_reg__STATUS_REG )
-#define S0_Status_Mask        (* (reg8 *) S0_sts_sts_reg__MASK_REG )
-#define S0_Status_Aux_Ctrl    (* (reg8 *) S0_sts_sts_reg__STATUS_AUX_CTL_REG )
+#define FSW0_Status             (* (reg8 *) FSW0_sts_sts_reg__STATUS_REG )
+#define FSW0_Status_PTR         (  (reg8 *) FSW0_sts_sts_reg__STATUS_REG )
+#define FSW0_Status_Mask        (* (reg8 *) FSW0_sts_sts_reg__MASK_REG )
+#define FSW0_Status_Aux_Ctrl    (* (reg8 *) FSW0_sts_sts_reg__STATUS_AUX_CTL_REG )
 
-#endif /* End CY_STATUS_REG_S0_H */
+#endif /* End CY_STATUS_REG_FSW0_H */
 
 
 /* [] END OF FILE */

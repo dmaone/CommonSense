@@ -23,6 +23,7 @@
 #define ABSOLUTE_MAX_ROWS 16
 #define ABSOLUTE_MAX_COLS 24
 #define ABSOLUTE_MAX_LAYERS 8
+#define ABSOLUTE_MAX_PEDALS 8
 #define NUM_DELAYS 16
 // Careful when changing above - may need to check nvram.h sizes.
 
@@ -76,6 +77,7 @@ enum deviceStatus {
   C2DEVSTATUS_TELEMETRY_MODE,
   C2DEVSTATUS_SETUP_MODE,
   C2DEVSTATUS_INSANE,
+  C2DEVSTATUS_WRONG_NVRAM,
 };
 
 enum deviceMode {
@@ -248,6 +250,10 @@ enum MacroCmdType {
 
 #define HID_RELEASED_MASK 0x80
 #define HID_REAL_KEY_MASK 0x40
+
+#define PEDAL_EDGE_TRIGGERED 0x01
+#define PEDAL_NORMALLY_HIGH 0x02
+#define PEDAL_LED_SYNCED 0x04
 
 // serial stuff
 enum supervisory_command {

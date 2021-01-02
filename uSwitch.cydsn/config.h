@@ -20,6 +20,11 @@
 // Switch type: see globals.h for options
 #define SWITCH_TYPE MICROSWITCH
 
+// Switches hanging off dedicated GPIO pins. Pedals or something.
+// Non-zero value requires FSW0 status register defined.
+// See uSwitch_gated\TopDesign.cysch for implementation details.
+#define NUM_PEDALS 0
+
 // For a key with Base "A" + L1 "B": pressing the key and switching layers
 // will release "A" and press "B". Default behavior is holding "A" till keyUp.
 // #define REEVALUATE_ON_LAYER_CHANGE
