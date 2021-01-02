@@ -9,6 +9,14 @@
 
 namespace {
 
+constexpr size_t fwVer(uint8_t major, uint8_t minor) {
+  return (major << 8) + minor;
+}
+
+static constexpr uint8_t kMinFwMajor{1};
+static constexpr uint8_t kMinFwMinor{4};
+static constexpr auto kMinFw{fwVer(kMinFwMajor, kMinFwMinor)};
+
 static const std::vector<std::string> expModeNames_{
   "Disabled",
 
@@ -67,6 +75,12 @@ bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
  * Fire up the uploader.
  */
 void DeviceConfig::toDevice() {
+  if (fwVer(interface_->firmwareMajor, interface_->firmwareMinor) < kMinFw) {
+    auto errMsg = QString("Please update firmware to v%1.%2 or newer!")
+        .arg(kMinFwMajor).arg(kMinFwMinor);
+    QMessageBox::critical(nullptr, "Firmware too old", errMsg);
+    return;
+  }
   if (interface_->getStatusBit(C2DEVSTATUS_TELEMETRY_MODE)) {
     QMessageBox::critical(
         nullptr, "Telemetry active", "Turn off telemetry first!");
@@ -166,7 +180,20 @@ void DeviceConfig::receiveConfigBlock_(QByteArray *payload) {
   emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock_);
 }
 
+uint16_t DeviceConfig::getLayoutOffset_(
+    uint8_t eepromVersion, uint8_t row, uint8_t col, uint8_t layer) {
+  if (eepromVersion < 3) {
+    return getMatrixSize() * (layer + 1) + row * numCols + col;
+  }
+  return getMatrixSize() + (row * numCols + col) * numLayers + layer;
+}
+
 void DeviceConfig::unpack_() {
+  if (eeprom_.configVersion < CS_LAST_COMPATIBLE_NVRAM_VERSION)  {
+    qWarning().nospace().noquote() << "EEPROM layout is too old (version "
+        << eeprom_.configVersion << ")! Minimum supported version is "
+        << CS_LAST_COMPATIBLE_NVRAM_VERSION << ".";
+  }
   numRows = eeprom_.matrixRows;
   numCols = eeprom_.matrixCols;
   numLayers = eeprom_.matrixLayers;
@@ -175,30 +202,40 @@ void DeviceConfig::unpack_() {
   setSwitchCapabilities_();
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
-  uint8_t tableSize = numRows * numCols;
-  for (uint8_t i = 0; i < numRows; i++) {
-    for (uint8_t j = 0; j < numCols; j++) {
-      uint16_t offset = i * numCols + j;
-      this->thresholds[i][j] =
-          capabilities.hasThresholds ? eeprom_.stash[offset] : 1;
-      for (uint8_t k = 0; k < numLayers; k++) {
-        layouts[k][i][j] = eeprom_.stash[tableSize * (k + 1) + offset];
+  uint16_t curPos{0};
+  for (uint8_t r = 0; r < numRows; r++) {
+    for (uint8_t c = 0; c < numCols; c++) {
+      thresholds[r][c] = capabilities.hasThresholds ? eeprom_.stash[curPos]
+                                                    : EMPTY_FLASH_BYTE;
+      curPos++;
+    }
+  }
+
+  auto zeroEmpty = [this] (uint16_t idx) {
+    return eeprom_.stash[idx] == EMPTY_FLASH_BYTE ? 0 : eeprom_.stash[idx];
+  };
+
+  for (uint8_t r = 0; r < numRows; r++) {
+    for (uint8_t c = 0; c < numCols; c++) {
+      for (uint8_t l = 0; l < numLayers; l++) {
+        layouts[l][r][c] =
+            zeroEmpty(getLayoutOffset_(eeprom_.configVersion, r, c, l));
+        curPos++; // Adjusting position - direct addressing is used here..
       }
     }
   }
-  int macro_start = tableSize * (numLayers + 1);
   macros.clear();
-  while(eeprom_.stash[macro_start] != 0xff) {
-    size_t len = eeprom_.stash[macro_start + 2];
+  while(eeprom_.stash[curPos] != EMPTY_FLASH_BYTE) {
+    size_t len = eeprom_.stash[curPos + 2];
     if (len == 0) {
       // Most likely fresh ROM
       break;
     }
-    macros.emplace_back(eeprom_.stash[macro_start],
-                        eeprom_.stash[macro_start+1],
+    macros.emplace_back(eeprom_.stash[curPos],
+                        eeprom_.stash[curPos+1],
                         QByteArray(reinterpret_cast<const char *>(
-                            eeprom_.stash+macro_start+3), len));
-    macro_start += len + 3;
+                            eeprom_.stash+curPos+3), len));
+    curPos += len + 3;
   }
   this->bValid = true;
   emit loaded();
@@ -206,30 +243,31 @@ void DeviceConfig::unpack_() {
 }
 
 void DeviceConfig::assemble_() {
-  eeprom_.configVersion = 2;
+  eeprom_.configVersion = CS_CONFIG_VERSION;
   memset(eeprom_.stash, EMPTY_FLASH_BYTE, sizeof(eeprom_.stash));
   memset(eeprom_._RESERVED0, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED0));
   memset(eeprom_._RESERVED1, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED1));
-  uint8_t tableSize = numRows * numCols;
   setSwitchCapabilities_();
-  for (uint8_t i = 0; i < this->numRows; i++) {
-    for (uint8_t j = 0; j < numCols; j++) {
-      uint16_t offset = i * numCols + j;
+  uint16_t curPos{0};
+  for (uint8_t r = 0; r < numRows; r++) {
+    for (uint8_t c = 0; c < numCols; c++) {
       if (capabilities.hasThresholds) {
-        eeprom_.stash[offset] = thresholds[i][j];
+        eeprom_.stash[curPos] = thresholds[r][c];
       }
-      for (uint8_t k = 0; k < numLayers; k++) {
-        this->eeprom_.stash[tableSize * (k + 1) + offset] =
-            this->layouts[k][i][j];
+      curPos++;
+    }
+  }
+  for (uint8_t r = 0; r < numRows; r++) {
+    for (uint8_t c = 0; c < numCols; c++) {
+      for (uint8_t l = 0; l < numLayers; l++) {
+        eeprom_.stash[curPos++] = this->layouts[l][r][c];
       }
     }
   }
-
-  size_t macros_cursor = tableSize * (numLayers + 1);
   for (auto& m : macros) {
     auto bin = m.toBin();
-    for (uint8_t i=0; i<bin.length(); i++) {
-      eeprom_.stash[macros_cursor++] = bin[i];
+    for (uint8_t i=0; i < bin.length(); i++) {
+      eeprom_.stash[curPos++] = bin[i];
     }
   }
 

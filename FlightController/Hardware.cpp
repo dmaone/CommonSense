@@ -37,7 +37,7 @@ void Hardware::init() {
   ui->chargeDelay->setValue(config.chargeDelay);
   ui->dischargeDelay->setValue(config.dischargeDelay);
   ui->debouncingTicks->setValue(config.debouncingTicks);
-  ui->debouncingTicks->setRange(1, kMaxDebouncingTicks);
+  ui->debouncingTicks->setRange(0, kMaxDebouncingTicks);
 
   ui->adcBits->setEnabled(config_.capabilities.hasTelemetry);
   ui->chargeDelay->setEnabled(config_.capabilities.hasChargeSequencer);

@@ -83,6 +83,8 @@ class DeviceConfig : public QObject {
  private:
   void sendConfigBlock_();
   void receiveConfigBlock_(QByteArray *);
+  uint16_t getLayoutOffset_(
+      uint8_t eepromVersion, uint8_t row, uint8_t col, uint8_t layer);
   void unpack_();
   void assemble_();
   void setSwitchCapabilities_();

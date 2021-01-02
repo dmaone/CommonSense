@@ -16,22 +16,16 @@
 #include <stdint.h>
 
 #define CS_CONFIG_VERSION 2
+#define CS_LAST_COMPATIBLE_NVRAM_VERSION 2
 
 #define EEPROM_BYTESIZE 2048
 #define COMMONSENSE_BASE_SIZE 64
-
-#ifdef MATRIX_ROWS
-// Firmware. matrix dimensions compiled in.
-#define COMMONSENSE_MATRIX_SIZE (MATRIX_ROWS * MATRIX_COLS)
-#define COMMONSENSE_CONFIG_SIZE                                                \
-  (COMMONSENSE_BASE_SIZE + 2 * COMMONSENSE_MATRIX_SIZE)
-#endif
 
 #define DEFAULT_DEBOUNCING_TICKS 4
 
 typedef union {
   struct {
-    uint8_t configVersion;
+    uint8_t configVersion; // +0
     uint8_t matrixRows;
     uint8_t matrixCols;
     uint8_t matrixLayers;
@@ -39,11 +33,10 @@ typedef union {
     uint8_t expMode;
     uint8_t expParam1;
     uint8_t expParam2;
-    uint8_t adcBits;
+    uint8_t adcBits; // +8
     uint8_t chargeDelay;
     uint16_t dischargeDelay;
-    uint8_t debouncingTicks;
-    uint8_t _RESERVED0[3];
+    uint8_t debouncingTicks; // +12
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
     uint8_t layerConditions[ABSOLUTE_MAX_LAYERS];
     uint8_t switchType;
@@ -52,18 +45,20 @@ typedef union {
 // Storage is for layout-size-specifics and MUST NOT be sized here
 // because firmware can know sizes in advance, while FlightController can't.
 #ifdef MATRIX_ROWS
-    // Firmware.
+    // Firmware. matrix dimensions compiled in.
+#define COMMONSENSE_MATRIX_SIZE (MATRIX_ROWS * MATRIX_COLS)
     uint8_t thresholds[COMMONSENSE_MATRIX_SIZE];
-    uint8_t layers[MATRIX_LAYERS][COMMONSENSE_MATRIX_SIZE];
-    uint8_t macros[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE -
-                   (MATRIX_LAYERS * COMMONSENSE_MATRIX_SIZE)];
+    uint8_t layers[COMMONSENSE_MATRIX_SIZE][MATRIX_LAYERS];
+    uint8_t macros[EEPROM_BYTESIZE -
+                   COMMONSENSE_MATRIX_SIZE - // thresholds
+                   COMMONSENSE_MATRIX_SIZE * MATRIX_LAYERS]; // layout
 #else
 // FlightController. Must work with what firmware tells it.
-#define COMMONSENSE_CONFIG_SIZE COMMONSENSE_BASE_SIZE
-    uint8_t stash[EEPROM_BYTESIZE - COMMONSENSE_CONFIG_SIZE];
+    uint8_t stash[EEPROM_BYTESIZE - COMMONSENSE_BASE_SIZE];
 #endif
   };
   uint8_t raw[EEPROM_BYTESIZE];
 } psoc_eeprom_t;
+
 
 #define EMPTY_FLASH_BYTE 0xff

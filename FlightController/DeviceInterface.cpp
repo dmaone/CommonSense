@@ -167,8 +167,9 @@ void DeviceInterface::processStatusReply_(QByteArray* payload) {
   setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
   matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_TELEMETRY_MODE);
   controllerInsane = payload->at(1) & (1 << C2DEVSTATUS_INSANE);
-  firmwareVersion = QString("%1.%2")
-      .arg((uint8_t)payload->at(2)).arg((uint8_t)payload->at(3));
+  firmwareMajor = payload->at(2);
+  firmwareMinor = payload->at(3);
+  firmwareVersion = QString("%1.%2").arg(firmwareMajor).arg(firmwareMinor);
   dieTemp = QString("%1%2")
       .arg((payload->at(4) == 1 ? '+' : '-')).arg((uint8_t)payload->at(5));
   if (matrixMonitor) {

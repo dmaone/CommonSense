@@ -140,6 +140,13 @@ void load_config(void) {
   CyExitCriticalSection(interruptState);
   EEPROM_Stop();
   sanitize_nvram_parameters();
+  if (config.configVersion < CS_LAST_COMPATIBLE_NVRAM_VERSION) {
+    status_register = (1 << C2DEVSTATUS_WRONG_NVRAM) |
+                      (1 << C2DEVSTATUS_INSANE) |
+                      (1 << C2DEVSTATUS_SETUP_MODE);
+    xprintf("Incompatible NVRAM layout!");
+    return;
+  }
   if (config.configVersion != CS_CONFIG_VERSION) {
     xprintf("Old version of EEPROM - possibly unpredictable results.");
   }

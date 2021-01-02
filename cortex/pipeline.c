@@ -75,11 +75,12 @@ static inline bool is_layer_mod(uint8_t code) {
 }
 
 inline uint8_t resolve_key(uint8_t key) {
+  uint8_t* cell = config.layers[key];
   for (int8_t i = currentLayer; i >= 0; --i) {
-    if (config.layers[i][key] == CODE_EMPTY) {
+    if (cell[i] == CODE_EMPTY) {
       continue;
     }
-    return config.layers[i][key];
+    return cell[i];
   }
   return CODE_EMPTY;
 }
@@ -205,7 +206,7 @@ static inline void process_layerMods(uint8_t flags, uint8_t code) {
   }
 #ifdef REEVALUATE_ON_LAYER_CHANGE
   // OK. Now we have to see which keys are pressed, and what will change.
-  for (uint8_t keyIndex = 0; keyIndex < COMMONSENSE_MATRIX_SIZE; ++keyIndex) {
+  for (uint8_t keyIndex = 0; keyIndex < sizeof pressed_codes; ++keyIndex) {
     uint8_t old_code = pressed_codes[keyIndex];
     if (old_code == CODE_EMPTY) { // Key isn't pressed
       continue; // NO key should map to CODE_EMPTY below real codes.
@@ -526,7 +527,7 @@ void pipeline_init(void) {
   for (uint8_t i = 0; i < QUEUE_SIZE; ++i) {
     hid_queue[i].raw = BUF_EMPTY;
   }
-  for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; ++i) {
+  for (uint8_t i = 0; i < sizeof pressed_codes; ++i) {
     pressed_codes[i] = CODE_EMPTY;
   }
   LEAVE_TAP_MODE;

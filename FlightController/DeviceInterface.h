@@ -56,6 +56,8 @@ class DeviceInterface : public QObject {
   bool controllerInsane{false};
   std::atomic<bool> rx{false};
   std::atomic<bool> tx{false};
+  uint8_t firmwareMajor{0};
+  uint8_t firmwareMinor{0};
   QString firmwareVersion{};
   QString dieTemp{};
   QString latencyMs{};

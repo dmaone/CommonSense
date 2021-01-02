@@ -184,18 +184,13 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
 
 void FlightController::lockUI_(bool lock) {
   uiLocked_ = lock;
-  ui->TelemetryButton->setDisabled(lock);
-  ui->thresholdsButton->setDisabled(lock);
   ui->macrosButton->setDisabled(lock);
   ui->layoutButton->setDisabled(lock);
   ui->layerModsButton->setDisabled(lock);
   ui->delaysButton->setDisabled(lock);
   ui->hwButton->setDisabled(lock);
-  if (lock) {
-    return;
-  }
-  ui->thresholdsButton->setEnabled(di_.config.capabilities.hasThresholds);
-  ui->TelemetryButton->setEnabled(di_.config.capabilities.hasTelemetry);
+  ui->thresholdsButton->setEnabled(!lock && di_.config.capabilities.hasThresholds);
+  ui->TelemetryButton->setEnabled(!lock && di_.config.capabilities.hasTelemetry);
 }
 
 void FlightController::timerEvent(QTimerEvent* timer) {
