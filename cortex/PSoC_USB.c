@@ -208,6 +208,7 @@ void usb_receive(OUT_c2packet_t *inbox) {
     SET_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
     apply_config();
     report_status();
+    xprintf("success!");
     break;
   case C2CMD_COMMIT:
     save_config();

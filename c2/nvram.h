@@ -15,8 +15,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
-#define CS_CONFIG_VERSION 2
-#define CS_LAST_COMPATIBLE_NVRAM_VERSION 2
+#define CS_CONFIG_VERSION 3
+#define CS_LAST_COMPATIBLE_NVRAM_VERSION 3
 
 #define EEPROM_BYTESIZE 2048
 #define COMMONSENSE_BASE_SIZE 64
