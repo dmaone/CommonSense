@@ -2,7 +2,7 @@
 * \file CyBle_Gatt.h
 * 
 * \file CYBLE_StackGatt.h
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  This file contains the GATT APIs of the BLE Host Stack IP

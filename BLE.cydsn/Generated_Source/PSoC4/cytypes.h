@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file cytypes.h
-* \version 5.90
+* \version 6.10
 *
 * \brief CyTypes provides register access macros and approved types for use in
 * firmware.
@@ -16,7 +16,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2021, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -317,7 +317,7 @@
             #define CY_IP_WCO_SRSSV2        (0 != 0)
             #if (CY_IP_BLESSV3)
                 #define CY_IP_WCO_WCOV2     (0 == 0)
-                #define CY_IP_WCO_BLESS     (0 != 0)                
+                #define CY_IP_WCO_BLESS     (0 != 0)
             #else
                 #define CY_IP_WCO_WCOV2     (0 != 0)
                 #define CY_IP_WCO_BLESS     (0 == 0)
@@ -353,7 +353,7 @@
             #define CY_IP_ECO_SRSSV2        (0 != 0)
             #define CY_IP_ECO_SRSSLT        (0 != 0)
             #define CY_IP_ECOV2_SRSSLT      (0 != 0)
-            
+
             #if (CY_IP_BLESSV3)
                 #define CY_IP_ECO_BLESS     (0 != 0)
                 #define CY_IP_ECO_BLESSV3   (0 == 0)
@@ -382,11 +382,11 @@
     #if (CY_IP_HOBTO_DEVICE)
         #if(CY_IP_SRSSV2)
             #define CY_IP_PLL           ((0 != 0) || \
-                                          (0 != 0)) 
+                                          (0 != 0))
 
             #define CY_IP_PLL_NR        (0u + \
                                           0u)
-        
+
         #elif (CY_IP_SRSSLT)
             #define CY_IP_PLL           (-1 == 1)
 
@@ -494,7 +494,12 @@
 #define CY_BOOT_5_50            (550u)
 #define CY_BOOT_5_60            (560u)
 #define CY_BOOT_5_70            (570u)
-#define CY_BOOT_VERSION         (CY_BOOT_5_70)
+#define CY_BOOT_5_80            (580u)
+#define CY_BOOT_5_81            (581u)
+#define CY_BOOT_5_90            (590u)
+#define CY_BOOT_6_0             (600u)
+#define CY_BOOT_6_10            (610u)
+#define CY_BOOT_VERSION         (CY_BOOT_6_10)
 
 
 /*******************************************************************************

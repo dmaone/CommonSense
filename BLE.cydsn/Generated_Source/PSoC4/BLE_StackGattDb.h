@@ -2,7 +2,7 @@
 * \file CyBle_GattDb.h
 * 
 * \file CYBLE_StackGattDb.h
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  This file contains the data structure for GATT Database

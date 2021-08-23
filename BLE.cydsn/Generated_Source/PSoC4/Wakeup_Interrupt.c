@@ -1,6 +1,6 @@
 /*******************************************************************************
 * File Name: Wakeup_Interrupt.c  
-* Version 1.70
+* Version 1.71
 *
 *  Description:
 *   API for controlling the state of an interrupt.
@@ -252,7 +252,7 @@ void Wakeup_Interrupt_SetPriority(uint8 priority)
     uint32 priorityOffset = ((Wakeup_Interrupt__INTC_NUMBER % 4u) * 8u) + 6u;
     
 	interruptState = CyEnterCriticalSection();
-    *Wakeup_Interrupt_INTC_PRIOR = (*Wakeup_Interrupt_INTC_PRIOR & (uint32)(~Wakeup_Interrupt__INTC_PRIOR_MASK)) |
+    *Wakeup_Interrupt_INTC_PRIOR = (*Wakeup_Interrupt_INTC_PRIOR & (uint32)(~(uint32)Wakeup_Interrupt__INTC_PRIOR_MASK)) |
                                     ((uint32)priority << priorityOffset);
 	CyExitCriticalSection(interruptState);
 }

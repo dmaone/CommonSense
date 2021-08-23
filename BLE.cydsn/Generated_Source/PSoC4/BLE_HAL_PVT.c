@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_HAL_PVT.c
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  This file contains the source code for the HAL section of the BLE component

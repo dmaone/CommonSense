@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CyLib.h
-* \version 5.90
+* \version 6.10
 *
 * \brief Provides a system API for the clocking, and interrupts.
 *
@@ -9,7 +9,7 @@
 *
 ********************************************************************************
 * \copyright
-* Copyright 2008-2018, Cypress Semiconductor Corporation.  All rights reserved.
+* Copyright 2008-2021, Cypress Semiconductor Corporation.  All rights reserved.
 * You may use this file only in accordance with the license, terms, conditions,
 * disclaimers, and limitations in the end user license agreement accompanying
 * the software package with which this file was provided.
@@ -1171,6 +1171,9 @@ extern uint32 CySysTickInitVar;
     #define CY_SFLASH_S1_TESTPGM_REV_REG        (*(reg8 *) CYSFLASH_S1_testpgm_rev)
     #define CY_SFLASH_S1_TESTPGM_REV_PTR        ( (reg8 *) CYSFLASH_S1_testpgm_rev)
 
+    #define CY_SFLASH_CRI_TESTPGM_REV_REG       (*(reg8 *) CYSFLASH_CRI_testpgm_rev)
+    #define CY_SFLASH_CRI_TESTPGM_REV_PTR       ( (reg8 *) CYSFLASH_CRI_testpgm_rev)
+
     #define CY_SFLASH_IMO_MAXF0_REG             (*(reg8 *) CYREG_SFLASH_IMO_MAXF0)
     #define CY_SFLASH_IMO_MAXF0_PTR             ( (reg8 *) CYREG_SFLASH_IMO_MAXF0)
 
@@ -1365,11 +1368,6 @@ extern uint32 CySysTickInitVar;
         
         #define CY_SYS_EXCO_PGM_CLK_REG         (*(reg32 *) CYREG_EXCO_EXCO_PGM_CLK) 
         #define CY_SYS_EXCO_PGM_CLK_PTR         ( (reg32 *) CYREG_EXCO_EXCO_PGM_CLK)
-        
-        #if (CY_IP_ECOV2_SRSSLT)
-        
-            
-        #endif /* (CY_IP_ECOV2_SRSSLT) */
         
     #else
         /* ECO Configuration Register */

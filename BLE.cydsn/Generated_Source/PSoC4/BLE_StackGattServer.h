@@ -2,7 +2,7 @@
 * \file CyBle_GattServer.h
 * 
 * \file CYBLE_StackGattServer.h
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  This file contains the GATT Server routines

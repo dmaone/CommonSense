@@ -2,7 +2,7 @@
 * \file CyBle.h
 *
 * \file CYBLE_Stack.h
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  This file contains declaration of public BLE APIs other than those covered by

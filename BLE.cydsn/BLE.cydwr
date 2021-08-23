@@ -2,7 +2,7 @@
 <DesignWideResources xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://cypress.com/xsd/cydwr">
   <Group key="Component">
     <Group key="v1">
-      <Data key="cy_boot" value="cy_boot_v5_90" />
+      <Data key="cy_boot" value="cy_boot_v6_10" />
       <Data key="cy_dmac" value="cy_dmac_v1_10" />
       <Data key="cy_lfclk" value="cy_lfclk_v1_20" />
       <Data key="Em_EEPROM_Dynamic" value="Em_EEPROM_Dynamic_v2_20" />

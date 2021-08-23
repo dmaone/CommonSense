@@ -1,6 +1,6 @@
 /***************************************************************************//**
 * \file CYBLE_STACK_PVT.h
-* \version 3.65
+* \version 3.66
 *
 * \brief
 *  Contains the function prototypes and constants for the HAL section
