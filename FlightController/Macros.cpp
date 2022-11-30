@@ -4,7 +4,6 @@
 #include <QPushButton>
 #include <QSpinBox>
 
-#include "DeviceInterface.h"
 #include "Macros.h"
 #include "ScancodeList.h"
 
@@ -134,9 +133,11 @@ QByteArray Macros::encodeSteps_(int /* macro_row */) {
 void Macros::selectMacro_(int index) {
   bool existingMacro = (index + 1 != ui->macroListCombo->count());
   if (dirty_) {
-    QMessageBox::question(this, "Warning",
-        "All your base are belong to us - unsaved changes will be lost",
-        QMessageBox::Ok);
+    QMessageBox::question(
+      this,
+      "Warning",
+      "All your base are belong to us - unsaved changes will be lost",
+      QMessageBox::StandardButtons(QMessageBox::StandardButton::Ok));
   }
   ui->bodyTable->clearContents();
   ui->bodyTable->setRowCount(1);

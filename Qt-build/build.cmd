@@ -1,4 +1,4 @@
-SET QTVER=5.15.0
+SET QTVER=5.15.2
 SET SRCDIR=c:\qt\%QTVER%\Src
 
 SET MINGWTOOLS=c:\qt\tools\mingw810_32
@@ -10,7 +10,7 @@ SET PATH=%SRCDIR%\qtbase\bin;%SRCDIR%\gnuwin32\bin;%MINGWTOOLS%\bin;%MINGW%\bin;
 
 cd %SRCDIR%
 
-configure.bat -platform win32-g++ -prefix c:\qt\static -opensource -confirm-license ^
+CALL configure.bat -platform win32-g++ -prefix c:\qt\static -opensource -confirm-license ^
  -static-runtime -static -release -feature-designer -native-win32-bluetooth ^
  -qt-freetype  -qt-libjpeg -qt-pcre -qt-libpng -qt-zlib -opengl desktop -feature-qdoc ^
  -no-feature-sql -no-feature-sqlmodel -no-sql-odbc -no-sql-sqlite ^

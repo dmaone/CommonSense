@@ -2,9 +2,11 @@
 hidapi 0.9.0+ is required. Luckily, it's available in precompiled form for all 3 platforms in 2020.
 
 ## Windows
-Download compiled [hidapi package](https://repo.msys2.org/mingw/i686/mingw-w64-i686-hidapi-0.9.0-1-any.pkg.tar.xz) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir ([7zip](https://www.7-zip.org/) can into .tar.xz)
+Download compiled [hidapi package](https://mirror.msys2.org/mingw/mingw32/mingw-w64-i686-hidapi-0.12.0-1-any.pkg.tar.zst) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir (you'll need [7zip-zstd](https://github.com/mcmilk/7-Zip-zstd/releases))
 
-If you want to run a debugging build - use dynamic linking and [x86_64 package](https://repo.msys2.org/mingw/x86_64/mingw-w64-x86_64-hidapi-0.9.0-1-any.pkg.tar.xz) - gdb can't load 32-bit ntdll on Windows 10 :(
+If you want to run a debugging build - use dynamic linking and [x86_64 package](https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-hidapi-0.12.0-1-any.pkg.tar.zst) - gdb can't load 32-bit ntdll on Windows 10 :(
+
+NOTE: for qt6 you'll also need x86_64 package, because qt6 no longer supports 32-bit.
 
 ## mac
 You'll need [brew](https://brew.sh)
@@ -33,10 +35,15 @@ Because windows app can be a single file - static version is better.
 ### Walkthrough
 * Download and run [opensource QT installer](https://www.qt.io/download-open-source)
 * Install the following into `c:\qt`
-  *  `Sources` and `MinGW 32-bit` from the latest qt version
-  * `Qt Creator` and matching `MinGW 32-bit` from tools
+  * `Sources` from the latest qt version
+  * `MinGW 32-bit` for qt5, `MinGW 64-bit` for qt6 (no more 32-bit)
+  * `Qt Creator` and matching `MinGW` from tools
+  * qt6-only: `Cmake` and `Ninja` from tools
 * Fix qt and MinGW versions if needed
-* run `build.cmd`
+* qt6-only
+  * install python
+  * switch win32 debug mode paths from 32-bit to 64-bit.
+* run `build.cmd` (`qt6build.cmd` for qt6)
 * https://www.youtube.com/watch?v=bMVbaCiy_XE
 * Profit!
 
@@ -85,7 +92,7 @@ You should have FlightController.dmg in this dir. Congratulations.
 # Linux build
 Linux users are supposed to know how to do that :)
 
-Okay, okay. Since there's LOTS of different Linux flavors, let's make it for Ubuntu 16.04.
+Okay, okay. Since there's LOTS of different Linux flavors, let's make it for Ubuntu 16.04. (NOTE: doesn't work for ubuntu 22.04)
 
 ```
 git clone https://github.com/dmaone/CommonSense.git
