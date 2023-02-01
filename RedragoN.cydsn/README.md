@@ -1,6 +1,6 @@
 # Kumara K552N controller swap - Ohmic matrix example
 
-Capacitive scanner actually works with contact matrix. It needs dioded, because there's no anti-ghosting algorithms in CommonSense, but it works.
+Capacitive scanner actually works with contact matrix. It needs diodes, because there's no anti-ghosting algorithms in CommonSense, but it works.
 
 
 Important settings: 8-bit ADC, thresholds of 60 (actual levels will be around 80.).

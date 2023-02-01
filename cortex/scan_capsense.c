@@ -115,13 +115,10 @@ void sensor_init() {
   FinalBuf_DmaInitialize(sizeof Results / NUM_ADCs, NUM_ADCs,
                          (uint16)(HI16(CYDEV_SRAM_BASE)),
                          (uint16)(HI16(CYDEV_SRAM_BASE)));
-  uint8 enableInterrupts = CyEnterCriticalSection();
-  (*(reg8 *)PTK_ChannelCounter__PERIOD_REG) =
-      (PTK_CHANNELS -
-       1); // Load number of channels. See Count7/WritePeriod for details.
-  (*(reg8 *)PTK_ChannelCounter__CONTROL_AUX_CTL_REG) |=
-      (uint8)0x20u; // Init count7
-  CyExitCriticalSection(enableInterrupts);
+  PTK_Start();
+  PTK_WritePeriod(PTK_CHANNELS - 1);
+  PTK_WriteCounter(PTK_CHANNELS - 1); // Just in case!
+
   ADC0_Start();
   ADC0_SetResolution(config.adcBits);
 #if NUM_ADCs > 1
@@ -140,8 +137,6 @@ void sensor_init() {
               (uint32)ADC1_ADC_SAR__WRK0, ADC_BUFFER_BYTESIZE + (uint32)BufMem);
 #endif
   ResultBufferSetup();
-  (*(reg8 *)PTK_CtrlReg__CONTROL_REG) =
-      (uint8)0b11u; // enable counter's clock, generate counter load pulse
   // It is important that ResultIRQ priority is less (=is higher)
   // so we don't start fetching next buffer before we are done with the current
   // one.
@@ -168,7 +163,16 @@ static inline void Drive(uint8 drv) {
    * good idea. reading the row in 4us is pointless if you spend 20us setting
    * drive modes.
    */
-  // SetPin should not be used because it doesn't trigger start circuitry
+  ControlReg0_Write(1); // Enable sensor
+  /*
+   * The above needs to come from software.
+   * It's not like hardware CANNOT do it - but it will require two-stage OR,
+   * followed by NOT (because sensor is enabled by disabling output on columns).
+   * This is _sometimes_ compiled into a NOT with a 60us delay (which, in turn,
+   * manifests as a missing "sensor enable" signal for the highest row).
+   * It's easier to just enable sensor from CPU, avoiding whole issue.
+   * Yes, this starts ChargeDelay - just drive the damn DriveReg right away.
+   */
   DriveReg0_Write(1 << drv);
 }
 

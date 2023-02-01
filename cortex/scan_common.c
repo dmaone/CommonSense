@@ -40,7 +40,8 @@ static uint8_t scancodes_while_output_disabled = 0;
 // It has value for spammy keys tho - we need to know which keys, not frequency.
 #define SCAN_ROW_SHIFT 5
 #define SCAN_COL_MASK 0x1f
-static uint32_t matrix_status[1 << (8 - SCAN_ROW_SHIFT)];
+#define MATRIX_STATUS_SIZE (1 << (8 - SCAN_ROW_SHIFT))
+static uint32_t matrix_status[MATRIX_STATUS_SIZE];
 
 inline void scan_register_event(uint8_t flags, uint8_t key) {
   if (STATUS_NOT(C2DEVSTATUS_OUTPUT_ENABLED)) {
@@ -189,7 +190,9 @@ void scan_common_reset() {
   for(uint8_t i = 0; i < QUEUE_SIZE; ++i) {
     event_queue[i].raw = scan_no_key.raw;
   }
-  memset(matrix_status, 0, sizeof(matrix_status));
+  for(uint8_t i = 0; i < MATRIX_STATUS_SIZE; i++) {
+    matrix_status[i] = 0;
+  }
   q_begin = 0;
   q_end = 0;
   for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; i++) {
