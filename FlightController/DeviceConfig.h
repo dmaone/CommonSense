@@ -3,7 +3,6 @@
 #include <QObject>
 #include "../c2/nvram.h"
 
-#include "Events.h"
 #include "LayerCondition.h"
 #include "Macro.h"
 
@@ -36,7 +35,7 @@ class DeviceConfig : public QObject {
 
   explicit DeviceConfig(DeviceInterface* di);
 
-  void reset();
+  void reset(uint8_t mtu);
 
   std::vector<LayerCondition> loadLayers();
   void setLayerCondition(int conditionIdx, LayerCondition cnd);
@@ -98,5 +97,6 @@ class DeviceConfig : public QObject {
   psoc_eeprom_t eeprom_;
   TransferDirection transferDirection_{TransferIdle};
   uint8_t currentBlock_{0};
+  uint8_t blockSize_{0};
 };
 

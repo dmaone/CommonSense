@@ -30,7 +30,17 @@
 #define BOOTLOADER_MAX_PACKET_LENGTH 32
 #define BOOTLOADER_PAYLOAD_LENGTH (3 + BOOTLOADER_MAX_PACKET_LENGTH + 3)
 
+#if (CY_PSOC5LP)
+// firmware AND PSoC5LP - limit to 64 bytes
+#define C2_MTU 64
+#else
+#define C2_MTU 130
+#endif
 /*
+ * Windows 10 HID requires 4 bytes of MTU (both ATT and L2CAP) and DLE headroom
+ * to work. So min. BLE MTU value needs to be 134.
+ * TODO: fix explanation below (for USB it's still true!)
+ *
  * The data block for the control channel is 64 bytes, both up and down.
  * Packet format is [command byte][application-specific].
  * MESSAGES MUST BE EXACTLY 64 BYTES IN LENGTH, otherwise host will drop them.
@@ -123,9 +133,9 @@ typedef union {
 typedef union {
   struct {
     uint8_t response_type;
-    uint8_t payload[63];
+    uint8_t payload[(C2_MTU - 1)];
   } __attribute__((packed));
-  uint8_t raw[64];
+  uint8_t raw[(C2_MTU)];
 } IN_c2packet_t;
 
 // IN_c2packet_t alternative layouts BEGIN
@@ -133,9 +143,9 @@ typedef struct {
   uint8_t response_type;
   uint8_t messageCode;
   union {
-    uint8_t rawMessage[62];
+    uint8_t rawMessage[(C2_MTU - 2)];
     struct {
-      uint8_t message[58];
+      uint8_t message[(C2_MTU - 6)];
       uint32_t sysTime;
     } __attribute__((packed));
   };
@@ -177,10 +187,10 @@ typedef struct {
   uint8_t response_type;
   union {
     struct {
-      char message[59];
+      char message[(C2_MTU - 5)];
       uint32_t sysTime;
     } __attribute__((packed));
-    char raw_message[63];
+    char raw_message[(C2_MTU - 1)];
   };
 } __attribute__((packed)) log_message_t;
 
@@ -189,9 +199,9 @@ typedef struct {
 typedef union {
   struct {
     unsigned char command;
-    unsigned char payload[63];
+    unsigned char payload[(C2_MTU - 1)];
   } __attribute__((packed));
-  uint8_t raw[64];
+  uint8_t raw[(C2_MTU)];
 } OUT_c2packet_t;
 
 typedef union {
@@ -216,7 +226,8 @@ typedef union {
   uint8_t raw[3];
 } Bootloader_packet_trailer_t;
 
-#define CONFIG_TRANSFER_BLOCK_SIZE 32
+#define CONFIG_TRANSFER_SIZE_BLE 128
+#define CONFIG_TRANSFER_SIZE_USB 32
 #define CONFIG_BLOCK_DATA_OFFSET 1
 
 #define MACRO_TYPE_ONKEYDOWN 0x00

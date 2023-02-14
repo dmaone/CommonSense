@@ -1,4 +1,5 @@
 #include <QComboBox>
+#include <QDebug>
 #include <QFileDialog>
 #include <QLabel>
 #include <QMessageBox>

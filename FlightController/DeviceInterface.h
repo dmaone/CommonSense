@@ -17,8 +17,6 @@
 
 #include "DeviceConfig.h"
 #include "DeviceSelector.h"
-#include "Events.h"
-#include "LogViewer.h"
 
 class DeviceInterface : public QObject {
   Q_OBJECT
@@ -107,6 +105,7 @@ class DeviceInterface : public QObject {
   void resetTimer_(int interval);
 
   hid_device* device_{nullptr};
+  uint8_t packet_size_{0};  // BLE uses 130-byte packets, USB - 64-byte
   int pollTimerId_{0};
   int statusTimerId_{0};
   Mode mode_{DeviceInterfaceNormal};

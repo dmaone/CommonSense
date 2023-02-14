@@ -4,6 +4,7 @@
 
 #include "DeviceConfig.h"
 #include "DeviceInterface.h"
+#include "Events.h"
 #include "LayerCondition.h"
 #include "settings.h"
 
@@ -17,13 +18,13 @@ static constexpr uint8_t kMinFwMajor{1};
 static constexpr uint8_t kMinFwMinor{4};
 static constexpr auto kMinFw{fwVer(kMinFwMajor, kMinFwMinor)};
 
-static const std::vector<std::string> expModeNames_{
+const std::vector<std::string> expModeNames_{
   "Disabled",
 
   "Solenoid+Num+Caps", "Lock LEDs",
 };
 
-static const std::vector<std::string> switchTypeNames_ {
+const std::vector<std::string> switchTypeNames_ {
   "CapInverted",
   "Capacitive",
   "ADB",
@@ -37,14 +38,15 @@ static const std::vector<std::string> switchTypeNames_ {
 } //namespace
 
 DeviceConfig::DeviceConfig(DeviceInterface* di) : interface_{di} {
-  reset();
+  reset(0);
 }
 
-void DeviceConfig::reset() {
+void DeviceConfig::reset(uint8_t mtu) {
   memset(this->eeprom_.raw, 0x00, sizeof(this->eeprom_));
   bValid = false;
   transferDirection_ = TransferIdle;
   currentBlock_ = 0;
+  blockSize_ = mtu > 65 ? CONFIG_TRANSFER_SIZE_BLE : CONFIG_TRANSFER_SIZE_USB;
 }
 
 bool DeviceConfig::eventFilter(QObject* /* obj */, QEvent *event) {
@@ -107,7 +109,7 @@ void DeviceConfig::toDevice() {
 void DeviceConfig::sendConfigBlock_() {
   switch (transferDirection_) {
   case TransferUpload:
-    if (currentBlock_ > (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
+    if (currentBlock_ >= (EEPROM_BYTESIZE / blockSize_)) {
       qInfo() << "done!";
       transferDirection_ = TransferIdle;
       emit sendCommand(C2CMD_APPLY_CONFIG, 1);
@@ -118,8 +120,8 @@ void DeviceConfig::sendConfigBlock_() {
     msg.command = C2CMD_UPLOAD_CONFIG;
     msg.payload[0] = currentBlock_;
     memcpy(msg.payload + CONFIG_BLOCK_DATA_OFFSET,
-           this->eeprom_.raw + (CONFIG_TRANSFER_BLOCK_SIZE * currentBlock_),
-           CONFIG_TRANSFER_BLOCK_SIZE);
+           this->eeprom_.raw + (blockSize_ * currentBlock_),
+           blockSize_);
     emit uploadBlock(msg);
     break;
   default:
@@ -167,16 +169,15 @@ void DeviceConfig::receiveConfigBlock_(QByteArray *payload) {
     return;
   }
   qInfo(".");
-  if (currentBlock_ >= (EEPROM_BYTESIZE / CONFIG_TRANSFER_BLOCK_SIZE)) {
+  if (currentBlock_ >= (EEPROM_BYTESIZE / blockSize_)) {
     transferDirection_ = TransferIdle;
     qInfo() << "done, unpacking...";
     unpack_();
     return;
   }
-  memcpy(this->eeprom_.raw +
-             (CONFIG_TRANSFER_BLOCK_SIZE * (uint8_t)payload->at(1)),
+  memcpy(this->eeprom_.raw + (blockSize_ * (uint8_t)payload->at(1)),
          payload->data() + 1 + CONFIG_BLOCK_DATA_OFFSET,
-         CONFIG_TRANSFER_BLOCK_SIZE);
+         blockSize_);
   emit downloadBlock(C2CMD_DOWNLOAD_CONFIG, currentBlock_);
 }
 

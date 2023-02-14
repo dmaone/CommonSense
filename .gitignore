@@ -11,6 +11,8 @@ Bootloader.hex
 codegentemp
 Export
 CortexM3
+CortexM0p
+CortexM4
 Compiled
 build-FlightController*
 
@@ -55,3 +57,7 @@ mingw64
 .Trashes
 ehthumbs.db
 Thumbs.db
+
+# Config ephemera #
+###################
+.vscode

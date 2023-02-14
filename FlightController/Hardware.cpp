@@ -1,5 +1,6 @@
 #include "Hardware.h"
 
+#include <QDebug>
 #include <QPushButton>
 
 namespace {

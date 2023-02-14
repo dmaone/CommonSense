@@ -1,3 +1,4 @@
+#include <QDebug>
 #include <QLabel>
 #include <QMenu>
 #include <QMessageBox>

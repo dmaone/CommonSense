@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <string>
 
+#include "Events.h"
 #include "ScancodeList.h"
 
 namespace {
@@ -22,9 +23,14 @@ constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
 
 // Constants below are non-negotiable
-constexpr size_t kHidPacketSize{65};
 constexpr uint8_t kNoReport{0};
+
+void printHidError(hid_device_ * device) {
+  qWarning() << QString::fromWCharArray(hid_error(device));
 }
+
+}
+
 
 DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
   installEventFilter(&config);
@@ -235,7 +241,7 @@ void DeviceInterface::enqueueCommand_(OUT_c2packet_t outbox) {
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
   OUT_c2packet_t outbox;
   outbox.command = cmd;
-  memcpy(outbox.payload, msg, 63);
+  memcpy(outbox.payload, msg, sizeof(outbox.payload));
   enqueueCommand_(outbox);
 }
 
@@ -336,7 +342,9 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
 }
 
 bool DeviceInterface::sendRawPacket_DANGER_(const std::vector<uint8_t>& buf) {
+  // qInfo() << "Sending" << buf[0] << buf[1] << buf[2] << "len" << buf.size();
   if (hid_write(device_, buf.data(), buf.size()) == -1) {
+    printHidError(device_);
     qWarning() << "Error sending to the device, will reconnect in 1 second";
     QThread::sleep(1);
     scheduleDeviceRelease_.store(true);
@@ -366,7 +374,7 @@ bool DeviceInterface::sendPacket_() {
     outbox_.pop();
   }
   std::vector<uint8_t> buf{};
-  buf.reserve(kHidPacketSize);
+  buf.reserve(packet_size_);
   buf.emplace_back(kNoReport); // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
@@ -385,7 +393,7 @@ bool DeviceInterface::sendPacket_() {
 
 bool DeviceInterface::receivePacket_() {
   std::vector<uint8_t> buffer{};
-  buffer.resize(kHidPacketSize, 0);
+  buffer.resize(packet_size_, 0);
 
   int bytesRead;
   {
@@ -417,7 +425,7 @@ bool DeviceInterface::receivePacket_() {
 }
 
 void DeviceInterface::initDevice_() {
-  config.reset();
+  config.reset(0);
   std::lock_guard<std::mutex> lock{deviceLock_};
   device_ = acquireDevice_();
   if (!device_) {
@@ -425,23 +433,42 @@ void DeviceInterface::initDevice_() {
     resetTimer_(kDeviceScanTick);
     return;
   }
+  // auto info = hid_get_device_info(device_);
   hid_set_nonblocking(device_, 1);
   // We want to put device into setup mode AND trigger scanner init on connect.
-  std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};
-  buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
-  if (!sendRawPacket_DANGER_(buf)) {
-    return;
-  }
+  if (mode_ == DeviceInterfaceBootloader) {
+    packet_size_ = 65; // This is for standard Cypress USB bootloader only
+    setState_(BootloaderConnected);
+  } else {
+    std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};
+    buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
+    if (!sendRawPacket_DANGER_(buf)) {
+      return;
+    }
+    // packet_size_ = (info->bus_type == HID_API_BUS_BLUETOOTH) ? 131 : 65;
+    auto tmp = std::vector<uint8_t>(C2_MTU);
+    auto bytesRead = hid_read_timeout(device_, tmp.data(), tmp.size(), 1000);
+    if (bytesRead < 1) {
+      if (bytesRead == -1) {
+        printHidError(device_);
+      }
+      qCritical() << "Cannot get response from the device, will reconnect..";
+      scheduleDeviceRelease_.store(true);
+      return;
+    }
+    packet_size_ = bytesRead;
+    qInfo() << "Transport MTU is" << packet_size_;
+    config.reset(packet_size_);
 
-  // Only flipping of the scan bit reinits scanner.
-  buf.back() += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
-  if (!sendRawPacket_DANGER_(buf)) {
-    return;
+    // Only flipping of the scan bit reinits scanner.
+    buf.back() += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
+    if (!sendRawPacket_DANGER_(buf)) {
+      return;
+    }
+    setState_(DeviceConnected);
   }
 
   cts_.store(true); // Not expecting anything from device - clear to send.
-  setState_(mode_ == DeviceInterfaceNormal ? DeviceConnected
-                                           : BootloaderConnected);
   // No need to change timer rate - loading config will switch it.
   return;
 }
@@ -469,8 +496,12 @@ DeviceInterface::DetectedDevices DeviceInterface::listDevices_() {
 #else
     if (d->usage_page == 0x6213 && d->usage == 0x88) {
 #endif
-      retval.keyboards.push_back(
-          std::make_pair(QString::fromWCharArray(d->serial_number), d->path));
+      // if (d->bus_type != HID_API_BUS_USB) {
+      auto devname = QString();
+      devname += d->bus_type == HID_API_BUS_USB ? "[USB] " : "[BLE] ";
+      devname += QString::fromWCharArray(d->serial_number);
+      retval.keyboards.push_back(std::make_pair(devname, d->path));
+      //}
     } else if (d->vendor_id == 0x04b4 &&
           (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
       retval.bootloaders.push_back(std::make_pair(
@@ -487,7 +518,7 @@ hid_device* DeviceInterface::acquireDevice_() {
     qInfo() << "Cannot initialize hidapi!";
     return nullptr;
   }
-  config.reset();
+  config.reset(0);
   auto devices = listDevices_();
   if (mode_ == DeviceInterfaceNormal && !devices.bootloaders.empty()) {
     QMessageBox::StandardButton result =

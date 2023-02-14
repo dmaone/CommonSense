@@ -18,6 +18,7 @@ CONFIG(release, debug|release) {
 win32 {
   # mingw32 for release, mingw64 for debug (use dynamic, 64-bit kit!)
   INCLUDEPATH += $$PWD/../mingw32/include $$PWD/../mingw64/include
+  QMAKE_LFLAGS += -fstack-protector  # For msys32 hidapi to work
   CONFIG(debug, debug|release) {
     LIBS += -L$$PWD/../mingw64/lib -L$$PWD/../mingw64/bin
   }

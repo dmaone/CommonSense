@@ -11,9 +11,13 @@
 #include <project.h>
 
 #include "gpio.h"
+#include "hid.h"
 #include "scan.h"
-#include "PSoC_USB.h"
 #include "sup_serial.h"
+
+#ifdef DEBUG_PIPELINE
+#include "io.h"
+#endif
 
 #define QUEUE_SIZE 64
 // ^ MUST BE POWER OF 2!
@@ -254,7 +258,7 @@ static inline void process_real_key(void) {
     ts_xprintf("Reset: commencing, data %d - %d", q_begin, q_end);
 #endif
 
-    reset_reports();
+    hid_reset_reports();
     serial_reset_reports();
     reports_reset_pending = false;
   }
@@ -300,13 +304,14 @@ static inline void process_real_key(void) {
     }
   }
 #ifdef DEBUG_PIPELINE
-  coded_message_t* cm = (coded_message_t*)&outbox.raw;
-  mc_key_resolved_payload_t* msg = (mc_key_resolved_payload_t*)&cm->message;
+  coded_message_t cm;
+  cm.messageCode = MC_KEY_RESOLVED;
+  mc_key_resolved_payload_t* msg = (mc_key_resolved_payload_t*)&cm.message;
   msg->key = event.key;
   msg->flags = event.flags;
   msg->layer = currentLayer;
   msg->code = code;
-  coded_timestamped_message(MC_KEY_RESOLVED);
+  coded_timestamped_message(&cm);
 #endif
 
   uint8_t keyflags = event.flags | HID_REAL_KEY_MASK;
@@ -377,15 +382,16 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
     pos = BUF_NEXT(pos);
   } while (hid_queue[pos].raw != BUF_EMPTY);
 #ifdef DEBUG_PIPELINE
-  coded_message_t* cm = (coded_message_t*)&outbox.raw;
-  mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm->message;
+  coded_message_t cm;
+  cm.messageCode = MC_SCHEDULE_HID;
+  mc_schedule_hid_payload_t* msg = (mc_schedule_hid_payload_t*)&cm.message;
   msg->event_time = time;
   msg->code = code;
   msg->flags = flags;
   msg->position = pos;
   msg->data_begin = q_begin;
   msg->data_end = q_end;
-  coded_timestamped_message(MC_SCHEDULE_HID);
+  coded_timestamped_message(&cm);
 #endif
   // Special codes - they're not queued, but processed RIGHT NOW.
   // Not sure macro-generated keys should be processed, but right now they are..
@@ -395,7 +401,7 @@ static inline void schedule_hid(uint32_t time, uint8_t flags, uint8_t code) {
     }
     switch (code) {
       case 2:
-      Boot_Load();
+        Boot_Load();
         break; // NORETURN function, break is strictly for consistence.
       case 3:
         gpio_toggle_expHdr();
@@ -451,15 +457,16 @@ static inline void update_reports(void) {
     return; // We'll return here on the next tick, hopefully passing.
   }
 #ifdef DEBUG_PIPELINE
-  coded_message_t* cm = (coded_message_t*)&outbox.raw;
-  mc_process_hid_payload_t* msg = (mc_process_hid_payload_t*)&cm->message;
+  coded_message_t cm;
+  cm.messageCode = MC_PROCESS_HID;
+  mc_process_hid_payload_t* msg = (mc_process_hid_payload_t*)&cm.message;
   msg->event_time = hid_queue[pos].sysTime;
   msg->code = hid_queue[pos].code;
   msg->flags = hid_queue[pos].flags;
   msg->position = pos;
   msg->data_begin = q_begin;
   msg->data_end = q_end;
-  coded_timestamped_message(MC_PROCESS_HID);
+  coded_timestamped_message(&cm);
 #endif
   if (is_special(hid_queue[pos].code)) {
     // Clowntown: fully "transparent" will toggle exp. header
@@ -468,17 +475,17 @@ static inline void update_reports(void) {
     hid_queue[pos].flags |= HID_RELEASED_MASK; // skip-cooldown trick.
     // ALL codes you want filtered from reports MUST BE ABOVE THIS LINE!
   } else if (hid_queue[pos].code >= 0xe8) {
-    update_consumer_report(&hid_queue[pos]);
+    hid_update_consumer(&hid_queue[pos]);
   } else if (hid_queue[pos].code >= 0xa5 &&
              hid_queue[pos].code <= 0xa7) {
-    update_system_report(&hid_queue[pos]);
+    hid_update_system(&hid_queue[pos]);
   } else {
     switch (output_direction) {
       case OUTPUT_DIRECTION_USB:
-        update_keyboard_report(&hid_queue[pos]);
+        hid_update_keyboard(&hid_queue[pos]);
         break;
       case OUTPUT_DIRECTION_SERIAL:
-        update_serial_keyboard_report(&hid_queue[pos]);
+        update_serial_keyboard_state(&hid_queue[pos]);
         break;
       default:
         break;
@@ -521,6 +528,7 @@ void pipeline_init(void) {
   // Pipeline is worked on in main loop only, no point disabling IRQs to avoid
   // preemption.
   scan_reset();
+  hid_init();
   q_begin = 0;
   q_end = 0;
   cooldown_timer = 0;

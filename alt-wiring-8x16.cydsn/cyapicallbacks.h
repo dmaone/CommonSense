@@ -18,4 +18,4 @@
 /*For more information, refer to the Macro Callbacks topic in the PSoC Creator
  * Help.*/
 #define USB_DP_ISR_ENTRY_CALLBACK
-void USB_DP_ISR_EntryCallback(void); // in PSoC_USB.c
+void USB_DP_ISR_EntryCallback(void); // in core.c

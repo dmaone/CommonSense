@@ -83,7 +83,7 @@ void serial_tick(void) {
 #endif
 }
 
-void update_serial_keyboard_report(hid_event* event) {
+void update_serial_keyboard_state(hid_event* event) {
 #ifdef HAS_EXTIF
   Sup_Pdu_t buffer;
   buffer.command =

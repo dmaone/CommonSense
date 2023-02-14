@@ -11,6 +11,7 @@
  * NO USER-SERVICEABLE PARTS INSIDE. You want config.h!
  */
 #pragma once
+#include "cytypes.h"
 
 // xprintf is no-op outside of setup mode. This switch overrides that.
 // #define XPRINTF_ALWAYS_ENABLED
@@ -70,47 +71,18 @@
 #define DEVICE_VER_MAJOR 0x01
 #define DEVICE_VER_MINOR 0x04
 
-/* Devices may append additional data to these boot reports,
- * but the first 8 bytes of keyboard reports
- * and the first 3 bytes of mouse reports
- * must conform to the format defined by the Boot Report descriptor
- * in order for the data to be correctly interpreted by the BIOS.
- * -- HID Spec, v1.11, Appendix B: "Boot Interface Descriptors"
- *
- * The BIOS will ignore any extensions to reports.
- * -- Same place.
- */
-#define MAX_KEYS 126
-
 // USB stuff
 #define USB_REMOTE_WAKEUP
 
-#if (CY_CPU_CORTEX_M4)
-#else
-#define KBD_KRO_LIMIT 62
 #define KBD_EP 1
-#define KBD_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_RPT_SCB
-#define KBD_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_BUF
-#define KBD_OUTBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_IN_BUF
-
-#define CONSUMER_KRO_LIMIT 8
 #define CONSUMER_EP 2
-#define CONSUMER_OUTBOX                                                        \
-  USB_DEVICE0_CONFIGURATION0_INTERFACE2_ALTERNATE0_HID_IN_BUF
-
 #define SYSTEM_EP 3
-#define SYSTEM_OUTBOX                                                          \
-  USB_DEVICE0_CONFIGURATION0_INTERFACE3_ALTERNATE0_HID_IN_BUF
-
 #define OUTBOX_EP 8
-#define CTRLR_SCB                                                              \
-  USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_OUT_RPT_SCB
-#define CTRLR_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE1_ALTERNATE0_HID_OUT_BUF
 
-#endif
+// #else
+// #define SYSTEM_OUTBOX 15
+// #endif
 #define OUTBOX_SIZE(X) (sizeof(X) - 1)
-
-IN_c2packet_t outbox;
 
 // EEPROM stuff
 psoc_eeprom_t config;
@@ -153,10 +125,6 @@ enum outputDirection {
 
 void xprintf(const char *format_p, ...);
 void ts_xprintf(const char *format_p, ...);
-
-// Expects the message prefilled in outbox. CAUTION: Overwrites first 6 bytes!
-// Wire format: [u8 cmd][u8 code][u32 systime][var payload]
-void coded_timestamped_message(uint8_t messageCode);
 
 #if SWITCH_TYPE == BEAMSPRING
 #define NORMALLY_LOW 0

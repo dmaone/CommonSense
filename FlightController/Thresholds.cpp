@@ -6,6 +6,7 @@
 #include <QSpinBox>
 
 #include "DeviceInterface.h"
+#include "Events.h"
 
 Thresholds::Thresholds(DeviceInterface& di) :
     QFrame{nullptr, Qt::Tool}, di_{di} {

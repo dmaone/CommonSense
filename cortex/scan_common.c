@@ -11,7 +11,7 @@
 #include <project.h>
 
 #include "gpio.h"
-#include "PSoC_USB.h"
+#include "io.h"
 
 #define QUEUE_SIZE 64
 // ^ MUST BE POWER OF 2!
@@ -58,11 +58,12 @@ inline void scan_register_event(uint8_t flags, uint8_t key) {
     // In setup mode all matrix events are sent via control channel, not HID.
     // This is done to prevent key spam in case of unfortunate threshold change.
     // Sanity checker should protect from this, but just in case..
-    coded_message_t* cm = (coded_message_t*)&outbox.raw;
-    mc_keypress_t* msg = (mc_keypress_t*)&cm->message;
+    coded_message_t cm;
+    cm.messageCode = MC_KEYPRESS;
+    mc_keypress_t* msg = (mc_keypress_t*)&cm.message;
     msg->key = key;
     msg->flags = flags;
-    coded_timestamped_message(MC_KEYPRESS);
+    coded_timestamped_message(&cm);
     return;
   }
 
@@ -215,6 +216,7 @@ void scan_common_tick() {
 
 void report_matrix_readouts(void) {
   uint8_t idx = 0;
+  IN_c2packet_t outbox;
   for (uint8 i = 0; i < MATRIX_ROWS; i++) {
     outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
     outbox.payload[0] = i;
@@ -222,7 +224,7 @@ void report_matrix_readouts(void) {
     for (uint8_t j = 0; j < MATRIX_COLS; j++) {
       outbox.payload[2 + j] = matrix[idx++];
     }
-    usb_send_c2_blocking();
+    io_c2_blocking(&outbox);
   }
 }
 
@@ -232,6 +234,7 @@ void scan_report_insanity() {
     cur_row = MATRIX_ROWS;
   }
   --cur_row;
+  IN_c2packet_t outbox;
   outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
   outbox.payload[0] = cur_row;
   outbox.payload[1] = MATRIX_COLS;
@@ -243,7 +246,7 @@ void scan_report_insanity() {
         TEST_BIT(matrix_status[sc >> SCAN_ROW_SHIFT], sc & SCAN_COL_MASK) ? 1
                                                                           : 0;
   }
-  usb_send_c2_blocking();
+  io_c2_blocking(&outbox);
 }
 
 #undef BUF_NEXT

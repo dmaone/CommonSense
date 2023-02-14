@@ -7,6 +7,8 @@
  * published by the Free Software Foundation.
  */
 
+#pragma once
+
 /*
  * pin assignment: direct order, aligned to the right of ADC.
  * for dual ADCs it means column X..11, X+12..23
