@@ -116,14 +116,25 @@ void settings_save(void) {
   settings_sanitize();
   EEPROM_Start();
   CyDelayUs(5);
-  EEPROM_UpdateTemperature();
+  EEPROM_UpdateTemperature(); // Unlikely to rise 10C during operation.
   xprintf("Updating EEPROM GO!");
-  uint16 bytes_modified = 0;
-  for (uint16 i = 0; i < EEPROM_BYTESIZE; i++)
-    if (config.raw[i] != EEPROM_ReadByte(i)) {
-      EEPROM_WriteByte(config.raw[i], i);
-      bytes_modified++;
+  uint16_t bytes_modified = 0;
+  uint8_t blocks_written = 0;
+  for (uint8_t row = 0; row < (EEPROM_BYTESIZE >> 4); row++) {
+    uint16_t row_start = row << 4;
+    uint8_t* rowData = config.raw + row_start;
+    bool needs_write = false;
+    for (uint8_t i = 0; i < 16; i++) {
+      if (rowData[i] != EEPROM_ReadByte(row_start + i)) {
+        needs_write |= true;
+        bytes_modified++;
+      }
     }
+    if (needs_write) {
+      EEPROM_Write(rowData, row);
+      blocks_written++;
+    }
+  }
   EEPROM_Stop();
-  xprintf("Written %d bytes!", bytes_modified);
+  xprintf("Written %d bytes/%d blocks!", bytes_modified, blocks_written);
 }
