@@ -10,6 +10,30 @@
 #include "hid.h"
 #include "io.h"
 
+/*
+ * Internal state storage. Must be longer than conceivable number of
+ * simultaneously pressed keys. USB HID spec requires whole report to say
+ * "Keyboard Rollover Error" when it happens. OS (Windows at least) will
+ * maintain last known state before KRO. Currently there's a semi-bug - if you
+ * set KRO lower than OUTBOX_SIZE, you'll see keycodes beyond KRO limit. It's a
+ * semi-bug because you're supposed to set KRO limit to match your packet size -
+ * hence match OUTBOX_SIZE.
+ */
+union {
+  struct {
+    uint8_t mods;
+    uint8_t reserved;
+    uint8_t keys[MAX_KEYS];
+  } __attribute__((packed));
+  uint8_t raw[MAX_KEYS + 2];
+} keyboard_state;
+uint8_t keys_pressed;
+
+// Consumer or system reports are not expected to be tested to KRO limit.
+uint16_t consumer_state[CONSUMER_KRO_LIMIT];
+uint8_t system_state[SYSTEM_KRO_LIMIT];
+
+
 void hid_init(void) {
   memset(keyboard_state.raw, 0, sizeof keyboard_state.raw);
   keys_pressed = 0;
@@ -21,7 +45,7 @@ void hid_init(void) {
   memset(R##_state, 0, sizeof R##_state);                                      \
   if (memcmp(R##_state, R##_report, sizeof R##_report) != 0) {                 \
     memset(R##_report, 0, sizeof R##_report);                                  \
-    IO_FUNCNAME(R)((void*)R##_report);                                                \
+    IO_FUNCNAME(R)();                                                \
   }
 
 /*
@@ -32,7 +56,7 @@ void hid_reset_reports(void) {
   memset(keyboard_state.raw, 0, sizeof(keyboard_state.raw));
   if (memcmp(keyboard_state.raw, keyboard_report, sizeof(keyboard_report))) {
     memset(keyboard_report, 0, sizeof(keyboard_report));
-    io_keyboard((void*)keyboard_report);
+    io_keyboard();
   }
   keys_pressed = 0;
   RESET_SINGLE(consumer)
@@ -85,12 +109,12 @@ void hid_update_keyboard(hid_event* event) {
     keyboard_release(event->code);
   }
   memcpy(keyboard_report, keyboard_state.raw, sizeof(keyboard_report));
-  if (keys_pressed > KBD_KRO_LIMIT) {
+  if (keys_pressed > io_kro_limit) {
     // on rollover error ALL keys must report ERO (Error: Rollover).
     memset(keyboard_report + 2, 1, KBD_KRO_LIMIT); // ERO is scancode 1.
     xprintf("Keyboard rollover error");
   }
-  io_keyboard(keyboard_report);
+  io_keyboard();
 }
 
 const uint16_t consumer_mapping[16] = {
@@ -153,7 +177,7 @@ void hid_update_consumer(hid_event* event) {
     consumer_release(code);
   }
   memcpy(consumer_report, consumer_state, sizeof(consumer_report));
-  io_consumer(consumer_report);
+  io_consumer();
 }
 
 void hid_update_system(hid_event* event) {
@@ -165,5 +189,5 @@ void hid_update_system(hid_event* event) {
   }
   memcpy(system_report, system_state, sizeof(system_report));
   // xprintf("System: %d", SYSTEM_OUTBOX[0]);  
-  io_system(system_report);
+  io_system();
 }

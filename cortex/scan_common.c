@@ -213,40 +213,55 @@ void scan_common_tick() {
   scan_check_matrix();
 }
 
-
 void report_matrix_readouts(void) {
-  uint8_t idx = 0;
+  if (!io_has_space()) {
+    return;
+  }
   IN_c2packet_t outbox;
-  for (uint8 i = 0; i < MATRIX_ROWS; i++) {
-    outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
-    outbox.payload[0] = i;
-    outbox.payload[1] = MATRIX_COLS;
-    for (uint8_t j = 0; j < MATRIX_COLS; j++) {
-      outbox.payload[2 + j] = matrix[idx++];
+  uint8_t start_key = 0;
+  uint8_t current_key = 0;
+  outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
+  while(current_key < sizeof(matrix)) {
+    uint8_t local_index = current_key - start_key + 1;
+    outbox.payload[local_index] = matrix[current_key++];
+    if (local_index == sizeof(outbox.payload) - 1) {
+      // we just modified local_index, so sizeof(payload) would be too far.
+      outbox.payload[0] = start_key;
+      io_c2(&outbox);
+      start_key = current_key;
     }
-    io_c2_blocking(&outbox);
+  }
+  // current_key == start_key here is only when there's no data to send.
+  if (current_key != start_key) {
+    outbox.payload[0] = start_key;
+    io_c2(&outbox);
   }
 }
 
 void scan_report_insanity() {
-  static uint8_t cur_row = 0;
-  if (cur_row == 0) {
-    cur_row = MATRIX_ROWS;
+  if (!io_has_space()) {
+    return;
   }
-  --cur_row;
   IN_c2packet_t outbox;
+  uint8_t start_key = 0;
+  uint8_t sc = 0;
   outbox.response_type = C2RESPONSE_TELEMETRY_ROW;
-  outbox.payload[0] = cur_row;
-  outbox.payload[1] = MATRIX_COLS;
-  uint8_t start_index = MATRIX_COLS * cur_row;
-
-  for (uint8_t i = 0; i < MATRIX_COLS; ++i) {
-    uint8_t sc = start_index + i;
-    outbox.payload[2 + i] =
-        TEST_BIT(matrix_status[sc >> SCAN_ROW_SHIFT], sc & SCAN_COL_MASK) ? 1
-                                                                          : 0;
+  while(sc < sizeof(matrix)) {
+    uint8_t local_index = sc - start_key + 1;
+    outbox.payload[local_index] =
+        TEST_BIT(matrix_status[sc >> SCAN_ROW_SHIFT], sc & SCAN_COL_MASK) ? 1 : 0;
+    sc++;
+    if (local_index == sizeof(outbox.payload) - 1) {
+      outbox.payload[0] = start_key;
+      io_c2(&outbox);
+      start_key = sc;
+    }
   }
-  io_c2_blocking(&outbox);
+  // sc == start_key here is only when there's no data to send.
+  if (sc != start_key) {
+    outbox.payload[0] = start_key;
+    io_c2(&outbox);
+  }
 }
 
 #undef BUF_NEXT

@@ -215,13 +215,13 @@ inline void main_loop() {
           scan_sanity_check();
         }
         scan_tick();
-        if (--ticksToAutonomy < 0) {
+        if ((ticksToAutonomy <= SETUP_TIMEOUT) && (--ticksToAutonomy < 0)) {
           // If FlightController doesn't poll us anymore - go to normal mode.
           ticksToAutonomy = LARGE_ENOUGH_32;
 
           status_register = 0; // Clear EVERYTHING
-          scan_common_start(SANITY_CHECK_DURATION); // pipeline init doesn't
-
+          CyDelay(10); // Ensure scan cycle ended by interrupt handler
+          scan_start();
           pipeline_init();
           // Should reapply config - but firmware seems to crash if I do.
           // apply_config();

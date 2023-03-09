@@ -30,6 +30,7 @@ typedef struct {
 #define USB_BUFFER_PREV(X) ((X + USB_BUFFER_END) & USB_BUFFER_END)
 // ^^^ THIS MUST EQUAL 2^n-1!!! Used as bitmask.
 
+#define KBD_INTERFACE 0
 #define KBD_SCB USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_RPT_SCB
 #define KBD_INBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_OUT_BUF
 #define KBD_OUTBOX USB_DEVICE0_CONFIGURATION0_INTERFACE0_ALTERNATE0_HID_IN_BUF
@@ -64,9 +65,11 @@ void report_status(void) {
 }
 
 void process_ewo(OUT_c2packet_t *inbox) {
+  bool scan_active = STATUS_IS(C2DEVSTATUS_SCAN_ENABLED);
   status_register = inbox->payload[0];
   report_status();
-  if (STATUS_IS(C2DEVSTATUS_SCAN_ENABLED)) {
+  // Avoid scan_start if already started - dangerous to do so.
+  if (!scan_active && STATUS_IS(C2DEVSTATUS_SCAN_ENABLED)) {
     scan_start();
   }
 }
@@ -132,9 +135,9 @@ void usbSend() {
   }
   while (usbSendingWritePos != usbSendingReadPos) {
     uint8_t pos = USB_BUFFER_NEXT(usbSendingReadPos);
-    if (USB_GetEPState(usbSendingQueue[pos].EP) == USB_IN_BUFFER_EMPTY) {
-      USB_LoadInEP(usbSendingQueue[pos].EP,
-          usbSendingQueue[pos].data, usbSendingQueue[pos].len);
+    UsbPdu_t* item = &usbSendingQueue[pos];
+    if (USB_GetEPState(item->EP) == USB_IN_BUFFER_EMPTY) {
+      USB_LoadInEP(item->EP, item->data, item->len);
       usbSendingReadPos = pos;
     } else {
       break;
@@ -142,7 +145,20 @@ void usbSend() {
   }
 }
 
+uint8_t divisor = 0;
+bool io_has_space(void) {
+  // figuring out if IO is busy based on queue length doesn't work.
+  // So we'll just ratelimit to 1/10 of the requested (which is every tick).
+  if (++divisor > 10) {
+    divisor = 0;
+    return true;
+  }
+  return false;
+}
+
 void io_init(void) {
+  usbSendingReadPos = 0;
+  usbSendingWritePos = 0;
   pipeline_init();
 #ifndef SELF_POWERED
   USB_Start(0u, USB_5V_OPERATION);
@@ -150,6 +166,19 @@ void io_init(void) {
 }
 
 void io_tick(void) {
+  /* This doesn't work - supposed to, but doesn't.
+  if (USB_GetEPState(OUTBOX_EP) == USB_OUT_BUFFER_FULL) {
+    OUT_c2packet_t inbox;
+    USB_ReadOutEP(OUTBOX_EP, inbox.raw, 64);
+    usb_receive(&inbox);
+  }
+  if (USB_GetEPState(KBD_EP) == USB_OUT_BUFFER_FULL) {
+    led_status = KBD_INBOX[0];
+    KBD_SCB.status = USB_XFER_IDLE;
+    gpio_setLEDs(led_status);
+  }
+  */
+  io_kro_limit = USB_GetProtocol(KBD_INTERFACE) ? KBD_KRO_LIMIT : 6;  // TODO update on change only
   uint8_t enableInterrupts = CyEnterCriticalSection();
   if (CTRLR_SCB.status == USB_XFER_STATUS_ACK) {
     CTRLR_SCB.status = USB_XFER_IDLE;
@@ -161,6 +190,12 @@ void io_tick(void) {
     gpio_setLEDs(led_status);
   }
   CyExitCriticalSection(enableInterrupts);
+  if (USB_UpdateHIDTimer(KBD_INTERFACE) == USB_IDLE_TIMER_EXPIRED) {
+    // We must report periodically even if no change happened (USB HID 7.2.4)
+    io_keyboard();
+    io_consumer();
+    io_system();
+  }
   usbSend();
 }
 
@@ -214,29 +249,22 @@ void coded_timestamped_message(coded_message_t* msg) {
 #define _WIPE_OUTBOX(OUTBOX)
 #endif
 
-#define USB_SEND_REPORT(TYPE)                                                  \
+#define USB_SEND_REPORT(TYPE, BUFFER)                                          \
   _WIPE_OUTBOX(TYPE##_OUTBOX);                                                 \
-  usbEnqueue(TYPE##_EP, OUTBOX_SIZE(TYPE##_OUTBOX), data);
+  usbEnqueue(TYPE##_EP, OUTBOX_SIZE(TYPE##_OUTBOX), (void*)BUFFER);
 
-inline void io_keyboard(void* data) {
-  USB_SEND_REPORT(KBD);
+inline void io_keyboard() {
+  USB_SEND_REPORT(KBD, keyboard_report);
 }
 
-inline void io_consumer(void* data) {
-  USB_SEND_REPORT(CONSUMER);
+inline void io_consumer() {
+  USB_SEND_REPORT(CONSUMER, consumer_report);
 }
 
-inline void io_system(void* data) {
-  USB_SEND_REPORT(SYSTEM);
+inline void io_system() {
+  USB_SEND_REPORT(SYSTEM, system_report);
 }
 
 void io_c2(IN_c2packet_t* data) {
   usbEnqueue(OUTBOX_EP, sizeof(data->raw), data->raw);
-}
-
-void io_c2_blocking(IN_c2packet_t* data) {
-  io_c2(data);
-  while (usbSendingReadPos != usbSendingWritePos) {
-    usbSend();
-  }
 }

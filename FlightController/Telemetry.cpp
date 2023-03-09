@@ -15,10 +15,10 @@
 
 namespace {
 
-const QString kEmptyStatLabel{"--- --- ---"};
+Q_GLOBAL_STATIC_WITH_ARGS(QString, kEmptyStatLabel, {"--- --- ---"});
 
-const QString kStart{"Start!"};
-const QString kStop{"Stop!"};
+Q_GLOBAL_STATIC_WITH_ARGS(QString, kStart, {"Start!"});
+Q_GLOBAL_STATIC_WITH_ARGS(QString, kStop, {"Stop!"});
 
 } // namespace
 
@@ -71,7 +71,7 @@ void Telemetry::init() {
       cell->readout.setMinimumHeight(25);
       cell->subLayout.addWidget(&cell->readout);
 
-      cell->stats.setText(kEmptyStatLabel);
+      cell->stats.setText(*kEmptyStatLabel);
       cell->subLayout.addWidget(&cell->stats, 0, Qt::AlignRight);
 
       grid_->addWidget(&cell->widget, i, j, 1, 1);
@@ -102,6 +102,52 @@ Telemetry::Cell& Telemetry::getCell_(uint8_t row, uint8_t col) {
   return cells_.at(row * di_.config.numCols + col);
 }
 
+void Telemetry::PaintCell(uint8_t row, uint8_t col, uint8_t level) {
+  auto& cell = getCell_(row, col);
+  const auto thr = di_.config.thresholds[row][col];
+  if (thr == SKIP_SCAN) {
+    cell.readout.setStyleSheet("background-color: #999999;");
+  } else if (di_.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
+    if (level > 0) {
+      cell.readout.setStyleSheet("color: black; background-color: #ff3333;");
+    } else {
+      cell.readout.setStyleSheet("");
+    }
+  } else {
+    if (di_.config.capabilities.isNormallyLow ? level > thr : level < thr) {
+      cell.readout.setStyleSheet("color: black; background-color: #33ff33;");
+    } else {
+      cell.readout.setStyleSheet("");
+    }
+  }
+  cell.now = level;
+  cell.min = std::min(level, cell.min);
+  cell.max = std::max(level, cell.max);
+  cell.sum += level;
+  cell.count++;
+
+  cell.stats.setText(QString("%1 %2 %3")
+      .arg(cell.min).arg(cell.sum / cell.count).arg(cell.max));
+
+  switch (displayMode_) {
+  case DisplayNow:
+    cell.readout.display(cell.now);
+    break;
+  case DisplayMin:
+    cell.readout.display(cell.min);
+    break;
+  case DisplayMax:
+    cell.readout.display(cell.max);
+    break;
+  case DisplayAvg:
+    cell.readout.display(((uint8_t)(cell.sum / cell.count)));
+    break;
+  default:
+    qCritical() << "Unknown display mode selected!!";
+    close();
+  }
+}
+
 bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
   if (initialized_.load() == false) {
     return false;
@@ -117,53 +163,23 @@ bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
     --warmupRows_;
     return true;
   }
-
-  uint8_t row = pl->at(1);
-  uint8_t max_cols = pl->at(2);
-  for (uint8_t i = 0; i < max_cols; ++i) {
-    auto& cell = getCell_(row, i);
-    uint8_t level = pl->constData()[3 + i];
-    const auto thr = di_.config.thresholds[row][i];
-    if (thr == SKIP_SCAN) {
-      cell.readout.setStyleSheet("background-color: #999999;");
-    } else if (di_.getStatusBit(deviceStatus::C2DEVSTATUS_INSANE)) {
-      if (level > 0) {
-        cell.readout.setStyleSheet("color: black; background-color: #ff3333;");
-      } else {
-        cell.readout.setStyleSheet("");
-      }
-    } else {
-      if (di_.config.capabilities.isNormallyLow ? level > thr : level < thr) {
-        cell.readout.setStyleSheet("color: black; background-color: #33ff33;");
-      } else {
-        cell.readout.setStyleSheet("");
-      }
+  if (di_.firmwareMajor == 1) {
+    // v1 format: <row> <numCols> <value> [<value>...]
+    uint8_t row = pl->at(1);
+    uint8_t max_cols = pl->at(2);
+    for (uint8_t i = 0; i < max_cols; ++i) {
+      PaintCell(row, i, pl->constData()[3 + i]);
     }
-    cell.now = level;
-    cell.min = std::min(level, cell.min);
-    cell.max = std::max(level, cell.max);
-    cell.sum += level;
-    cell.count++;
-
-    cell.stats.setText(QString("%1 %2 %3")
-        .arg(cell.min).arg(cell.sum / cell.count).arg(cell.max));
-
-    switch (displayMode_) {
-    case DisplayNow:
-      cell.readout.display(cell.now);
-      break;
-    case DisplayMin:
-      cell.readout.display(cell.min);
-      break;
-    case DisplayMax:
-      cell.readout.display(cell.max);
-      break;
-    case DisplayAvg:
-      cell.readout.display(((uint8_t)(cell.sum / cell.count)));
-      break;
-    default:
-      qCritical() << "Unknown display mode selected!!";
-      close();
+  } else {
+    // New format: <start key> <value> [<value>...]
+    uint8_t start_key = pl->at(1);
+    uint8_t kDataOffset{2};
+    for (uint8_t i = 0; i <= di_.packetSize - kDataOffset; i++) {
+      auto [row, col] = di_.config.toRowCol(start_key + i);
+      if (row >= di_.config.numRows) {
+        break;  // Last packet will contain extra data, ignore.
+      }
+      PaintCell(row, col, pl->constData()[kDataOffset + i]);
     }
   }
   return false;
@@ -171,10 +187,10 @@ bool Telemetry::eventFilter(QObject* /* obj */, QEvent* event) {
 
 void Telemetry::enableReporting_(bool newState) {
   if (initialized_.load() == false) {
-    ui->runButton->setText(kStart);
+    ui->runButton->setText(*kStart);
     isActive_ = false;
   }
-  ui->runButton->setText(newState ? kStop : kStart);
+  ui->runButton->setText(newState ? *kStop : *kStart);
   if (isActive_ == newState) {
     return;
   }
@@ -246,7 +262,7 @@ void Telemetry::resetCells_() {
     cell.min = 255;
     cell.max = 0;
     cell.readout.display(0);
-    cell.stats.setText(kEmptyStatLabel);
+    cell.stats.setText(*kEmptyStatLabel);
   }
   warmupRows_ = ABSOLUTE_MAX_ROWS; // Workaround - stale data may come in couple
                                    // of first rows.

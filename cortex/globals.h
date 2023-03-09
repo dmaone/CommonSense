@@ -68,8 +68,8 @@
 #include "../c2/c2_protocol.h"
 #include "../c2/nvram.h"
 
-#define DEVICE_VER_MAJOR 0x01
-#define DEVICE_VER_MINOR 0x04
+#define DEVICE_VER_MAJOR 0x02
+#define DEVICE_VER_MINOR 0x00
 
 // USB stuff
 #define USB_REMOTE_WAKEUP

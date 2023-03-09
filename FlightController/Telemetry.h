@@ -68,4 +68,5 @@ class Telemetry : public QFrame {
 
   Cell& getCell_(uint8_t row, uint8_t col);
   void enableReporting_(bool newState);
+  void PaintCell(uint8_t row, uint8_t col, uint8_t level);
 };

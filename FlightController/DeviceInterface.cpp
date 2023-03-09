@@ -374,7 +374,7 @@ bool DeviceInterface::sendPacket_() {
     outbox_.pop();
   }
   std::vector<uint8_t> buf{};
-  buf.reserve(packet_size_);
+  buf.reserve(packetSize);
   buf.emplace_back(kNoReport); // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
@@ -385,7 +385,7 @@ bool DeviceInterface::sendPacket_() {
     buf.emplace_back(cmd.raw[i]);
   }
   if (kDebugUsbTraffic) {
-    qDebug() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
+    qInfo() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
   }
   std::lock_guard<std::mutex> lock{deviceLock_};
   return sendRawPacket_DANGER_(buf);
@@ -393,7 +393,7 @@ bool DeviceInterface::sendPacket_() {
 
 bool DeviceInterface::receivePacket_() {
   std::vector<uint8_t> buffer{};
-  buffer.resize(packet_size_, 0);
+  buffer.resize(packetSize, 0);
 
   int bytesRead;
   {
@@ -407,10 +407,10 @@ bool DeviceInterface::receivePacket_() {
     scheduleDeviceRelease_.store(true);
     return true;
   }
-  buffer.resize(bytesRead);
   if (kDebugUsbTraffic) {
-    qDebug() << "Got " << bytesRead << " b, cmd " << buffer.front();
+    qInfo() << "Got" << bytesRead << "b, cmd" << buffer.front() << "/" << buffer[1];
   }
+  buffer.resize(bytesRead);
   cts_.store(true);
   if (buffer.front() != C2RESPONSE_STATUS) {
     rx = true;
@@ -437,7 +437,7 @@ void DeviceInterface::initDevice_() {
   hid_set_nonblocking(device_, 1);
   // We want to put device into setup mode AND trigger scanner init on connect.
   if (mode_ == DeviceInterfaceBootloader) {
-    packet_size_ = 65; // This is for standard Cypress USB bootloader only
+    packetSize = 65; // This is for standard Cypress USB bootloader only
     setState_(BootloaderConnected);
   } else {
     std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};
@@ -456,9 +456,9 @@ void DeviceInterface::initDevice_() {
       scheduleDeviceRelease_.store(true);
       return;
     }
-    packet_size_ = bytesRead;
-    qInfo() << "Transport MTU is" << packet_size_;
-    config.reset(packet_size_);
+    packetSize = bytesRead;
+    qInfo() << "Transport MTU is" << packetSize;
+    config.reset(packetSize);
 
     // Only flipping of the scan bit reinits scanner.
     buf.back() += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
