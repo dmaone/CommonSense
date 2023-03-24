@@ -23,4 +23,4 @@ If you want to add tap dance macros, or RGB LED support, or "port it to QMK" - b
 
 There are two exceptions to the above, but you know who you are, because I explicitly promised you.
 
-This is code-only repo, to keep it small. Instructions and pics are moved to [CSI](http://github.com/dmaone/CSI) repo to keep this repo nible.
+This is code-only repo, to keep it small. Instructions and pics are moved to [CSI](http://github.com/dmaone/CSI) repo to keep this repo nimble.
