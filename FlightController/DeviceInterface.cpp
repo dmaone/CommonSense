@@ -496,12 +496,12 @@ DeviceInterface::DetectedDevices DeviceInterface::listDevices_() {
 #else
     if (d->usage_page == 0x6213 && d->usage == 0x88) {
 #endif
-      // if (d->bus_type != HID_API_BUS_USB) {
+      if (d->bus_type == HID_API_BUS_USB) {
       auto devname = QString();
       devname += d->bus_type == HID_API_BUS_USB ? "[USB] " : "[BLE] ";
       devname += QString::fromWCharArray(d->serial_number);
       retval.keyboards.push_back(std::make_pair(devname, d->path));
-      //}
+      }
     } else if (d->vendor_id == 0x04b4 &&
           (d->product_id == 0xb71d || d->product_id == 0xf13b)) {
       retval.bootloaders.push_back(std::make_pair(

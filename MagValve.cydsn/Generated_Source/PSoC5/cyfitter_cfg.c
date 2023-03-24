@@ -280,7 +280,7 @@ static void AnalogSetDefault(void)
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC1_SW2, 0x08u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC2_SW2, 0x04u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_DAC3_SW2, 0x04u);
-	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP0_SW0, 0x10u);
+	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP0_SW0, 0x40u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP0_SW6, 0x04u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP1_SW3, 0x01u);
 	CY_SET_XTND_REG8((void CYFAR *)CYREG_CMP1_SW6, 0x08u);
@@ -349,7 +349,7 @@ void cyfitter_cfg(void)
 {
 	/* IOPINS0_0 Address: CYREG_PRT0_DM0 Size (bytes): 8 */
 	static const uint8 CYCODE BS_IOPINS0_0_VAL[] = {
-		0x00u, 0x08u, 0x6Bu, 0x6Bu, 0x00u, 0x63u, 0x00u, 0x00u};
+		0x00u, 0x00u, 0x63u, 0x63u, 0x00u, 0x63u, 0x00u, 0x00u};
 
 	/* IOPINS0_7 Address: CYREG_PRT12_DR Size (bytes): 10 */
 	static const uint8 CYCODE BS_IOPINS0_7_VAL[] = {

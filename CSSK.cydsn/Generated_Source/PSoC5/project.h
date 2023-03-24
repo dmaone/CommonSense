@@ -51,8 +51,6 @@
 #include "Sup_I2C.h"
 #include "Sup_I2C_PVT.h"
 #include "ILO_Trim.h"
-#include "HPWR_aliases.h"
-#include "HPWR.h"
 #include "DriveReg2.h"
 #include "USB_VBUS_aliases.h"
 #include "USB_VBUS.h"

@@ -11,7 +11,9 @@
  * NO USER-SERVICEABLE PARTS INSIDE. You want config.h!
  */
 #pragma once
+#if __has_include("cytypes.h")
 #include "cytypes.h"
+#endif
 
 // xprintf is no-op outside of setup mode. This switch overrides that.
 // #define XPRINTF_ALWAYS_ENABLED
