@@ -239,9 +239,6 @@ void report_matrix_readouts(void) {
 }
 
 void scan_report_insanity() {
-  if (!io_has_space()) {
-    return;
-  }
   IN_c2packet_t outbox;
   uint8_t start_key = 0;
   uint8_t sc = 0;

@@ -150,27 +150,6 @@
       <property name="spacing">
        <number>0</number>
       </property>
-      <item row="1" column="9">
-       <widget class="QLabel" name="degreesC">
-        <property name="text">
-         <string>°C </string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="8">
-       <widget class="QLabel" name="tempGauge">
-        <property name="text">
-         <string>+30</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="10">
-       <widget class="QLabel" name="txLabel">
-        <property name="text">
-         <string> TX </string>
-        </property>
-       </widget>
-      </item>
       <item row="1" column="0">
        <widget class="QLabel" name="swVersionLegend">
         <property name="text">
@@ -178,77 +157,42 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="13">
+      <item row="1" column="5">
+       <widget class="QLabel" name="typeLabel">
+        <property name="text">
+         <string>UNKNOWN</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="20">
        <widget class="QLabel" name="rxSpacer">
         <property name="text">
          <string/>
         </property>
        </widget>
       </item>
-      <item row="1" column="12">
-       <widget class="QLabel" name="rxLabel">
+      <item row="1" column="3">
+       <widget class="QLabel" name="fwVersionLabel">
         <property name="text">
-         <string> RX </string>
+         <string>-.-</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="14">
-       <widget class="QToolButton" name="scanButton">
-        <property name="enabled">
-         <bool>true</bool>
-        </property>
-        <property name="sizePolicy">
-         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-          <horstretch>0</horstretch>
-          <verstretch>0</verstretch>
-         </sizepolicy>
-        </property>
+      <item row="1" column="11">
+       <widget class="QLabel" name="tempGauge">
         <property name="text">
-         <string>Scan</string>
-        </property>
-        <property name="toolButtonStyle">
-         <enum>Qt::ToolButtonTextOnly</enum>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
+         <string>+30</string>
         </property>
        </widget>
       </item>
-      <item row="1" column="18">
+      <item row="1" column="25">
        <widget class="QLabel" name="insaneLabel">
         <property name="text">
          <string> UNSAFE </string>
         </property>
        </widget>
       </item>
-      <item row="1" column="15">
-       <widget class="QToolButton" name="outputButton">
-        <property name="text">
-         <string>Output</string>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="16">
-       <widget class="QToolButton" name="setupButton">
-        <property name="text">
-         <string>Setup</string>
-        </property>
-        <property name="autoRaise">
-         <bool>true</bool>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="11">
-       <widget class="QLabel" name="txSpacer">
-        <property name="text">
-         <string/>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="6">
+      <item row="1" column="8">
        <spacer name="horizontalSpacer">
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
@@ -261,6 +205,51 @@
         </property>
        </spacer>
       </item>
+      <item row="1" column="18">
+       <widget class="QLabel" name="txSpacer">
+        <property name="text">
+         <string/>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="23">
+       <widget class="QToolButton" name="setupButton">
+        <property name="text">
+         <string>Setup</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="24">
+       <widget class="QLabel" name="telemetryLabel">
+        <property name="text">
+         <string> Telemetry  </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="19">
+       <widget class="QLabel" name="rxLabel">
+        <property name="text">
+         <string> RX </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="14">
+       <widget class="QLabel" name="sysTimeLabel">
+        <property name="text">
+         <string>--</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="12">
+       <widget class="QLabel" name="degreesC">
+        <property name="text">
+         <string>°C </string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="2">
        <widget class="QLabel" name="fwVersionLegend">
         <property name="text">
@@ -268,21 +257,7 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="3">
-       <widget class="QLabel" name="fwVersionLabel">
-        <property name="text">
-         <string>-.-</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="17">
-       <widget class="QLabel" name="telemetryLabel">
-        <property name="text">
-         <string> Telemetry  </string>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0" colspan="19">
+      <item row="0" column="0" colspan="26">
        <widget class="LogViewer" name="LogViewport">
         <property name="font">
          <font>
@@ -310,17 +285,70 @@
         </property>
        </widget>
       </item>
+      <item row="1" column="22">
+       <widget class="QToolButton" name="outputButton">
+        <property name="text">
+         <string>Output</string>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="17">
+       <widget class="QLabel" name="txLabel">
+        <property name="text">
+         <string> TX </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="15">
+       <widget class="QLabel" name="sysClockDriftLegend">
+        <property name="text">
+         <string> Drift:</string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="21">
+       <widget class="QToolButton" name="scanButton">
+        <property name="enabled">
+         <bool>true</bool>
+        </property>
+        <property name="sizePolicy">
+         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+          <horstretch>0</horstretch>
+          <verstretch>0</verstretch>
+         </sizepolicy>
+        </property>
+        <property name="text">
+         <string>Scan</string>
+        </property>
+        <property name="toolButtonStyle">
+         <enum>Qt::ToolButtonTextOnly</enum>
+        </property>
+        <property name="autoRaise">
+         <bool>true</bool>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="10">
+       <widget class="QLabel" name="latencyLabel">
+        <property name="text">
+         <string>0 ms </string>
+        </property>
+       </widget>
+      </item>
+      <item row="1" column="13">
+       <widget class="QLabel" name="sysTimeLegend">
+        <property name="text">
+         <string> SysTime:</string>
+        </property>
+       </widget>
+      </item>
       <item row="1" column="1">
        <widget class="QLabel" name="swVersionLabel">
         <property name="text">
          <string>-.-</string>
-        </property>
-       </widget>
-      </item>
-      <item row="1" column="7">
-       <widget class="QLabel" name="latencyLabel">
-        <property name="text">
-         <string>0 ms </string>
         </property>
        </widget>
       </item>
@@ -331,10 +359,10 @@
         </property>
        </widget>
       </item>
-      <item row="1" column="5">
-       <widget class="QLabel" name="typeLabel">
+      <item row="1" column="16">
+       <widget class="QLabel" name="sysClockDriftLabel">
         <property name="text">
-         <string>UNKNOWN</string>
+         <string>--</string>
         </property>
        </widget>
       </item>
@@ -356,7 +384,7 @@
      <x>0</x>
      <y>0</y>
      <width>780</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <widget class="QMenu" name="menu_File">

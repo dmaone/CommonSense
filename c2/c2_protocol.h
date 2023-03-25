@@ -125,9 +125,14 @@ typedef union {
     uint8_t status;
     uint8_t versionMajor;
     uint8_t versionMinor;
+    uint8_t dieTempSign;
     uint8_t dieTemp;
+    uint8_t padding0;
+    uint8_t padding1;
+    uint8_t padding2;
+    uint32_t sysTime;
   } __attribute__((packed));
-  uint8_t raw[4];
+  uint8_t raw[12];
 } device_status_t;
 
 typedef union {

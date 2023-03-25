@@ -19,6 +19,12 @@
 // for xprintf - stdio + stdarg
 #include <stdarg.h>
 
+// only allow telemetry every Nth USB tick - see io_has_space.
+// This is needed so host isn't too overwhelmed to timely send GET_STATUS
+// (if it doesn't - keyboard goes to autonomous mode and telemetry stops!)
+#define TELEMETRY_RATELIMIT 10
+volatile uint8_t telemetry_cooldown = TELEMETRY_RATELIMIT;  // Block until first io_tick
+
 typedef struct {
   uint8_t EP;
   uint8_t len;
@@ -52,12 +58,14 @@ uint8_t usbSendingWritePos = 0;
 void report_status(void) {
   IN_c2packet_t outbox;
   outbox.response_type = C2RESPONSE_STATUS;
-  outbox.payload[0] = status_register;
-  outbox.payload[1] = DEVICE_VER_MAJOR;
-  outbox.payload[2] = DEVICE_VER_MINOR;
+  device_status_t* deviceStatus = (void *)&outbox.payload;
+  deviceStatus->status = status_register;
+  deviceStatus->versionMajor = DEVICE_VER_MAJOR;
+  deviceStatus->versionMinor = DEVICE_VER_MINOR;
   EEPROM_UpdateTemperature();
-  outbox.payload[3] = dieTemperature[0];
-  outbox.payload[4] = dieTemperature[1];
+  deviceStatus->dieTempSign = dieTemperature[0];
+  deviceStatus->dieTemp = dieTemperature[1];
+  deviceStatus->sysTime = systime;
   io_c2(&outbox);
   // xprintf("time: %d", systime);
   // xprintf("LED status: %d %d %d %d %d", led_status&0x01, led_status&0x02,
@@ -67,29 +75,27 @@ void report_status(void) {
 void process_ewo(OUT_c2packet_t *inbox) {
   bool scan_active = STATUS_IS(C2DEVSTATUS_SCAN_ENABLED);
   status_register = inbox->payload[0];
-  report_status();
   // Avoid scan_start if already started - dangerous to do so.
   if (!scan_active && STATUS_IS(C2DEVSTATUS_SCAN_ENABLED)) {
     scan_start();
   }
+  report_status();
 }
 
 void usb_receive(OUT_c2packet_t *inbox) {
   ticksToAutonomy = SETUP_TIMEOUT;
-  // ALL COMMANDS MUST GENERATE A RESPONSE OVER USB!
   switch (inbox->command) {
   case C2CMD_EWO:
     process_ewo(inbox);
     break;
   case C2CMD_GET_STATUS:
+    report_status();
     if (STATUS_IS(C2DEVSTATUS_INSANE)) {
       scan_report_insanity();
     }
-    report_status();
     break;
   case C2CMD_SET_MODE:
     FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, inbox->payload[0]);
-    report_status();
     break;
   case C2CMD_ENTER_BOOTLOADER:
     xprintf("Jumping to bootloader..");
@@ -104,7 +110,6 @@ void usb_receive(OUT_c2packet_t *inbox) {
     xprintf("Applying config..");
     SET_BIT(status_register, C2DEVSTATUS_SETUP_MODE);
     settings_apply();
-    report_status();
     xprintf("success!");
     break;
   case C2CMD_COMMIT:
@@ -115,6 +120,7 @@ void usb_receive(OUT_c2packet_t *inbox) {
     CySoftwareReset(); // Does not return, no need for break.
   case C2CMD_ENABLE_TELEMETRY:
     FORCE_BIT(status_register, C2DEVSTATUS_TELEMETRY_MODE, inbox->payload[0]);
+    FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, !inbox->payload[0]);
     scan_reset();
     break;
   default:
@@ -145,12 +151,11 @@ void usbSend() {
   }
 }
 
-uint8_t divisor = 0;
 bool io_has_space(void) {
   // figuring out if IO is busy based on queue length doesn't work.
-  // So we'll just ratelimit to 1/10 of the requested (which is every tick).
-  if (++divisor > 10) {
-    divisor = 0;
+  // So we'll just ratelimit to every 10th tick
+  if (telemetry_cooldown == 0) {
+    telemetry_cooldown = 1;
     return true;
   }
   return false;
@@ -195,6 +200,11 @@ void io_tick(void) {
     io_keyboard();
     io_consumer();
     io_system();
+  }
+  if (telemetry_cooldown > 0) {
+    if (++telemetry_cooldown > TELEMETRY_RATELIMIT) {
+      telemetry_cooldown = 0;
+    }
   }
   usbSend();
 }

@@ -48,8 +48,7 @@ void Thresholds::init() {
       cell->setMaximumWidth(80);
       auto& cellRef = *cell;
       connect(&cellRef, QOverload<int>::of(&QSpinBox::valueChanged),
-          [this, &cellRef](int){ paintCell_(cellRef); });
-
+          this, [this, &cellRef](int){ paintCell_(cellRef); });
       grid_->addWidget(&cellRef, i, j, 1, 1);
       ++cell;
     }

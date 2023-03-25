@@ -27,7 +27,8 @@ class DeviceInterface : public QObject {
     BootloaderConnected,
     DeviceConnected,
     DeviceConfigured,
-    StatusUpdated
+    StatusUpdated,
+    ThresholdsUpdated,
   };
   Q_ENUM(State)
 
@@ -45,6 +46,7 @@ class DeviceInterface : public QObject {
   void scheduleDeviceRelease() {
     scheduleDeviceRelease_.store(true);
   };
+  void updateThresholds();
 
   DeviceConfig config;
   bool scanEnabled{false};
@@ -56,6 +58,10 @@ class DeviceInterface : public QObject {
   std::atomic<bool> tx{false};
   uint8_t firmwareMajor{0};
   uint8_t firmwareMinor{0};
+  uint32_t deviceTime{0};
+  uint32_t prevDeviceTime{0};
+  uint64_t prevSysTime{0};
+  int32_t deviceDrift{0};
   QString firmwareVersion{};
   QString dieTemp{};
   QString latencyMs{};

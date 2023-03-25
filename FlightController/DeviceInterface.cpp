@@ -176,17 +176,32 @@ void DeviceInterface::processStatusReply_(QByteArray* payload) {
     qInfo() << "Received status packet runt, length: " << payload->size();
     return;
   }
-  deviceStatus_ = payload->at(1);
-  scanEnabled = payload->at(1) & (1 << C2DEVSTATUS_SCAN_ENABLED);
-  outputEnabled = payload->at(1) & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
-  setupMode = payload->at(1) & (1 << C2DEVSTATUS_SETUP_MODE);
-  matrixMonitor = payload->at(1) & (1 << C2DEVSTATUS_TELEMETRY_MODE);
-  controllerInsane = payload->at(1) & (1 << C2DEVSTATUS_INSANE);
-  firmwareMajor = payload->at(2);
-  firmwareMinor = payload->at(3);
+  device_status_t reply;
+  memcpy(reply.raw, payload->data() + 1, sizeof(reply.raw));
+  deviceStatus_ = reply.status;
+  scanEnabled = deviceStatus_ & (1 << C2DEVSTATUS_SCAN_ENABLED);
+  outputEnabled = deviceStatus_ & (1 << C2DEVSTATUS_OUTPUT_ENABLED);
+  setupMode = deviceStatus_ & (1 << C2DEVSTATUS_SETUP_MODE);
+  matrixMonitor = deviceStatus_ & (1 << C2DEVSTATUS_TELEMETRY_MODE);
+  controllerInsane = deviceStatus_ & (1 << C2DEVSTATUS_INSANE);
+  firmwareMajor = reply.versionMajor;
+  firmwareMinor = reply.versionMinor;
   firmwareVersion = QString("%1.%2").arg(firmwareMajor).arg(firmwareMinor);
-  dieTemp = QString("%1%2")
-      .arg((payload->at(4) == 1 ? '+' : '-')).arg((uint8_t)payload->at(5));
+  dieTemp = QString("%1%2").arg((reply.dieTempSign == 1 ? '+' : '-')).arg(reply.dieTemp);
+  prevDeviceTime = deviceTime;
+  deviceTime = reply.sysTime;
+  auto now = QDateTime::currentDateTime().toMSecsSinceEpoch();
+  int64_t deviceDiff = deviceTime - prevDeviceTime;
+  auto hostDiff = now - prevSysTime;
+  if (deviceDiff < 0 && prevDeviceTime < (UINT32_MAX - 10000)) {
+    // suppress crash detection if too close to rollover
+    qWarning() << "Controller crash detected" << deviceTime << "ms ago";
+  }
+  prevDeviceTime = deviceTime;
+  prevSysTime = now;
+  deviceDrift = int((float(deviceDiff) - float(hostDiff)) * 1000 / hostDiff);
+  // qInfo() << "dH:" << hostDiff << "dD:" << deviceDiff << "Drift, promille:" << deviceDrift;
+
   if (matrixMonitor) {
     setupMode = false;
   }
@@ -445,7 +460,6 @@ void DeviceInterface::initDevice_() {
     if (!sendRawPacket_DANGER_(buf)) {
       return;
     }
-    // packet_size_ = (info->bus_type == HID_API_BUS_BLUETOOTH) ? 131 : 65;
     auto tmp = std::vector<uint8_t>(C2_MTU);
     auto bytesRead = hid_read_timeout(device_, tmp.data(), tmp.size(), 1000);
     if (bytesRead < 1) {
@@ -478,6 +492,10 @@ void DeviceInterface::setState_(State newState) {
     state_ = newState;
     emit notify(state_);
   }
+}
+
+void DeviceInterface::updateThresholds() {
+  emit notify(ThresholdsUpdated);
 }
 
 DeviceInterface::DetectedDevices DeviceInterface::listDevices_() {

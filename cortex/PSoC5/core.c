@@ -182,9 +182,9 @@ inline void setup() {
   // Disable core internal LDOs.
   CY_PM_PWRSYS_CR0_REG = 0b00110000;
 #endif
+  CyGlobalIntEnable; /* Enable global interrupts. */
   ILO_Trim_Start();
   ILO_Trim_BeginTrimming();
-  CyGlobalIntEnable; /* Enable global interrupts. */
   BootIRQ_StartEx(BootIRQ_ISR);
   SysTimer_Start();
   TimerIRQ_StartEx(Timer_ISR);
@@ -208,6 +208,25 @@ inline void main_loop() {
 #endif
     switch (power_state) {
     case DEVSTATE_FULL_THROTTLE:
+#ifdef SELF_POWERED
+      if (usb_powered()) {
+        if (USB_initVar == 0) {
+          CyPins_ClearPin(HPWR_0);
+          USB_Start(0u, USB_POWER_MODE);
+        }
+      } else {
+        if (usb_status == USB_STATUS_CONNECTED) {
+          CyPins_ClearPin(HPWR_0);
+          USB_Stop();
+          usb_status = USB_STATUS_DISCONNECTED;
+          output_direction = OUTPUT_DIRECTION_SERIAL;
+        }
+        return;
+      }
+#endif
+  if (0u != USB_IsConfigurationChanged()) {
+    usb_configure();
+  }
       if (pending_usb_ticks > 0) {
         gpio_tick(pending_usb_ticks);
         pending_usb_ticks = 0;
@@ -231,29 +250,10 @@ inline void main_loop() {
         } else if (STATUS_IS(C2DEVSTATUS_OUTPUT_ENABLED)) {
           pipeline_process();
         }
+        serial_tick();
+        io_tick();
       }
-      serial_tick();
-#ifdef SELF_POWERED
-      if (usb_powered()) {
-        if (USB_initVar == 0) {
-          CyPins_ClearPin(HPWR_0);
-          USB_Start(0u, USB_POWER_MODE);
-        }
-      } else {
-        if (usb_status == USB_STATUS_CONNECTED) {
-          CyPins_ClearPin(HPWR_0);
-          USB_Stop();
-          usb_status = USB_STATUS_DISCONNECTED;
-          output_direction = OUTPUT_DIRECTION_SERIAL;
-        }
-        return;
-      }
-#endif
-  if (0u != USB_IsConfigurationChanged()) {
-    usb_configure();
-  }
 
-      io_tick();
       // Timer ISR will wake us up.
       CyPmAltAct(PM_ALT_ACT_TIME_NONE, PM_ALT_ACT_SRC_NONE);
       break;

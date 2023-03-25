@@ -294,4 +294,5 @@ void Telemetry::setThresholds_() {
       di_.config.thresholds[i][j] = getCell_(i,j).readout.intValue();
     }
   }
+  di_.updateThresholds();
 }

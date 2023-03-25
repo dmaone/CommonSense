@@ -3876,7 +3876,7 @@
     <Group key="c56ea238-e14b-4607-8ad8-15fa6aa00a27/c271fbaf-3e7b-411d-b9dc-085e7ccc9d7e">
       <Group key="CortexM3">
         <Data key="Assigned" value="True" />
-        <Data key="Priority" value="6" />
+        <Data key="Priority" value="0" />
         <Data key="Vector" value="-1" />
       </Group>
     </Group>

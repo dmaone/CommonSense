@@ -167,6 +167,12 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
     ui->typeLabel->setText(di_.config.getSwitchTypeName());
     lockUI_(false);
     break;
+  case DeviceInterface::ThresholdsUpdated:
+      // Partial update of UI controls to update thresholds info
+      thresholds_.init();
+      layout_.init();
+      pedals_.init();
+      break;
   case DeviceInterface::BootloaderConnected:
     lockUI_(true);
     loader_.load();
@@ -174,6 +180,8 @@ void FlightController::deviceInterfaceNotification(DeviceInterface::State s) {
   case DeviceInterface::StatusUpdated:
     ui->fwVersionLabel->setText(di_.firmwareVersion);
     ui->tempGauge->setText(di_.dieTemp);
+    ui->sysTimeLabel->setText(QString("%1").arg(di_.deviceTime));
+    ui->sysClockDriftLabel->setText(QString("%1").arg(di_.deviceDrift));
     ui->scanButton->setStyleSheet(di_.scanEnabled ? kGreen : kOff);
     ui->outputButton->setStyleSheet(di_.outputEnabled ? kGreen : kOff);
     ui->action_Setup_mode->setChecked(di_.setupMode);
