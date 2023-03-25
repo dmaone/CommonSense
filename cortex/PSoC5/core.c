@@ -92,16 +92,10 @@ void usb_configure(void) {
     // This never happens. But let's handle it just in case.
     usb_status = USB_STATUS_DISCONNECTED;
     output_direction = OUTPUT_DIRECTION_SERIAL;
-#ifdef SELF_POWERED
-    CyPins_ClearPin(HPWR_0);
-#endif
   } else {
     usb_status = USB_STATUS_CONNECTED;
     output_direction = OUTPUT_DIRECTION_USB;
     usb_suspend_monitor_start();
-#ifdef SELF_POWERED
-    CyPins_SetPin(HPWR_0);
-#endif
   }
 }
 
@@ -122,9 +116,8 @@ void usb_nap(void) {
   USB_Suspend();
   power_state = DEVSTATE_PREPARING_TO_SLEEP;
 #ifdef SELF_POWERED
-  CyPins_ClearPin(HPWR_0); // Actually, SUSP pin should be used here
+  // TODO SUSP pin should be pulled up here, but it's not laid out.
 #endif
-  // But there's no SUSP pin laid out.
 }
 
 void usb_check_power(void) {
@@ -153,6 +146,9 @@ void usb_check_power(void) {
 
 void usb_wake(void) {
   USB_Resume();
+#ifdef SELF_POWERED
+  // TODO SUSP pin should be pulled down here, but it's not laid out.
+#endif
   power_state = DEVSTATE_FULL_THROTTLE;
   scan_start();
   usb_suspend_monitor_start();
@@ -211,12 +207,10 @@ inline void main_loop() {
 #ifdef SELF_POWERED
       if (usb_powered()) {
         if (USB_initVar == 0) {
-          CyPins_ClearPin(HPWR_0);
           USB_Start(0u, USB_POWER_MODE);
         }
       } else {
         if (usb_status == USB_STATUS_CONNECTED) {
-          CyPins_ClearPin(HPWR_0);
           USB_Stop();
           usb_status = USB_STATUS_DISCONNECTED;
           output_direction = OUTPUT_DIRECTION_SERIAL;
