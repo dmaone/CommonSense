@@ -25,6 +25,8 @@
 #define TELEMETRY_RATELIMIT 10
 volatile uint8_t telemetry_cooldown = TELEMETRY_RATELIMIT;  // Block until first io_tick
 
+static bool boot_protocol_mode = false;
+
 typedef struct {
   uint8_t EP;
   uint8_t len;
@@ -143,7 +145,20 @@ void usbSend() {
     uint8_t pos = USB_BUFFER_NEXT(usbSendingReadPos);
     UsbPdu_t* item = &usbSendingQueue[pos];
     if (USB_GetEPState(item->EP) == USB_IN_BUFFER_EMPTY) {
-      USB_LoadInEP(item->EP, item->data, item->len);
+      if (boot_protocol_mode && item->EP == KBD_EP) {
+        /*
+         * In boot protocol mode, send short packets, lest HP Z800 BIOS
+         * will get first key stuck until you unplug the keyboard.
+         *
+         * Which is kinda violation of USB HID Appendix B
+         * ("The BIOS will ignore any extensions to reports")
+         * but also kinda not ("The report may not exceed 8 bytes in length.")
+         * Most BIOSes are fine with 64-byte USB packets, but not HP Z800.
+         */
+        USB_LoadInEP(item->EP, item->data, 8);
+      } else {
+        USB_LoadInEP(item->EP, item->data, item->len);
+      }
       usbSendingReadPos = pos;
     } else {
       break;
@@ -183,7 +198,6 @@ void io_tick(void) {
     gpio_setLEDs(led_status);
   }
   */
-  io_kro_limit = USB_GetProtocol(KBD_INTERFACE) ? KBD_KRO_LIMIT : 6;  // TODO update on change only
   uint8_t enableInterrupts = CyEnterCriticalSection();
   if (CTRLR_SCB.status == USB_XFER_STATUS_ACK) {
     CTRLR_SCB.status = USB_XFER_IDLE;
@@ -195,11 +209,20 @@ void io_tick(void) {
     gpio_setLEDs(led_status);
   }
   CyExitCriticalSection(enableInterrupts);
-  if (USB_UpdateHIDTimer(KBD_INTERFACE) == USB_IDLE_TIMER_EXPIRED) {
-    // We must report periodically even if no change happened (USB HID 7.2.4)
-    io_keyboard();
-    io_consumer();
-    io_system();
+  if (USB_GetProtocol(KBD_INTERFACE) == 0) {
+    io_kro_limit = BOOT_KRO_LIMIT;
+    boot_protocol_mode = true;
+  } else {
+    boot_protocol_mode = false;
+    io_kro_limit = KBD_KRO_LIMIT;
+    if (USB_UpdateHIDTimer(KBD_INTERFACE) == USB_IDLE_TIMER_EXPIRED) {
+      // We must report periodically even if no change happened (USB HID 7.2.4)
+      // ..except at least Windows just tells us to shut up forever,
+      // only reporting when a real change happens.
+      io_keyboard();
+      io_consumer();
+      io_system();
+    }
   }
   if (telemetry_cooldown > 0) {
     if (++telemetry_cooldown > TELEMETRY_RATELIMIT) {

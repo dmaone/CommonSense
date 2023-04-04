@@ -49,7 +49,7 @@
 #define NOT_A_KEYBOARD 0
 
 // Should matrix generate "All keys up" signal when no keys are pressed?
-#undef MATRIX_GENERATES_ALL_UP
+#define MATRIX_GENERATES_ALL_UP
 
 // If FlightController stops polling us - return to normal mode after X ticks.
 #define SETUP_TIMEOUT 2000

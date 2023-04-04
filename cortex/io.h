@@ -19,6 +19,7 @@ volatile int32_t ticksToAutonomy;
 #define USB_STATUS_DISCONNECTED 1
 uint8_t usb_status;
 uint8_t io_kro_limit;
+#define BOOT_KRO_LIMIT 6
 #define KBD_KRO_LIMIT 62
 #define CONSUMER_KRO_LIMIT 8
 #define SYSTEM_KRO_LIMIT 1

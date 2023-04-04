@@ -29,7 +29,8 @@ static uint8_t q_end;
 // loop was seen to lag). Doesn't cause reordering, so we can get away without.
 
 static int8_t matrix[COMMONSENSE_MATRIX_SIZE];
-static bool matrix_was_active = false;
+static uint8_t keys_pressed = 0;
+static uint8_t keys_last_pressed = 0;
 
 static int8_t press_threshold;
 static int8_t release_threshold;
@@ -100,6 +101,7 @@ inline void scan_debounce(uint8_t flags, uint8_t key) {
       if (++d_buf >= release_threshold) { // Long enough. Release the hounds!
         d_buf = -1;
         scan_register_event(KEY_UP_MASK, key);
+        --keys_pressed;
       }
     }
   } else if (d_buf > 0) { // Pressed, no change. Reset the streak counter.
@@ -108,7 +110,7 @@ inline void scan_debounce(uint8_t flags, uint8_t key) {
     if (--d_buf <= press_threshold) { // Long enough. Press the key.
       d_buf = 1;
       scan_register_event(0, key);
-      matrix_was_active = true;
+      ++keys_pressed;
     }
   }
   matrix[key] = d_buf;
@@ -139,19 +141,10 @@ inline scan_event_t scan_read_event(void) {
 
 inline void scan_check_matrix(void) {
 #ifdef MATRIX_GENERATES_ALL_UP
-  if (!matrix_was_active) { // idle -> idle
-    return;
-  }
-  matrix_was_active = false; // Covers "key pressed while counting" scenario
-  for (uint8_t i = 0; i < COMMONSENSE_MATRIX_SIZE; ++i) {
-    if (matrix[i] > 0) {
-      matrix_was_active = true;
-      break;
-    }
-  }
-  if (!matrix_was_active) { // was active, no longer is.
+  if (keys_last_pressed != 0 && keys_pressed == 0) { // Last key released
     scan_register_event(KEY_UP_MASK, COMMONSENSE_NOKEY);
   }
+  keys_last_pressed = keys_pressed;
 #endif
 }
 

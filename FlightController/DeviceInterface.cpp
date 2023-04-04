@@ -456,6 +456,8 @@ void DeviceInterface::initDevice_() {
     setState_(BootloaderConnected);
   } else {
     std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};
+    // change above to C2CMD_ENTER_BOOTLOADER to put directly into bootloader.
+    // THIS IS DANGEROUS - MAKE SURE YOU HAVE ANOTHER KEYBOARD CONNECTED!
     buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
     if (!sendRawPacket_DANGER_(buf)) {
       return;
