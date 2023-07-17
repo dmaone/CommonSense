@@ -3,7 +3,7 @@
 BUILD_DIR=build-macx
 
 QT_PACKAGE=qt
-brew install $QT_PACKAGE
+brew install $QT_PACKAGE hidapi
 
 export PATH="$(brew --prefix $QT_PACKAGE)/bin:$PATH"
 
@@ -30,8 +30,6 @@ echo "If xcodebuild returns error - it's okay! Means it's working."
 test -d $BUILD_DIR && rm -rf $BUILD_DIR
 mkdir $BUILD_DIR
 pushd $BUILD_DIR
-# so that macdeployqt may find libhidapi
-cp ../../../hidapi/mac/.libs/libhidapi.0.dylib /usr/local/lib
 qmake ../../FlightController/FlightController.pro -r -spec macx-clang
 make && macdeployqt FlightController.app -verbose=2 -dmg
 popd
