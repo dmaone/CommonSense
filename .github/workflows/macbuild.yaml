@@ -2,6 +2,9 @@ on: [workflow_dispatch]
 
 jobs:
   build:
+    name: Build MacOS FlightController
+    runs-on: macos-latest
+
     steps:
       - name: checkout
         uses: actions/checkout@v3
