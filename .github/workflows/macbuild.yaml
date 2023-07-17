@@ -38,6 +38,7 @@ jobs:
           make && macdeployqt FlightController.app -verbose=2 -dmg
 
       - name: prepare uploads
+        run: |
           mkdir upload
           mv build/FlightController.dmg upload
 
