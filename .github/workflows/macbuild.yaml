@@ -1,0 +1,48 @@
+on: [manual]
+
+jobs:
+  build:
+    steps:
+      - name: checkout
+        uses: actions/checkout@v3
+
+      - name: install QT
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: 5.15.*
+          archives: qtbase qttools
+
+      - name: install deps
+        run: brew install hidapi
+
+      - name: build icons
+        run: |
+          cd FlightController-icons
+          mkdir FlightController.iconset
+          cd FlightController.iconset
+          cp -a ../icon_* .
+          cp -f icon_1024x1024.png icon_512x512@2x.png
+          cp -f icon_512x512.png icon_256x256@2x.png
+          cp -f icon_256x256.png icon_128x128@2x.png
+          cp -f icon_64x64.png icon_32x32@2x.png
+          cp -f icon_32x32.png icon_16x16@2x.png
+          cd ..
+          iconutil -c icns FlightController.iconset
+          cp -a FlightController.icns ../FlightController
+
+      - name: build FlightController
+        run: |
+          mkdir build
+          cd build
+          qmake ../FlightController/FlightController.pro -r -spec macx-clang
+          make && macdeployqt FlightController.app -verbose=2 -dmg
+
+      - name: prepare uploads
+          mkdir upload
+          mv build/FlightController.dmg upload
+
+      - name: upload build artifacts
+        uses: actions/upload-artifact@v3
+        with:
+          name: FlightController-latest
+          path: upload
