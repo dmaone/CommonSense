@@ -14,6 +14,7 @@
 #define HW_BEAMSPRING 3
 #define HW_DISPLAYWRITER 4
 #define HW_REDRAGON 5
+#define HW_EPSON 6
 
 #define HARDWARE_VARIANT HW_FSSK
 
@@ -69,6 +70,10 @@
 #define MATRIX_ROWS 8
 #define INVERT_EXPHDR
 #define INVERT_FIRE
+
+#elif HARDWARE_VARIANT == HW_EPSON
+#define MATRIX_COLS 23
+#define MATRIX_ROWS 5
 
 #else
 #error "Unknown hardware variant"
