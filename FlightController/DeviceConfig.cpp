@@ -32,6 +32,7 @@ const std::vector<std::string> switchTypeNames_ {
   "Inductive",
   "Microswitch",
   "Ohmic(contact)",
+  "PS/2",
   "UNKNOWN"
 };
 

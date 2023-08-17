@@ -41,6 +41,7 @@
 #define CORTRON 4
 #define MICROSWITCH 5
 #define CONTACT 6
+#define PS2 7
 // Do not touch above definitions. To change switch type change config.h
 
 #include "config.h"
@@ -71,7 +72,7 @@
 #include "../c2/nvram.h"
 
 #define DEVICE_VER_MAJOR 0x02
-#define DEVICE_VER_MINOR 0x00
+#define DEVICE_VER_MINOR 0x01
 
 // USB stuff
 #define USB_REMOTE_WAKEUP
@@ -142,6 +143,8 @@ void ts_xprintf(const char *format_p, ...);
 #elif SWITCH_TYPE == MICROSWITCH
 // Nothing, really
 #elif SWITCH_TYPE == CONTACT
+// Nothing, really
+#elif SWITCH_TYPE == PS2
 // Nothing, really
 #else
 #error "Unknown switch type"
