@@ -139,7 +139,7 @@ void FlightController::connectUiSlots_() {
   // Buttons without actions
   click(ui->ClearButton, ui->LogViewport, SLOT(clearAll()));
   click(ui->CopyAllButton, ui->LogViewport, SLOT(copyAll()));
-  click(ui->reconnectButton, this, SLOT(resetConnection_()));
+  click(ui->rescanButton, this, SLOT(resetConnection_()));
   click(ui->outputButton, this, SLOT(toggleOutput_()));
   click(ui->scanButton, this, SLOT(toggleScan_()));
   click(ui->setupButton, this, SLOT(toggleSetupMode_()));

@@ -7,7 +7,8 @@
 #include <memory>
 #include <string>
 
-using DeviceList = std::vector<std::pair<QString, std::string>>;
+using DeviceConnectionParams = std::pair<QString, std::string>;
+using DeviceList = std::vector<DeviceConnectionParams>;
 
 class DeviceSelector : public QDialog
 {

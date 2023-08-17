@@ -44,11 +44,13 @@ class DeviceInterface : public QObject {
   bool event(QEvent *e);
   device_status_t *getStatus();
   void scheduleDeviceRelease() {
+    lastConnectedDevice.clear();
     scheduleDeviceRelease_.store(true);
   };
   void updateThresholds();
 
   DeviceConfig config;
+  QString lastConnectedDevice{};
   bool scanEnabled{false};
   bool outputEnabled{false};
   bool setupMode{false};
@@ -95,6 +97,7 @@ class DeviceInterface : public QObject {
   };
 
   hid_device* acquireDevice_();
+  hid_device* openDevice_(const DeviceConnectionParams& params);
   void initDevice_();
   void releaseDeviceIfScheduled_();
   void setState_(State newState);

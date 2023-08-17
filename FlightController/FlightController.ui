@@ -86,9 +86,9 @@
        </widget>
       </item>
       <item row="26" column="0">
-       <widget class="QPushButton" name="reconnectButton">
+       <widget class="QPushButton" name="rescanButton">
         <property name="text">
-         <string>Reconnect</string>
+         <string>Rescan</string>
         </property>
        </widget>
       </item>

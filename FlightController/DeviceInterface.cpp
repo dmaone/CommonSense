@@ -556,11 +556,18 @@ hid_device* DeviceInterface::acquireDevice_() {
   if (what.empty()) {
     return nullptr;
   }
-
-  if (what.size() == 1) {
+  if (mode_ == DeviceInterfaceNormal && !lastConnectedDevice.isEmpty()) {
+    qInfo() << "Attempting to reconnect to" << lastConnectedDevice;
+    for (unsigned int i = 0; i < what.size(); i++) {
+      if (what.at(i).first == lastConnectedDevice) {
+        return openDevice_(what.at(i));
+      }
+    }
+    return nullptr;
+  } else if (what.size() == 1) {
     qInfo() << "Found a node!";
     qDebug() << "Trying to use" << what.at(0).second.data();
-    return hid_open_path(what.at(0).second.data());
+    return openDevice_(what.at(0));
   }
   // More than one device.
   qInfo() << "Hello, fellow DT member!";
@@ -570,10 +577,18 @@ hid_device* DeviceInterface::acquireDevice_() {
   qInfo().noquote() << "Connecting to s/n" << deviceSerial;
   for (const auto& it : what) {
     if (it.first == deviceSerial) {
-      return hid_open_path(it.second.data());
+      return openDevice_(it);
     }
   }
   return nullptr;
+}
+
+hid_device* DeviceInterface::openDevice_(const DeviceConnectionParams& params) {
+  if (mode_ == DeviceInterfaceNormal) {
+    // prevent post-flash reconnect - bootloader has different serial!
+    lastConnectedDevice = params.first;
+  }
+  return hid_open_path(params.second.data());
 }
 
 void DeviceInterface::releaseDeviceIfScheduled_() {
