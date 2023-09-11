@@ -98,5 +98,23 @@ class DeviceConfig : public QObject {
   TransferDirection transferDirection_{TransferIdle};
   uint8_t currentBlock_{0};
   uint8_t blockSize_{0};
+
+  const std::vector<std::string> expModeNames_{
+    "Disabled",
+
+    "Solenoid+Num+Caps", "Lock LEDs",
+  };
+
+  const std::vector<std::string> switchTypeNames_{
+    "CapInverted",
+    "Capacitive",
+    "ADB",
+    "Sun",
+    "Inductive",
+    "Microswitch",
+    "Ohmic(contact)",
+    "PS/2",
+    "UNKNOWN"
+  };
 };
 

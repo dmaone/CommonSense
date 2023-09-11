@@ -18,24 +18,6 @@ static constexpr uint8_t kMinFwMajor{1};
 static constexpr uint8_t kMinFwMinor{4};
 static constexpr auto kMinFw{fwVer(kMinFwMajor, kMinFwMinor)};
 
-const std::vector<std::string> expModeNames_{
-  "Disabled",
-
-  "Solenoid+Num+Caps", "Lock LEDs",
-};
-
-const std::vector<std::string> switchTypeNames_ {
-  "CapInverted",
-  "Capacitive",
-  "ADB",
-  "Sun",
-  "Inductive",
-  "Microswitch",
-  "Ohmic(contact)",
-  "PS/2",
-  "UNKNOWN"
-};
-
 } //namespace
 
 DeviceConfig::DeviceConfig(DeviceInterface* di) : interface_{di} {

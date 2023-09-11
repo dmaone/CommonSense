@@ -4,7 +4,6 @@
 #include "ui_Macros.h"
 
 #include "DeviceConfig.h"
-#include "DeviceInterface.h"
 
 class Macros : public QFrame {
   Q_OBJECT
@@ -28,6 +27,7 @@ class Macros : public QFrame {
   int currentMacro_{0};
   bool dirty_{false};
   int contextMenuRow_;
+  const QString kNew{"-new-"};
 
 
  private slots:

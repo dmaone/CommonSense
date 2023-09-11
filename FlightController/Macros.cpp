@@ -8,10 +8,6 @@
 #include "Macros.h"
 #include "ScancodeList.h"
 
-namespace {
-  static const QString kNew{"-new-"};
-} // namespace
-
 Macros::Macros(DeviceConfig& config) :
     QFrame{nullptr, Qt::Tool}, config_{config} {
   ui->setupUi(this);
