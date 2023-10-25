@@ -116,13 +116,16 @@ class DeviceInterface : public QObject {
 
   hid_device* device_{nullptr};
   int pollTimerId_{0};
+  int pollTimerInterval_{4114};
   int statusTimerId_{0};
   Mode mode_{DeviceInterfaceNormal};
   State state_{DeviceDisconnected};
   uint8_t deviceStatus_{0};
   UploadQueue outbox_{};
+  std::vector<uint8_t> outgoingPacket_{};
+  int retriesLeft_{0};
   std::atomic<bool> cts_{true};
-  size_t noCtsDelay_{0};
+  int64_t noCtsDelay_{0};
   size_t antiLagTimer_{0};
   std::atomic<bool> scheduleDeviceRelease_{false};
   std::mutex deviceLock_{};

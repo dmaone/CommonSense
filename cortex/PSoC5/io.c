@@ -98,6 +98,7 @@ void usb_receive(OUT_c2packet_t *inbox) {
     break;
   case C2CMD_SET_MODE:
     FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, inbox->payload[0]);
+    report_status(); // If FC doesn't get a reply - it will wait 2s for CTS.
     break;
   case C2CMD_ENTER_BOOTLOADER:
     xprintf("Jumping to bootloader..");

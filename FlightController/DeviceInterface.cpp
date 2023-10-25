@@ -12,25 +12,28 @@
 #include "ScancodeList.h"
 
 namespace {
-constexpr size_t kNoCtsDelay = 1000; // Ticks to wait between packets if no CTS.
-constexpr size_t kNormalOperationTick{100}; // ms
-constexpr size_t kDeviceScanTick{1000}; // ms connect retry
-constexpr size_t kStatusTimerTick{200}; // ms between status updates
-constexpr size_t kHaveDataTickMs{0}; // If we have data to send - loop FAST.
-constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
-
 constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
 
+constexpr size_t kMaxPacketSendRetries{3};
+constexpr size_t kNoCtsDelayMs{1000}; // Wait this long for CTS.
+constexpr size_t kNormalOperationTick{100}; // ms
+constexpr size_t kDeviceScanTick{1000}; // ms connect retry
+constexpr size_t kStatusTimerTick{200}; // ms between status updates
+constexpr size_t kHaveDataTickMs{2}; // If we have data to send - loop FAST.
+constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
+
+
+
 // Constants below are non-negotiable
 constexpr uint8_t kNoReport{0};
+constexpr int kAbsolutelyNoRetriesLeft{-1};
 
 void printHidError(hid_device_ * device) {
   qWarning() << QString::fromWCharArray(hid_error(device));
 }
 
 }
-
 
 DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
   installEventFilter(&config);
@@ -323,10 +326,15 @@ bool DeviceInterface::getStatusBit(deviceStatus bit) {
 }
 
 void DeviceInterface::resetTimer_(int interval) {
+  if (pollTimerInterval_ == interval) {
+    return;
+  }
+  pollTimerInterval_ = interval;
   if (pollTimerId_ > 0) {
     killTimer(pollTimerId_);
   }
-  pollTimerId_ = startTimer(interval);
+  qDebug() << "New poll timer interval:" << pollTimerInterval_;
+  pollTimerId_ = startTimer(pollTimerInterval_, Qt::PreciseTimer);
 }
 
 void DeviceInterface::timerEvent(QTimerEvent* event) {
@@ -357,8 +365,10 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
 }
 
 bool DeviceInterface::sendRawPacket_DANGER_(const std::vector<uint8_t>& buf) {
-  // qInfo() << "Sending" << buf[0] << buf[1] << buf[2] << "len" << buf.size();
-  if (hid_write(device_, buf.data(), buf.size()) == -1) {
+  if (kDebugUsbTraffic) {
+    qInfo() << "USB TX:" << buf[0] << buf[1] << buf[2] << "len" << packetSize;
+  }
+  if (hid_write(device_, buf.data(), packetSize + 1) == -1) {
     printHidError(device_);
     qWarning() << "Error sending to the device, will reconnect in 1 second";
     QThread::sleep(1);
@@ -370,6 +380,7 @@ bool DeviceInterface::sendRawPacket_DANGER_(const std::vector<uint8_t>& buf) {
 
 bool DeviceInterface::sendPacket_() {
   OUT_c2packet_t cmd;
+  bool shouldRetry{false};
   {
     std::lock_guard<std::mutex> lock{queueLock_};
     if (outbox_.empty()) {
@@ -381,29 +392,40 @@ bool DeviceInterface::sendPacket_() {
       qWarning() << "Device went away on send";
       return true;
     }
-    if (cts_.exchange(false) == false && --noCtsDelay_ > 0) {
+    noCtsDelay_ -= pollTimerInterval_;
+    if (cts_.exchange(false) == false && noCtsDelay_ > 0) {
       return true; // Do not slow down, may receive reply anytime soon!
     }
-    noCtsDelay_ = kNoCtsDelay; // reset timer
-    cmd = outbox_.front();
-    outbox_.pop();
+    noCtsDelay_ = kNoCtsDelayMs; // reset timer
+    // Prevent deadlock - release queueLock_ first, _then_ acquire deviceLock_!
+    shouldRetry = (--retriesLeft_ > 0);
+    if (!shouldRetry) {
+      cmd = outbox_.front();
+      outbox_.pop();
+    }
   }
-  std::vector<uint8_t> buf{};
-  buf.reserve(packetSize);
-  buf.emplace_back(kNoReport); // ReportID is not used.
+  if (shouldRetry) {
+    // Make sure this is a flip of condition above!
+    std::lock_guard<std::mutex> lock{deviceLock_};
+    return sendRawPacket_DANGER_(outgoingPacket_);
+  }
+  retriesLeft_ = kMaxPacketSendRetries;
+  outgoingPacket_.clear();
+  outgoingPacket_.reserve(packetSize);
+  outgoingPacket_.emplace_back(kNoReport); // ReportID is not used.
   if (cmd.command != C2CMD_GET_STATUS) {
     tx = true;
     emit notify(StatusUpdated); // Blink the TX light
     lastSentAt_ = QDateTime::currentMSecsSinceEpoch();
   }
   for (size_t i = 0; i < sizeof(cmd); ++i) {
-    buf.emplace_back(cmd.raw[i]);
+    outgoingPacket_.emplace_back(cmd.raw[i]);
   }
   if (kDebugUsbTraffic) {
     qInfo() << "Sending cmd " << cmd.command << (uint8_t)cmd.payload[0];
   }
   std::lock_guard<std::mutex> lock{deviceLock_};
-  return sendRawPacket_DANGER_(buf);
+  return sendRawPacket_DANGER_(outgoingPacket_);
 }
 
 bool DeviceInterface::receivePacket_() {
@@ -420,13 +442,14 @@ bool DeviceInterface::receivePacket_() {
   } else if (bytesRead < 0) {
     qWarning() << "Device went away. Reconnecting";
     scheduleDeviceRelease_.store(true);
-    return true;
+    return true; // block sending
   }
   if (kDebugUsbTraffic) {
-    qInfo() << "Got" << bytesRead << "b, cmd" << buffer.front() << "/" << buffer[1];
+    qInfo() << "USB rcv" << bytesRead << "b, cmd" << buffer.front() << "/" << buffer[1];
   }
   buffer.resize(bytesRead);
   cts_.store(true);
+  retriesLeft_ = kAbsolutelyNoRetriesLeft;
   if (buffer.front() != C2RESPONSE_STATUS) {
     rx = true;
     if (lastSentAt_ > 0) {
@@ -460,7 +483,7 @@ void DeviceInterface::initDevice_() {
     // THIS IS DANGEROUS - MAKE SURE YOU HAVE ANOTHER KEYBOARD CONNECTED!
     buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
     if (!sendRawPacket_DANGER_(buf)) {
-      return;
+      return; // Check if we can send, determine MTU
     }
     auto tmp = std::vector<uint8_t>(C2_MTU);
     auto bytesRead = hid_read_timeout(device_, tmp.data(), tmp.size(), 1000);
@@ -477,6 +500,8 @@ void DeviceInterface::initDevice_() {
     config.reset(packetSize);
 
     // Only flipping of the scan bit reinits scanner.
+    // We do this on connect to reset transient insanity state (if any).
+    // Probably not a good idea diagnostically - but let it stay for now.
     buf.back() += 1 << deviceStatus::C2DEVSTATUS_SCAN_ENABLED;
     if (!sendRawPacket_DANGER_(buf)) {
       return;
@@ -593,6 +618,7 @@ hid_device* DeviceInterface::openDevice_(const DeviceConnectionParams& params) {
 
 void DeviceInterface::releaseDeviceIfScheduled_() {
   if (!scheduleDeviceRelease_.exchange(false)) {
+    retriesLeft_ = kAbsolutelyNoRetriesLeft;
     return;
   }
   std::lock_guard<std::mutex> lock{deviceLock_};
