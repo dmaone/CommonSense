@@ -475,7 +475,7 @@ void DeviceInterface::initDevice_() {
   hid_set_nonblocking(device_, 1);
   // We want to put device into setup mode AND trigger scanner init on connect.
   if (mode_ == DeviceInterfaceBootloader) {
-    packetSize = 65; // This is for standard Cypress USB bootloader only
+    packetSize = 64; // This is for standard Cypress USB bootloader only
     setState_(BootloaderConnected);
   } else {
     std::vector<uint8_t> buf{kNoReport, C2CMD_EWO};

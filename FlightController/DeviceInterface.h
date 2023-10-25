@@ -67,7 +67,7 @@ class DeviceInterface : public QObject {
   QString firmwareVersion{};
   QString dieTemp{};
   QString latencyMs{};
-  uint8_t packetSize{0};  // BLE uses 130-byte packets, USB - 64-byte
+  uint8_t packetSize{64};  // BLE uses 130-byte packets, USB - 64-byte
 
  public slots:
   void sendCommand(c2command, uint8_t *);
