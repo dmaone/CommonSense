@@ -245,7 +245,7 @@ void DeviceConfig::unpack_() {
 void DeviceConfig::assemble_() {
   eeprom_.configVersion = CS_CONFIG_VERSION;
   memset(eeprom_.stash, EMPTY_FLASH_BYTE, sizeof(eeprom_.stash));
-  memset(eeprom_._RESERVED0, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED0));
+  eeprom_._RESERVED0 = EMPTY_FLASH_BYTE;
   memset(eeprom_._RESERVED1, EMPTY_FLASH_BYTE, sizeof(eeprom_._RESERVED1));
   setSwitchCapabilities_();
   uint16_t curPos{0};
