@@ -15,6 +15,7 @@ struct HardwareConfig {
   uint8_t expHdrMode;
   uint8_t expHdrParam1;
   uint8_t expHdrParam2;
+  uint8_t hostMode;
 };
 
 struct SwitchTypeCapabilities {
@@ -46,6 +47,7 @@ class DeviceConfig : public QObject {
 
   HardwareConfig getHardwareConfig();
   void setHardwareConfig(HardwareConfig config);
+  const std::vector<std::string> getHostModeNames();
   const std::vector<std::string> getExpModeNames();
   const QString getSwitchTypeName();
   size_t getMatrixSize() const;
@@ -101,8 +103,13 @@ class DeviceConfig : public QObject {
 
   const std::vector<std::string> expModeNames_{
     "Disabled",
+    "Solenoid+Num+Caps",
+    "Lock LEDs",
+  };
 
-    "Solenoid+Num+Caps", "Lock LEDs",
+  const std::vector<std::string> hostModeNames_{
+      "Windows",
+      "Mac",
   };
 
   const std::vector<std::string> switchTypeNames_{

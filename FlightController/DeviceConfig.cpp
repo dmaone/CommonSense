@@ -185,6 +185,9 @@ void DeviceConfig::unpack_() {
   uint8_t maxSwitchIndex = switchTypeNames_.size() - 1;
   switchType = std::min(eeprom_.switchType, maxSwitchIndex);
   setSwitchCapabilities_();
+  if (eeprom_.hostMode == EMPTY_FLASH_BYTE) {
+    eeprom_.hostMode = HM_WINDOWS;
+  }
   memset(thresholds, EMPTY_FLASH_BYTE, sizeof(thresholds));
   memset(layouts, 0x00, sizeof(layouts));
   uint16_t curPos{0};
@@ -367,16 +370,17 @@ void DeviceConfig::setDelay(size_t pos, uint16_t delay_ms) {
 }
 
 HardwareConfig DeviceConfig::getHardwareConfig() {
-  HardwareConfig retval;
-  retval.adcBits = eeprom_.adcBits;
-  retval.chargeDelay = eeprom_.chargeDelay;
-  retval.dischargeDelay = eeprom_.dischargeDelay;
-  retval.debouncingTicks = eeprom_.debouncingTicks;
-  retval.pedalDebouncingTicks = eeprom_.pedalDebouncingTicks;
-  retval.expHdrMode = eeprom_.expMode;
-  retval.expHdrParam1 = eeprom_.expParam1;
-  retval.expHdrParam2 = eeprom_.expParam2;
-  return retval;
+  return HardwareConfig{
+    .adcBits = eeprom_.adcBits,
+    .chargeDelay = eeprom_.chargeDelay,
+    .dischargeDelay = eeprom_.dischargeDelay,
+    .debouncingTicks = eeprom_.debouncingTicks,
+    .pedalDebouncingTicks = eeprom_.pedalDebouncingTicks,
+    .expHdrMode = eeprom_.expMode,
+    .expHdrParam1 = eeprom_.expParam1,
+    .expHdrParam2 = eeprom_.expParam2,
+    .hostMode = eeprom_.hostMode,
+  };
 }
 
 void DeviceConfig::setHardwareConfig(HardwareConfig config) {
@@ -388,10 +392,15 @@ void DeviceConfig::setHardwareConfig(HardwareConfig config) {
   eeprom_.expMode = config.expHdrMode;
   eeprom_.expParam1 = config.expHdrParam1;
   eeprom_.expParam2 = config.expHdrParam2;
+  eeprom_.hostMode = config.hostMode;
 }
 
 const std::vector<std::string> DeviceConfig::getExpModeNames() {
   return expModeNames_;
+}
+
+const std::vector<std::string> DeviceConfig::getHostModeNames() {
+  return hostModeNames_;
 }
 
 const QString DeviceConfig::getSwitchTypeName() {

@@ -84,7 +84,22 @@ inline uint8_t resolve_key(uint8_t key) {
     if (cell[i] == CODE_EMPTY) {
       continue;
     }
-    return cell[i];
+    if (config.hostMode == HM_MAC) {
+      switch (cell[i]) {
+        case 0xE2:
+          return 0xE3;
+        case 0xE3:
+          return 0xE2;
+        case 0xE6:
+          return 0xE7;
+        case 0xE7:
+          return 0xE6;
+        default:
+          return cell[i];
+      }
+    } else {
+      return cell[i];
+    }
   }
   return CODE_EMPTY;
 }
@@ -135,6 +150,7 @@ static inline void play_macro(uint_fast16_t start) {
 #ifdef DEBUG_PIPELINE
   ts_xprintf("Play macro: %d, sz: %d", start, config.macros[start + 2]);
 #endif
+  uint8_t last_keycode = 0;
   uint32_t now = systime;
   while (mptr < macro_end) {
     uint8_t cmd = *mptr;
@@ -145,6 +161,15 @@ static inline void play_macro(uint_fast16_t start) {
       // Press+release, timing from delayLib
       // FIXME possible to queue NOEVENT here. This will most likely trigger
       // exp. header, but can be as bad as infinite loop.
+      if (config.hostMode == HM_MAC && *mptr == last_keycode) {
+        // MacOS (on ARM macs at least) has _really_ slow HID implementation.
+        // It needs AT LEAST 40 milliseconds to reliably detect a repeated
+        // keypress (key must spend >=40ms released before it's pressed again).
+        // 30ms is mostly enough, but not always.
+        // This includes the lock screen - so it isn't any app's fault.
+        now += get_delay(DELAYS_EVENT);
+      }
+      last_keycode = *mptr;
       schedule_hid(now, 0, *mptr);
       now += get_delay(cmd);
       schedule_hid(now, HID_RELEASED_MASK, *mptr);
@@ -342,7 +367,7 @@ static inline void process_real_key(void) {
       schedule_hid(systime - 120, HID_REAL_KEY_MASK, tap.code);
     }
     if (tap.macro_ptr == MACRO_NOT_FOUND) {
-      LEAVE_TAP_MODE;
+      LEAVE_TAP_MODE; // Not above because this macro clears whole tap struct
       // Switch to normal mode. Early return - no real keys were involved.
       return;
     }

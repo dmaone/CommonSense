@@ -28,6 +28,7 @@ void Delays::init() {
     switch (i) {
      case 0:
       label.setText(QString("Event delay"));
+      label.setToolTip(QString("Keyboard will type no faster than 1 key per period"));
       break;
      case 1:
       label.setText(QString("Tap delay"));

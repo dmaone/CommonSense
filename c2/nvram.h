@@ -38,7 +38,8 @@ typedef union {
     uint16_t dischargeDelay;
     uint8_t debouncingTicks; // +12
     uint8_t pedalDebouncingTicks;
-    uint8_t _RESERVED0[2];
+    uint8_t hostMode;
+    uint8_t _RESERVED0;
     uint16_t delayLib[NUM_DELAYS]; // 2 bytes per item!
     uint8_t layerConditions[ABSOLUTE_MAX_LAYERS];
     uint8_t switchType;

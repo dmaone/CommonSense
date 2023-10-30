@@ -125,6 +125,9 @@ void usb_receive(OUT_c2packet_t *inbox) {
     FORCE_BIT(status_register, C2DEVSTATUS_TELEMETRY_MODE, inbox->payload[0]);
     FORCE_BIT(status_register, C2DEVSTATUS_SETUP_MODE, !inbox->payload[0]);
     scan_reset();
+    if (!inbox->payload[0]) {
+      report_status(); // FC wants reply - if telemetry is off, send status.
+    }
     break;
   default:
     break;

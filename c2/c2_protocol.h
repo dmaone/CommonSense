@@ -113,6 +113,13 @@ enum SwitchType {
   ST_UNKNOWN,
 };
 
+enum HostMode {
+  HM_WINDOWS = 0,
+  HM_MAC = 1,
+};
+
+
+
 enum MessageCode {
   MC_KEYPRESS = 0,
   MC_KEY_RESOLVED,
@@ -255,7 +262,10 @@ enum MacroCmdType {
 #define MACROCMD_DELAY_MASK 0b00111100
 #define MACROCMD_ACTUATE_KEYUP 0x02
 
-#define DELAYS_EVENT 0
+#define MIN_MAC_HID_DELAY 40  // This is here due to ARM MacOS HID horrible slowness.
+#define MIN_MAC_CONTROL_DELAY 40  // min delay between unsolicited control packets.
+
+#define DELAYS_EVENT 0  // How fast we can type into USB
 #define DELAYS_TAP 1
 
 #define SKIP_SCAN 0

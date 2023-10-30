@@ -10,6 +10,9 @@ constexpr size_t kMaxDebouncingTicks{64};
 Hardware::Hardware(DeviceConfig& config) :
     QFrame{nullptr, Qt::Tool}, config_{config} {
   ui->setupUi(this);
+  for (const auto& it: config_.getHostModeNames()) {
+    ui->hostModeBox->addItem(it.data());
+  }
   for (const auto& it: config_.getExpModeNames()) {
     ui->modeBox->addItem(it.data());
   }
@@ -49,6 +52,8 @@ void Hardware::init() {
   ui->modeBox->setCurrentIndex(config.expHdrMode);
   ui->Param1->setValue(config.expHdrParam1);
   ui->Param2->setValue(config.expHdrParam2);
+
+  ui->hostModeBox->setCurrentIndex(config.hostMode);
 }
 
 void Hardware::updateParamVisibility_() {
@@ -71,5 +76,6 @@ void Hardware::apply_() {
   config.expHdrMode = ui->modeBox->currentIndex();
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();
+  config.hostMode = ui->modeBox->currentIndex();
   config_.setHardwareConfig(config);
 }

@@ -72,7 +72,7 @@
 #include "../c2/nvram.h"
 
 #define DEVICE_VER_MAJOR 0x02
-#define DEVICE_VER_MINOR 0x01
+#define DEVICE_VER_MINOR 0x02
 
 // USB stuff
 #define USB_REMOTE_WAKEUP

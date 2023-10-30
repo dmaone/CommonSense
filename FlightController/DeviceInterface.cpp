@@ -14,14 +14,23 @@
 namespace {
 constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
+constexpr bool kStatusPolling{true};
 
 constexpr size_t kMaxPacketSendRetries{3};
+
+constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
+constexpr size_t kDeviceScanTick{1000}; // ms connect retry
 constexpr size_t kNoCtsDelayMs{1000}; // Wait this long for CTS.
 constexpr size_t kNormalOperationTick{100}; // ms
-constexpr size_t kDeviceScanTick{1000}; // ms connect retry
-constexpr size_t kStatusTimerTick{200}; // ms between status updates
-constexpr size_t kHaveDataTickMs{2}; // If we have data to send - loop FAST.
-constexpr size_t kAntiLagTicks{500}; // Slow polling down after this many ticks
+
+#ifdef __APPLE__
+// Mac (at least ARM variety) has HORRIBLY slow HID. So we have to be slower.
+constexpr size_t kHaveDataTickMs{10}; // If we have data to send - loop.. errhm..
+constexpr size_t kStatusTimerTick{1000}; // ms between status updates
+#else
+constexpr size_t kHaveDataTickMs{1}; // If we have data to send - loop FAST.
+constexpr size_t kStatusTimerTick{100}; // ms between status updates
+#endif
 
 
 
@@ -46,7 +55,9 @@ DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
 
   connect(&config, SIGNAL(sendCommand(c2command, uint8_t)), this,
           SLOT(sendCommand(c2command, uint8_t)));
-  statusTimerId_ = startTimer(kStatusTimerTick);
+  if (kStatusPolling) {
+    statusTimerId_ = startTimer(kStatusTimerTick);
+  }
 }
 
 DeviceInterface::~DeviceInterface() {
@@ -387,15 +398,16 @@ bool DeviceInterface::sendPacket_() {
       return false;
     }
     if (!device_) {
+      qWarning() << "Device went away on send";
       UploadQueue tmp{};
       outbox_.swap(tmp);
-      qWarning() << "Device went away on send";
       return true;
     }
     noCtsDelay_ -= pollTimerInterval_;
     if (cts_.exchange(false) == false && noCtsDelay_ > 0) {
       return true; // Do not slow down, may receive reply anytime soon!
     }
+
     noCtsDelay_ = kNoCtsDelayMs; // reset timer
     // Prevent deadlock - release queueLock_ first, _then_ acquire deviceLock_!
     shouldRetry = (--retriesLeft_ > 0);
@@ -404,11 +416,26 @@ bool DeviceInterface::sendPacket_() {
       outbox_.pop();
     }
   }
+
   if (shouldRetry) {
     // Make sure this is a flip of condition above!
+    switch (outgoingPacket_.size()) {
+      case 0:
+        qWarning() << "Attempt to retry sending empty packet!";
+        break;
+      case 1:
+        qWarning() << "Attempt to retry sending runt packet!";
+        break;
+      case 2:
+        qWarning() << "Retrying USB TX" << outgoingPacket_.at(1);
+        break;
+      default:
+        qWarning() << "Retrying USB TX" << outgoingPacket_.at(1) << outgoingPacket_.at(2);
+    }
     std::lock_guard<std::mutex> lock{deviceLock_};
     return sendRawPacket_DANGER_(outgoingPacket_);
   }
+
   retriesLeft_ = kMaxPacketSendRetries;
   outgoingPacket_.clear();
   outgoingPacket_.reserve(packetSize);
@@ -464,6 +491,7 @@ bool DeviceInterface::receivePacket_() {
 
 void DeviceInterface::initDevice_() {
   config.reset(0);
+  retriesLeft_ = kAbsolutelyNoRetriesLeft;
   std::lock_guard<std::mutex> lock{deviceLock_};
   device_ = acquireDevice_();
   if (!device_) {
@@ -482,8 +510,8 @@ void DeviceInterface::initDevice_() {
     // change above to C2CMD_ENTER_BOOTLOADER to put directly into bootloader.
     // THIS IS DANGEROUS - MAKE SURE YOU HAVE ANOTHER KEYBOARD CONNECTED!
     buf.emplace_back(1 << C2DEVSTATUS_SETUP_MODE);
-    if (!sendRawPacket_DANGER_(buf)) {
-      return; // Check if we can send, determine MTU
+    if (!sendRawPacket_DANGER_(buf)) { // Check if we can send, determine MTU
+      return;
     }
     auto tmp = std::vector<uint8_t>(C2_MTU);
     auto bytesRead = hid_read_timeout(device_, tmp.data(), tmp.size(), 1000);
@@ -618,10 +646,10 @@ hid_device* DeviceInterface::openDevice_(const DeviceConnectionParams& params) {
 
 void DeviceInterface::releaseDeviceIfScheduled_() {
   if (!scheduleDeviceRelease_.exchange(false)) {
-    retriesLeft_ = kAbsolutelyNoRetriesLeft;
     return;
   }
   std::lock_guard<std::mutex> lock{deviceLock_};
+  retriesLeft_ = kAbsolutelyNoRetriesLeft;
   if (device_) {
     qInfo() << "Releasing device..";
   }

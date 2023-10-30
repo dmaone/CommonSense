@@ -197,6 +197,9 @@ inline void setup() {
   scan_start(); // We are starting in full power - must do that initial kick
 }
 
+static uint8_t diag_tick = 1;
+static uint8_t diag_tick_divider = 1;
+
 inline void main_loop() {
   for (;;) {
 #ifdef DEBUG_STATE_MACHINE
@@ -240,7 +243,11 @@ inline void main_loop() {
           // apply_config();
         }
         if (STATUS_IS(C2DEVSTATUS_TELEMETRY_MODE)) {
-          report_matrix_readouts();
+          if ((++diag_tick) > diag_tick_divider) {
+            diag_tick = 1;
+            diag_tick_divider = config.hostMode == HM_MAC ? MIN_MAC_CONTROL_DELAY : 1;
+            report_matrix_readouts();
+          }
         } else if (STATUS_IS(C2DEVSTATUS_OUTPUT_ENABLED)) {
           pipeline_process();
         }

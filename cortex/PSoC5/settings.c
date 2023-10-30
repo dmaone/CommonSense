@@ -76,6 +76,10 @@ void settings_sanitize(void) {
   if (config.debouncingTicks < 1) {
     config.debouncingTicks = DEFAULT_DEBOUNCING_TICKS;
   }
+  if (config.hostMode == HM_MAC
+  && config.delayLib[DELAYS_EVENT] < MIN_MAC_HID_DELAY) {
+    config.delayLib[DELAYS_EVENT] = MIN_MAC_HID_DELAY;
+  }
 }
 
 void settings_load(void) {
