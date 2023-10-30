@@ -28,8 +28,8 @@ constexpr size_t kNormalOperationTick{100}; // ms
 constexpr size_t kHaveDataTickMs{10}; // If we have data to send - loop.. errhm..
 constexpr size_t kStatusTimerTick{1000}; // ms between status updates
 #else
-constexpr size_t kHaveDataTickMs{1}; // If we have data to send - loop FAST.
-constexpr size_t kStatusTimerTick{100}; // ms between status updates
+constexpr size_t kHaveDataTickMs{10}; // If we have data to send - loop FAST.
+constexpr size_t kStatusTimerTick{1000}; // ms between status updates
 #endif
 
 
