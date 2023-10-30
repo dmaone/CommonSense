@@ -14,7 +14,7 @@
 namespace {
 constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
-constexpr bool kStatusPolling{true};
+constexpr bool kStatusPolling{false};
 
 constexpr size_t kMaxPacketSendRetries{3};
 
