@@ -23,14 +23,8 @@ constexpr size_t kDeviceScanTick{1000}; // ms connect retry
 constexpr size_t kNoCtsDelayMs{1000}; // Wait this long for CTS.
 constexpr size_t kNormalOperationTick{100}; // ms
 
-#ifdef __APPLE__
-// Mac (at least ARM variety) has HORRIBLY slow HID. So we have to be slower.
-constexpr size_t kHaveDataTickMs{10}; // If we have data to send - loop.. errhm..
-constexpr size_t kStatusTimerTick{1000}; // ms between status updates
-#else
 constexpr size_t kHaveDataTickMs{10}; // If we have data to send - loop FAST.
-constexpr size_t kStatusTimerTick{1000}; // ms between status updates
-#endif
+constexpr size_t kStatusTimerTick{200}; // ms between status updates
 
 
 

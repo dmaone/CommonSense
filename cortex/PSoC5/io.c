@@ -219,6 +219,10 @@ void io_tick(void) {
   } else {
     boot_protocol_mode = false;
     io_kro_limit = KBD_KRO_LIMIT;
+    /*
+     * honoring SET_IDLE causes M1 MBP to spend 7% of CPU in com.apple.AppleUserHIDDrivers.
+     * BLE HID docs say SET_IDLE was meant for autorepeat and is a Bad Idea in modern day.
+     * So, this part is disabled.
     if (USB_UpdateHIDTimer(KBD_INTERFACE) == USB_IDLE_TIMER_EXPIRED) {
       // We must report periodically even if no change happened (USB HID 7.2.4)
       // ..except at least Windows just tells us to shut up forever,
@@ -227,6 +231,7 @@ void io_tick(void) {
       io_consumer();
       io_system();
     }
+    */
   }
   if (telemetry_cooldown > 0) {
     if (++telemetry_cooldown > TELEMETRY_RATELIMIT) {

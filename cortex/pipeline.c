@@ -161,18 +161,23 @@ static inline void play_macro(uint_fast16_t start) {
       // Press+release, timing from delayLib
       // FIXME possible to queue NOEVENT here. This will most likely trigger
       // exp. header, but can be as bad as infinite loop.
+      /*
       if (config.hostMode == HM_MAC && *mptr == last_keycode) {
-        // MacOS (on ARM macs at least) has _really_ slow HID implementation.
-        // It needs AT LEAST 40 milliseconds to reliably detect a repeated
+        // IF you handle SET_IDLE - MacOS (at least on ARM) will be _mad_.
+        // It will need AT LEAST 40 milliseconds to reliably detect a repeated
         // keypress (key must spend >=40ms released before it's pressed again).
         // 30ms is mostly enough, but not always.
-        // This includes the lock screen - so it isn't any app's fault.
+        // Adding an extra delay before keyDown will kinda work around that - but, BUT
+        // just say "FUCK No" to SET_IDLE - BLE guys strongly discourage hosts from even sending that nowadays..
         now += get_delay(DELAYS_EVENT);
       }
+      */
       last_keycode = *mptr;
       schedule_hid(now, 0, *mptr);
-      now += get_delay(cmd);
+      now += get_delay(DELAYS_EVENT); // "Type" always uses "Event delay".
+      // NOTE to self: if you decide that double-delay is not needed - use get_delay(cmd) above.
       schedule_hid(now, HID_RELEASED_MASK, *mptr);
+      now += get_delay(cmd); // Not strictly necessary, but just in case.
       ++mptr;
       break;
     case MACROCMD_ACTUATE:
