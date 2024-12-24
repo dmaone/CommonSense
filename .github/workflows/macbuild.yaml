@@ -16,7 +16,9 @@ jobs:
           archives: qtbase qttools
 
       - name: install deps
-        run: arch -x86_64 /usr/local/bin/brew install hidapi
+        run: |
+          which brew
+          arch -x86_64 /usr/local/bin/brew install hidapi
 
       - name: build icons
         run: |
