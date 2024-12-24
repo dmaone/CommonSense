@@ -305,7 +305,7 @@
       <item row="1" column="15">
        <widget class="QLabel" name="sysClockDriftLegend">
         <property name="text">
-         <string> Drift:</string>
+         <string> Drift: </string>
         </property>
        </widget>
       </item>
@@ -341,7 +341,7 @@
       <item row="1" column="13">
        <widget class="QLabel" name="sysTimeLegend">
         <property name="text">
-         <string> SysTime:</string>
+         <string> SysTime: </string>
         </property>
        </widget>
       </item>
@@ -361,6 +361,12 @@
       </item>
       <item row="1" column="16">
        <widget class="QLabel" name="sysClockDriftLabel">
+        <property name="minimumSize">
+         <size>
+          <width>20</width>
+          <height>0</height>
+         </size>
+        </property>
         <property name="text">
          <string>--</string>
         </property>

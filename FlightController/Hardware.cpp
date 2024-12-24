@@ -76,6 +76,6 @@ void Hardware::apply_() {
   config.expHdrMode = ui->modeBox->currentIndex();
   config.expHdrParam1 = ui->Param1->value();
   config.expHdrParam2 = ui->Param2->value();
-  config.hostMode = ui->modeBox->currentIndex();
+  config.hostMode = ui->hostModeBox->currentIndex();
   config_.setHardwareConfig(config);
 }

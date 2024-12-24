@@ -5,7 +5,6 @@
 #include <QInputDialog>
 #include <QMessageBox>
 #include <QThread>
-#include <algorithm>
 #include <string>
 
 #include "Events.h"
@@ -14,7 +13,7 @@
 namespace {
 constexpr bool kDebugUsbTraffic{false};
 constexpr bool kDumpIncomingPackets{false};
-constexpr bool kStatusPolling{false};
+constexpr bool kStatusPolling{true};
 
 constexpr size_t kMaxPacketSendRetries{3};
 
