@@ -29,8 +29,8 @@ win32 {
   RC_FILE = WindowsIcon.rc
 }
 macx {
-  INCLUDEPATH += /opt/homebrew/include
-  LIBS += -L/opt/homebrew/lib -lhidapi
+  INCLUDEPATH += /usr/local/include
+  LIBS += -L/usr/local/lib -lhidapi
   ICON = FlightController.icns
 }
 linux {
