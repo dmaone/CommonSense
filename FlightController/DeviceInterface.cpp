@@ -54,9 +54,7 @@ DeviceInterface::DeviceInterface() : QObject{nullptr}, config{this} {
 }
 
 DeviceInterface::~DeviceInterface() {
-  if (pollTimerId_ > 0) {
-    killTimer(pollTimerId_);
-  }
+  killMainTimer_();
   scheduleDeviceRelease_.store(true);
   releaseDeviceIfScheduled_(); // So we don't wait for timer
 }
@@ -197,7 +195,7 @@ void DeviceInterface::processStatusReply_(QByteArray* payload) {
   dieTemp = QString("%1%2").arg((reply.dieTempSign == 1 ? '+' : '-')).arg(reply.dieTemp);
   prevDeviceTime = deviceTime;
   deviceTime = reply.sysTime;
-  auto now = QDateTime::currentDateTime().toMSecsSinceEpoch();
+  auto now = QDateTime::currentMSecsSinceEpoch();
   int64_t deviceDiff = deviceTime - prevDeviceTime;
   auto hostDiff = now - prevSysTime;
   if (deviceDiff < 0 && prevDeviceTime < (UINT32_MAX - 10000)) {
@@ -257,7 +255,7 @@ void DeviceInterface::enqueueCommand_(OUT_c2packet_t outbox) {
     std::lock_guard<std::mutex> lock{queueLock_};
     outbox_.push(std::move(outbox));
   }
-  resetTimer_(kHaveDataTickMs);
+  resetMainTimer_(kHaveDataTickMs);
 }
 
 void DeviceInterface::sendCommand(c2command cmd, uint8_t *msg) {
@@ -303,7 +301,7 @@ void DeviceInterface::bootloaderMode(bool bEnabled) {
     qInfo() << "Resuming normal operations.";
     mode_ = DeviceInterfaceNormal;
   }
-  resetTimer_(kDeviceScanTick);
+  resetMainTimer_(kDeviceScanTick);
   scheduleDeviceRelease_.store(true);
 }
 
@@ -329,16 +327,21 @@ bool DeviceInterface::getStatusBit(deviceStatus bit) {
   return deviceStatus_ & (1 << bit);
 }
 
-void DeviceInterface::resetTimer_(int interval) {
-  if (pollTimerInterval_ == interval) {
+void DeviceInterface::killMainTimer_() {
+    if (mainTimerId_) {
+        killTimer(mainTimerId_);
+        mainTimerId_ = 0;
+    }
+}
+
+void DeviceInterface::resetMainTimer_(int interval) {
+  if (mainTimerInterval_ == interval) {
     return;
   }
-  pollTimerInterval_ = interval;
-  if (pollTimerId_ > 0) {
-    killTimer(pollTimerId_);
-  }
-  qDebug() << "New poll timer interval:" << pollTimerInterval_;
-  pollTimerId_ = startTimer(pollTimerInterval_, Qt::PreciseTimer);
+  mainTimerInterval_ = interval;
+  killMainTimer_();
+  qDebug() << "New poll timer interval:" << mainTimerInterval_;
+  mainTimerId_ = startTimer(mainTimerInterval_, Qt::PreciseTimer);
 }
 
 void DeviceInterface::timerEvent(QTimerEvent* event) {
@@ -349,7 +352,7 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
     }
     return;
   }
-  if (event->timerId() != pollTimerId_) {
+  if (event->timerId() != mainTimerId_) {
     return;
   }
   if (!device_) {
@@ -361,7 +364,7 @@ void DeviceInterface::timerEvent(QTimerEvent* event) {
     // Go back to slow mode_ if idle and not bootloader.
     if (--antiLagTimer_ == 0) {
       qDebug("Idle. Slowing down to save CPU");
-      resetTimer_(kNormalOperationTick);
+      resetMainTimer_(kNormalOperationTick);
       antiLagTimer_ = kAntiLagTicks;
     }
   }
@@ -396,7 +399,7 @@ bool DeviceInterface::sendPacket_() {
       outbox_.swap(tmp);
       return true;
     }
-    noCtsDelay_ -= pollTimerInterval_;
+    noCtsDelay_ -= mainTimerInterval_;
     if (cts_.exchange(false) == false && noCtsDelay_ > 0) {
       return true; // Do not slow down, may receive reply anytime soon!
     }
@@ -489,7 +492,7 @@ void DeviceInterface::initDevice_() {
   device_ = acquireDevice_();
   if (!device_) {
     qInfo() << ".";
-    resetTimer_(kDeviceScanTick);
+    resetMainTimer_(kDeviceScanTick);
     return;
   }
   // auto info = hid_get_device_info(device_);
@@ -656,5 +659,5 @@ void DeviceInterface::releaseDeviceIfScheduled_() {
 
 void DeviceInterface::start() {
   qInfo() << "Acquiring device - can take a while with certain old USB hubs..";
-  resetTimer_(kNormalOperationTick);
+  resetMainTimer_(kNormalOperationTick);
 }

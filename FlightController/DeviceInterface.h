@@ -112,11 +112,12 @@ class DeviceInterface : public QObject {
   void enqueueCommand_(OUT_c2packet_t outbox);
   DetectedDevices listDevices_();
   void processStatusReply_(QByteArray* payload);
-  void resetTimer_(int interval);
+  void killMainTimer_();
+  void resetMainTimer_(int interval);
 
   hid_device* device_{nullptr};
-  int pollTimerId_{0};
-  int pollTimerInterval_{4114};
+  int mainTimerId_{0};
+  int mainTimerInterval_{4114};
   int statusTimerId_{0};
   Mode mode_{DeviceInterfaceNormal};
   State state_{DeviceDisconnected};

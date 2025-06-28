@@ -2,10 +2,11 @@
 hidapi 0.9.0+ is required. Luckily, it's available in precompiled form for all 3 platforms in 2020.
 
 ## Windows
-Download compiled [hidapi package](https://mirror.msys2.org/mingw/mingw32/mingw-w64-i686-hidapi-0.13.1-2-any.pkg.tar.zst) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir (you'll need [7zip-zstd](https://github.com/mcmilk/7-Zip-zstd/releases))
+Download compiled [hidapi package](https://mirror.msys2.org/mingw/mingw32/mingw-w64-i686-hidapi-0.14.0-2-any.pkg.tar.zst) from [msys2 repository](https://packages.msys2.org/package/mingw-w64-i686-hidapi?repo=mingw32), unpack to CommonSense dir (you'll need [7zip-zstd](https://github.com/mcmilk/7-Zip-zstd/releases))
 NOTE: There's precompiled DLL in [hidapi repo](https://github.com/libusb/hidapi/releases) - but you'll need libhidapi.a for static linking, DLL won't help.
+CAUTION: v0.15.0 is broken, if you can't find 0.14.0-2 - check that [issue](https://github.com/libusb/hidapi/issues/756) is fixed, or you'll have to compile.
 
-If you want to run a debugging build - use dynamic linking and [x86_64 package](https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-hidapi-0.13.1-2-any.pkg.tar.zst) - gdb can't load 32-bit ntdll on Windows 10 :(
+If you want to run a debugging build - use dynamic linking and [x86_64 package](https://mirror.msys2.org/mingw/mingw64/mingw-w64-x86_64-hidapi-0.14.0-2-any.pkg.tar.zst) - gdb can't load 32-bit ntdll on Windows 10 :(
 
 NOTE: for qt6 you'll also need x86_64 package, because qt6 no longer supports 32-bit.
 
@@ -34,11 +35,13 @@ Because windows app can be a single file - static version is better.
 [Official way](https://wiki.qt.io/Building_a_static_Qt_for_Windows_using_MinGW)
 
 ### Walkthrough
-* Download and run [opensource QT installer](https://www.qt.io/download-open-source)
+* Download and run [opensource QT installer](https://www.qt.io/download-qt-installer-oss)
+* Select "custom installation"
+* On the next page, select "archive" in top box, and then pick version 5.15.2
 * Install the following into `c:\qt`
-  * `Sources` from the latest qt version
-  * `MinGW 32-bit` for qt5, `MinGW 64-bit` for qt6 (no more 32-bit)
-  * `Qt Creator` and matching `MinGW` from tools
+  * `Sources` from the qt 5.15.2
+  * from "build tools" - `MinGW 32-bit` for qt5, `MinGW 64-bit` for qt6 (no more 32-bit)
+  * `Qt Creator`
   * qt6-only: `Cmake` and `Ninja` from tools
 * Fix qt and MinGW versions if needed
 * qt6-only

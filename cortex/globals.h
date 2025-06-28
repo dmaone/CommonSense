@@ -53,7 +53,7 @@
 #define MATRIX_GENERATES_ALL_UP
 
 // If FlightController stops polling us - return to normal mode after X ticks.
-#define SETUP_TIMEOUT 2000
+#define SETUP_TIMEOUT 1000
 #define LARGE_ENOUGH_32 (1 << 30);
 
 // LIB.H!!!

@@ -22,7 +22,7 @@ extern const scan_event_t scan_no_key;
 
 // number of ticks to check for spam after scan starts
 #define SANITY_CHECK_DURATION 1000
-#define SCANNER_INSANITY_THRESHOLD 3
+#define SCANNER_INSANITY_THRESHOLD 5
 
 #define KEY_UP_MASK 0x80
 

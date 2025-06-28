@@ -151,16 +151,18 @@ inline void scan_check_matrix(void) {
 void scan_sanity_check() {
   if (0 == --sanity_check_timer) {
     // We're out of the woods.
+    CLEAR_BIT(status_register, C2DEVSTATUS_INSANE);
     scan_common_reset();
     pipeline_init();
     gpio_init(); // So that initially-pressed pedals are reported pressed
     SET_BIT(status_register, C2DEVSTATUS_OUTPUT_ENABLED);
   } else if (scancodes_while_output_disabled >= SCANNER_INSANITY_THRESHOLD) {
-    // Keyboard is insane. Disable it.
-    status_register &= (1 << C2DEVSTATUS_SETUP_MODE); // Keep setup mode.
+    // Keyboard is insane. Don't allow key spam
+    // reset watchdog so that we only send keys when we're stable for SANITY_CHECK_DURATION ticks
+    sanity_check_timer = SANITY_CHECK_DURATION;
+    scancodes_while_output_disabled = 0;
     SET_BIT(status_register, C2DEVSTATUS_INSANE);
-    xprintf("Scan module has gone insane and had to be shot!");
-    sanity_check_timer = 0;
+    // xprintf("Scan module has gone insane and had to be shot!");
   }
 }
 

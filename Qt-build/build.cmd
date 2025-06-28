@@ -15,9 +15,9 @@ CALL configure.bat -platform win32-g++ -prefix c:\qt\static -opensource -confirm
  -qt-freetype  -qt-libjpeg -qt-pcre -qt-libpng -qt-zlib -opengl desktop -feature-qdoc ^
  -no-feature-sql -no-feature-sqlmodel -no-sql-odbc -no-sql-sqlite ^
  -no-feature-network -no-openssl ^
- -skip qtlocation -skip qtwebengine -no-feature-qdoc ^
+ -skip qmltestrunner -skip qtdeclarative -skip qtlocation -skip qtwebengine -no-feature-qdoc ^
  -skip qt3d -skip qtquick3d -skip qtquickcontrols -skip qtquickcontrols2 -skip qtquicktimeline ^
  -make libs -make tools -nomake examples -nomake tests
 
-mingw32-make -k -j4
+mingw32-make -k -j6
 mingw32-make -k install
